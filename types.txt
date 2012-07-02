@@ -1,0 +1,10 @@
+    #working:
+    # 0 : open space
+    # 1 : wall
+    # 2 : key
+    # 3 : door
+    # 4 : exit
+    # 5 : fruit
+    # 6 : h potion
+    # 7 : spellbook
+    # 8 : chest 
