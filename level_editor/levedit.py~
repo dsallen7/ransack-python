@@ -1,8 +1,7 @@
 from pygame import *
-import pygame
-import os
-import pickle
-import random
+import pygame, os, pickle, random, eztext
+
+# Eztext courtesy of http://www.pygame.org/project-EzText-920-.html
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('IMG', name)
@@ -76,17 +75,59 @@ class Handler():
         self.currentTile += 1
         self.currentTile = self.currentTile % 10
     
+    def getFilename(self):
+        #get file name
+        filename = None
+        txtbx = eztext.Input(maxlength=45, color=(255,0,0), prompt='Enter filename: ')
+        inputWindow = pygame.Surface( (300,100) )
+        while filename == None:
+            # make sure the program is running at 30 fps
+            clock.tick(30)
+
+            # events for txtbx
+            events = pygame.event.get()
+            # process other events
+            for event in events:
+                # close it x button si pressed
+                if event.type == pygame.QUIT:
+                        os.sys.exit()
+                if event.type == KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        filename = txtbx.getValue()
+
+            # clear the screen
+            inputWindow.fill((25,25,25))
+            # update txtbx
+            txtbx.update(events)
+            # blit txtbx on the sceen
+            txtbx.draw(inputWindow)
+            gridField.blit(inputWindow, (100,100) )
+            screen.blit(gridField,(0,0))
+            # refresh the display
+            pygame.display.flip()
+        return filename
+    
     def saveMap(self):
+        filename = self.getFilename()
         grid = myMap.getGrid()
-        save = open("map.dat", "w")
-        pickle.dump(grid, save)
-        save.close()
+        try:
+            save = open(filename, "w")
+            pickle.dump(grid, save)
+            save.close()
+        except pygame.error, message:
+            print 'Cannot save map:', name
+            raise SystemExit, message
     
     def loadMap(self):
-        save = open("map.dat", "r")
-        grid = pickle.load(save)
-        save.close()
-        myMap.installGrid(grid)
+        filename = self.getFilename()
+        try:
+            save = open(filename, "r")
+            grid = pickle.load(save)
+            save.close()
+            myMap.installGrid(grid)
+        except pygame.error, message:
+            print 'Cannot load map:', name
+            raise SystemExit, message
 
     def event_handler(self, event):
         (x,y) = self.cursorPos
@@ -176,6 +217,8 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 myHandler.event_handler(event)
+            if event.type == pygame.QUIT:
+                os.sys.exit()
         myHandler.updateDisplay()
         screen.blit(gridField, (0,0) )
         pygame.display.flip()
