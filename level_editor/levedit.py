@@ -1,7 +1,11 @@
 from pygame import *
+from types import *
 import pygame, os, pickle, random, eztext
 
 # Eztext courtesy of http://www.pygame.org/project-EzText-920-.html
+
+#NSWE
+CARDINALS = [ (0,-1), (0,1), (-1,0), (1,0) ]
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('IMG', name)
@@ -17,7 +21,7 @@ def load_image(name, colorkey=None):
         image.set_colorkey(colorkey, pygame.RLEACCEL)
     return image, image.get_rect()
 
-DIM = 20
+DIM = 6
 
 # Define the colors we will use in RGB format
 black = [  0,  0,  0]
@@ -48,7 +52,10 @@ class Map():
         self.grid[y] = self.grid[y][:x] + [e] + self.grid[y][x+1:]
     
     def getEntry(self, x, y):
-        return self.grid[y][x]
+        if x in range(DIM) and y in range(DIM):
+            return self.grid[y][x]
+        else:
+            return -1
     
     def getGrid(self):
         return self.grid
@@ -64,6 +71,8 @@ class Handler():
         self.sideImg, sideRect = load_image('sidebar.bmp')
         self.drawMode = False
         self.cursorColor = white
+        
+        self.visited = []
     
     def drawBox(self, pos, color):
         (x,y) = pos
@@ -74,6 +83,40 @@ class Handler():
     def switchTile(self):
         self.currentTile += 1
         self.currentTile = self.currentTile % 10
+    
+    def flatten(self, x):
+        result = []
+        for el in x:
+            if hasattr(el, "__iter__") and not isinstance(el, basestring) and type(el) is not TupleType and type(el) is not NoneType:
+                result.extend(self.flatten(el))
+            elif type(el) is TupleType:
+                result.append(el)
+        return result
+    
+    def floodFillBFS(self,pieceLocation):
+        if (pieceLocation == None):
+            return
+        (x,y) = pieceLocation
+        entryList = []
+        for (Cx,Cy) in CARDINALS:
+            if (myMap.getEntry(x,y) == myMap.getEntry(x+Cx,y+Cy) and (x+Cx,y+Cy) not in self.visited ):
+                entryList += [ (x+Cx,y+Cy) ]
+                self.visited += [ (x+Cx,y+Cy) ]
+            else:
+                entryList += [ None ]
+        if ( entryList == [None,None,None,None] ):
+            return (x,y)
+        else:
+            return [ (x,y) ] + [self.floodFillBFS(entryList[0])] + [self.floodFillBFS(entryList[1])] + [self.floodFillBFS(entryList[2])] + [self.floodFillBFS(entryList[3])]
+
+    def floodFill(self, tile, start):
+        (x,y) = start
+        self.visited = [ (x,y) ]
+        floodArea = self.flatten( self.floodFillBFS(start) )
+        floodArea = list( set(floodArea) )
+        for entry in floodArea:
+            (x,y) = entry
+            myMap.setEntry(x,y,tile)
     
     def getFilename(self):
         #get file name
@@ -156,6 +199,8 @@ class Handler():
             self.saveMap()
         if event.key == pygame.K_l:
             self.loadMap()
+        if event.key == pygame.K_f:
+            self.floodFill(self.currentTile, (x,y) )
         if self.drawMode:
             myMap.setEntry(x/blocksize,y/blocksize,self.currentTile)
         self.cursorPos = (x,y)

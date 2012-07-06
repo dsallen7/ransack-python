@@ -26,6 +26,15 @@ class hero(pygame.sprite.Sprite):
         
         self.X = blocksize
         self.Y = blocksize
+        
+        self.currHP = 50
+        self.maxHP = 50
+        
+        self.currMP = 20
+        self.maxMP = 20
+        
+        self.score = 0
+        self.keys = 0
 
     def checkMap(self, x, y):
         i = self.newGame.myMap.getUnit(x/blocksize,y/blocksize)
@@ -47,6 +56,29 @@ class hero(pygame.sprite.Sprite):
     def changeDirection(self, imgNum, dir):
         self.image = self.images[imgNum]
         self.dir = dir
+    
+    def getPlayerStats(self):
+        return (self.currHP, self.maxHP, self.currMP, self.maxMP, self.strength, self.dex, self.intell, self.score, self.keys)
+    
+    def setPlayerStats(self, stats):
+        (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys) = stats
+        cHP = cHP % mHP+1
+        self.currHP = cHP
+        self.currMP = cMP
+        self.strength = sth
+        self.dex = dex
+        self.intell = itl
+        self.score = scr
+        self.keys = kys
+    
+    def takeKey(self):
+        self.keys -= 1
+    
+    def takeDmg(self,dmg):
+        self.currHP -= dmg
+    
+    def getCurrHP(self):
+        return self.currHP
 
 
     #There is duplicate code here. at some point it would be wise to implement
@@ -58,7 +90,7 @@ class hero(pygame.sprite.Sprite):
         locBox = pygame.Surface( (350,50) )
         locBox.fill( grey )
         if pygame.font:
-            font = pygame.font.SysFont("arial", 24)
+            font = pygame.font.SysFont("arial", 14)
             locText = font.render( "Self.X:"+str(self.X)+"Self.Y:"+str(self.Y)+"RectX:"+str(x1)+"RectY"+str(y1), 1, red, yellow )
             locBox.blit(locText, (10,10) )
         gameBoard.blit(locBox, (100, 300) )

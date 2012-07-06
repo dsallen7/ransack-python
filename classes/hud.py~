@@ -5,34 +5,54 @@ import random
 
 class hud():
     def __init__(self, screen):
-        self.box = pygame.Surface((80, 250))
-        self.box.fill( yellow )
-        self.playerscore = 0
-        self.playerlife = 50
+        self.textBox1 = pygame.Surface((100, 250))
+        self.textBox1.fill( yellow )
+        self.textBox2 = pygame.Surface((250, 100))
+        self.textBox2.fill( yellow )
         self.playerkeys = 0
         
         #for displaying messages or menus
         self.screen = screen
         
         self.invItems = []
+        
+        self.frameBox1, r = load_image("hudBox1.bmp",-1)
+        self.frameBox2, r = load_image("hudBox2.bmp",-1)
+        
+        self.scrollText = ['']*3
 
-    def update(self, gameBoard):
-        self.box = self.box.copy()
+    def update1(self, gameBoard, stats):
+        (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys) = stats
+        self.textBox1 = pygame.Surface((100, 250))
+        self.textBox1.fill( yellow )
+        self.frameBox1 = self.frameBox1.copy()
         if pygame.font:
-            font = pygame.font.SysFont("arial", 24)
-            scoretext = font.render( "Score: "+str(self.playerscore), 1, red, yellow )
-            self.box.blit(scoretext, (0,0) )
-            lifetext = font.render( "Life: ", 1, red, yellow)
-            self.box.blit(lifetext, (0,25) )
-            keytext = font.render( "Keys: "+str(self.playerkeys), 1, red, yellow)
-            self.box.blit(keytext, (0,80) )
-        backbar = pygame.Surface((100,10))
-        lifebar = pygame.Surface((self.playerlife,10))
-        backbar.fill( yellow )
-        lifebar.fill(red)
-        self.box.blit(backbar, (0,55) )
-        self.box.blit(lifebar, (0,55) )
-        gameBoard.blit(self.box, (blocksize*10, 0) )
+            font = pygame.font.SysFont("arial", 18)
+            scoretext = font.render( "Score: "+str(scr), 1, white, yellow )
+            self.textBox1.blit(scoretext, (0,0) )
+            lifetext = font.render( "HP: "+str(cHP)+"/"+str(mHP), 1, white, yellow)
+            self.textBox1.blit(lifetext, (0,25) )
+            magtext = font.render( "MP: "+str(cMP)+"/"+str(mMP), 1, white, yellow)
+            self.textBox1.blit(magtext, (0,50) )
+            keytext = font.render( "Keys: "+str(kys), 1, white, yellow)
+            self.textBox1.blit(keytext, (0,80) )
+        self.frameBox1.blit(self.textBox1,(25,25))
+        gameBoard.blit(self.frameBox1, (blocksize*10, 0) )
+        gameBoard.blit(self.frameBox2, (0, blocksize*10) )
+    
+    def update2(self,gameBoard, msg):
+        self.textBox2 = pygame.Surface((250, 100))
+        self.textBox2.fill( yellow )
+        self.scrollText[0] = self.scrollText[1]
+        self.scrollText[1] = self.scrollText[2]
+        self.scrollText[2] = msg
+        if pygame.font:
+            font = pygame.font.SysFont("arial", 18)
+            for i in range(3):
+                Msg = font.render( self.scrollText[i], 1, white, yellow)
+                self.textBox2.blit(Msg, (0,20*i) )
+        self.frameBox2.blit(self.textBox2, (25,25) )
+        gameBoard.blit(self.frameBox2, (0, blocksize*10) )
 
     def hurt(self):
         if self.playerlife > 10:
@@ -44,19 +64,21 @@ class hud():
         self.playerkeys -= 1
         self.message("The door unlocks")
 
-    def getItem(self,type):
+    def getItem(self,type,stats):
+        (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys) = stats
         if type == 5:
-            if self.playerlife < 90:
-                self.playerlife += 10
+            if cHP < mHP:
+                cHP += 10
             else:
-                self.playerlife = 100
-            self.playerscore += 10
+                cHP = mHP
+            scr += 10
         if type == 2:
-            self.playerkeys += 1
+            kys += 1
             self.message("You got a key")
         if type == 6:
             self.invItems += ['hp']
             self.message("You found a healing potion")
+        return (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys)
     
     def getItemsList(self):
         return self.invItems
@@ -68,16 +90,16 @@ class hud():
             msgBox = pygame.Surface( (i*2, 50 ) )
             msgBox.fill( yellow )
             borderBox.blit(msgBox, (5, 5) )
-            screen.blit(borderBox, (188-i, 200) )
+            self.screen.blit(borderBox, (188-i, 200) )
             pygame.display.flip()
             
         borderBox = pygame.Surface( ( 186, 60 ) )
         borderBox.fill( grey )
         if pygame.font:
-            font = pygame.font.SysFont("arial", 24)
-            msgText = font.render( text, 1, red, yellow )
+            font = pygame.font.SysFont("arial", 18)
+            msgText = font.render( text, 1, white, yellow )
             msgBox.blit(msgText, (10,10) )
         borderBox.blit( msgBox, (5, 5) )
-        screen.blit(borderBox, (100, 200) )
+        self.screen.blit(borderBox, (100, 200) )
         pygame.display.flip()
         while (pygame.event.wait().type != pygame.KEYDOWN): pass

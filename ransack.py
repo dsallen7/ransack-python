@@ -3,10 +3,7 @@ import os
 import random
 import pickle
 
-from classes import hero
-from classes import map
-from classes import hud
-from classes import sword
+from classes import hero, map, hud, sword, battle, menu, enemy
 from const import *
 from load_image import *
 
@@ -28,21 +25,17 @@ class PyManMain:
         """Create the Screen"""
         self.screen = pygame.display.set_mode((self.width, self.height))
 
-class item():
-    def __init__(self):
-        self.type = None
-        
-
-    
-
-
 class game():
     def __init__(self):
         self.badguys = []
         self.myHero = hero.hero()
         self.myHud = hud.hud(screen)
         self.mySword = sword.sword()
+        self.myMenu = menu.menu()
+        self.myBattle = battle.battle()
         self.myMap = None
+        
+        self.allsprites = pygame.sprite.RenderPlain((self.myHero, self.badguys))
         
         #this is true while player is in a particular game
         self.gameOn = True
@@ -50,15 +43,23 @@ class game():
         #this is true while player is in a particular level
         self.levelOn = True        
         
-        self.gameBoard = pygame.Surface( [400,400] )
-        
+        self.gameBoard = pygame.Surface( [450,450] )
         self.gameScreen, self.gameScreenRect = load_image('gamescreen600.bmp', -1)
+        self.spriteLayer = pygame.Surface( [450,450] )
+        
+        self.battleDie = 0
     
     def gameover(self):
         self.gameOn = False
         
     def nextLevel(self):
         self.levelOn = False
+        
+    def screenShot(self):
+        serial = 1
+        while os.access("ransack"+str(serial)+".bmp", os.F_OK):
+            serial += 1
+        pygame.image.save(screen, "ransack"+str(serial)+".bmp")
     
     def event_handler(self, event):
         if event.type == pygame.KEYDOWN:
@@ -69,11 +70,50 @@ class game():
                 self.newGame.mySword.attack(x,y,self.dir)
                 '''
             elif event.key == pygame.K_s:
-                self.openSpellMenu()
+                self.myMenu.openSpellMenu(screen)
             elif event.key == pygame.K_i:
-                self.invMenu()
+                self.myMenu.invMenu(screen, self.myHud.getItemsList(), self.myMap.getImages() )
+            elif event.key == pygame.K_t:
+                self.screenShot()
             else:
                 self.move(pygame.key.name(event.key))
+    
+    def rollDie(self, target, range):
+        d = random.randrange(range)
+        if target >= d:
+            return True
+        else:
+            return False
+    
+    def fightBattle(self):
+        engagedEnemy = enemy.enemy()
+        while engagedEnemy.getHP() > 0:
+            clock.tick(15)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    os.sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    #you attack
+                    if event.key == pygame.K_f:
+                        if self.rollDie(1,2):
+                            dmg = random.randrange(1,5)
+                            self.myHud.update2(self.gameBoard, "You hit the monster for "+str(dmg)+" points!")
+                            engagedEnemy.takeDmg(dmg)
+                        else:
+                            self.myHud.update2(self.gameBoard, "You missed the monster!")
+                    #enemy attacks
+                    if self.rollDie(1,2):
+                        dmg = random.randrange(1,5)
+                        self.myHud.update2(self.gameBoard, "The monster hits you for "+str(dmg)+" points!")
+                        self.myHero.takeDmg(dmg)
+                    else:
+                        self.myHud.update2(self.gameBoard, "The monster missed you!")
+                    self.myHud.update1(self.gameBoard, self.myHero.getPlayerStats())
+                    self.redrawScreen()
+                    pygame.display.flip()
+        self.myHud.update2(self.gameBoard, "The monster is dead!")
+            
+    
     
     def move(self, direction):
         noGoList = [1,8]
@@ -97,22 +137,23 @@ class game():
         i = self.myMap.getUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize)
         #door
         if i == 3:
-            if self.myHud.playerkeys == 0:
+            if self.myHero.getPlayerStats()[8] == 0:
                 self.myHud.message( "The door is locked!" )
                 return
             else:
-                self.myHud.takeKey()
+                self.myHud.message( "The door creaks open..." )
+                self.myHero.takeKey()
                 self.myMap.updateUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize,0)
         #item
         if i == 2 or i == 5 or i == 6:
-            self.myHud.getItem(i)
+            self.myHero.setPlayerStats( self.myHud.getItem(i, self.myHero.getPlayerStats() ) )
             self.myMap.getItem( (X + moveX)/blocksize, (Y + moveY)/blocksize)
         #exit
         if i == 4:
             self.myHud.message( "Onto the next level!" )
             self.nextLevel()
-        #open space
-        if ( (0 < X+moveX <= 540) and (0 < Y+moveY <= 540 ) and i not in noGoList ):
+        #check if open space
+        if ( (0 < X+moveX <= blocksize*DIM) and (0 < Y+moveY <= blocksize*DIM ) and i not in noGoList ):
             X += moveX
             Y += moveY
             rectX = X
@@ -126,89 +167,45 @@ class game():
             if Y >= 15*blocksize:
                 rectY = Y - HALFDIM*blocksize
             self.myHero.setXY(X,Y)
+            '''
+            #make the move animated
+            if x1 == rectX:
+                xAxis = [x1]*blocksize
+            elif x1 < rectX:
+                xAxis = range(x1, rectX)
+            else:
+                xAxis = range(x1, rectX, -1)
+            if y1 == rectY:
+                yAxis = [y1]*blocksize
+            elif y1 < rectY:
+                yAxis = range(y1, rectY)
+            elif y1 > rectY:
+                yAxis = range(y1, rectY, -1)
+            for (i, j) in zip(xAxis, yAxis):
+                self.myHero.setRect( i, j, x2, y2)
+                self.updateSprites()
+                self.redrawScreen()
+            '''
             self.myHero.setRect( rectX, rectY, x2, y2)
+            #roll the die to see if there will be a battle
+            self.battleDie = random.randrange(1,20)
+            if self.battleDie == 10:
+                self.myHud.message("The battle is joined!")
+                self.myBattle.commence(screen)
+                self.fightBattle()
+       
+    def updateSprites(self):
+        #self.allsprites.clear(self.spriteLayer, self.gameBoard)
+        self.allsprites.update()
+        self.allsprites.draw(self.gameBoard)
     
-    def openSpellMenu(self):
-        for i in range(88):
-            borderBox = pygame.Surface( ( ((i*2)+5 ), 60) )
-            borderBox.fill( grey )
-            msgBox = pygame.Surface( (i*2, 50 ) )
-            msgBox.fill( yellow )
-            borderBox.blit(msgBox, (5, 5) )
-            screen.blit(borderBox, (188-i, 200) )
-            pygame.display.flip()
-            
-        borderBox = pygame.Surface( ( 186, 60 ) )
-        borderBox.fill( grey )
-        if pygame.font:
-            font = pygame.font.SysFont("arial", 24)
-            msgText = font.render( "Spell menu:", 1, red, yellow )
-            msgBox.blit(msgText, (10,10) )
-        borderBox.blit( msgBox, (5, 5) )
-        screen.blit(borderBox, (100, 200) )
+    def redrawScreen(self):
+        screen.blit( self.gameScreen, (0,0) )
+        #self.myHero.showLocation(self.gameBoard)
+        screen.blit( self.gameBoard, (75,75) )
+        #screen.blit( self.spriteLayer, (75,75) )
         pygame.display.flip()
-        while (pygame.event.wait().type != pygame.KEYDOWN): pass
         
-    def invMenu(self):
-        for i in range(88):
-            borderBox = pygame.Surface( ( ((i*2)+5 ), 120) )
-            borderBox.fill( grey )
-            msgBox = pygame.Surface( (i*2, 110 ) )
-            msgBox.fill( yellow )
-            borderBox.blit(msgBox, (5, 5) )
-            screen.blit(borderBox, (188-i, 100) )
-            pygame.display.flip()
-            
-        borderBox = pygame.Surface( ( 186, 120 ) )
-        borderBox.fill( grey )
-                
-        if pygame.font:
-            font = pygame.font.SysFont("arial", 24)
-            msgText = font.render( "Inventory:", 1, red, yellow )
-            msgBox.blit(msgText, (10,10) )
-        
-        #draw available items in window
-        items = self.myHud.getItemsList()
-        w = 10 #var to draw items across screen
-        #hPosList = []
-        for item in items:
-            if item == 'hp':
-                itemBox = pygame.Surface( (23, 29) )
-                itemBox.fill( black )
-                itemBox.blit( self.newGame.myMap.images[5], (5, 5) )
-                
-            msgBox.blit( itemBox, (w, 30) )
-            w += 10
-            #hPosList += [w]
-        hPos = 10 #horizontal position of selection box
-        hPosList = [10, 30, 50]
-        boxPoints = ( (hPos, 30), (hPos, 59), (hPos+23, 59), (hPos+23, 30) )
-        pygame.draw.lines( msgBox, white, True, boxPoints, 1 )
-        
-        borderBox.blit( msgBox, (5, 5) )
-        screen.blit(borderBox, (100, 100) )        
-        pygame.display.flip()
-        while True:
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_RIGHT:
-                        pygame.draw.lines( msgBox, yellow, True, boxPoints, 1 )
-                        hPosList = hPosList[1:]+[hPosList[0]]
-                        hPos = hPosList[0]
-                        boxPoints = ( (hPos, 30), (hPos, 59), (hPos+23, 59), (hPos+23, 30) )
-                        pygame.draw.lines( msgBox, white, True, boxPoints, 1 )
-                    if event.key == pygame.K_LEFT:
-                        pygame.draw.lines( msgBox, yellow, True, boxPoints, 1 )
-                        hPosList = [hPosList[2]]+hPosList[:2]
-                        hPos = hPosList[0]
-                        boxPoints = ( (hPos, 30), (hPos, 59), (hPos+23, 59), (hPos+23, 30) )
-                        pygame.draw.lines( msgBox, white, True, boxPoints, 1 )
-                    if event.key == pygame.K_ESCAPE:
-                        return
-            borderBox.blit( msgBox, (5, 5) )
-            screen.blit(borderBox, (100, 100) ) 
-            pygame.display.flip()
-        #while (pygame.event.wait().type != pygame.KEYDOWN): pass
 
     def mainLoop(self, mapList):
         #while self.gameOn == True:
@@ -217,24 +214,16 @@ class game():
             self.myMap = map.map(self.badguys, mapFileName)
             while self.levelOn == True:
                 self.gameBoard.fill(black)
-                allsprites = pygame.sprite.RenderPlain((self.myHero, self.badguys))
                 clock.tick(15)
                 for event in pygame.event.get():
                     self.event_handler(event)
                     if event.type == pygame.QUIT:
                         os.sys.exit()
-                if self.mySword.swordTimer > 0:
-                    self.mySword.drawSword()
-                allsprites.update()
-                allsprites.draw(self.gameBoard)
-                self.myMap.redraw(self.myHero.getXY(), self.gameBoard)
-                self.myHud.update(self.gameBoard)
-                for b in self.badguys:
-                    b.move()
-                screen.blit( self.gameScreen, (0,0) )
-                self.myHero.showLocation(self.gameBoard)
-                screen.blit( self.gameBoard, (75,75) )
-                pygame.display.flip()
+                self.myMap.redraw(self.myHero.getXY(), self.myHero.getRect(), self.gameBoard)
+                self.myHud.update1(self.gameBoard, self.myHero.getPlayerStats())
+                self.updateSprites()
+                #self.myHero.showLocation(self.gameBoard)
+                self.redrawScreen()
 
 # Set the height and width of the screen
 size=[600,600]
@@ -265,9 +254,9 @@ def main():
     
     titleScreen.blit(titleImg, (0,0) )
     
-    clearScreen = pygame.Surface([500,500])
+    #clearScreen = pygame.Surface([500,500])
     
-    clearScreen.fill(black)
+    #clearScreen.fill(black)
     
     screen.blit(titleScreen, (0,0))
     while True:
@@ -280,7 +269,7 @@ def main():
                     os.sys.exit()
                 if event.key == pygame.K_SPACE:
                     newGame = game()
-                    screen.blit(clearScreen, (0,0))
+                    #screen.blit(clearScreen, (0,0))
                     newGame.mainLoop(mapList)
         pygame.display.flip()
     
