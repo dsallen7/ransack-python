@@ -7,7 +7,7 @@ class map():
         self.maptext = []
         self.loadMap()
         self.images = range(10)
-        imageNames = ['floor.bmp','brick2.bmp','key.bmp','door.bmp','exit.bmp','fruit_s.bmp','hpotion.bmp','spellbook.bmp','chest.bmp']
+        imageNames = ['floor.bmp','brick2.bmp','key.bmp','door.bmp','exit.bmp','fruit_s.bmp','hpotion.bmp','mpotion.bmp','spellbook.bmp','chest.bmp']
         self.images[0], self.rect = load_image(imageNames[0], -1)
         for i in range(1,9):
             self.images[i], self.rect = load_image(imageNames[i], None)
@@ -32,7 +32,7 @@ class map():
         save.close()
     
     def getImages(self):
-        return images
+        return self.images
     
     def loadMap(self):
         save = open("map.dat", "r")
@@ -88,7 +88,7 @@ class map():
         for x in range(HALFDIM):
             for y in range(HALFDIM):
                 tile = self.getUnit(x+topX,y+topY)
-                if tile < 9:
+                if tile < 10:
                     self.image = self.images[tile]
                     gameBoard.blit(self.image, (x*blocksize,y*blocksize), area=(0,0,blocksize,blocksize) )
                     dist = self.distanceFunc( (x,y), (rx,ry) )

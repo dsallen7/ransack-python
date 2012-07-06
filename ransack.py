@@ -3,7 +3,7 @@ import os
 import random
 import pickle
 
-from classes import hero, map, hud, sword, battle, menu, enemy
+from classes import hero, map, hud, battle, menu, enemy
 from const import *
 from load_image import *
 
@@ -30,7 +30,6 @@ class game():
         self.badguys = []
         self.myHero = hero.hero()
         self.myHud = hud.hud(screen)
-        self.mySword = sword.sword()
         self.myMenu = menu.menu()
         self.myBattle = battle.battle()
         self.myMap = None
@@ -47,9 +46,12 @@ class game():
         self.gameScreen, self.gameScreenRect = load_image('gamescreen600.bmp', -1)
         self.spriteLayer = pygame.Surface( [450,450] )
         
-        self.battleDie = 0
+        self.spellImages = range(2)
+        spellNames = ['heart.bmp','fireball.bmp']
+        for i in range(2):
+            self.spellImages[i],r = load_image(spellNames[i],-1)
     
-    def gameover(self):
+    def gameOver(self):
         self.gameOn = False
         
     def nextLevel(self):
@@ -70,9 +72,9 @@ class game():
                 self.newGame.mySword.attack(x,y,self.dir)
                 '''
             elif event.key == pygame.K_s:
-                self.myMenu.openSpellMenu(screen)
+                self.castSpell( self.myMenu.invMenu(screen, self.myHero.getSpells(), self.spellImages, "Spells:" ) )
             elif event.key == pygame.K_i:
-                self.myMenu.invMenu(screen, self.myHud.getItemsList(), self.myMap.getImages() )
+                self.useItem( self.myMenu.invMenu(screen, self.myHud.getItemsList(), self.myMap.getImages(), "Items:" ) )
             elif event.key == pygame.K_t:
                 self.screenShot()
             else:
@@ -84,6 +86,22 @@ class game():
             return True
         else:
             return False
+    
+    def castSpell(self, spell):
+        if spell == 'heal':
+            if self.myHero.takeMP(5):
+                self.myHero.takeDmg(-5)
+                self.myHud.msgSystem(self.gameBoard, "You feel better!")
+            else:
+                self.myHud.msgSystem(self.gameBoard, "Not enough MP!")
+    
+    def useItem(self,item):
+        if item == 'hp':
+            self.myHero.takeDmg(-5)
+            self.myHud.msgSystem(self.gameBoard, "You feel better!")
+        elif item == 'mp':
+            self.myHero.takeMP(-5)
+            self.myHud.msgSystem(self.gameBoard, "You feel magical!")
     
     def fightBattle(self):
         engagedEnemy = enemy.enemy()
@@ -97,22 +115,26 @@ class game():
                     if event.key == pygame.K_f:
                         if self.rollDie(1,2):
                             dmg = random.randrange(1,5)
-                            self.myHud.update2(self.gameBoard, "You hit the monster for "+str(dmg)+" points!")
+                            self.myHud.msgSystem(self.gameBoard, "You hit the monster for "+str(dmg)+" points!")
                             engagedEnemy.takeDmg(dmg)
                         else:
-                            self.myHud.update2(self.gameBoard, "You missed the monster!")
+                            self.myHud.msgSystem(self.gameBoard, "You missed the monster!")
                     #enemy attacks
                     if self.rollDie(1,2):
                         dmg = random.randrange(1,5)
-                        self.myHud.update2(self.gameBoard, "The monster hits you for "+str(dmg)+" points!")
-                        self.myHero.takeDmg(dmg)
+                        self.myHud.msgSystem(self.gameBoard, "The monster hits you for "+str(dmg)+" points!")
+                        if self.myHero.takeDmg(dmg) < 1:
+                            self.myHud.msgSystem(self.gameBoard, "You have died!")
+                            self.gameOver()
+                            return
                     else:
-                        self.myHud.update2(self.gameBoard, "The monster missed you!")
-                    self.myHud.update1(self.gameBoard, self.myHero.getPlayerStats())
+                        self.myHud.msgSystem(self.gameBoard, "The monster missed you!")
+                    self.myHud.displayStats(self.gameBoard, self.myHero.getPlayerStats())
                     self.redrawScreen()
                     pygame.display.flip()
-        self.myHud.update2(self.gameBoard, "The monster is dead!")
-            
+        self.myHud.msgSystem(self.gameBoard, "The monster is dead!")
+        if self.myHero.increaseExp(5):
+            self.myHud.msgSystem(self.gameBoard, "Congratulations! You have gained a level!")
     
     
     def move(self, direction):
@@ -145,7 +167,7 @@ class game():
                 self.myHero.takeKey()
                 self.myMap.updateUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize,0)
         #item
-        if i == 2 or i == 5 or i == 6:
+        if i == 2 or i == 5 or i == 6 or i == 7:
             self.myHero.setPlayerStats( self.myHud.getItem(i, self.myHero.getPlayerStats() ) )
             self.myMap.getItem( (X + moveX)/blocksize, (Y + moveY)/blocksize)
         #exit
@@ -188,8 +210,7 @@ class game():
             '''
             self.myHero.setRect( rectX, rectY, x2, y2)
             #roll the die to see if there will be a battle
-            self.battleDie = random.randrange(1,20)
-            if self.battleDie == 10:
+            if self.rollDie(1,20):
                 self.myHud.message("The battle is joined!")
                 self.myBattle.commence(screen)
                 self.fightBattle()
@@ -212,7 +233,7 @@ class game():
         for mapFileName in mapList:
             self.levelOn = True
             self.myMap = map.map(self.badguys, mapFileName)
-            while self.levelOn == True:
+            while self.levelOn and self.gameOn:
                 self.gameBoard.fill(black)
                 clock.tick(15)
                 for event in pygame.event.get():
@@ -220,7 +241,7 @@ class game():
                     if event.type == pygame.QUIT:
                         os.sys.exit()
                 self.myMap.redraw(self.myHero.getXY(), self.myHero.getRect(), self.gameBoard)
-                self.myHud.update1(self.gameBoard, self.myHero.getPlayerStats())
+                self.myHud.displayStats(self.gameBoard, self.myHero.getPlayerStats())
                 self.updateSprites()
                 #self.myHero.showLocation(self.gameBoard)
                 self.redrawScreen()

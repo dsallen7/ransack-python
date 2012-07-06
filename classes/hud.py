@@ -21,8 +21,8 @@ class hud():
         
         self.scrollText = ['']*3
 
-    def update1(self, gameBoard, stats):
-        (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys) = stats
+    def displayStats(self, gameBoard, stats):
+        (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX) = stats
         self.textBox1 = pygame.Surface((100, 250))
         self.textBox1.fill( yellow )
         self.frameBox1 = self.frameBox1.copy()
@@ -34,14 +34,22 @@ class hud():
             self.textBox1.blit(lifetext, (0,25) )
             magtext = font.render( "MP: "+str(cMP)+"/"+str(mMP), 1, white, yellow)
             self.textBox1.blit(magtext, (0,50) )
+            magtext = font.render( "Int: "+str(itl), 1, white, yellow)
+            self.textBox1.blit(magtext, (0,75) )
+            magtext = font.render( "Str: "+str(sth), 1, white, yellow)
+            self.textBox1.blit(magtext, (0,100) )
+            magtext = font.render( "Dex: "+str(dex), 1, white, yellow)
+            self.textBox1.blit(magtext, (0,125) )
+            magtext = font.render( "Exp: "+str(cEX)+"/"+str(nEX), 1, white, yellow)
+            self.textBox1.blit(magtext, (0,150) )
             keytext = font.render( "Keys: "+str(kys), 1, white, yellow)
-            self.textBox1.blit(keytext, (0,80) )
+            self.textBox1.blit(keytext, (0,175) )
         self.frameBox1.blit(self.textBox1,(25,25))
         gameBoard.blit(self.frameBox1, (blocksize*10, 0) )
         gameBoard.blit(self.frameBox2, (0, blocksize*10) )
     
-    def update2(self,gameBoard, msg):
-        self.textBox2 = pygame.Surface((300, 100))
+    def msgSystem(self,gameBoard, msg):
+        self.textBox2 = pygame.Surface((500, 100))
         self.textBox2.fill( yellow )
         self.scrollText[0] = self.scrollText[1]
         self.scrollText[1] = self.scrollText[2]
@@ -65,7 +73,7 @@ class hud():
         self.message("The door unlocks")
 
     def getItem(self,type,stats):
-        (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys) = stats
+        (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX) = stats
         if type == 5:
             if cHP < mHP:
                 cHP += 10
@@ -78,7 +86,10 @@ class hud():
         if type == 6:
             self.invItems += ['hp']
             self.message("You found a healing potion")
-        return (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys)
+        if type == 7:
+            self.invItems += ['mp']
+            self.message("You found a magic potion")
+        return (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX)
     
     def getItemsList(self):
         return self.invItems

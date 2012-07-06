@@ -1,7 +1,6 @@
-import pygame
+import pygame, random, math
 from load_image import *
 from const import *
-import random
 
 class hero(pygame.sprite.Sprite):
     
@@ -15,8 +14,6 @@ class hero(pygame.sprite.Sprite):
 
         self.image = self.images[1]
         self.rect = (blocksize, blocksize, blocksize, blocksize)
-        #Height: 23
-        #Width: 17
         
         self.dir = 'd'
         
@@ -35,11 +32,23 @@ class hero(pygame.sprite.Sprite):
         
         self.score = 0
         self.keys = 0
+        
+        self.level = 1
+        self.currExp = 0
+        self.nextExp = 20
+        
+        #Sword, axe, spear, hammer
+        self.weapons = [[1,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
+        self.weaponEquipped = (0,1)
+        
+        #Breastplate, helmet, shield
+        self.armor = [[1,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]
+        self.armorEquipped = [(0,1),None,None]
+        
+        self.items = []
+        #healing, fireball
+        self.spells = ['heal']
 
-    def checkMap(self, x, y):
-        i = self.newGame.myMap.getUnit(x/blocksize,y/blocksize)
-        return i
-    
     def getXY(self):
         return (self.X,self.Y)
     
@@ -58,11 +67,12 @@ class hero(pygame.sprite.Sprite):
         self.dir = dir
     
     def getPlayerStats(self):
-        return (self.currHP, self.maxHP, self.currMP, self.maxMP, self.strength, self.dex, self.intell, self.score, self.keys)
+        return (self.currHP, self.maxHP, self.currMP, self.maxMP, self.strength, self.dex, self.intell, self.score, self.keys, self.currExp, self.nextExp)
     
     def setPlayerStats(self, stats):
-        (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys) = stats
-        cHP = cHP % mHP+1
+        (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX) = stats
+        if cHP > mHP:
+            cHP = mHP
         self.currHP = cHP
         self.currMP = cMP
         self.strength = sth
@@ -76,9 +86,32 @@ class hero(pygame.sprite.Sprite):
     
     def takeDmg(self,dmg):
         self.currHP -= dmg
+        return self.currHP
+    
+    def takeMP(self, mp):
+        if self.currMP - mp >= 0:
+            self.currMP -= mp
+            return True
+        else:
+            return False
     
     def getCurrHP(self):
         return self.currHP
+    
+    def getSpells(self):
+        return self.spells
+    
+    def gainLevel(self):
+        self.level += 1
+        self.nextExp = int( math.ceil( self.nextExp * 2.5 ) )
+        self.maxHP = int( math.ceil( self.maxHP * 1.15 ) )
+        self.currHP = self.maxHP
+    
+    def increaseExp(self, exp):
+        self.currExp += exp
+        if self.currExp >= self.nextExp:
+            self.gainLevel()
+            return True
 
 
     #There is duplicate code here. at some point it would be wise to implement

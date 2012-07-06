@@ -6,10 +6,10 @@ class map():
     def __init__(self, badguys, filename):
         self.maptext = []
         self.loadMap()
-        self.images = range(10)
-        imageNames = ['floor.bmp','brick2.bmp','key.bmp','door.bmp','exit.bmp','fruit_s.bmp','hpotion.bmp','spellbook.bmp','chest.bmp']
+        self.images = range(11)
+        imageNames = ['floor.bmp','brick2.bmp','key.bmp','door.bmp','exit.bmp','fruit_s.bmp','hpotion.bmp','mpotion.bmp','spellbook.bmp','chest.bmp']
         self.images[0], self.rect = load_image(imageNames[0], -1)
-        for i in range(1,9):
+        for i in range(1,10):
             self.images[i], self.rect = load_image(imageNames[i], None)
         
         self.fog = pygame.Surface( (30,30) )
@@ -88,7 +88,7 @@ class map():
         for x in range(HALFDIM):
             for y in range(HALFDIM):
                 tile = self.getUnit(x+topX,y+topY)
-                if tile < 9:
+                if tile < 10:
                     self.image = self.images[tile]
                     gameBoard.blit(self.image, (x*blocksize,y*blocksize), area=(0,0,blocksize,blocksize) )
                     dist = self.distanceFunc( (x,y), (rx,ry) )

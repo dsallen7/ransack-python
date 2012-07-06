@@ -6,5 +6,6 @@
     # 4 : exit
     # 5 : fruit
     # 6 : h potion
-    # 7 : spellbook
-    # 8 : chest 
+    # 7 : m potion
+    # 8 : spellbook
+    # 9 : chest 
