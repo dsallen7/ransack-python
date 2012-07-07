@@ -67,7 +67,7 @@ class menu():
                         boxPoints = ( (hPos, blocksize), (hPos, 2*blocksize), (hPos+blocksize, 2*blocksize), (hPos+blocksize, blocksize) )
                         pygame.draw.lines( msgBox, white, True, boxPoints, 1 )
                         if len(items) > 1:
-                            items = [items[len(items)-1]] + items[len(items)-1]
+                            items = [items[len(items)-1]] + items[:len(items)-1]
                     if event.key == pygame.K_ESCAPE:
                         return None
                     if event.key == pygame.K_RETURN:

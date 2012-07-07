@@ -45,7 +45,8 @@ class hero(pygame.sprite.Sprite):
         self.armor = [[1,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]
         self.armorEquipped = [(0,1),None,None]
         
-        self.items = []
+        #hp, mp,?
+        self.items = [0,0,0]
         #healing, fireball
         self.spells = ['heal']
 
@@ -71,7 +72,8 @@ class hero(pygame.sprite.Sprite):
     
     def setPlayerStats(self, stats):
         (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX) = stats
-        cHP = cHP % mHP+1
+        if cHP > mHP:
+            cHP = mHP
         self.currHP = cHP
         self.currMP = cMP
         self.strength = sth

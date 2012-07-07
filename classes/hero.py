@@ -45,7 +45,8 @@ class hero(pygame.sprite.Sprite):
         self.armor = [[1,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]
         self.armorEquipped = [(0,1),None,None]
         
-        self.items = []
+        #hp, mp,?
+        self.items = [0,0,0]
         #healing, fireball
         self.spells = ['heal']
 
@@ -112,6 +113,9 @@ class hero(pygame.sprite.Sprite):
         if self.currExp >= self.nextExp:
             self.gainLevel()
             return True
+    
+    def getItems(self):
+        return self.items
 
 
     #There is duplicate code here. at some point it would be wise to implement

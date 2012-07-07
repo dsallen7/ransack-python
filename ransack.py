@@ -136,6 +136,39 @@ class game():
         if self.myHero.increaseExp(5):
             self.myHud.msgSystem(self.gameBoard, "Congratulations! You have gained a level!")
     
+    def drawHero(self):
+        (X,Y) = self.myHero.getXY()
+        rectX = X
+        rectY = Y
+        if 5*blocksize <= X < 15*blocksize:
+            rectX = 5 * blocksize
+        if X >= 15*blocksize:
+            rectX = X - HALFDIM*blocksize
+        if 5*blocksize <= Y < 15*blocksize:
+            rectY = 5 * blocksize
+        if Y >= 15*blocksize:
+            rectY = Y - HALFDIM*blocksize
+        '''
+        #make the move animated
+        if x1 == rectX:
+            xAxis = [x1]*blocksize
+        elif x1 < rectX:
+            xAxis = range(x1, rectX)
+        else:
+            xAxis = range(x1, rectX, -1)
+        if y1 == rectY:
+            yAxis = [y1]*blocksize
+        elif y1 < rectY:
+            yAxis = range(y1, rectY)
+        elif y1 > rectY:
+            yAxis = range(y1, rectY, -1)
+        for (i, j) in zip(xAxis, yAxis):
+            self.myHero.setRect( i, j, x2, y2)
+            self.updateSprites()
+            self.redrawScreen()
+        '''
+        self.myHero.setRect( rectX, rectY, blocksize, blocksize)
+            
     
     def move(self, direction):
         noGoList = [1,8]
@@ -158,7 +191,7 @@ class game():
         
         i = self.myMap.getUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize)
         #door
-        if i == 3:
+        if i == DOOR:
             if self.myHero.getPlayerStats()[8] == 0:
                 self.myHud.message( "The door is locked!" )
                 return
@@ -167,50 +200,21 @@ class game():
                 self.myHero.takeKey()
                 self.myMap.updateUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize,0)
         #item
-        if i == 2 or i == 5 or i == 6 or i == 7:
+        if i == KEY or i == FRUIT or i == HPOTION or i == MPOTION:
             self.myHero.setPlayerStats( self.myHud.getItem(i, self.myHero.getPlayerStats() ) )
             self.myMap.getItem( (X + moveX)/blocksize, (Y + moveY)/blocksize)
         #exit
-        if i == 4:
+        if i == EXIT:
             self.myHud.message( "Onto the next level!" )
             self.nextLevel()
         #check if open space
         if ( (0 < X+moveX <= blocksize*DIM) and (0 < Y+moveY <= blocksize*DIM ) and i not in noGoList ):
             X += moveX
             Y += moveY
-            rectX = X
-            rectY = Y
-            if 5*blocksize <= X < 15*blocksize:
-                rectX = 5 * blocksize
-            if X >= 15*blocksize:
-                rectX = X - HALFDIM*blocksize
-            if 5*blocksize <= Y < 15*blocksize:
-                rectY = 5 * blocksize
-            if Y >= 15*blocksize:
-                rectY = Y - HALFDIM*blocksize
             self.myHero.setXY(X,Y)
-            '''
-            #make the move animated
-            if x1 == rectX:
-                xAxis = [x1]*blocksize
-            elif x1 < rectX:
-                xAxis = range(x1, rectX)
-            else:
-                xAxis = range(x1, rectX, -1)
-            if y1 == rectY:
-                yAxis = [y1]*blocksize
-            elif y1 < rectY:
-                yAxis = range(y1, rectY)
-            elif y1 > rectY:
-                yAxis = range(y1, rectY, -1)
-            for (i, j) in zip(xAxis, yAxis):
-                self.myHero.setRect( i, j, x2, y2)
-                self.updateSprites()
-                self.redrawScreen()
-            '''
-            self.myHero.setRect( rectX, rectY, x2, y2)
+            self.drawHero()
             #roll the die to see if there will be a battle
-            if self.rollDie(1,20):
+            if self.rollDie(0,50):
                 self.myHud.message("The battle is joined!")
                 self.myBattle.commence(screen)
                 self.fightBattle()
@@ -232,7 +236,11 @@ class game():
         #while self.gameOn == True:
         for mapFileName in mapList:
             self.levelOn = True
-            self.myMap = map.map(self.badguys, mapFileName)
+            self.myMap = map.map(mapFileName)
+            (X,Y) = self.myMap.getStartXY()
+            print X,Y
+            self.myHero.setXY( X*blocksize,Y*blocksize )
+            self.drawHero()
             while self.levelOn and self.gameOn:
                 self.gameBoard.fill(black)
                 clock.tick(15)
@@ -275,10 +283,6 @@ def main():
     
     titleScreen.blit(titleImg, (0,0) )
     
-    #clearScreen = pygame.Surface([500,500])
-    
-    #clearScreen.fill(black)
-    
     screen.blit(titleScreen, (0,0))
     while True:
         screen.blit(titleScreen, (0,0))
@@ -290,7 +294,6 @@ def main():
                     os.sys.exit()
                 if event.key == pygame.K_SPACE:
                     newGame = game()
-                    #screen.blit(clearScreen, (0,0))
                     newGame.mainLoop(mapList)
         pygame.display.flip()
     

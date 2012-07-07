@@ -3,13 +3,13 @@ from load_image import *
 from const import *
 
 class map():
-    def __init__(self, badguys, filename):
+    def __init__(self, filename):
         self.maptext = []
-        self.loadMap()
-        self.images = range(10)
+        self.loadMap(filename)
+        self.images = range(11)
         imageNames = ['floor.bmp','brick2.bmp','key.bmp','door.bmp','exit.bmp','fruit_s.bmp','hpotion.bmp','mpotion.bmp','spellbook.bmp','chest.bmp']
         self.images[0], self.rect = load_image(imageNames[0], -1)
-        for i in range(1,9):
+        for i in range(1,10):
             self.images[i], self.rect = load_image(imageNames[i], None)
         
         self.fog = pygame.Surface( (30,30) )
@@ -18,12 +18,13 @@ class map():
         
         self.image = self.images[0]
         
+        self.topMapCorner = (0,0)
+        
         for i in range(DIM):
             for j in range(DIM):
-                if self.getUnit(i,j) == 9:
+                if self.getUnit(i,j) == HEROSTART:
                     self.startXY = (i,j)
-        
-        self.topMapCorner = (0,0)
+                    print self.startXY
     
     def saveMap(self):
         grid = self.getGrid()
@@ -34,11 +35,15 @@ class map():
     def getImages(self):
         return self.images
     
-    def loadMap(self):
-        save = open("map.dat", "r")
-        grid = pickle.load(save)
-        save.close()
-        self.maptext = grid
+    def loadMap(self, filename):
+        try:
+            save = open(filename, "r")
+            grid = pickle.load(save)
+            save.close()
+            self.maptext = grid
+        except pygame.error, message:
+            print 'Cannot load map:', name
+            raise SystemExit, message
     
     def getGrid(self):
         return self.maptext
@@ -116,3 +121,6 @@ class map():
     
     def getUnit(self,x,y):
         return self.maptext[y][x]
+    
+    def getStartXY(self):
+        return self.startXY
