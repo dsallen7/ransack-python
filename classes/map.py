@@ -24,7 +24,6 @@ class map():
             for j in range(DIM):
                 if self.getUnit(i,j) == HEROSTART:
                     self.startXY = (i,j)
-                    print self.startXY
     
     def saveMap(self):
         grid = self.getGrid()

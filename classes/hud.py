@@ -19,32 +19,46 @@ class hud():
         self.frameBox1, r = load_image("hudBox1.bmp",-1)
         self.frameBox2, r = load_image("hudBox2.bmp",-1)
         
+        self.weaponImg = range(4)
+        self.weaponImg[0], r = load_image("sword.bmp",-1)
+        
+        self.armorImg = range(3)
+        self.armorImg[0], r = load_image("bplate.bmp",-1)
+        self.armorImg[2], r = load_image("shield.bmp",-1)
+        
         self.scrollText = ['']*3
+    
+    def writeText(self, surface, loc, text, fgc, bgc):
+        font = pygame.font.SysFont("arial", 18)
+        surface.blit( font.render(text, 1, fgc, bgc), loc )
 
-    def displayStats(self, gameBoard, stats):
+    def displayStats(self, gameBoard, stats, armor, weapon):
         (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX) = stats
         self.textBox1 = pygame.Surface((100, 250))
         self.textBox1.fill( yellow )
         self.frameBox1 = self.frameBox1.copy()
         if pygame.font:
-            font = pygame.font.SysFont("arial", 18)
-            scoretext = font.render( "Score: "+str(scr), 1, white, yellow )
-            self.textBox1.blit(scoretext, (0,0) )
-            lifetext = font.render( "HP: "+str(cHP)+"/"+str(mHP), 1, white, yellow)
-            self.textBox1.blit(lifetext, (0,25) )
-            magtext = font.render( "MP: "+str(cMP)+"/"+str(mMP), 1, white, yellow)
-            self.textBox1.blit(magtext, (0,50) )
-            magtext = font.render( "Int: "+str(itl), 1, white, yellow)
-            self.textBox1.blit(magtext, (0,75) )
-            magtext = font.render( "Str: "+str(sth), 1, white, yellow)
-            self.textBox1.blit(magtext, (0,100) )
-            magtext = font.render( "Dex: "+str(dex), 1, white, yellow)
-            self.textBox1.blit(magtext, (0,125) )
-            magtext = font.render( "Exp: "+str(cEX)+"/"+str(nEX), 1, white, yellow)
-            self.textBox1.blit(magtext, (0,150) )
-            keytext = font.render( "Keys: "+str(kys), 1, white, yellow)
-            self.textBox1.blit(keytext, (0,175) )
+            self.writeText(self.textBox1, (0,0), "Score: "+str(scr), white, yellow)
+            self.writeText(self.textBox1, (0,25), "HP: "+str(cHP)+"/"+str(mHP), white, yellow)
+            self.writeText(self.textBox1, (0,50), "MP: "+str(cMP)+"/"+str(mMP), white, yellow)
+            self.writeText(self.textBox1, (0,75), "Int: "+str(itl), white, yellow)
+            self.writeText(self.textBox1, (0,100), "Str: "+str(sth), white, yellow)
+            self.writeText(self.textBox1, (0,125), "Dex: "+str(dex), white, yellow)
+            self.writeText(self.textBox1, (0,150), "Exp: "+str(cEX)+"/"+str(nEX), white, yellow)
+            self.writeText(self.textBox1, (0,175), "Keys: "+str(kys), white, yellow)
         self.frameBox1.blit(self.textBox1,(25,25))
+        #show equipped armor and weapon
+        weaponCopy = self.weaponImg[weapon[1]]
+        self.writeText(weaponCopy, (25,25), str(weapon[0]), white, black)
+        self.frameBox1.blit(weaponCopy, (25, 250))
+        
+        armorLocList = [(60,250), (25,290), (60,290)]
+        for A in range( len(armor) ):
+            if armor[A] == None:
+                pass
+            else:
+                self.frameBox1.blit(self.armorImg[ armor[A] ], armorLocList[A])
+        
         gameBoard.blit(self.frameBox1, (blocksize*10, 0) )
         gameBoard.blit(self.frameBox2, (0, blocksize*10) )
     

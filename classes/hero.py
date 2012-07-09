@@ -37,13 +37,17 @@ class hero(pygame.sprite.Sprite):
         self.currExp = 0
         self.nextExp = 20
         
-        #Sword, axe, spear, hammer
+        # first dimension of array is weapon level
+        # second is type: Sword, axe, spear, hammer
         self.weapons = [[1,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
-        self.weaponEquipped = (0,1)
+        # (level, type)
+        self.weaponEquipped = (0,0)
         
+        #same as above
         #Breastplate, helmet, shield
         self.armor = [[1,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]
-        self.armorEquipped = [(0,1),None,None]
+        # types are in order as above, level is indicated
+        self.armorEquipped = [None,0,None]
         
         #hp, mp,?
         self.items = [0,0,0]
@@ -106,7 +110,9 @@ class hero(pygame.sprite.Sprite):
         self.level += 1
         self.nextExp = int( math.ceil( self.nextExp * 2.5 ) )
         self.maxHP = int( math.ceil( self.maxHP * 1.15 ) )
+        self.maxMP = int( math.ceil( self.maxMP * 1.15 ) )
         self.currHP = self.maxHP
+        self.currMP = self.maxMP
     
     def increaseExp(self, exp):
         self.currExp += exp
@@ -116,6 +122,18 @@ class hero(pygame.sprite.Sprite):
     
     def getItems(self):
         return self.items
+    
+    def getWeapons(self):
+        return self.weapons
+    
+    def getWeaponEquipped(self):
+        return self.weaponEquipped
+    
+    def getArmor(self):
+        return self.armor
+    
+    def getArmorEquipped(self):
+        return self.armorEquipped
 
 
     #There is duplicate code here. at some point it would be wise to implement
