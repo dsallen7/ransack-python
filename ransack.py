@@ -4,12 +4,10 @@ import random
 import pickle
 
 from classes import hero, map, hud, battle, menu, enemy
+from IMG import images
 from const import *
 from load_image import *
 
-import numpy as np
-from numpy.random import random_integers as rnd
-import matplotlib.pyplot as plt
 
 class PyManMain:
     """The Main PyMan Class - This class handles the main 
@@ -44,11 +42,6 @@ class game():
         
         self.gameBoard = pygame.Surface( [450,450] )
         self.gameFrame, self.gameFrameRect = load_image('gamescreen600.bmp', -1)
-        
-        self.spellImages = range(2)
-        spellNames = ['heart.bmp','fireball.bmp']
-        for i in range(2):
-            self.spellImages[i],r = load_image(spellNames[i],-1)
         
         # 0 : camera
         # 1 : sword
@@ -86,11 +79,13 @@ class game():
                 self.newGame.mySword.attack(x,y,self.dir)
                 '''
             elif event.key == pygame.K_s:
-                self.castSpell( self.myMenu.invMenu(screen, self.myHero.getSpells(), self.spellImages, "Spells:" ) )
+                self.castSpell( self.myMenu.invMenu(screen, self.myHero.getSpells(), images.spellImages, "Spells:" ) )
             elif event.key == pygame.K_i:
-                self.useItem( self.myMenu.invMenu(screen, self.myHud.getItemsList(), self.myMap.getImages(), "Items:" ) )
+                self.useItem( self.myMenu.invMenu(screen, self.myHero.getItems(), images.itemImages, "Items:" ) )
             elif event.key == pygame.K_t:
                 self.screenShot()
+            elif event.key == pygame.K_m:
+                self.myMap.callDrawMiniMap(screen)
             else:
                 self.move(pygame.key.name(event.key))
     
@@ -102,21 +97,26 @@ class game():
             return False
     
     def castSpell(self, spell):
-        if spell == 'heal':
+        if spell == HEAL:
             if self.myHero.takeMP(5):
                 self.myHero.takeDmg(-5)
                 self.myHud.msgSystem(self.gameBoard, "You feel better!")
             else:
                 self.myHud.msgSystem(self.gameBoard, "Not enough MP!")
     
+    # this 
     def useItem(self,item):
-        if item == 'hp':
+        if item == None:
+            return
+        elif item == HPOT_I:
             self.myHero.takeDmg(-5)
             self.myHud.msgSystem(self.gameBoard, "You feel better!")
-        elif item == 'mp':
+        elif item == MPOT_I:
             self.myHero.takeMP(-5)
             self.myHud.msgSystem(self.gameBoard, "You feel magical!")
+        self.myHero.setItem(item, -1)
     
+    # this controls all the logic of what goes on in an actual battle
     def fightBattle(self):
         engagedEnemy = enemy.enemy()
         while engagedEnemy.getHP() > 0:
@@ -133,9 +133,9 @@ class game():
                     self.myHud.msgSystem(self.gameBoard, "You missed the monster!")
                     self.sounds[2].play()
             elif action == 'Magic':
-                self.castSpell( self.myMenu.invMenu(screen, self.myHero.getSpells(), self.spellImages, "Spells:" ) )
+                self.castSpell( self.myMenu.invMenu(screen, self.myHero.getSpells(), images.spellImages, "Spells:" ) )
             elif action == 'Item':
-                self.useItem( self.myMenu.invMenu(screen, self.myHud.getItemsList(), self.myMap.getImages(), "Items:" ) )
+                self.useItem( self.myMenu.invMenu(screen, self.myHero.getItems(), images.itemImages, "Items:" ) )
             elif action == 'Flee':
                 if self.rollDie(1,3):
                     self.myHud.msgSystem(self.gameBoard, "You escaped safely.")
@@ -143,17 +143,18 @@ class game():
                 else:
                     self.myHud.msgSystem(self.gameBoard, "You can't escape!")                    
             #enemy attacks
-            if self.rollDie(0,2):
-                dmg = random.randrange(1,5)
-                self.myHud.msgSystem(self.gameBoard, "The monster hits you for "+str(dmg)+" points!")
-                self.sounds[1].play()
-                if self.myHero.takeDmg(dmg) < 1:
-                    self.myHud.msgSystem(self.gameBoard, "You have died!")
-                    self.gameOver()
-                    return
-            else:
-                self.myHud.msgSystem(self.gameBoard, "The monster missed you!")
-                self.sounds[2].play()
+            if engagedEnemy.getHP() > 0:
+                if self.rollDie(0,2):
+                    dmg = random.randrange(1,5)
+                    self.myHud.msgSystem(self.gameBoard, "The monster hits you for "+str(dmg)+" points!")
+                    self.sounds[1].play()
+                    if self.myHero.takeDmg(dmg) < 1:
+                        self.myHud.msgSystem(self.gameBoard, "You have died!")
+                        self.gameOver()
+                        return
+                else:
+                    self.myHud.msgSystem(self.gameBoard, "The monster missed you!")
+                    self.sounds[2].play()
             self.myHud.displayStats(self.gameBoard, self.myHero.getPlayerStats(),self.myHero.getArmorEquipped(), self.myHero.getWeaponEquipped() )
             self.redrawScreen()
             pygame.display.flip()
@@ -226,9 +227,10 @@ class game():
                 self.myHero.takeKey()
                 self.myMap.updateUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize,0)
         #item
-        if i == KEY or i == FRUIT or i == HPOTION or i == MPOTION:
-            self.myHero.setPlayerStats( self.myHud.getItem(i, self.myHero.getPlayerStats() ) )
-            self.myMap.getItem( (X + moveX)/blocksize, (Y + moveY)/blocksize)
+        if i == KEY or i == FRUIT or i == HPOTION or i == MPOTION or i == SPELLBOOK:
+            self.myHero.getItem(i)
+            self.myMap.updateUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize, 0)
+            self.myHud.msgSystem(self.gameBoard, itemMsgs[i])
         #exit
         if i == EXIT:
             self.myHud.message( "Onto the next level!" )
@@ -260,14 +262,12 @@ class game():
         
 
     def mainLoop(self, mapList):
-        #while self.gameOn == True:
         screen.blit(self.gameFrame,(0,0))
         for mapFileName in mapList:
             self.levelOn = True
             self.myMap = map.map(mapFileName)
             (X,Y) = self.myMap.getStartXY()
             self.myHero.setXY( X*blocksize,Y*blocksize )
-            #self.drawHero()
             while self.levelOn and self.gameOn:
                 clock.tick(15)
                 for event in pygame.event.get():
@@ -278,7 +278,6 @@ class game():
                 self.myMap.redraw(self.myHero.getXY(), self.myHero.getRect(), self.gameBoard)
                 self.myHud.displayStats(self.gameBoard, self.myHero.getPlayerStats(),self.myHero.getArmorEquipped(), self.myHero.getWeaponEquipped())
                 self.updateSprites()
-                #self.myHero.showLocation(self.gameBoard)
                 self.redrawScreen()
 
 # Set the height and width of the screen
@@ -299,6 +298,7 @@ pygame.init()
 clock = pygame.time.Clock()
 random.seed()
 
+images.load()
 
 def main():
     mapList = ['map.dat', 'map2.dat']    

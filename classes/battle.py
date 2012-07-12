@@ -23,7 +23,7 @@ class battle():
     # displays battle menu and waits for player to select choice,
     # returns choice to fightBattle()
     def getAction(self):
-        menuBox = pygame.Surface( (50,100) )
+        menuBox = pygame.Surface( (60,100) )
         options = ['Fight', 'Magic', 'Item', 'Flee']
         selection = 0
         while True:

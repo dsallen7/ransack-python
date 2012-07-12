@@ -23,13 +23,13 @@ class hud():
         self.weaponImg[0], r = load_image("sword.bmp",-1)
         
         self.armorImg = range(3)
-        self.armorImg[0], r = load_image("bplate.bmp",-1)
-        self.armorImg[2], r = load_image("shield.bmp",-1)
+        self.armorImg[0], r = load_image("bplate.bmp",None)
+        self.armorImg[2], r = load_image("shield.bmp",None)
         
         self.scrollText = ['']*3
     
-    def writeText(self, surface, loc, text, fgc, bgc):
-        font = pygame.font.SysFont("arial", 18)
+    def writeText(self, surface, loc, text, fgc, bgc, size=18, font="arial"):
+        font = pygame.font.SysFont(font, size)
         surface.blit( font.render(text, 1, fgc, bgc), loc )
 
     def displayStats(self, gameBoard, stats, armor, weapon):
@@ -49,7 +49,7 @@ class hud():
         self.frameBox1.blit(self.textBox1,(25,25))
         #show equipped armor and weapon
         weaponCopy = self.weaponImg[weapon[1]]
-        self.writeText(weaponCopy, (25,25), str(weapon[0]), white, black)
+        self.writeText(weaponCopy, (20,20), str(weapon[0]), white, black, 8)
         self.frameBox1.blit(weaponCopy, (25, 250))
         
         armorLocList = [(60,250), (25,290), (60,290)]
@@ -57,7 +57,9 @@ class hud():
             if armor[A] == None:
                 pass
             else:
-                self.frameBox1.blit(self.armorImg[ armor[A] ], armorLocList[A])
+                armorCopy = self.armorImg[ A ]
+                self.writeText(armorCopy, (20,20), str(armor[A]), white, black,8)
+                self.frameBox1.blit(armorCopy, armorLocList[A])
         
         gameBoard.blit(self.frameBox1, (blocksize*10, 0) )
         gameBoard.blit(self.frameBox2, (0, blocksize*10) )
@@ -75,13 +77,7 @@ class hud():
                 self.textBox2.blit(Msg, (0,20*i) )
         self.frameBox2.blit(self.textBox2, (25,25) )
         gameBoard.blit(self.frameBox2, (0, blocksize*10) )
-
-    def hurt(self):
-        if self.playerlife > 10:
-            self.playerlife -= 10
-        else:
-            self.newGame.gameover()
-            
+    
     def takeKey(self):
         self.playerkeys -= 1
         self.message("The door unlocks")

@@ -47,12 +47,12 @@ class hero(pygame.sprite.Sprite):
         #Breastplate, helmet, shield
         self.armor = [[1,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]
         # types are in order as above, level is indicated
-        self.armorEquipped = [None,0,None]
+        self.armorEquipped = [0,None,0]
         
-        #hp, mp,?
+        #hpot, mpot,?
         self.items = [0,0,0]
         #healing, fireball
-        self.spells = ['heal']
+        self.spells = [1,0]
 
     def getXY(self):
         return (self.X,self.Y)
@@ -106,6 +106,7 @@ class hero(pygame.sprite.Sprite):
     def getSpells(self):
         return self.spells
     
+    # increases level, next exp for lev up, max HP and MP and refills both
     def gainLevel(self):
         self.level += 1
         self.nextExp = int( math.ceil( self.nextExp * 2.5 ) )
@@ -119,6 +120,22 @@ class hero(pygame.sprite.Sprite):
         if self.currExp >= self.nextExp:
             self.gainLevel()
             return True
+    
+    def setItem(self, item, num=1):
+        self.items[item] += num
+    
+    # Input: tile number denoting item
+    def getItem(self, type):
+        if type == KEY:
+            self.keys += 1
+        elif type == FRUIT:
+            self.items[FRUT_I] += 1
+        elif type == HPOTION:
+            self.items[HPOT_I] += 1
+        elif type == MPOTION:
+            self.items[MPOT_I] += 1
+        elif type == SPELLBOOK:
+            self.spells[FRBL] += 1
     
     def getItems(self):
         return self.items
