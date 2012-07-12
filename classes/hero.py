@@ -67,9 +67,12 @@ class hero(pygame.sprite.Sprite):
     def setRect(self,x1,y1,x2,y2):
         self.rect = (x1,y1,x2,y2)
     
-    def changeDirection(self, imgNum, dir):
-        self.image = self.images[imgNum]
+    def changeDirection(self, dir):
         self.dir = dir
+        if dir == 'up': self.image = self.images[0]; return (0,-blocksize)
+        elif dir == 'down': self.image = self.images[1]; return (0,blocksize)
+        elif dir == 'left': self.image = self.images[2]; return (-blocksize,0)
+        elif dir == 'right': self.image = self.images[3]; return (blocksize,0)
     
     def getPlayerStats(self):
         return (self.currHP, self.maxHP, self.currMP, self.maxMP, self.strength, self.dex, self.intell, self.score, self.keys, self.currExp, self.nextExp)

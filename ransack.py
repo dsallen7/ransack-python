@@ -198,23 +198,13 @@ class game():
             
     
     def move(self, direction):
-        noGoList = [1,8]
+        if direction not in ['up','down','left','right']: return
+        noGoList = [1,3,10]
         x1,y1,x2,y2 = self.myHero.getRect()
         moveX = 0
         moveY = 0
         (X,Y) = self.myHero.getXY()
-        if direction == 'up':
-            self.myHero.changeDirection(0,'u')
-            moveY = -blocksize
-        elif direction == 'down':
-            self.myHero.changeDirection(1,'d')
-            moveY = blocksize
-        elif direction == 'left':
-            self.myHero.changeDirection(2,'l')
-            moveX = -blocksize
-        elif direction == 'right':
-            self.myHero.changeDirection(3,'r')
-            moveX = blocksize
+        (moveX,moveY) = self.myHero.changeDirection(direction)
         
         i = self.myMap.getUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize)
         #door
@@ -231,8 +221,8 @@ class game():
             self.myHero.getItem(i)
             self.myMap.updateUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize, 0)
             self.myHud.msgSystem(self.gameBoard, itemMsgs[i])
-        #exit
-        if i == EXIT:
+        # Stairs down
+        if i == STAIRDN:
             self.myHud.message( "Onto the next level!" )
             self.nextLevel()
         #check if open space
@@ -265,9 +255,10 @@ class game():
         screen.blit(self.gameFrame,(0,0))
         for mapFileName in mapList:
             self.levelOn = True
-            self.myMap = map.map(mapFileName)
+            self.myMap = map.map(mapFileName, images.mapImages)
             (X,Y) = self.myMap.getStartXY()
             self.myHero.setXY( X*blocksize,Y*blocksize )
+            self.updateSprites()
             while self.levelOn and self.gameOn:
                 clock.tick(15)
                 for event in pygame.event.get():

@@ -3,14 +3,14 @@
 from spritesheet import *
 from const import *
 
-mapImages = range(11)
+mapImages = range(12)
 itemImages = range(3)
 spellImages = range(2)
 
 def load():
     mapSpriteSheet = spritesheet('mapsheet.bmp')
 
-    for i in range(11):
+    for i in range(12):
         mapImages[i] = mapSpriteSheet.image_at( (i*blocksize, 0, blocksize, blocksize) )
 
     itemSpriteSheet = spritesheet('itemsheet.bmp')

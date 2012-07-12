@@ -31,14 +31,10 @@ class miniMap():
         while (pygame.event.wait().type != pygame.KEYDOWN): pass
 
 class map():
-    def __init__(self, filename):
+    def __init__(self, filename, images):
         self.maptext = []
         self.loadMap(filename)
-        self.images = range(11)
-        imageNames = ['floor.bmp','brick2.bmp','key.bmp','door.bmp','exit.bmp','fruit_s.bmp','hpotion.bmp','mpotion.bmp','spellbook.bmp','chest.bmp']
-        self.images[0], self.rect = load_image(imageNames[0], -1)
-        for i in range(1,10):
-            self.images[i], self.rect = load_image(imageNames[i], None)
+        self.images = images
         
         self.fog = pygame.Surface( (30,30) )
         
@@ -55,6 +51,8 @@ class map():
                 if self.getUnit(i,j) == HEROSTART:
                     self.startXY = (i,j)
         self.playerXY = self.startXY
+        self.pointOfEntry = None
+        self.pointOfExit = None
     
     def saveMap(self):
         grid = self.getGrid()
@@ -68,9 +66,13 @@ class map():
     def loadMap(self, filename):
         try:
             save = open(filename, "r")
-            grid = pickle.load(save)
+            ball = pickle.load(save)
             save.close()
+            (grid, hs, poe, poex) = ball
             self.maptext = grid
+            self.playerXY = hs
+            self.pointOfEntry = poe
+            self.pointOfExit = poex
         except pygame.error, message:
             print 'Cannot load map:', name
             raise SystemExit, message
@@ -89,11 +91,14 @@ class map():
     # 1 : wall
     # 2 : key
     # 3 : door
-    # 4 : exit
-    # 5 : fruit
-    # 6 : h potion
-    # 7 : spellbook
-    # 8 : chest
+    # 4 : stairs up
+    # 5 : stairs down
+    # 6 : fruit
+    # 7 : h potion
+    # 8 : m potion
+    # 9 : spellbook
+    # 10 : chest 
+
     def redraw(self, heroLoc, heroRect, gameBoard):
         oldX, oldY = self.playerXY
         self.updateUnit(oldX,oldY,0)
@@ -134,16 +139,13 @@ class map():
                     dist = self.distanceFunc( (x,y), (rx,ry) )
                     if dist == 1:
                         self.fog.set_alpha( 0 )
-                        gameBoard.blit(self.fog, (x*blocksize,y*blocksize), area=(0,0,blocksize,blocksize) )
                     elif dist == 2:
                         self.fog.set_alpha( 70 )
-                        gameBoard.blit(self.fog, (x*blocksize,y*blocksize), area=(0,0,blocksize,blocksize) )
                     elif dist == 3:
                         self.fog.set_alpha( 140 )
-                        gameBoard.blit(self.fog, (x*blocksize,y*blocksize), area=(0,0,blocksize,blocksize) )
                     elif dist >= 4:
                         self.fog.set_alpha( 210 )
-                        gameBoard.blit(self.fog, (x*blocksize,y*blocksize), area=(0,0,blocksize,blocksize) )
+                    gameBoard.blit(self.fog, (x*blocksize,y*blocksize), area=(0,0,blocksize,blocksize) )
     
     def updateUnit(self, x, y, type):
         #Updates one map unit to type at map coordinates x,y

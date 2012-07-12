@@ -3,9 +3,10 @@
     # 1 : wall
     # 2 : key
     # 3 : door
-    # 4 : exit
-    # 5 : fruit
-    # 6 : h potion
-    # 7 : m potion
-    # 8 : spellbook
-    # 9 : chest 
+    # 4 : stairs up
+    # 5 : stairs down
+    # 6 : fruit
+    # 7 : h potion
+    # 8 : m potion
+    # 9 : spellbook
+    # 10 : chest 
