@@ -18,7 +18,7 @@ class miniMap():
         self.miniMapBoard = pygame.Surface( [300,300] )
         self.miniMapBoard.fill( black )
         
-        self.colorDict = {0:0, 1:1, 2:2, 3:3, 4:3, 5:4, 6:4, 7:4, 8:6, 9:6, 10:5}
+        self.colorDict = {0:0, 1:1, 2:2, 3:3, 4:3, 5:4, 6:4, 7:4, 8:6, 9:6, 10:5, 11:5}
     
     def getEntry(self, x, y):
         return self.maptext[y][x]

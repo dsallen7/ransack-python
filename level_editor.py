@@ -81,11 +81,12 @@ class Map():
         return self.grid
     
     def installBall(self, ball):
-        (grid, hs, poe, poex) = ball
+        (grid, hs, poe, poex, ssidx) = ball
         self.grid = grid
         self.heroStart = hs
         self.pointOfEntry = poe
         self.pointOfExit = poex
+        myHandler.selectSheet(ssidx)
     
     def getMapBall(self):
         return (self.grid, self.heroStart, self.pointOfEntry, self.pointOfExit, myHandler.ss_idx)
@@ -109,10 +110,8 @@ class Handler():
         
         self.BFSQueue = queue.Queue()
     
-    def selectSheet(self):
-        self.ss_idx += 1
-        if self.ss_idx == len(self.sslist):
-            self.ss_idx = 0
+    def selectSheet(self, sheet):
+        self.ss_idx = sheet
         self.currentTile = 0
         self.tileSheet = self.sslist[self.ss_idx]
         self.numImages = len(self.tileSheet)
@@ -251,7 +250,10 @@ class Handler():
         if event.key == pygame.K_f:
             self.floodFill(self.currentTile, (x,y) )
         if event.key == pygame.K_e:
-            self.selectSheet()
+            self.ss_idx += 1
+            if self.ss_idx == len(self.sslist):
+                self.ss_idx = 0
+            self.selectSheet(self.ss_idx)
         if self.drawMode:
             myMap.setEntry(x/blocksize,y/blocksize,self.currentTile)
         self.cursorPos = (x,y)

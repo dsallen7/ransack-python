@@ -6,7 +6,7 @@ from const import *
 mapImages = range(12)
 itemImages = range(3)
 spellImages = range(2)
-villageImages = range(12)
+villageImages = range(14)
 
 def load():
     mapSpriteSheet = spritesheet('mapsheet.bmp')
@@ -26,5 +26,5 @@ def load():
     
     villageSpriteSheet = spritesheet('villagesheet.bmp')
     
-    for i in range(12):
+    for i in range(14):
         villageImages[i] = villageSpriteSheet.image_at( (i*blocksize, 0, blocksize, blocksize) )
