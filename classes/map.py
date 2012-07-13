@@ -1,6 +1,7 @@
 import pygame, random, pickle
 from load_image import *
 from const import *
+from IMG import images
 
 class miniMap():
     def __init__(self, maptext):
@@ -31,28 +32,24 @@ class miniMap():
         while (pygame.event.wait().type != pygame.KEYDOWN): pass
 
 class map():
-    def __init__(self, filename, images):
+    def __init__(self, filename):
+        images.load()
         self.maptext = []
+        self.lineOfVision = 0
         self.loadMap(filename)
-        self.images = images
+        
+        self.playerXY = self.startXY
         
         self.fog = pygame.Surface( (30,30) )
-        
         self.fog.fill( black )
-        
-        self.image = self.images[0]
-        
+                
         self.topMapCorner = (0,0)
         
         self.myMiniMap = miniMap(self.maptext)
         
-        for i in range(DIM):
-            for j in range(DIM):
-                if self.getUnit(i,j) == HEROSTART:
-                    self.startXY = (i,j)
-        self.playerXY = self.startXY
-        self.pointOfEntry = None
-        self.pointOfExit = None
+        self.sslist = [images.mapImages, images.villageImages]
+        self.images = self.sslist[self.ss_idx]
+        self.image = self.images[0]
     
     def saveMap(self):
         grid = self.getGrid()
@@ -68,17 +65,41 @@ class map():
             save = open(filename, "r")
             ball = pickle.load(save)
             save.close()
-            (grid, hs, poe, poex) = ball
+            (grid, hs, poe, poex, ssidx) = ball
             self.maptext = grid
-            self.playerXY = hs
+            self.startXY = poe
             self.pointOfEntry = poe
             self.pointOfExit = poex
+            self.ss_idx = ssidx
+            if ssidx == 0:
+                self.lineOfVision = 0
+            else: self.lineOfVision = 4
         except pygame.error, message:
             print 'Cannot load map:', name
             raise SystemExit, message
     
     def getGrid(self):
         return self.maptext
+    
+    def updateUnit(self, x, y, type):
+        #Updates one map unit to type at map coordinates x,y
+        self.maptext[y] = self.maptext[y][:x]+[type]+self.maptext[y][x+1:]
+    
+    def getUnit(self,x,y):
+        return self.maptext[y][x]
+    
+    def getStartXY(self):
+        return self.startXY
+    
+    def callDrawMiniMap(self, screen):
+        self.myMiniMap.drawMiniMap(screen)
+    
+    def getPOE(self):
+        print self.pointOfEntry
+        return self.pointOfEntry
+    
+    def getPOEx(self):
+        return self.pointOfExit
     
     # returns distance between two points
     def distanceFunc(self, pos1, pos2):
@@ -101,14 +122,14 @@ class map():
 
     def redraw(self, heroLoc, heroRect, gameBoard):
         oldX, oldY = self.playerXY
-        self.updateUnit(oldX,oldY,0)
+        #self.updateUnit(oldX,oldY,0)
         # Compute top map corner
         (px,py) = heroLoc
         px = px/blocksize
         py = py/blocksize
         #Erase old player
         self.playerXY = (px, py)
-        self.updateUnit(px,py,10)
+        #self.updateUnit(px,py,10)
         
         self.topMapCorner = ( (px%10 + (px/10)*10), (py%10 + (py/10)*10) )
         
@@ -137,25 +158,13 @@ class map():
                     self.image = self.images[tile]
                     gameBoard.blit(self.image, (x*blocksize,y*blocksize), area=(0,0,blocksize,blocksize) )
                     dist = self.distanceFunc( (x,y), (rx,ry) )
-                    if dist == 1:
+                    if dist <= self.lineOfVision + 1:
                         self.fog.set_alpha( 0 )
-                    elif dist == 2:
+                    elif dist == self.lineOfVision + 2:
                         self.fog.set_alpha( 70 )
-                    elif dist == 3:
+                    elif dist == self.lineOfVision + 3:
                         self.fog.set_alpha( 140 )
-                    elif dist >= 4:
+                    elif dist >= self.lineOfVision + 4:
                         self.fog.set_alpha( 210 )
                     gameBoard.blit(self.fog, (x*blocksize,y*blocksize), area=(0,0,blocksize,blocksize) )
     
-    def updateUnit(self, x, y, type):
-        #Updates one map unit to type at map coordinates x,y
-        self.maptext[y] = self.maptext[y][:x]+[type]+self.maptext[y][x+1:]
-    
-    def getUnit(self,x,y):
-        return self.maptext[y][x]
-    
-    def getStartXY(self):
-        return self.startXY
-    
-    def callDrawMiniMap(self, screen):
-        self.myMiniMap.drawMiniMap(screen)

@@ -157,7 +157,8 @@ class hero(pygame.sprite.Sprite):
 
 
     #There is duplicate code here. at some point it would be wise to implement
-    #a project-wide messaging/menu utility.    
+    #a project-wide messaging/menu utility.
+    #UPDATE: done.
 
     
     def showLocation(self, gameBoard):

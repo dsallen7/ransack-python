@@ -31,6 +31,13 @@ class game():
         self.myMenu = menu.menu()
         self.myBattle = battle.battle(screen)
         self.myMap = None
+        self.levelDepth = 2
+        # a dungeon is just an array of maps
+        self.myDungeon = []
+        for mapFileName in mapList:
+            self.myDungeon += [map.map(mapFileName)]
+        
+        self.myMap = self.myDungeon[self.levelDepth]
         
         self.allsprites = pygame.sprite.RenderPlain((self.myHero, self.badguys))
         
@@ -56,7 +63,16 @@ class game():
         self.gameOn = False
         
     def nextLevel(self):
-        self.levelOn = False
+        self.levelDepth += 1
+        self.myMap = self.myDungeon[self.levelDepth]
+        (x,y) = self.myMap.getPOE()
+        self.myHero.setXY( x*blocksize,y*blocksize )
+    
+    def prevLevel(self):
+        self.levelDepth -= 1
+        self.myMap = self.myDungeon[self.levelDepth]
+        (x,y) = self.myMap.getPOEx()
+        self.myHero.setXY( x*blocksize,y*blocksize )
     
     #takes screen shot and saves as bmp in serial fashion, beginning with 1
     def screenShot(self):
@@ -119,13 +135,14 @@ class game():
     # this controls all the logic of what goes on in an actual battle
     def fightBattle(self):
         engagedEnemy = enemy.enemy()
+        (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX) = self.myHero.getPlayerStats()
         while engagedEnemy.getHP() > 0:
             clock.tick(15)
             action = self.myBattle.getAction()
             if action == 'Fight':
                 #hero attacks
                 if self.rollDie(0,2):
-                    dmg = random.randrange(1,5)
+                    dmg = random.randrange(sth/2,sth)
                     self.myHud.msgSystem(self.gameBoard, "You hit the monster for "+str(dmg)+" points!")
                     self.sounds[1].play()
                     engagedEnemy.takeDmg(dmg)
@@ -163,7 +180,7 @@ class game():
             self.myHud.msgSystem(self.gameBoard, "Congratulations! You have gained a level!")
     
     #takes x,y of old myHero.rect location and finds new
-    def drawHero(self,x1,y1):
+    def drawHero(self,x1,y1, animated=True):
         (X,Y) = self.myHero.getXY()
         rectX = X
         rectY = Y
@@ -177,22 +194,23 @@ class game():
             rectY = Y - HALFDIM*blocksize
         
         #make the move animated
-        if x1 == rectX:
-            xAxis = [x1]*blocksize
-        elif x1 < rectX:
-            xAxis = range(x1, rectX)
-        else:
-            xAxis = range(x1, rectX, -1)
-        if y1 == rectY:
-            yAxis = [y1]*blocksize
-        elif y1 < rectY:
-            yAxis = range(y1, rectY)
-        elif y1 > rectY:
-            yAxis = range(y1, rectY, -1)
-        for (i, j) in zip(xAxis, yAxis):
-            self.myHero.setRect( i, j, blocksize, blocksize)
-            self.updateSprites()
-            self.redrawScreen()
+        if animated:
+            if x1 == rectX:
+                xAxis = [x1]*blocksize
+            elif x1 < rectX:
+                xAxis = range(x1, rectX)
+            else:
+                xAxis = range(x1, rectX, -1)
+            if y1 == rectY:
+                yAxis = [y1]*blocksize
+            elif y1 < rectY:
+                yAxis = range(y1, rectY)
+            elif y1 > rectY:
+                yAxis = range(y1, rectY, -1)
+            for (i, j) in zip(xAxis, yAxis):
+                self.myHero.setRect( i, j, blocksize, blocksize)
+                self.updateSprites()
+                self.redrawScreen()
         
         self.myHero.setRect( rectX, rectY, blocksize, blocksize)
             
@@ -225,6 +243,13 @@ class game():
         if i == STAIRDN:
             self.myHud.message( "Onto the next level!" )
             self.nextLevel()
+            self.drawHero(x1,y1,False)
+            return
+        # Stairs up
+        if i == STAIRUP:
+            self.prevLevel()
+            self.drawHero(x1,y1,False)
+            return
         #check if open space
         if ( (0 < X+moveX <= blocksize*DIM) and (0 < Y+moveY <= blocksize*DIM ) and i not in noGoList ):
             X += moveX
@@ -249,27 +274,26 @@ class game():
         screen.blit( self.gameBoard, (75,75) )
         #screen.blit( self.spriteLayer, (75,75) )
         pygame.display.flip()
-        
+    
+    def switchMap(self):
+        pass
 
     def mainLoop(self, mapList):
         screen.blit(self.gameFrame,(0,0))
-        for mapFileName in mapList:
-            self.levelOn = True
-            self.myMap = map.map(mapFileName, images.mapImages)
-            (X,Y) = self.myMap.getStartXY()
-            self.myHero.setXY( X*blocksize,Y*blocksize )
+        (X,Y) = self.myMap.getStartXY()
+        self.myHero.setXY( X*blocksize,Y*blocksize )
+        self.updateSprites()
+        while self.levelOn and self.gameOn:
+            clock.tick(15)
+            for event in pygame.event.get():
+                self.event_handler(event)
+                if event.type == pygame.QUIT:
+                    os.sys.exit()
+            self.gameBoard.fill(black)
+            self.myMap.redraw(self.myHero.getXY(), self.myHero.getRect(), self.gameBoard)
+            self.myHud.displayStats(self.gameBoard, self.myHero.getPlayerStats(),self.myHero.getArmorEquipped(), self.myHero.getWeaponEquipped())
             self.updateSprites()
-            while self.levelOn and self.gameOn:
-                clock.tick(15)
-                for event in pygame.event.get():
-                    self.event_handler(event)
-                    if event.type == pygame.QUIT:
-                        os.sys.exit()
-                self.gameBoard.fill(black)
-                self.myMap.redraw(self.myHero.getXY(), self.myHero.getRect(), self.gameBoard)
-                self.myHud.displayStats(self.gameBoard, self.myHero.getPlayerStats(),self.myHero.getArmorEquipped(), self.myHero.getWeaponEquipped())
-                self.updateSprites()
-                self.redrawScreen()
+            self.redrawScreen()
 
 # Set the height and width of the screen
 screenSize=[600,600]
@@ -291,13 +315,10 @@ random.seed()
 
 images.load()
 
-def main():
-    mapList = ['map.dat', 'map2.dat']    
-    
+def main():    
     titleScreen = pygame.Surface(screenSize)
     
     titleScreen.fill(black)
-    
     
     titleImg, titleRect = load_image('titlescreen.bmp', -1)
     

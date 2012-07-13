@@ -31,6 +31,9 @@ HPOT_I = 0
 MPOT_I = 1
 FRUT_I = 2
 
+# List of maps in dungeon
+mapList = ['village1.dat','village2.dat','map.dat', 'map2.dat']
+
 # Messages to display for item found
 itemMsgs = { 2: 'You found a key!',
              6: 'You found a piece of fruit.',

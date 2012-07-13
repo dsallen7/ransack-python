@@ -66,8 +66,6 @@ class menu():
         screen.blit(borderBox, (100, 100) )        
         pygame.display.flip()
         numItems = len(availableItems)
-        print hPosList
-        print availableItems
         # wait for selection
         while True:
             for event in pygame.event.get():
