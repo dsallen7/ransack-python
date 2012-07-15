@@ -7,18 +7,20 @@ class miniMap():
     def __init__(self, maptext):
         self.maptext = maptext
         
-        self.mapColors = [black,brickred,yellow,grey,red,white,brown]
+        self.mapColors = [black,brickred,yellow,grey,red,white,brown,green,dkgreen]
         
-        self.mapColorBlocks = range(7)
+        self.mapColorBlocks = range(9)
         
-        for i in range(7):
+        for i in range(9):
             self.mapColorBlocks[i] = pygame.Surface( (miniblocksize,miniblocksize) )
             self.mapColorBlocks[i].fill( self.mapColors[i] )
         
         self.miniMapBoard = pygame.Surface( [300,300] )
         self.miniMapBoard.fill( black )
         
-        self.colorDict = {0:0, 1:1, 2:2, 3:3, 4:3, 5:4, 6:4, 7:4, 8:6, 9:6, 10:5, 11:5}
+        self.colorDict = {0:0, 3:3, 4:3, 5:4, 6:4, 7:4, 8:3, 9:6, 10:5, 11:5, 12:7, 24:1, 25:1,
+                          42:5, 42:5, 43:5, 44:5, 45:5, 46:5, 47:5, 48:1, 49:1, 50:1, 51:8, 52:8, 53:8, 55:3, 64:5, 92:4, 95:4, 98:2, 99:6, 
+                          100:6, 116:3, 120:3, 121:3, 126:0, 127:5}
     
     def getEntry(self, x, y):
         return self.maptext[y][x]
@@ -32,11 +34,15 @@ class miniMap():
         while (pygame.event.wait().type != pygame.KEYDOWN): pass
 
 class map():
-    def __init__(self, filename):
+    def __init__(self, filename=None, mapball = None):
         images.load()
         self.maptext = []
         self.lineOfVision = 0
-        self.loadMap(filename)
+        if filename != None:
+            self.loadMap(filename)
+        
+        if mapball != None:
+            self.installBall(mapball)
         
         self.playerXY = self.startXY
         
@@ -47,9 +53,10 @@ class map():
         
         self.myMiniMap = miniMap(self.maptext)
         
-        self.sslist = [images.mapImages, images.villageImages]
-        self.images = self.sslist[self.ss_idx]
-        self.image = self.images[0]
+        self.images = images.mapImages
+    
+    def setLOV(self, num):
+        self.lineOfVision = num
     
     def saveMap(self):
         grid = self.getGrid()
@@ -60,20 +67,20 @@ class map():
     def getImages(self):
         return self.images
     
+    def installBall(self, ball):
+        (grid, poe, poex, hs) = ball
+        self.maptext = grid
+        self.heroStart = hs
+        self.startXY = poe
+        self.pointOfEntry = poe
+        self.pointOfExit = poex
+    
     def loadMap(self, filename):
         try:
             save = open(filename, "r")
             ball = pickle.load(save)
             save.close()
-            (grid, hs, poe, poex, ssidx) = ball
-            self.maptext = grid
-            self.startXY = poe
-            self.pointOfEntry = poe
-            self.pointOfExit = poex
-            self.ss_idx = ssidx
-            if ssidx == 0:
-                self.lineOfVision = 0
-            else: self.lineOfVision = 4
+            self.installBall(ball)
         except pygame.error, message:
             print 'Cannot load map:', name
             raise SystemExit, message
@@ -86,7 +93,9 @@ class map():
         self.maptext[y] = self.maptext[y][:x]+[type]+self.maptext[y][x+1:]
     
     def getUnit(self,x,y):
-        return self.maptext[y][x]
+        if 0 <= x < DIM and 0 <= y < DIM:
+            return self.maptext[y][x]
+        else: return -1
     
     def getStartXY(self):
         return self.startXY
@@ -119,6 +128,8 @@ class map():
     # 8 : m potion
     # 9 : spellbook
     # 10 : chest 
+    # ...
+    # 64 : 
 
     def redraw(self, heroLoc, heroRect, gameBoard):
         oldX, oldY = self.playerXY
@@ -154,7 +165,7 @@ class map():
         for x in range(HALFDIM):
             for y in range(HALFDIM):
                 tile = self.getUnit(x+topX,y+topY)
-                if tile < 10:
+                if tile != HEROSTART and tile != VOID:
                     self.image = self.images[tile]
                     gameBoard.blit(self.image, (x*blocksize,y*blocksize), area=(0,0,blocksize,blocksize) )
                     dist = self.distanceFunc( (x,y), (rx,ry) )

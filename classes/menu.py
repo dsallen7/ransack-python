@@ -2,6 +2,8 @@ import pygame, random
 from load_image import *
 from const import *
 
+from IMG import images
+
 class menu():
     
     def __init__(self):
@@ -20,7 +22,7 @@ class menu():
     # Input:  screen, list of items to display in menu, list of images of items
     #         text to display for menu heading
     # Output: player's selection from menu
-    def invMenu(self, screen, items, images, text):
+    def invMenu(self, screen, items, text):
         for i in range(88):
             borderBox = pygame.Surface( ( ((i*2)+5 ), 120) )
             borderBox.fill( grey )
@@ -46,7 +48,7 @@ class menu():
             if items[item] > 0:
                 itemBox = pygame.Surface( (blocksize, blocksize) )
                 itemBox.fill( black )
-                itemBox.blit( images[item], (0, 0) )
+                itemBox.blit( images.mapImages[item+86], (0, 0) )
                 if pygame.font:
                     font = pygame.font.SysFont("arial", 8)
                     msgText = font.render( 'x'+str(items[item]), 1, white, black )

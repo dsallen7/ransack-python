@@ -50,9 +50,11 @@ class hero(pygame.sprite.Sprite):
         self.armorEquipped = [0,None,0]
         
         #hpot, mpot,?
-        self.items = [0,0,0]
+        self.items = [0]*DIM
         #healing, fireball
         self.spells = [1,0]
+        
+        self.gold = 0
 
     def getXY(self):
         return (self.X,self.Y)
@@ -131,14 +133,9 @@ class hero(pygame.sprite.Sprite):
     def getItem(self, type):
         if type == KEY:
             self.keys += 1
-        elif type == FRUIT:
-            self.items[FRUT_I] += 1
-        elif type == HPOTION:
-            self.items[HPOT_I] += 1
-        elif type == MPOTION:
-            self.items[MPOT_I] += 1
         elif type == SPELLBOOK:
             self.spells[FRBL] += 1
+        else: self.items[type-86] += 1
     
     def getItems(self):
         return self.items
@@ -154,6 +151,9 @@ class hero(pygame.sprite.Sprite):
     
     def getArmorEquipped(self):
         return self.armorEquipped
+    
+    def addGold(self, amt):
+        self.gold += amt
 
 
     #There is duplicate code here. at some point it would be wise to implement

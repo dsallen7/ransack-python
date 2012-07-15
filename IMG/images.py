@@ -3,21 +3,17 @@
 from spritesheet import *
 from const import *
 
-mapImages = range(12)
-itemImages = range(3)
+mapSpriteSheet = None
+villageSpriteSheet = None
+mapImages = range(128)
 spellImages = range(2)
 villageImages = range(14)
 
 def load():
-    mapSpriteSheet = spritesheet('mapsheet.bmp')
 
-    for i in range(12):
-        mapImages[i] = mapSpriteSheet.image_at( (i*blocksize, 0, blocksize, blocksize) )
-
-    itemSpriteSheet = spritesheet('itemsheet.bmp')
-
-    for i in range(3):
-        itemImages[i] = itemSpriteSheet.image_at( (i*blocksize, 0, blocksize, blocksize) )
+    mapSpriteSheet = spritesheet('mastersheet.bmp')
+    for i in range(128):
+        mapImages[i] = mapSpriteSheet.image_at( ( (i*blocksize)%240, (i/8)*blocksize, blocksize, blocksize) )
     
     spellSpriteSheet = spritesheet('spellsheet.bmp')
     

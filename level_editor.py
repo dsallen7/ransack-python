@@ -4,6 +4,8 @@ import pygame, os, pickle, random, eztext, const
 from const import *
 from IMG import images
 
+from MAP import mapgen
+
 from UTIL import queue
 
 # Eztext courtesy of http://www.pygame.org/project-EzText-920-.html
@@ -27,15 +29,14 @@ def load_image(name, colorkey=None):
 
 DIM = 20
 
-# Define the colors we will use in RGB format
-black = [  0,  0,  0]
-white = [255,255,255]
-blue =  [  0,  0,255]
-green = [  0,255,  0]
-red =   [255,  0,  0]
-yellow = [127, 127, 0]
-grey = [32, 32, 32]
-
+class subMap():
+    def __init__(self):
+        self.DIMX = 4
+        self.DIMY = 5
+        self.maptext = []
+        self.portal = (0,0)
+        for i in range(DIMX):
+            self.maptext += [0]*DIMY
 
 class Map():
     
@@ -46,6 +47,7 @@ class Map():
         self.heroStart = None
         self.pointOfEntry = None
         self.pointOfExit = None
+        self.portals = []
     
     def setEntry(self, x, y, e):
         if e == HEROSTART:
@@ -81,15 +83,17 @@ class Map():
         return self.grid
     
     def installBall(self, ball):
-        (grid, hs, poe, poex, ssidx) = ball
+        (grid, poe, poex, hs) = ball
         self.grid = grid
         self.heroStart = hs
         self.pointOfEntry = poe
         self.pointOfExit = poex
-        myHandler.selectSheet(ssidx)
     
     def getMapBall(self):
-        return (self.grid, self.heroStart, self.pointOfEntry, self.pointOfExit, myHandler.ss_idx)
+        return (self.grid, self.pointOfEntry, self.pointOfExit, self.heroStart)
+    
+    def resizeMap(self):
+        pass
 
 class Handler():
     
@@ -99,28 +103,17 @@ class Handler():
         self.sideImg, sideRect = load_image('sidebar.bmp')
         self.drawMode = False
         self.cursorColor = white
-        self.ss_idx = 0
-        self.sslist = [images.mapImages, images.villageImages]
-        
-        self.tileSheet = self.sslist[self.ss_idx]
-        
-        self.numImages = len(self.tileSheet)
+        self.offset = 0
+        self.numImages = len(images.mapImages)
         
         self.visited = []
         
         self.BFSQueue = queue.Queue()
     
-    def selectSheet(self, sheet):
-        self.ss_idx = sheet
-        self.currentTile = 0
-        self.tileSheet = self.sslist[self.ss_idx]
-        self.numImages = len(self.tileSheet)
-    
     def drawBox(self, pos, color):
         (x,y) = pos
         boxPoints = ( (x,y), (x,y+blocksize), (x+blocksize,y+blocksize), (x+blocksize,y) )
         pygame.draw.lines( gridField, color, True, boxPoints, 1 )
-    
 
     def switchTile(self):
         self.currentTile += 1
@@ -219,6 +212,11 @@ class Handler():
         except pygame.error, message:
             print 'Cannot load map:', name
             raise SystemExit, message
+    
+    def generateMap(self, DIM):
+        newMap = mapgen.Map(DIM)
+        newMap.generateMap(5)
+        myMap.installBall( newMap.getMapBall() )
 
     def event_handler(self, event):
         (x,y) = self.cursorPos
@@ -249,19 +247,35 @@ class Handler():
             self.loadMap()
         if event.key == pygame.K_f:
             self.floodFill(self.currentTile, (x,y) )
+        if event.key == pygame.K_g:
+            self.generateMap(DIM)
         if event.key == pygame.K_e:
-            self.ss_idx += 1
-            if self.ss_idx == len(self.sslist):
-                self.ss_idx = 0
-            self.selectSheet(self.ss_idx)
+            self.offset += 32
+            if self.offset == 128:
+                self.offset = 0
         if self.drawMode:
             myMap.setEntry(x/blocksize,y/blocksize,self.currentTile)
         self.cursorPos = (x,y)
-
+    
+    def mouseHandler(self, e):
+        (mx, my) = pygame.mouse.get_pos()
+        if 0 <= mx < 600 and 0 <= my < 600:
+            myMap.setEntry(mx/blocksize,my/blocksize,self.currentTile)
+            self.cursorPos = ( (mx/blocksize)*blocksize, (my/blocksize)*blocksize )
+        if 650 <= mx < 770 and 200 <= my < 440:
+            self.currentTile = self.offset + (mx-650)/blocksize + (my-200)/blocksize * 4
+        
+    
+    def mouseUpdate(self):
+        (mx, my) = pygame.mouse.get_pos()
+        if 650 <= mx < 770 and 200 <= my < 440:
+            boxPoints = ( (mx,my), (mx,my+blocksize), (mx+blocksize,my+blocksize), (mx+blocksize,my) )
+            pygame.draw.lines( screen, red, True, boxPoints, 1 )
+    
     def updateDisplay(self):
         for i in range(DIM):
             for j in range(DIM):
-                gridField.blit( self.tileSheet[myMap.getEntry(i,j)], (i*blocksize,j*blocksize) )
+                gridField.blit( images.mapImages[myMap.getEntry(i,j)], (i*blocksize,j*blocksize) )
         (x,y) = self.cursorPos
         if self.drawMode:
             self.cursorColor = yellow
@@ -270,7 +284,10 @@ class Handler():
         boxPoints = ( (x,y), (x,y+blocksize), (x+blocksize,y+blocksize), (x+blocksize,y) )
         pygame.draw.lines( gridField, self.cursorColor, True, boxPoints, 1 )
         self.sideImg, sideRect = load_image('sidebar.bmp')
-        self.sideImg.blit(self.tileSheet[self.currentTile],(50,50))
+        self.sideImg.blit(images.mapImages[self.currentTile],(50,50))
+        for i in range(8):
+            for j in range(4):
+                self.sideImg.blit(images.mapImages[self.offset + j + (4*i)], (50+j*blocksize, 200+(i*blocksize)))
         
         entryBox = pygame.Surface((30,30))
         entryBox.fill(black)
@@ -294,6 +311,7 @@ class Handler():
 size=[800,800]
 screen=pygame.display.set_mode(size)
 
+images.load()
 pygame.init()
 clock = pygame.time.Clock()
 
@@ -308,15 +326,17 @@ gridField = pygame.Surface( [DIM*blocksize, DIM*blocksize] )
 
 os.sys.setrecursionlimit(15000)
 
-images.load()
 
 def main():
     while True :
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 myHandler.event_handler(event)
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                myHandler.mouseHandler(event)
             if event.type == pygame.QUIT:
                 os.sys.exit()
+        myHandler.mouseUpdate()
         myHandler.updateDisplay()
         screen.blit(gridField, (0,0) )
         pygame.display.flip()

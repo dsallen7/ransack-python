@@ -8,6 +8,8 @@ from IMG import images
 from const import *
 from load_image import *
 
+from MAP import mapgen
+
 
 class PyManMain:
     """The Main PyMan Class - This class handles the main 
@@ -31,7 +33,7 @@ class game():
         self.myMenu = menu.menu()
         self.myBattle = battle.battle(screen)
         self.myMap = None
-        self.levelDepth = 2
+        self.levelDepth = 1
         # a dungeon is just an array of maps
         self.myDungeon = []
         for mapFileName in mapList:
@@ -61,18 +63,35 @@ class game():
     #toggles switch to continue running game
     def gameOver(self):
         self.gameOn = False
+    
+    def generateMap(self, DIM):
+        rndMap = mapgen.Map(DIM)
+        rndMap.generateMap(5)
+        newMap = map.map(None, rndMap.getMapBall())
+        return newMap
         
     def nextLevel(self):
+        print self.myDungeon
         self.levelDepth += 1
-        self.myMap = self.myDungeon[self.levelDepth]
+        if self.levelDepth == len(self.myDungeon):
+            self.myDungeon.append(self.generateMap(DIM))
+            self.myMap = self.myDungeon[self.levelDepth]
+        else:
+            self.myMap = self.myDungeon[self.levelDepth]
         (x,y) = self.myMap.getPOE()
         self.myHero.setXY( x*blocksize,y*blocksize )
+        if self.levelDepth <= 1:
+            self.myMap.setLOV(4)
+        else: self.myMap.setLOV(0)
     
     def prevLevel(self):
         self.levelDepth -= 1
         self.myMap = self.myDungeon[self.levelDepth]
         (x,y) = self.myMap.getPOEx()
         self.myHero.setXY( x*blocksize,y*blocksize )
+        if self.levelDepth <= 1:
+            self.myMap.setLOV(4)
+        else: self.myMap.setLOV(0)
     
     #takes screen shot and saves as bmp in serial fashion, beginning with 1
     def screenShot(self):
@@ -97,7 +116,7 @@ class game():
             elif event.key == pygame.K_s:
                 self.castSpell( self.myMenu.invMenu(screen, self.myHero.getSpells(), images.spellImages, "Spells:" ) )
             elif event.key == pygame.K_i:
-                self.useItem( self.myMenu.invMenu(screen, self.myHero.getItems(), images.itemImages, "Items:" ) )
+                self.useItem( self.myMenu.invMenu(screen, self.myHero.getItems(), "Items:" ) )
             elif event.key == pygame.K_t:
                 self.screenShot()
             elif event.key == pygame.K_m:
@@ -122,12 +141,13 @@ class game():
     
     # this 
     def useItem(self,item):
+        print item
         if item == None:
             return
-        elif item == HPOT_I:
+        elif item+86 == SHP:
             self.myHero.takeDmg(-5)
             self.myHud.msgSystem(self.gameBoard, "You feel better!")
-        elif item == MPOT_I:
+        elif item+86 == SMP:
             self.myHero.takeMP(-5)
             self.myHud.msgSystem(self.gameBoard, "You feel magical!")
         self.myHero.setItem(item, -1)
@@ -225,6 +245,8 @@ class game():
         (moveX,moveY) = self.myHero.changeDirection(direction)
         
         i = self.myMap.getUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize)
+        if i == -1 or i in range(24,86):
+            return
         #door
         if i == DOOR:
             if self.myHero.getPlayerStats()[8] == 0:
@@ -235,7 +257,7 @@ class game():
                 self.myHero.takeKey()
                 self.myMap.updateUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize,0)
         #item
-        if i == KEY or i == FRUIT or i == HPOTION or i == MPOTION or i == SPELLBOOK:
+        if i in range(86,101): 
             self.myHero.getItem(i)
             self.myMap.updateUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize, 0)
             self.myHud.msgSystem(self.gameBoard, itemMsgs[i])
@@ -251,13 +273,13 @@ class game():
             self.drawHero(x1,y1,False)
             return
         #check if open space
-        if ( (0 < X+moveX <= blocksize*DIM) and (0 < Y+moveY <= blocksize*DIM ) and i not in noGoList ):
+        if ( (0 < X+moveX <= blocksize*DIM) and (0 < Y+moveY <= blocksize*DIM ) and i in range(24) ):
             X += moveX
             Y += moveY
             self.myHero.setXY(X,Y)
             self.drawHero(x1,y1)
             #roll the die to see if there will be a battle
-            if self.rollDie(0,40):
+            if self.rollDie(0,40) and self.levelDepth > 1:
                 self.myHud.message("The battle is joined!")
                 #self.myBattle.commence(screen)
                 self.gameBoard.fill( black )
@@ -283,6 +305,7 @@ class game():
         (X,Y) = self.myMap.getStartXY()
         self.myHero.setXY( X*blocksize,Y*blocksize )
         self.updateSprites()
+        self.drawHero( X*blocksize,Y*blocksize, False )
         while self.levelOn and self.gameOn:
             clock.tick(15)
             for event in pygame.event.get():
