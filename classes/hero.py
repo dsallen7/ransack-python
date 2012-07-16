@@ -1,6 +1,9 @@
 import pygame, random, math
 from load_image import *
 from const import *
+import spells, items
+
+import Queue
 
 class hero(pygame.sprite.Sprite):
     
@@ -50,9 +53,11 @@ class hero(pygame.sprite.Sprite):
         self.armorEquipped = [0,None,0]
         
         #hpot, mpot,?
-        self.items = [0]*DIM
+        self.items = []
         #healing, fireball
-        self.spells = [1,0]
+        self.spells = []
+        self.learnSpell(0)
+        self.learnSpell(1)
         
         self.gold = 0
 
@@ -130,15 +135,16 @@ class hero(pygame.sprite.Sprite):
         self.items[item] += num
     
     # Input: tile number denoting item
-    def getItem(self, type):
-        if type == KEY:
+    def getItem(self, itype):
+        if itype == KEY:
             self.keys += 1
-        elif type == SPELLBOOK:
-            self.spells[FRBL] += 1
-        else: self.items[type-86] += 1
+        else: self.items.append( items.Item(itype+86) )
     
     def getItems(self):
         return self.items
+    
+    def getSpells(self):
+        return self.spells
     
     def getWeapons(self):
         return self.weapons
@@ -154,6 +160,23 @@ class hero(pygame.sprite.Sprite):
     
     def addGold(self, amt):
         self.gold += amt
+    
+    def learnSpell(self, num):
+        self.spells += [spells.Spell( num )]
+    
+    def castSpell(self, spell, battle=False):
+        if spell == None:
+            return
+        if spell.getType() == 1 and battle==False:
+            return -1
+        spell.execute(self)
+        return spell.getType()
+    
+    def useItem(self, item):
+        if item == None:
+            return
+        item.execute(self)
+        self.items.remove(item)
 
 
     #There is duplicate code here. at some point it would be wise to implement

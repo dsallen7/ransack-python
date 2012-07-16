@@ -18,17 +18,20 @@ class miniMap():
         self.miniMapBoard = pygame.Surface( [300,300] )
         self.miniMapBoard.fill( black )
         
-        self.colorDict = {0:0, 3:3, 4:3, 5:4, 6:4, 7:4, 8:3, 9:6, 10:5, 11:5, 12:7, 24:1, 25:1,
-                          42:5, 42:5, 43:5, 44:5, 45:5, 46:5, 47:5, 48:1, 49:1, 50:1, 51:8, 52:8, 53:8, 55:3, 64:5, 92:4, 95:4, 98:2, 99:6, 
-                          100:6, 116:3, 120:3, 121:3, 126:0, 127:5}
+        self.colorDict = {-1:0, 0:0, 3:3, 4:3, 5:4, 6:4, 7:4, 8:3, 9:6, 10:5, 11:5, 12:7, 24:1, 25:1,
+                          42:5, 42:5, 43:5, 44:5, 45:5, 46:5, 47:5, 48:1, 49:1, 50:1, 51:8, 52:8, 53:8, 55:3, 64:5, 72:5, 73:5, 92:4, 95:4, 98:2, 99:6, 
+                          100:6, 110:6, 116:3, 120:3, 121:3, 126:0, 127:5}
     
     def getEntry(self, x, y):
-        return self.maptext[y][x]
+        if x in range( len(self.maptext) ) and y in range( len(self.maptext) ):
+            return self.maptext[y][x]
+        else: return -1
     
-    def drawMiniMap(self,screen):
+    def drawMiniMap(self,screen, topCorner):
+        (tx, ty) = topCorner
         for i in range(DIM):
             for j in range(DIM):
-                self.miniMapBoard.blit( self.mapColorBlocks[ self.colorDict[self.getEntry(i,j)] ], (i*miniblocksize, j*miniblocksize) )
+                self.miniMapBoard.blit( self.mapColorBlocks[ self.colorDict[self.getEntry(i+tx,j+ty)] ], ( i*miniblocksize, j*miniblocksize) )
         screen.blit(self.miniMapBoard, (75,75) )
         pygame.display.flip()
         while (pygame.event.wait().type != pygame.KEYDOWN): pass
@@ -54,6 +57,9 @@ class map():
         self.myMiniMap = miniMap(self.maptext)
         
         self.images = images.mapImages
+        
+        self.DIM = len(self.maptext)
+        print self.DIM
     
     def setLOV(self, num):
         self.lineOfVision = num
@@ -68,12 +74,13 @@ class map():
         return self.images
     
     def installBall(self, ball):
-        (grid, poe, poex, hs) = ball
+        (grid, poe, poex, hs, chests) = ball
         self.maptext = grid
         self.heroStart = hs
         self.startXY = poe
         self.pointOfEntry = poe
         self.pointOfExit = poex
+        self.chests = chests
     
     def loadMap(self, filename):
         try:
@@ -88,12 +95,15 @@ class map():
     def getGrid(self):
         return self.maptext
     
+    def getDIM(self):
+        return self.DIM
+    
     def updateUnit(self, x, y, type):
         #Updates one map unit to type at map coordinates x,y
         self.maptext[y] = self.maptext[y][:x]+[type]+self.maptext[y][x+1:]
     
     def getUnit(self,x,y):
-        if 0 <= x < DIM and 0 <= y < DIM:
+        if 0 <= x < self.DIM and 0 <= y < self.DIM:
             return self.maptext[y][x]
         else: return -1
     
@@ -101,10 +111,9 @@ class map():
         return self.startXY
     
     def callDrawMiniMap(self, screen):
-        self.myMiniMap.drawMiniMap(screen)
+        self.myMiniMap.drawMiniMap(screen, self.topMapCorner)
     
     def getPOE(self):
-        print self.pointOfEntry
         return self.pointOfEntry
     
     def getPOEx(self):
@@ -132,6 +141,7 @@ class map():
     # 64 : 
 
     def redraw(self, heroLoc, heroRect, gameBoard):
+        DIMEN = self.getDIM()
         oldX, oldY = self.playerXY
         #self.updateUnit(oldX,oldY,0)
         # Compute top map corner
@@ -146,19 +156,19 @@ class map():
         
         if px < 5:
             topX = 0
-        elif 5 <= px <= 15:
+        elif 5 <= px <= DIMEN - 5:
             topX = px - 5
         else:
-            topX = 10
+            topX = DIMEN - 10
         
         if py < 5:
             topY = 0
-        elif 5 <= py <= 15:
+        elif 5 <= py <= DIMEN - 5:
             topY = py - 5
         else:
-            topY = 10
+            topY = DIMEN - 10
         #Redraw map on screen from current map matrix
-        #topX, topY = self.topMapCorner
+        self.topMapCorner = (topX, topY)
         (rx, ry, r2x, r2y) = heroRect
         rx = rx/blocksize
         ry = ry/blocksize

@@ -27,6 +27,8 @@ class Map():
         for i in range(DIM):
             self.grid += [[126]*DIM]
         self.DIM = DIM
+        
+        self.chests = {}
     
     def setMapEntry(self, x, y, e):
         if 0 <= x < self.DIM and 0 <= y < self.DIM:
@@ -140,27 +142,37 @@ class Map():
         (xdim, ydim) = choice1.getDimensions()
         self.setMapEntry( xpos + xdim/2, ypos + ydim/2, 120)
         self.POE = ( xpos + xdim/2, ypos + ydim/2 )
+        rooms.remove(choice1)
         
         choice2 = choice(rooms)
-        while choice2 == choice1:
-            choice2 = choice(rooms)
         (xpos, ypos) = choice2.getPos()
         (xdim, ydim) = choice2.getDimensions()
         self.setMapEntry( xpos + xdim/2, ypos + ydim/2, 121)
         self.POEx = ( xpos + xdim/2, ypos + ydim/2 )
+        rooms.remove(choice2)
         
         choice3 = choice(rooms)
-        while choice3 == choice2 or choice3 == choice1:
-            choice3 = choice(rooms)
         (xpos, ypos) = choice3.getPos()
         (xdim, ydim) = choice3.getDimensions()
         self.setMapEntry( xpos + xdim/2, ypos + ydim/2, 127)
         self.hs = ( xpos + xdim/2, ypos + ydim/2 )
+        rooms.remove(choice3)
+        
+        #add chests
+        chestlist = []
+        for i in range(maxRooms/5):
+            choice4 = choice(rooms)
+            (xpos, ypos) = choice4.getPos()
+            (xdim, ydim) = choice4.getDimensions()
+            self.setMapEntry( xpos + xdim/2, ypos + ydim/2, 110)
+            chestlist += [( ( xpos + xdim/2, ypos + ydim/2), [(6,1),(9,1)] )]
+            rooms.remove(choice4)
+        self.chests = dict(chestlist)
         
         #self.draw()
     
     def getMapBall(self):
-        return (self.grid, self.POE, self.POEx, self.hs )
+        return (self.grid, self.POE, self.POEx, self.hs, self.chests )
     
     def saveMap(self):
         #filename = self.getFilename()

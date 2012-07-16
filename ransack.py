@@ -10,7 +10,6 @@ from load_image import *
 
 from MAP import mapgen
 
-
 class PyManMain:
     """The Main PyMan Class - This class handles the main 
     initialization and creating of the Game."""
@@ -27,11 +26,8 @@ class PyManMain:
 
 class game():
     def __init__(self):
-        self.badguys = []
         self.myHero = hero.hero()
-        self.myHud = hud.hud(screen)
         self.myMenu = menu.menu()
-        self.myBattle = battle.battle(screen)
         self.myMap = None
         self.levelDepth = 1
         # a dungeon is just an array of maps
@@ -41,7 +37,7 @@ class game():
         
         self.myMap = self.myDungeon[self.levelDepth]
         
-        self.allsprites = pygame.sprite.RenderPlain((self.myHero, self.badguys))
+        self.allsprites = pygame.sprite.RenderPlain((self.myHero))
         
         #this is true while player is in a particular game
         self.gameOn = True
@@ -52,6 +48,8 @@ class game():
         self.gameBoard = pygame.Surface( [450,450] )
         self.gameFrame, self.gameFrameRect = load_image('gamescreen600.bmp', -1)
         
+        self.DIM = DIM
+        
         # 0 : camera
         # 1 : sword
         # 2 : miss
@@ -59,25 +57,28 @@ class game():
         self.sounds[0] = pygame.mixer.Sound(os.path.join('SND', 'camera.wav' ))
         self.sounds[1] = pygame.mixer.Sound(os.path.join('SND', 'sword1.wav' ))
         self.sounds[2] = pygame.mixer.Sound(os.path.join('SND', 'miss.wav' ))
+        
+        self.myHud = hud.hud(screen, self)
+        self.myBattle = battle.battle(screen,self.myHud)
     
     #toggles switch to continue running game
     def gameOver(self):
         self.gameOn = False
     
-    def generateMap(self, DIM):
-        rndMap = mapgen.Map(DIM)
-        rndMap.generateMap(5)
+    def generateMap(self, dimension):
+        rndMap = mapgen.Map(dimension)
+        rndMap.generateMap(20)
         newMap = map.map(None, rndMap.getMapBall())
         return newMap
         
     def nextLevel(self):
-        print self.myDungeon
         self.levelDepth += 1
         if self.levelDepth == len(self.myDungeon):
-            self.myDungeon.append(self.generateMap(DIM))
+            self.myDungeon.append(self.generateMap(40))
             self.myMap = self.myDungeon[self.levelDepth]
         else:
             self.myMap = self.myDungeon[self.levelDepth]
+        self.DIM = self.myMap.getDIM()
         (x,y) = self.myMap.getPOE()
         self.myHero.setXY( x*blocksize,y*blocksize )
         if self.levelDepth <= 1:
@@ -87,6 +88,7 @@ class game():
     def prevLevel(self):
         self.levelDepth -= 1
         self.myMap = self.myDungeon[self.levelDepth]
+        self.DIM = self.myMap.getDIM()
         (x,y) = self.myMap.getPOEx()
         self.myHero.setXY( x*blocksize,y*blocksize )
         if self.levelDepth <= 1:
@@ -109,14 +111,11 @@ class game():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 pass
-                '''
-                (x,y,a,b) = self.rect
-                self.newGame.mySword.attack(x,y,self.dir)
-                '''
             elif event.key == pygame.K_s:
-                self.castSpell( self.myMenu.invMenu(screen, self.myHero.getSpells(), images.spellImages, "Spells:" ) )
+                if self.myHero.castSpell( self.myMenu.invMenu(screen, self.myHero.getSpells(), "Spells:" ) ) == -1:
+                    self.textMessage('That spell may only be cast in battle.')
             elif event.key == pygame.K_i:
-                self.useItem( self.myMenu.invMenu(screen, self.myHero.getItems(), "Items:" ) )
+                self.myHero.useItem( self.myMenu.invMenu(screen, self.myHero.getItems(), "Items:" ) )
             elif event.key == pygame.K_t:
                 self.screenShot()
             elif event.key == pygame.K_m:
@@ -130,88 +129,21 @@ class game():
             return True
         else:
             return False
-    
-    def castSpell(self, spell):
-        if spell == HEAL:
-            if self.myHero.takeMP(5):
-                self.myHero.takeDmg(-5)
-                self.myHud.msgSystem(self.gameBoard, "You feel better!")
-            else:
-                self.myHud.msgSystem(self.gameBoard, "Not enough MP!")
-    
-    # this 
-    def useItem(self,item):
-        print item
-        if item == None:
-            return
-        elif item+86 == SHP:
-            self.myHero.takeDmg(-5)
-            self.myHud.msgSystem(self.gameBoard, "You feel better!")
-        elif item+86 == SMP:
-            self.myHero.takeMP(-5)
-            self.myHud.msgSystem(self.gameBoard, "You feel magical!")
-        self.myHero.setItem(item, -1)
-    
-    # this controls all the logic of what goes on in an actual battle
-    def fightBattle(self):
-        engagedEnemy = enemy.enemy()
-        (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX) = self.myHero.getPlayerStats()
-        while engagedEnemy.getHP() > 0:
-            clock.tick(15)
-            action = self.myBattle.getAction()
-            if action == 'Fight':
-                #hero attacks
-                if self.rollDie(0,2):
-                    dmg = random.randrange(sth/2,sth)
-                    self.myHud.msgSystem(self.gameBoard, "You hit the monster for "+str(dmg)+" points!")
-                    self.sounds[1].play()
-                    engagedEnemy.takeDmg(dmg)
-                else:
-                    self.myHud.msgSystem(self.gameBoard, "You missed the monster!")
-                    self.sounds[2].play()
-            elif action == 'Magic':
-                self.castSpell( self.myMenu.invMenu(screen, self.myHero.getSpells(), images.spellImages, "Spells:" ) )
-            elif action == 'Item':
-                self.useItem( self.myMenu.invMenu(screen, self.myHero.getItems(), images.itemImages, "Items:" ) )
-            elif action == 'Flee':
-                if self.rollDie(1,3):
-                    self.myHud.msgSystem(self.gameBoard, "You escaped safely.")
-                    return
-                else:
-                    self.myHud.msgSystem(self.gameBoard, "You can't escape!")                    
-            #enemy attacks
-            if engagedEnemy.getHP() > 0:
-                if self.rollDie(0,2):
-                    dmg = random.randrange(1,5)
-                    self.myHud.msgSystem(self.gameBoard, "The monster hits you for "+str(dmg)+" points!")
-                    self.sounds[1].play()
-                    if self.myHero.takeDmg(dmg) < 1:
-                        self.myHud.msgSystem(self.gameBoard, "You have died!")
-                        self.gameOver()
-                        return
-                else:
-                    self.myHud.msgSystem(self.gameBoard, "The monster missed you!")
-                    self.sounds[2].play()
-            self.myHud.displayStats(self.gameBoard, self.myHero.getPlayerStats(),self.myHero.getArmorEquipped(), self.myHero.getWeaponEquipped() )
-            self.redrawScreen()
-            pygame.display.flip()
-        self.myHud.msgSystem(self.gameBoard, "The monster is dead!")
-        if self.myHero.increaseExp(5):
-            self.myHud.msgSystem(self.gameBoard, "Congratulations! You have gained a level!")
-    
+
     #takes x,y of old myHero.rect location and finds new
     def drawHero(self,x1,y1, animated=True):
+        DIMEN = self.myMap.getDIM()
         (X,Y) = self.myHero.getXY()
         rectX = X
         rectY = Y
-        if 5*blocksize <= X < 15*blocksize:
+        if 5*blocksize <= X < (DIMEN-5)*blocksize:
             rectX = 5 * blocksize
-        if X >= 15*blocksize:
-            rectX = X - HALFDIM*blocksize
-        if 5*blocksize <= Y < 15*blocksize:
+        if X >= (DIMEN-5)*blocksize:
+            rectX = X - (DIMEN/2)*blocksize
+        if 5*blocksize <= Y < (DIMEN-5)*blocksize:
             rectY = 5 * blocksize
-        if Y >= 15*blocksize:
-            rectY = Y - HALFDIM*blocksize
+        if Y >= (DIMEN-5)*blocksize:
+            rectY = Y - (DIMEN/2)*blocksize
         
         #make the move animated
         if animated:
@@ -233,7 +165,14 @@ class game():
                 self.redrawScreen()
         
         self.myHero.setRect( rectX, rectY, blocksize, blocksize)
-            
+    
+    # calls message
+    def boxMessage(self, msg):
+        self.myHud.boxMessage(msg)
+    
+    # calls msgSystem
+    def textMessage(self, msg):
+        self.myHud.txtMessage(msg)
     
     def move(self, direction):
         if direction not in ['up','down','left','right']: return
@@ -250,20 +189,19 @@ class game():
         #door
         if i == DOOR:
             if self.myHero.getPlayerStats()[8] == 0:
-                self.myHud.message( "The door is locked!" )
+                self.boxMessage( "The door is locked!" )
                 return
             else:
-                self.myHud.message( "The door creaks open..." )
+                self.boxMessage( "The door creaks open..." )
                 self.myHero.takeKey()
                 self.myMap.updateUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize,0)
         #item
-        if i in range(86,101): 
+        if i in range(86,109): 
             self.myHero.getItem(i)
             self.myMap.updateUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize, 0)
             self.myHud.msgSystem(self.gameBoard, itemMsgs[i])
         # Stairs down
         if i == STAIRDN:
-            self.myHud.message( "Onto the next level!" )
             self.nextLevel()
             self.drawHero(x1,y1,False)
             return
@@ -272,29 +210,31 @@ class game():
             self.prevLevel()
             self.drawHero(x1,y1,False)
             return
+        # Chest
+        if i == CHEST:
+            chestlist = self.myMap.chests[(X + moveX)/blocksize, (Y + moveY)/blocksize]
+            for item in self.myMenu.displayChest( screen, chestlist ):
+                self.myHero.getItem(item)
+            self.myMap.updateUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize, OCHEST )
         #check if open space
-        if ( (0 < X+moveX <= blocksize*DIM) and (0 < Y+moveY <= blocksize*DIM ) and i in range(24) ):
+        if ( (0 < X+moveX <= blocksize*self.DIM) and (0 < Y+moveY <= blocksize*self.DIM ) and i in range(24) ):
             X += moveX
             Y += moveY
             self.myHero.setXY(X,Y)
             self.drawHero(x1,y1)
             #roll the die to see if there will be a battle
             if self.rollDie(0,40) and self.levelDepth > 1:
-                self.myHud.message("The battle is joined!")
-                #self.myBattle.commence(screen)
+                self.boxMessage("The battle is joined!")
                 self.gameBoard.fill( black )
-                self.fightBattle()
+                if not self.myBattle.fightBattle(self.myHero, enemy.enemy()):
+                    self.gameOver()
        
     def updateSprites(self):
-        #self.allsprites.clear(self.spriteLayer, self.gameBoard)
         self.allsprites.update()
         self.allsprites.draw(self.gameBoard)
     
     def redrawScreen(self):
-        #screen.blit( self.gameFrame, (0,0) )
-        #self.myHero.showLocation(self.gameBoard)
         screen.blit( self.gameBoard, (75,75) )
-        #screen.blit( self.spriteLayer, (75,75) )
         pygame.display.flip()
     
     def switchMap(self):
@@ -303,6 +243,8 @@ class game():
     def mainLoop(self, mapList):
         screen.blit(self.gameFrame,(0,0))
         (X,Y) = self.myMap.getStartXY()
+        if self.levelDepth < 2:
+            self.myMap.setLOV(4)
         self.myHero.setXY( X*blocksize,Y*blocksize )
         self.updateSprites()
         self.drawHero( X*blocksize,Y*blocksize, False )
@@ -314,7 +256,8 @@ class game():
                     os.sys.exit()
             self.gameBoard.fill(black)
             self.myMap.redraw(self.myHero.getXY(), self.myHero.getRect(), self.gameBoard)
-            self.myHud.displayStats(self.gameBoard, self.myHero.getPlayerStats(),self.myHero.getArmorEquipped(), self.myHero.getWeaponEquipped())
+            #self.myHero.showLocation(self.gameBoard)
+            self.myHud.update()
             self.updateSprites()
             self.redrawScreen()
 

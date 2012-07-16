@@ -3,8 +3,11 @@ from load_image import *
 from const import *
 import random
 
-class hud():
-    def __init__(self, screen):
+#import threading
+import Queue
+
+class hud( ):
+    def __init__(self, screen, game):
         self.textBox1 = pygame.Surface((100, 250))
         self.textBox1.fill( yellow )
         self.textBox2 = pygame.Surface((300, 100))
@@ -27,13 +30,25 @@ class hud():
         self.armorImg[2], r = load_image("shield.bmp",None)
         
         self.scrollText = ['']*3
+        
+        self.game = game
+        self.gameBoard = game.gameBoard
+        
+        self.On = True
+        
+        #self.Queue = Q
+        #self.queueLock = QL
+        
+        #threading.Thread.__init__ ( self )
     
     def writeText(self, surface, loc, text, fgc, bgc, size=18, font="arial"):
         font = pygame.font.SysFont(font, size)
         surface.blit( font.render(text, 1, fgc, bgc), loc )
-
-    def displayStats(self, gameBoard, stats, armor, weapon):
+        
+    def update( self ):
+        stats = self.game.myHero.getPlayerStats()
         (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX) = stats
+        (armor, weapon) = ( self.game.myHero.getArmorEquipped(), self.game.myHero.getWeaponEquipped() )
         self.textBox1 = pygame.Surface((100, 250))
         self.textBox1.fill( yellow )
         self.frameBox1 = self.frameBox1.copy()
@@ -60,11 +75,25 @@ class hud():
                 armorCopy = self.armorImg[ A ]
                 self.writeText(armorCopy, (20,20), str(armor[A]), white, black,8)
                 self.frameBox1.blit(armorCopy, armorLocList[A])
-        
-        gameBoard.blit(self.frameBox1, (blocksize*10, 0) )
-        gameBoard.blit(self.frameBox2, (0, blocksize*10) )
+        '''
+        # check for messages
+        self.queueLock.acquire()
+        if not self.Queue.empty():
+            data = self.Queue.get()
+            (fn, msg) = data
+            if fn == 0:
+                self.boxMessage(msg)
+            else: self.txtMessage(msg)
+            self.queueLock.release()
+        else:
+            self.queueLock.release()
+        '''
+        self.gameBoard.blit(self.frameBox1, (blocksize*10, 0) )
+        self.gameBoard.blit(self.frameBox2, (0, blocksize*10) )
+        self.screen.blit(self.gameBoard, (75,75) )
+
     
-    def msgSystem(self,gameBoard, msg):
+    def txtMessage(self, msg):
         self.textBox2 = pygame.Surface((500, 100))
         self.textBox2.fill( yellow )
         self.scrollText[0] = self.scrollText[1]
@@ -76,35 +105,11 @@ class hud():
                 Msg = font.render( self.scrollText[i], 1, white, yellow)
                 self.textBox2.blit(Msg, (0,20*i) )
         self.frameBox2.blit(self.textBox2, (25,25) )
-        gameBoard.blit(self.frameBox2, (0, blocksize*10) )
+        self.gameBoard.blit(self.frameBox2, (0, blocksize*10) )
+        self.screen.blit(self.gameBoard, (75,75) )
     
-    def takeKey(self):
-        self.playerkeys -= 1
-        self.message("The door unlocks")
-
-    def getItem(self,type,stats):
-        (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX) = stats
-        if type == 5:
-            if cHP < mHP:
-                cHP += 10
-            else:
-                cHP = mHP
-            scr += 10
-        if type == 2:
-            kys += 1
-            self.message("You got a key")
-        if type == 6:
-            self.invItems += ['hp']
-            self.message("You found a healing potion")
-        if type == 7:
-            self.invItems += ['mp']
-            self.message("You found a magic potion")
-        return (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX)
-    
-    def getItemsList(self):
-        return self.invItems
-    
-    def message(self, text):
+   
+    def boxMessage(self, text):
         for i in range(88):
             borderBox = pygame.Surface( ( ((i*2)+5 ), 60) )
             borderBox.fill( grey )

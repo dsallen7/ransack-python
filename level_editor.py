@@ -27,8 +27,6 @@ def load_image(name, colorkey=None):
         image.set_colorkey(colorkey, pygame.RLEACCEL)
     return image, image.get_rect()
 
-DIM = 20
-
 class subMap():
     def __init__(self):
         self.DIMX = 4
@@ -40,14 +38,16 @@ class subMap():
 
 class Map():
     
-    def __init__(self):
+    def __init__(self, DIM=20):
         self.grid = []
-        for i in range(DIM):
-            self.grid += [DIM*[0]]
+        self.DIM = DIM
+        for i in range(self.DIM):
+            self.grid += [self.DIM*[0]]
         self.heroStart = None
         self.pointOfEntry = None
         self.pointOfExit = None
         self.portals = []
+        self.chests = {}
     
     def setEntry(self, x, y, e):
         if e == HEROSTART:
@@ -74,7 +74,7 @@ class Map():
         self.grid[y] = self.grid[y][:x] + [e] + self.grid[y][x+1:]
     
     def getEntry(self, x, y):
-        if x in range(DIM) and y in range(DIM):
+        if x in range(self.DIM) and y in range(self.DIM):
             return self.grid[y][x]
         else:
             return -1
@@ -83,17 +83,33 @@ class Map():
         return self.grid
     
     def installBall(self, ball):
-        (grid, poe, poex, hs) = ball
+        (grid, poe, poex, hs, chests) = ball
         self.grid = grid
         self.heroStart = hs
         self.pointOfEntry = poe
         self.pointOfExit = poex
+        self.chests = chests
     
     def getMapBall(self):
-        return (self.grid, self.pointOfEntry, self.pointOfExit, self.heroStart)
+        return (self.grid, self.pointOfEntry, self.pointOfExit, self.heroStart, self.chests)
     
-    def resizeMap(self):
-        pass
+    
+    def changeDimensions(self, nDim):
+        # expanding
+        if nDim > self.DIM:
+            for i in range(nDim):
+                if i < self.DIM:
+                    self.grid[i] = self.grid[i] + [0]*(nDim-self.DIM)
+                else: self.grid.append( [0]*nDim )
+        #shrinking
+        elif self.DIM > nDim:
+            self.grid = self.grid[:nDim]
+            for i in range(nDim):
+                self.grid[i] = self.grid[i][:nDim]
+        #same
+        else: return
+        self.DIM = nDim
+        self.cursorPos = (0,0)
 
 class Handler():
     
@@ -105,7 +121,8 @@ class Handler():
         self.cursorColor = white
         self.offset = 0
         self.numImages = len(images.mapImages)
-        
+        self.topX = 0
+        self.topY = 0
         self.visited = []
         
         self.BFSQueue = queue.Queue()
@@ -159,12 +176,12 @@ class Handler():
             (x,y) = entry
             myMap.setEntry(x,y,tile)
     
-    def getFilename(self):
+    def getInput(self, msg):
         #get file name
-        filename = None
-        txtbx = eztext.Input(maxlength=45, color=(255,0,0), prompt='Enter filename: ')
+        input = None
+        txtbx = eztext.Input(maxlength=45, color=(255,0,0), prompt=msg)
         inputWindow = pygame.Surface( (300,100) )
-        while filename == None:
+        while input == None:
             # make sure the program is running at 30 fps
             clock.tick(30)
 
@@ -177,7 +194,7 @@ class Handler():
                         os.sys.exit()
                 if event.type == KEYDOWN:
                     if event.key == pygame.K_RETURN:
-                        filename = txtbx.getValue()
+                        input = txtbx.getValue()
 
             # clear the screen
             inputWindow.fill((25,25,25))
@@ -189,7 +206,10 @@ class Handler():
             screen.blit(gridField,(0,0))
             # refresh the display
             pygame.display.flip()
-        return filename
+        return input
+    
+    def getFilename(self):
+        return self.getInput('Enter filename: ')
     
     def saveMap(self):
         filename = self.getFilename()
@@ -213,26 +233,34 @@ class Handler():
             print 'Cannot load map:', name
             raise SystemExit, message
     
-    def generateMap(self, DIM):
-        newMap = mapgen.Map(DIM)
-        newMap.generateMap(5)
+    def generateMap(self, rooms):
+        newMap = mapgen.Map(myMap.DIM)
+        newMap.generateMap(rooms)
         myMap.installBall( newMap.getMapBall() )
 
     def event_handler(self, event):
         (x,y) = self.cursorPos
         self.drawBox( (x,y), black)
         if event.key == pygame.K_RIGHT:
-            if( x+blocksize < DIM*blocksize ):
+            if( x+blocksize < myMap.DIM*blocksize ):
                 x += blocksize
+            if x < myMap.DIM*blocksize and x == 20*blocksize + self.topX*blocksize:
+                self.topX += 1
         if event.key == pygame.K_LEFT:
             if( x-blocksize >= 0 ):
                 x -= blocksize
+            if x > 0 and x == self.topX*blocksize:
+                self.topX -= 1
         if event.key == pygame.K_UP:
             if( y-blocksize >= 0 ):
                 y -= blocksize
+            if y > 0 and y == self.topY*blocksize:
+                self.topY -= 1
         if event.key == pygame.K_DOWN:
-            if( y+blocksize < DIM*blocksize ):
+            if( y+blocksize < myMap.DIM*blocksize ):
                 y += blocksize
+            if y < myMap.DIM*blocksize and y == 20*blocksize + self.topY*blocksize:
+                self.topY += 1
         if event.key == pygame.K_t:
             self.switchTile()
         if event.key == pygame.K_SPACE:
@@ -248,7 +276,9 @@ class Handler():
         if event.key == pygame.K_f:
             self.floodFill(self.currentTile, (x,y) )
         if event.key == pygame.K_g:
-            self.generateMap(DIM)
+            self.generateMap( int ( self.getInput('Enter number of rooms: ') ))
+        if event.key == pygame.K_c:
+            myMap.changeDimensions( int ( self.getInput('Enter new dimension: ') ))
         if event.key == pygame.K_e:
             self.offset += 32
             if self.offset == 128:
@@ -256,6 +286,7 @@ class Handler():
         if self.drawMode:
             myMap.setEntry(x/blocksize,y/blocksize,self.currentTile)
         self.cursorPos = (x,y)
+        print self.topX, self.topY
     
     def mouseHandler(self, e):
         (mx, my) = pygame.mouse.get_pos()
@@ -273,10 +304,13 @@ class Handler():
             pygame.draw.lines( screen, red, True, boxPoints, 1 )
     
     def updateDisplay(self):
-        for i in range(DIM):
-            for j in range(DIM):
-                gridField.blit( images.mapImages[myMap.getEntry(i,j)], (i*blocksize,j*blocksize) )
+        gridField.fill(black)
+        for i in range(self.topX, self.topX+20):
+            for j in range(self.topY, self.topY+20):
+                gridField.blit( images.mapImages[myMap.getEntry(i,j)], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
         (x,y) = self.cursorPos
+        x = x - self.topX*blocksize
+        y = y - self.topY*blocksize
         if self.drawMode:
             self.cursorColor = yellow
         else:
@@ -289,11 +323,12 @@ class Handler():
             for j in range(4):
                 self.sideImg.blit(images.mapImages[self.offset + j + (4*i)], (50+j*blocksize, 200+(i*blocksize)))
         
+        (x,y) = self.cursorPos
         entryBox = pygame.Surface((30,30))
         entryBox.fill(black)
         if pygame.font:
             font = pygame.font.SysFont("arial",20)
-            entry = font.render(str(myMap.getEntry(x/blocksize,y/blocksize)),1, white, black )
+            entry = font.render(str(myMap.getEntry( (x+self.topX)/blocksize, (y+self.topY)/blocksize)),1, white, black )
             entryBox.blit(entry,(0,0))
             self.sideImg.blit(entryBox,(80,50))
         if self.drawMode:
@@ -305,7 +340,7 @@ class Handler():
                 msgBox.blit(msgText, (10,10) )
             self.sideImg.blit( msgBox, (50,100) )
             #pygame.display.flip()
-        screen.blit(self.sideImg, (DIM*blocksize,0) )
+        screen.blit(self.sideImg, (600,0) )
 
 # Set the height and width of the screen
 size=[800,800]
