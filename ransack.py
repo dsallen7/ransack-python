@@ -10,20 +10,6 @@ from load_image import *
 
 from MAP import mapgen
 
-class PyManMain:
-    """The Main PyMan Class - This class handles the main 
-    initialization and creating of the Game."""
-    
-    def __init__(self, width=500,height=500):
-        """Initialize"""
-        """Initialize PyGame"""
-        pygame.init()
-        """Set the window Size"""
-        self.width = width
-        self.height = height
-        """Create the Screen"""
-        self.screen = pygame.display.set_mode((self.width, self.height))
-
 class game():
     def __init__(self):
         self.myHero = hero.hero()
@@ -164,7 +150,9 @@ class game():
             elif y1 > rectY:
                 yAxis = range(y1, rectY, -1)
             for (i, j) in zip(xAxis, yAxis):
+                #clock.tick(100)
                 self.myHero.setRect( i, j, blocksize, blocksize)
+                self.myHero.takeStep()
                 self.updateSprites()
                 self.redrawScreen()
         
@@ -180,7 +168,6 @@ class game():
     
     def move(self, direction):
         if direction not in ['up','down','left','right']: return
-        noGoList = [1,3,10]
         x1,y1,x2,y2 = self.myHero.getRect()
         moveX = 0
         moveY = 0
@@ -230,7 +217,7 @@ class game():
             if self.rollDie(0,40) and self.levelDepth > 2:
                 self.boxMessage("The battle is joined!")
                 self.gameBoard.fill( black )
-                if not self.myBattle.fightBattle(self.myHero, enemy.enemy()):
+                if not self.myBattle.fightBattle(self.myHero, enemy.enemy(self.levelDepth)):
                     self.gameOver()
        
     def updateSprites(self):

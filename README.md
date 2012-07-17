@@ -18,7 +18,7 @@ The game begins in the 'village' which doesn't actually do anything yet but will
 A basic level editor is included. Use 't' to select tiles or select with mouse, move with arrow keys and space bar or point and click to place tiles, and 'd' to toggle draw mode. 's' saves a map and 'l' loads. 'f' flood fills the map with currently selected tile beginning at the location of the cursor. 'g' generates a random map with specified number of rooms.
 Note that setting rooms too high may cause the generator to hang if the map is not big enough.
 
-Currently using Nintendo Link sprites for player until I get around to designing my own.
+I have created all the artwork for the game, at this point it's quite rudimentary but it will be expanded as the project continues.
 
 Uses sprite sheet code from www.scriptefun.com/transcript-2-using-sprite-sheets-and-drawing-the-background
 

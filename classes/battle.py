@@ -21,8 +21,15 @@ class battle():
         
         self.myHud = hud
     
+    def writeText(self, surface, loc, text, fgc, bgc, size=18, font="arial"):
+        font = pygame.font.SysFont(font, size)
+        surface.blit( font.render(text, 1, fgc, bgc), loc )
+        
     def drawBattleScreen(self):
         self.screen.blit( self.battleField, (75,75) )
+        
+        enemyHPBox = pygame.Surface( (100,50) )
+        #self.writeText( enemyHPBox, (0,0), 
         pygame.display.flip()
     
     # displays battle menu and waits for player to select choice,

@@ -162,13 +162,13 @@ class Map():
         choice3 = choice(rooms)
         (xpos, ypos) = choice3.getPos()
         (xdim, ydim) = choice3.getDimensions()
-        self.setMapEntry( xpos + xdim/2, ypos + ydim/2, 127)
+        #self.setMapEntry( xpos + xdim/2, ypos + ydim/2, 127)
         self.hs = ( xpos + xdim/2, ypos + ydim/2 )
         rooms.remove(choice3)
         
         #add chests
         chestlist = []
-        for i in range(maxRooms/5):
+        for i in range(maxRooms/10):
             choice4 = choice(rooms)
             (xpos, ypos) = choice4.getPos()
             (xdim, ydim) = choice4.getDimensions()
@@ -176,8 +176,8 @@ class Map():
             if self.rollDie(0,2) and self.rollDie(0,2):
                 chestItems = [(6,1),(9,1)]
             elif self.rollDie(0,2):
-                chestItems.append((6,1))
-            else: chestItems.append((9,1))
+                chestItems.append((0,1))
+            else: chestItems.append((4,1))
             self.setMapEntry( xpos + xdim/2, ypos + ydim/2, 110)
             chestlist += [( ( xpos + xdim/2, ypos + ydim/2), chestItems )]
             rooms.remove(choice4)
@@ -186,7 +186,7 @@ class Map():
         #self.draw()
     
     def getMapBall(self):
-        return (self.grid, self.POE, self.POEx, self.hs, self.chests )
+        return (self.grid, self.POE, self.POEx, self.POE, self.chests )
     
     def saveMap(self):
         #filename = self.getFilename()

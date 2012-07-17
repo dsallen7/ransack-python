@@ -3,6 +3,8 @@ from load_image import *
 from const import *
 import random
 
+from IMG import images
+
 #import threading
 import Queue
 
@@ -75,26 +77,16 @@ class hud( ):
                 armorCopy = self.armorImg[ A ]
                 self.writeText(armorCopy, (20,20), str(armor[A]), white, black,8)
                 self.frameBox1.blit(armorCopy, armorLocList[A])
-        '''
-        # check for messages
-        self.queueLock.acquire()
-        if not self.Queue.empty():
-            data = self.Queue.get()
-            (fn, msg) = data
-            if fn == 0:
-                self.boxMessage(msg)
-            else: self.txtMessage(msg)
-            self.queueLock.release()
-        else:
-            self.queueLock.release()
-        '''
+        goldBox = pygame.Surface( (30,30) )
+        goldBox.blit( images.mapImages[109], (0,0) )
+        self.frameBox1.blit( goldBox, (25, 290) )
         self.gameBoard.blit(self.frameBox1, (blocksize*10, 0) )
         self.gameBoard.blit(self.frameBox2, (0, blocksize*10) )
         self.screen.blit(self.gameBoard, (75,75) )
 
     
     def txtMessage(self, msg):
-        self.textBox2 = pygame.Surface((500, 100))
+        self.textBox2 = pygame.Surface((400, 100))
         self.textBox2.fill( yellow )
         self.scrollText[0] = self.scrollText[1]
         self.scrollText[1] = self.scrollText[2]

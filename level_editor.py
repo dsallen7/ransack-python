@@ -55,8 +55,8 @@ class Map():
                 self.heroStart = (x,y)
             else:
                 (px,py) = self.heroStart
-                self.setEntry(px,py,0)
                 self.heroStart = (x,y)
+                return
         if e == STAIRUP:
             if self.pointOfEntry == None:
                 self.pointOfEntry = (x,y)
@@ -77,7 +77,7 @@ class Map():
         if x in range(self.DIM) and y in range(self.DIM):
             return self.grid[y][x]
         else:
-            return -1
+            return VOID
     
     def getGrid(self):
         return self.grid
@@ -162,7 +162,6 @@ class Handler():
             return (x,y)
         else:
             return [ (x, y) ] + [ self.floodFillBFS(self.BFSQueue.pop()) ] + [self.floodFillBFS(self.BFSQueue.pop()) ] + [self.floodFillBFS(self.BFSQueue.pop()) ] + [self.floodFillBFS(self.BFSQueue.pop()) ]
-            #return [ (x,y) ] + [self.floodFillBFS(entryList[0])] + [self.floodFillBFS(entryList[1])] + [self.floodFillBFS(entryList[2])] + [self.floodFillBFS(entryList[3])]
 
     def floodFill(self, tile, start):
         (x,y) = start
@@ -308,6 +307,9 @@ class Handler():
         for i in range(self.topX, self.topX+20):
             for j in range(self.topY, self.topY+20):
                 gridField.blit( images.mapImages[myMap.getEntry(i,j)], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
+                if (i,j) == myMap.heroStart:
+                    gridField.blit( images.mapImages[HEROSTART], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
+                    
         (x,y) = self.cursorPos
         x = x - self.topX*blocksize
         y = y - self.topY*blocksize

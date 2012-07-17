@@ -3,19 +3,18 @@ from load_image import *
 from const import *
 import spells, items
 
+from IMG import images
+
 import Queue
 
 class hero(pygame.sprite.Sprite):
     
     def __init__(self):
         pygame.sprite.Sprite.__init__(self) #call Sprite intializer
-        self.images = range(6)
-        self.images[0], self.rect = load_image('link_u.bmp', -1)
-        self.images[1], self.rect = load_image('link_d.bmp', -1)
-        self.images[2], self.rect = load_image('link_l.bmp', -1)
-        self.images[3], self.rect = load_image('link_r.bmp', -1)
-
-        self.image = self.images[1]
+        #images.load()
+        self.images = images.heroImages
+        self.imgIdx = 2
+        self.image = self.images[self.imgIdx]
         self.rect = (blocksize, blocksize, blocksize, blocksize)
         
         self.dir = 'd'
@@ -60,6 +59,18 @@ class hero(pygame.sprite.Sprite):
         self.learnSpell(1)
         
         self.gold = 0
+        
+        self.step = False
+    
+    def takeStep(self):
+        if self.step == True:
+            self.imgIdx -= 1
+            self.image = self.images[self.imgIdx]
+            self.step = False
+        else: 
+            self.imgIdx += 1
+            self.image = self.images[self.imgIdx]
+            self.step = True
 
     def getXY(self):
         return (self.X,self.Y)
@@ -76,10 +87,10 @@ class hero(pygame.sprite.Sprite):
     
     def changeDirection(self, dir):
         self.dir = dir
-        if dir == 'up': self.image = self.images[0]; return (0,-blocksize)
-        elif dir == 'down': self.image = self.images[1]; return (0,blocksize)
-        elif dir == 'left': self.image = self.images[2]; return (-blocksize,0)
-        elif dir == 'right': self.image = self.images[3]; return (blocksize,0)
+        if dir == 'up': self.imgIdx = 0; self.image = self.images[self.imgIdx]; return (0,-blocksize)
+        elif dir == 'down': self.imgIdx = 2; self.image = self.images[self.imgIdx]; return (0,blocksize)
+        elif dir == 'left': self.imgIdx = 4; self.image = self.images[self.imgIdx]; return (-blocksize,0)
+        elif dir == 'right': self.imgIdx = 6; self.image = self.images[self.imgIdx]; return (blocksize,0)
     
     def getPlayerStats(self):
         return (self.currHP, self.maxHP, self.currMP, self.maxMP, self.strength, self.dex, self.intell, self.score, self.keys, self.currExp, self.nextExp)

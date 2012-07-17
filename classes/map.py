@@ -18,21 +18,26 @@ class miniMap():
         self.miniMapBoard = pygame.Surface( [300,300] )
         self.miniMapBoard.fill( black )
         
-        self.colorDict = {-1:0, 0:0, 3:3, 4:3, 5:4, 6:4, 7:4, 8:3, 9:6, 10:5, 11:5, 12:7, 13:7, 16:6, 24:1, 25:1, 29:10,
+        self.colorDict = {-1:0, 0:0, 3:3, 4:3, 5:4, 6:4, 7:4, 8:10, 9:6, 10:5, 11:5, 12:7, 13:7, 
+                          16:6, 20:10, 21:10, 22:10, 23:10, 24:1, 25:1, 28:3, 29:10, 32:3, 33:3, 34:3, 35:3, 36:3, 37:3,
                           42:5, 42:5, 43:5, 44:5, 45:5, 46:5, 47:5, 48:1, 49:1, 50:1, 51:8, 52:8, 53:8, 55:3, 64:5, 
                           65:9, 66:9, 67:9, 68:9, 69:9, 70:9, 72:5, 73:5, 92:4, 95:4, 98:2, 99:6, 
-                          100:6, 110:6, 111:6, 116:3, 120:3, 121:3, 126:0, 127:5}
+                          100:6, 110:6, 111:6, 112:3, 116:3, 117:3, 118:3, 120:3, 121:3, 126:0, 127:5}
     
     def getEntry(self, x, y):
         if x in range( len(self.maptext) ) and y in range( len(self.maptext) ):
             return self.maptext[y][x]
         else: return -1
     
-    def drawMiniMap(self,screen, topCorner):
+    def drawMiniMap(self,screen, topCorner, playerXY):
+        if len(self.maptext) <= DIM:
+            topCorner = (0,0)
         (tx, ty) = topCorner
         for i in range(DIM):
             for j in range(DIM):
-                self.miniMapBoard.blit( self.mapColorBlocks[ self.colorDict[self.getEntry(i+tx,j+ty)] ], ( i*miniblocksize, j*miniblocksize) )
+                if (i+tx,j+ty) == playerXY:
+                    self.miniMapBoard.blit( self.mapColorBlocks[ 5 ], ( i*miniblocksize, j*miniblocksize) )
+                else: self.miniMapBoard.blit( self.mapColorBlocks[ self.colorDict[self.getEntry(i+tx,j+ty)] ], ( i*miniblocksize, j*miniblocksize) )
         screen.blit(self.miniMapBoard, (75,75) )
         pygame.display.flip()
         while (pygame.event.wait().type != pygame.KEYDOWN): pass
@@ -60,7 +65,6 @@ class map():
         self.images = images.mapImages
         
         self.DIM = len(self.maptext)
-        print self.DIM
     
     def setLOV(self, num):
         self.lineOfVision = num
@@ -112,7 +116,7 @@ class map():
         return self.startXY
     
     def callDrawMiniMap(self, screen):
-        self.myMiniMap.drawMiniMap(screen, self.topMapCorner)
+        self.myMiniMap.drawMiniMap(screen, self.topMapCorner, self.playerXY)
     
     def getPOE(self):
         return self.pointOfEntry

@@ -73,8 +73,8 @@
     # 69: lake 5
     # 70: lake 6
     # 71: lake 7
-    # 72: 
-    # 73: 
+    # 72: house 2 upper left
+    # 73: house 2 upper right
     # 74: bridge 1
     # 75: bridge 2
     # 76: rampart 1
@@ -111,7 +111,7 @@
     # 106: 
     # 107: 
     # 108: 
-    # 109: 
+    # 109: gold
     # 110: chest
     # 111: open chest
     # 112: sword
@@ -119,8 +119,8 @@
     # 114: 
     # 115: 
     # 116: dungeon door
-    # 117: 
-    # 118: 
+    # 117: shield
+    # 118: breastplate
     # 119: 
     # 120: stairs up
     # 121: stairs down
