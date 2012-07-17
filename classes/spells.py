@@ -9,12 +9,17 @@ class Spell():
         self.type = type
         self.img = type + 102
         self.cost = 5
+        self.level = 0
+        self.name = 'spell'
     
     def getType(self):
         return self.type
     
     def getImg(self):
         return self.img
+    
+    def getLevel(self):
+        return self.level
     
     def execute(self, hero):
         [cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX] = hero.getPlayerStats()

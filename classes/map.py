@@ -7,20 +7,21 @@ class miniMap():
     def __init__(self, maptext):
         self.maptext = maptext
         
-        self.mapColors = [black,brickred,yellow,grey,red,white,brown,green,dkgreen]
+        self.mapColors = [black,brickred,yellow,grey,red,white,brown,green,dkgreen,blue,ltgrey]
         
-        self.mapColorBlocks = range(9)
+        self.mapColorBlocks = range(11)
         
-        for i in range(9):
+        for i in range(11):
             self.mapColorBlocks[i] = pygame.Surface( (miniblocksize,miniblocksize) )
             self.mapColorBlocks[i].fill( self.mapColors[i] )
         
         self.miniMapBoard = pygame.Surface( [300,300] )
         self.miniMapBoard.fill( black )
         
-        self.colorDict = {-1:0, 0:0, 3:3, 4:3, 5:4, 6:4, 7:4, 8:3, 9:6, 10:5, 11:5, 12:7, 24:1, 25:1,
-                          42:5, 42:5, 43:5, 44:5, 45:5, 46:5, 47:5, 48:1, 49:1, 50:1, 51:8, 52:8, 53:8, 55:3, 64:5, 72:5, 73:5, 92:4, 95:4, 98:2, 99:6, 
-                          100:6, 110:6, 116:3, 120:3, 121:3, 126:0, 127:5}
+        self.colorDict = {-1:0, 0:0, 3:3, 4:3, 5:4, 6:4, 7:4, 8:3, 9:6, 10:5, 11:5, 12:7, 13:7, 16:6, 24:1, 25:1, 29:10,
+                          42:5, 42:5, 43:5, 44:5, 45:5, 46:5, 47:5, 48:1, 49:1, 50:1, 51:8, 52:8, 53:8, 55:3, 64:5, 
+                          65:9, 66:9, 67:9, 68:9, 69:9, 70:9, 72:5, 73:5, 92:4, 95:4, 98:2, 99:6, 
+                          100:6, 110:6, 111:6, 116:3, 120:3, 121:3, 126:0, 127:5}
     
     def getEntry(self, x, y):
         if x in range( len(self.maptext) ) and y in range( len(self.maptext) ):
@@ -105,7 +106,7 @@ class map():
     def getUnit(self,x,y):
         if 0 <= x < self.DIM and 0 <= y < self.DIM:
             return self.maptext[y][x]
-        else: return -1
+        else: return 126
     
     def getStartXY(self):
         return self.startXY
@@ -154,30 +155,38 @@ class map():
         
         self.topMapCorner = ( (px%10 + (px/10)*10), (py%10 + (py/10)*10) )
         
-        if px < 5:
+        if DIMEN <= HALFDIM:
             topX = 0
-        elif 5 <= px <= DIMEN - 5:
-            topX = px - 5
-        else:
-            topX = DIMEN - 10
-        
-        if py < 5:
             topY = 0
-        elif 5 <= py <= DIMEN - 5:
-            topY = py - 5
+            WINDOWOFFSET = (HALFDIM - DIMEN)/2
+            WINDOWSIZE = DIMEN
         else:
-            topY = DIMEN - 10
+            if px < 5:
+                topX = 0
+            elif 5 <= px <= DIMEN - 5:
+                topX = px - 5
+            else:
+                topX = DIMEN - 10
+            
+            if py < 5:
+                topY = 0
+            elif 5 <= py <= DIMEN - 5:
+                topY = py - 5
+            else:
+                topY = DIMEN - 10
+            WINDOWSIZE = HALFDIM
+            WINDOWOFFSET = 0
         #Redraw map on screen from current map matrix
         self.topMapCorner = (topX, topY)
         (rx, ry, r2x, r2y) = heroRect
         rx = rx/blocksize
         ry = ry/blocksize
-        for x in range(HALFDIM):
-            for y in range(HALFDIM):
+        for x in range(WINDOWSIZE):
+            for y in range(WINDOWSIZE):
                 tile = self.getUnit(x+topX,y+topY)
                 if tile != HEROSTART and tile != VOID:
                     self.image = self.images[tile]
-                    gameBoard.blit(self.image, (x*blocksize,y*blocksize), area=(0,0,blocksize,blocksize) )
+                    gameBoard.blit(self.image, ( (x+WINDOWOFFSET)*blocksize, (y+WINDOWOFFSET)*blocksize), area=(0,0,blocksize,blocksize) )
                     dist = self.distanceFunc( (x,y), (rx,ry) )
                     if dist <= self.lineOfVision + 1:
                         self.fog.set_alpha( 0 )

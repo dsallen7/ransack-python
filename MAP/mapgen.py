@@ -5,6 +5,7 @@ from random import choice, randrange
 #from IMG import images
 
 dirDict = { 'w':(-1,0), 'e':(1,0), 'n':(0,-1), 's':(0,1) }
+DefaultWallTile = 29
 
 class Room():
     def __init__(self, xdim, ydim, pos=(0,0)):
@@ -30,6 +31,13 @@ class Map():
         
         self.chests = {}
     
+    def rollDie(self, target, range):
+        d = randrange(range)
+        if target >= d:
+            return True
+        else:
+            return False
+    
     def setMapEntry(self, x, y, e):
         if 0 <= x < self.DIM and 0 <= y < self.DIM:
             self.grid[y] = self.grid[y][:x] + [e] + self.grid[y][x+1:]
@@ -46,11 +54,11 @@ class Map():
         (xpos, ypos) = room.getPos()
         (xdim, ydim) = room.getDimensions()
         for i in range(xdim+1):
-            self.setMapEntry(i+xpos, ypos, 25)
-            self.setMapEntry(i+xpos, ypos+ydim, 25)
+            self.setMapEntry(i+xpos, ypos, DefaultWallTile)
+            self.setMapEntry(i+xpos, ypos+ydim, DefaultWallTile)
         for i in range(ydim+1):
-            self.setMapEntry(xpos, i+ypos, 25)
-            self.setMapEntry(xpos+xdim, i+ypos, 25)
+            self.setMapEntry(xpos, i+ypos, DefaultWallTile)
+            self.setMapEntry(xpos+xdim, i+ypos, DefaultWallTile)
         for i in range(1,xdim):
             for j in range(1,ydim):
                 self.setMapEntry(xpos+i, ypos+j, 0)
@@ -164,8 +172,14 @@ class Map():
             choice4 = choice(rooms)
             (xpos, ypos) = choice4.getPos()
             (xdim, ydim) = choice4.getDimensions()
+            chestItems = []
+            if self.rollDie(0,2) and self.rollDie(0,2):
+                chestItems = [(6,1),(9,1)]
+            elif self.rollDie(0,2):
+                chestItems.append((6,1))
+            else: chestItems.append((9,1))
             self.setMapEntry( xpos + xdim/2, ypos + ydim/2, 110)
-            chestlist += [( ( xpos + xdim/2, ypos + ydim/2), [(6,1),(9,1)] )]
+            chestlist += [( ( xpos + xdim/2, ypos + ydim/2), chestItems )]
             rooms.remove(choice4)
         self.chests = dict(chestlist)
         

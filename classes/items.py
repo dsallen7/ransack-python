@@ -8,6 +8,8 @@ class Item():
     def __init__(self, type):
         self.type = type
         self.img = type
+        self.name = 'item'
+        self.qty = 0
     
     def getType(self):
         return self.type

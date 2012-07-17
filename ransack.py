@@ -29,7 +29,7 @@ class game():
         self.myHero = hero.hero()
         self.myMenu = menu.menu()
         self.myMap = None
-        self.levelDepth = 1
+        self.levelDepth = 2
         # a dungeon is just an array of maps
         self.myDungeon = []
         for mapFileName in mapList:
@@ -81,7 +81,7 @@ class game():
         self.DIM = self.myMap.getDIM()
         (x,y) = self.myMap.getPOE()
         self.myHero.setXY( x*blocksize,y*blocksize )
-        if self.levelDepth <= 1:
+        if self.levelDepth <= 2:
             self.myMap.setLOV(4)
         else: self.myMap.setLOV(0)
     
@@ -91,7 +91,7 @@ class game():
         self.DIM = self.myMap.getDIM()
         (x,y) = self.myMap.getPOEx()
         self.myHero.setXY( x*blocksize,y*blocksize )
-        if self.levelDepth <= 1:
+        if self.levelDepth <= 2:
             self.myMap.setLOV(4)
         else: self.myMap.setLOV(0)
     
@@ -136,14 +136,18 @@ class game():
         (X,Y) = self.myHero.getXY()
         rectX = X
         rectY = Y
-        if 5*blocksize <= X < (DIMEN-5)*blocksize:
-            rectX = 5 * blocksize
-        if X >= (DIMEN-5)*blocksize:
-            rectX = X - (DIMEN/2)*blocksize
-        if 5*blocksize <= Y < (DIMEN-5)*blocksize:
-            rectY = 5 * blocksize
-        if Y >= (DIMEN-5)*blocksize:
-            rectY = Y - (DIMEN/2)*blocksize
+        if DIMEN > HALFDIM:
+            if 5*blocksize <= X < (DIMEN-5)*blocksize:
+                rectX = 5 * blocksize
+            if X >= (DIMEN-5)*blocksize:
+                rectX = X - (DIMEN/2)*blocksize
+            if 5*blocksize <= Y < (DIMEN-5)*blocksize:
+                rectY = 5 * blocksize
+            if Y >= (DIMEN-5)*blocksize:
+                rectY = Y - (DIMEN/2)*blocksize
+        else:
+            rectX += (HALFDIM - DIMEN)/2*blocksize
+            rectY += (HALFDIM - DIMEN)/2*blocksize
         
         #make the move animated
         if animated:
@@ -223,7 +227,7 @@ class game():
             self.myHero.setXY(X,Y)
             self.drawHero(x1,y1)
             #roll the die to see if there will be a battle
-            if self.rollDie(0,40) and self.levelDepth > 1:
+            if self.rollDie(0,40) and self.levelDepth > 2:
                 self.boxMessage("The battle is joined!")
                 self.gameBoard.fill( black )
                 if not self.myBattle.fightBattle(self.myHero, enemy.enemy()):
@@ -243,7 +247,7 @@ class game():
     def mainLoop(self, mapList):
         screen.blit(self.gameFrame,(0,0))
         (X,Y) = self.myMap.getStartXY()
-        if self.levelDepth < 2:
+        if self.levelDepth < 3:
             self.myMap.setLOV(4)
         self.myHero.setXY( X*blocksize,Y*blocksize )
         self.updateSprites()

@@ -1,4 +1,4 @@
-import pygame, random, math
+import pygame, random, math, os
 from load_image import *
 from const import *
 import spells, items
@@ -53,7 +53,7 @@ class hero(pygame.sprite.Sprite):
         self.armorEquipped = [0,None,0]
         
         #hpot, mpot,?
-        self.items = []
+        self.items = range(20)
         #healing, fireball
         self.spells = []
         self.learnSpell(0)
@@ -138,10 +138,20 @@ class hero(pygame.sprite.Sprite):
     def getItem(self, itype):
         if itype == KEY:
             self.keys += 1
-        else: self.items.append( items.Item(itype+86) )
+        entry = self.items[itype]
+        if hasattr(entry, "__iter__"):
+            self.items[itype].append( items.Item(itype+86) )
+        else:
+            self.items[itype] = [items.Item(itype+86)]
     
     def getItems(self):
-        return self.items
+        availableItems = []
+        for i in self.items:
+            if hasattr(i, "__iter__"):
+                if len(i) > 0:
+                    i[0].qty = len(i)
+                    availableItems.append(i[0])
+        return availableItems
     
     def getSpells(self):
         return self.spells
@@ -176,7 +186,7 @@ class hero(pygame.sprite.Sprite):
         if item == None:
             return
         item.execute(self)
-        self.items.remove(item)
+        self.items[item.getType()-86].remove(item)
 
 
     #There is duplicate code here. at some point it would be wise to implement

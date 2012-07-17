@@ -59,15 +59,15 @@ class hud( ):
             self.writeText(self.textBox1, (0,75), "Int: "+str(itl), white, yellow,12)
             self.writeText(self.textBox1, (25,75), "Str: "+str(sth), white, yellow,12)
             self.writeText(self.textBox1, (50,75), "Dex: "+str(dex), white, yellow,12)
-            self.writeText(self.textBox1, (0,150), "Exp: "+str(cEX)+"/"+str(nEX), white, yellow)
-            self.writeText(self.textBox1, (0,175), "Keys: "+str(kys), white, yellow)
+            self.writeText(self.textBox1, (0,125), "Exp: "+str(cEX)+"/"+str(nEX), white, yellow)
+            self.writeText(self.textBox1, (0,150), "Keys: "+str(kys), white, yellow)
         self.frameBox1.blit(self.textBox1,(25,25))
         #show equipped armor and weapon
         weaponCopy = self.weaponImg[weapon[1]]
         self.writeText(weaponCopy, (20,20), str(weapon[0]), white, black, 8)
-        self.frameBox1.blit(weaponCopy, (25, 250))
+        self.frameBox1.blit(weaponCopy, (25, 210))
         
-        armorLocList = [(60,250), (25,290), (60,290)]
+        armorLocList = [(60,210), (25,250), (60,250)]
         for A in range( len(armor) ):
             if armor[A] == None:
                 pass

@@ -117,19 +117,26 @@ class menu():
         w = 10 #var to draw items across screen
         availableItems = []
         hPosList = [10]
-        for item in range( len(items) ):
-            itemBox = pygame.Surface( (blocksize, blocksize) )
-            itemBox.fill( black )
-            itemBox.blit( images.mapImages[items[item].getImg()], (0, 0) )
-            if pygame.font:
-                font = pygame.font.SysFont("arial", 8)
-                msgText = font.render( 'x', 1, white, black )
-                itemBox.blit(msgText, (20,20) )
-            msgBox.blit( itemBox, (w, 30) )
-            if w not in hPosList:
-                hPosList += [w]
-            availableItems += [items[item]]
-            w += blocksize
+        for i in range( len(items) ):
+            item = items[i]
+            
+            if item in availableItems:
+                pass
+            else:
+                itemBox = pygame.Surface( (blocksize, blocksize) )
+                itemBox.fill( black )
+                itemBox.blit( images.mapImages[item.getImg()], (0, 0) )
+                if pygame.font:
+                    font = pygame.font.SysFont("arial", 8)
+                    if item.name == 'item':
+                        msgText = font.render( 'x'+str(item.qty), 1, white, black )
+                    else: msgText = font.render( 'x'+str(item.getLevel()), 1, white, black )
+                    itemBox.blit(msgText, (20,20) )
+                msgBox.blit( itemBox, (w, 30) )
+                if w not in hPosList:
+                    hPosList += [w]
+                w += blocksize
+                availableItems.append(item)
         hPos = 10 #horizontal position of selection box
         #boxPoints = ( (hPos, blocksize), (hPos, 2*blocksize), (hPos+blocksize, 2*blocksize), (hPos+blocksize, blocksize) )
         boxPointsFn = lambda x: ( (x,blocksize), (x,2*blocksize), (x+blocksize, 2*blocksize), (x+blocksize, blocksize) )

@@ -81,11 +81,12 @@ itemMsgs = { 86: 'You found a piece of fruit.',
 # Define the colors we will use in RGB format
 black = [  0,  0,  0]
 white = [255,255,255]
-blue =  [  0,  0,255]
+blue =  [  0,  0,192]
 green = [  0,193,  0]
 dkgreen = [0, 128, 0] 
 red =   [255,  0,  0]
 brickred = [128, 0, 0]
 yellow = [127, 127, 0]
 grey = [32, 32, 32]
+ltgrey = [128,128,128]
 brown = [139, 69, 19]
