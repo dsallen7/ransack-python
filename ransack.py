@@ -3,12 +3,12 @@ import os
 import random
 import pickle
 
-from classes import hero, map, hud, battle, menu, enemy
+from classes import hero, hud, battle, menu, enemy
 from IMG import images
 from const import *
 from load_image import *
 
-from MAP import mapgen
+from MAP import map, mapgen
 
 class game():
     def __init__(self):
@@ -23,16 +23,14 @@ class game():
         
         self.myMap = self.myDungeon[self.levelDepth]
         
-        self.allsprites = pygame.sprite.RenderPlain((self.myHero))
+        self.gameBoard = pygame.Surface( [450,450] )
+        self.gameFrame, self.gameFrameRect = load_image('gamescreen600.bmp', -1)
+        
+        self.allsprites = pygame.sprite.LayeredDirty((self.myHero))
+        self.allsprites.clear(screen, self.gameBoard)
         
         #this is true while player is in a particular game
         self.gameOn = True
-        
-        #this is true while player is in a particular level
-        self.levelOn = True        
-        
-        self.gameBoard = pygame.Surface( [450,450] )
-        self.gameFrame, self.gameFrameRect = load_image('gamescreen600.bmp', -1)
         
         self.DIM = DIM
         
@@ -116,7 +114,7 @@ class game():
         else:
             return False
 
-    #takes x,y of old myHero.rect location and finds new
+    # takes x,y of old myHero.rect location and finds new
     def drawHero(self,x1,y1, animated=True):
         DIMEN = self.myMap.getDIM()
         (X,Y) = self.myHero.getXY()
@@ -150,11 +148,11 @@ class game():
             elif y1 > rectY:
                 yAxis = range(y1, rectY, -1)
             for (i, j) in zip(xAxis, yAxis):
-                #clock.tick(100)
+                clock.tick(100)
                 self.myHero.setRect( i, j, blocksize, blocksize)
                 self.myHero.takeStep()
-                self.updateSprites()
-                self.redrawScreen()
+                #self.updateSprites()
+                self.redrawGameBoard()
         
         self.myHero.setRect( rectX, rectY, blocksize, blocksize)
     
@@ -222,9 +220,13 @@ class game():
        
     def updateSprites(self):
         self.allsprites.update()
-        self.allsprites.draw(self.gameBoard)
+        rects = self.allsprites.draw(self.gameBoard)
+        pygame.display.update(rects)
+        pygame.display.flip()
     
-    def redrawScreen(self):
+    def redrawGameBoard(self):
+        self.myMap.redraw(self.myHero.getXY(), self.myHero.getRect(), self.gameBoard)
+        self.updateSprites()
         screen.blit( self.gameBoard, (75,75) )
         pygame.display.flip()
     
@@ -239,18 +241,15 @@ class game():
         self.myHero.setXY( X*blocksize,Y*blocksize )
         self.updateSprites()
         self.drawHero( X*blocksize,Y*blocksize, False )
-        while self.levelOn and self.gameOn:
+        while self.gameOn:
             clock.tick(15)
             for event in pygame.event.get():
                 self.event_handler(event)
                 if event.type == pygame.QUIT:
                     os.sys.exit()
             self.gameBoard.fill(black)
-            self.myMap.redraw(self.myHero.getXY(), self.myHero.getRect(), self.gameBoard)
-            #self.myHero.showLocation(self.gameBoard)
             self.myHud.update()
-            self.updateSprites()
-            self.redrawScreen()
+            self.redrawGameBoard()
 
 # Set the height and width of the screen
 screenSize=[600,600]

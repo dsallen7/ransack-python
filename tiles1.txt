@@ -1,4 +1,3 @@
-    # 0: void
     # --------NON-BLOCKING TILES---------
     # 0: dungeon floor 1
     # 1: dungeon floor 2

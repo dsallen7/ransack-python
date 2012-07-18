@@ -65,6 +65,8 @@ class map():
         self.images = images.mapImages
         
         self.DIM = len(self.maptext)
+        
+        self.xGameBoard = pygame.Surface( (self.DIM*blocksize, self.DIM*blocksize) )
     
     def setLOV(self, num):
         self.lineOfVision = num
@@ -130,21 +132,23 @@ class map():
         (x2,y2) = pos2
         return max( abs(y2-y1), abs(x2-x1) )
     
-    #working:
-    # 0 : open space
-    # 1 : wall
-    # 2 : key
-    # 3 : door
-    # 4 : stairs up
-    # 5 : stairs down
-    # 6 : fruit
-    # 7 : h potion
-    # 8 : m potion
-    # 9 : spellbook
-    # 10 : chest 
-    # ...
-    # 64 : 
+    def getScrollingMap(self, dir):
+        oldTopX, oldTopY = self.topMapCorner
+        if dir == 'u':
+            if oldTopX == 0:
+                return
+            scrollingMap = pygame.Surface( (self.getDIM()*blocksize, (self.getDIM()+1)*blocksize) )
+        if dir == 'd':
+            pass
+            
+    
+    # complete list of tiles is in tiles1.txt
+    
+    
+    def drawMapWindow(self, heroLoc, heroRect, gameBoard):
+        pass
 
+    # draws entire map to DIMxDIM Surface
     def redraw(self, heroLoc, heroRect, gameBoard):
         DIMEN = self.getDIM()
         oldX, oldY = self.playerXY
@@ -156,8 +160,6 @@ class map():
         #Erase old player
         self.playerXY = (px, py)
         #self.updateUnit(px,py,10)
-        
-        self.topMapCorner = ( (px%10 + (px/10)*10), (py%10 + (py/10)*10) )
         
         if DIMEN <= HALFDIM:
             topX = 0
@@ -180,6 +182,15 @@ class map():
                 topY = DIMEN - 10
             WINDOWSIZE = HALFDIM
             WINDOWOFFSET = 0
+        oldTopX, oldTopY = self.topMapCorner
+        if oldTopX < topX:
+            pass
+        elif oldTopX > topX:
+            pass
+        elif oldTopY < topY:
+            pass
+        elif oldTopY > topY:
+            pass
         #Redraw map on screen from current map matrix
         self.topMapCorner = (topX, topY)
         (rx, ry, r2x, r2y) = heroRect

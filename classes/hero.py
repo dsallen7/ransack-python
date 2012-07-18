@@ -7,10 +7,10 @@ from IMG import images
 
 import Queue
 
-class hero(pygame.sprite.Sprite):
+class hero(pygame.sprite.DirtySprite):
     
     def __init__(self):
-        pygame.sprite.Sprite.__init__(self) #call Sprite intializer
+        pygame.sprite.DirtySprite.__init__(self) #call Sprite intializer
         #images.load()
         self.images = images.heroImages
         self.imgIdx = 2
@@ -61,6 +61,14 @@ class hero(pygame.sprite.Sprite):
         self.gold = 0
         
         self.step = False
+        
+        self.dirty = 1
+    
+
+    def update(self):
+        self.dirty = 1
+
+
     
     def takeStep(self):
         if self.step == True:
