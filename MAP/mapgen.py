@@ -13,6 +13,8 @@ class Room():
         self.xdim = xdim
         self.ydim = ydim
         
+        self.entrances = []
+        
     def getDimensions(self):
         return (self.xdim, self.ydim)
     
@@ -122,8 +124,6 @@ class Map():
             
             tile, dir = self.branchTile(candidateRoom)
             
-            #print dir
-            
             # 6 generate new room
             
             newRoom = self.genRoom()
@@ -139,30 +139,45 @@ class Map():
             #10 create doorway into new room
                 (x1,y1) = tile
                 self.setMapEntry( x1,y1,0 )
+                candidateRoom.entrances.append( (x1,y1) )
                 (x2,y2) = dirDict[dir]
                 self.setMapEntry( x1+x2, y1+y2, 0)
+                newRoom.entrances.append( (x1+x2,y1+y2) )
             # 11 repeat step 4
             #self.draw()
         # set staircases
-        
+        # up
         choice1 = choice(rooms)
         (xpos, ypos) = choice1.getPos()
         (xdim, ydim) = choice1.getDimensions()
         self.setMapEntry( xpos + xdim/2, ypos + ydim/2, 120)
         self.POE = ( xpos + xdim/2, ypos + ydim/2 )
         rooms.remove(choice1)
-        
+        # down
         choice2 = choice(rooms)
+        # find room with only 1 entrance
+        # WARNING: this algorithm not guaranteed to stop.
+        while len(choice2.entrances) > 1:
+            choice2 = choice(rooms)
         (xpos, ypos) = choice2.getPos()
         (xdim, ydim) = choice2.getDimensions()
+        (doorX, doorY) = choice2.entrances[0]
         self.setMapEntry( xpos + xdim/2, ypos + ydim/2, 121)
+        self.setMapEntry( doorX, doorY, 116)
         self.POEx = ( xpos + xdim/2, ypos + ydim/2 )
         rooms.remove(choice2)
         
+        # add key for door
+        keyRoom = choice(rooms)
+        (xpos, ypos) = keyRoom.getPos()
+        (xdim, ydim) = keyRoom.getDimensions()
+        self.setMapEntry( xpos + xdim/2, ypos + ydim/2, 98)
+        rooms.remove(keyRoom)
+        
+        # set hero starting location - optional
         choice3 = choice(rooms)
         (xpos, ypos) = choice3.getPos()
         (xdim, ydim) = choice3.getDimensions()
-        #self.setMapEntry( xpos + xdim/2, ypos + ydim/2, 127)
         self.hs = ( xpos + xdim/2, ypos + ydim/2 )
         rooms.remove(choice3)
         

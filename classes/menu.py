@@ -33,7 +33,7 @@ class menu():
         borderBox.fill( grey )
         
         if pygame.font:
-            font = pygame.font.SysFont("arial", 18)
+            font = pygame.font.SysFont("URW Chancery L", 18)
             msgText = font.render( 'Chest', 1, white, yellow )
             msgBox.blit(msgText, (10,10) )
         #draw available items in window
@@ -46,7 +46,7 @@ class menu():
             itemBox.fill( black )
             itemBox.blit( images.mapImages[img+86], (0, 0) )
             if pygame.font:
-                font = pygame.font.SysFont("arial", 8)
+                font = pygame.font.SysFont("URW Chancery L", 8)
                 msgText = font.render( 'x'+str(qty), 1, white, black )
                 itemBox.blit(msgText, (20,20) )
             msgBox.blit( itemBox, (w, 30) )
@@ -109,7 +109,7 @@ class menu():
         borderBox.fill( grey )
                 
         if pygame.font:
-            font = pygame.font.SysFont("arial", 18)
+            font = pygame.font.SysFont("URW Chancery L", 18)
             msgText = font.render( text, 1, white, yellow )
             msgBox.blit(msgText, (10,10) )
         
@@ -127,7 +127,7 @@ class menu():
                 itemBox.fill( black )
                 itemBox.blit( images.mapImages[item.getImg()], (0, 0) )
                 if pygame.font:
-                    font = pygame.font.SysFont("arial", 8)
+                    font = pygame.font.SysFont("URW Chancery L", 8)
                     if item.name == 'item':
                         msgText = font.render( 'x'+str(item.qty), 1, white, black )
                     else: msgText = font.render( 'x'+str(item.getLevel()), 1, white, black )

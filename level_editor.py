@@ -285,7 +285,6 @@ class Handler():
         if self.drawMode:
             myMap.setEntry(x/blocksize,y/blocksize,self.currentTile)
         self.cursorPos = (x,y)
-        print self.topX, self.topY
     
     def mouseHandler(self, e):
         (mx, my) = pygame.mouse.get_pos()

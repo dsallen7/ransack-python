@@ -1,17 +1,17 @@
 import pygame, random, math, os
 from load_image import *
 from const import *
-import spells, items
 
 from IMG import images
+from OBJ import spell, item, weapon, armor
 
 import Queue
 
-class hero(pygame.sprite.DirtySprite):
+class hero(pygame.sprite.Sprite):
     
     def __init__(self):
-        pygame.sprite.DirtySprite.__init__(self) #call Sprite intializer
-        #images.load()
+        pygame.sprite.Sprite.__init__(self) #call Sprite intializer
+        images.load()
         self.images = images.heroImages
         self.imgIdx = 2
         self.image = self.images[self.imgIdx]
@@ -39,21 +39,15 @@ class hero(pygame.sprite.DirtySprite):
         self.currExp = 0
         self.nextExp = 20
         
-        # first dimension of array is weapon level
-        # second is type: Sword, axe, spear, hammer
-        self.weapons = [[1,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
-        # (level, type)
-        self.weaponEquipped = (0,0)
+        self.weapons = []
+        self.gainWeapon(0,0)
+        self.equipWeapon(self.weapons[0])
         
-        #same as above
-        #Breastplate, helmet, shield
-        self.armor = [[1,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]
-        # types are in order as above, level is indicated
-        self.armorEquipped = [0,None,0]
+        self.armor = []
+        self.armorEquipped = [None,None,None]
         
-        #hpot, mpot,?
         self.items = range(20)
-        #healing, fireball
+        
         self.spells = []
         self.learnSpell(0)
         self.learnSpell(1)
@@ -61,15 +55,7 @@ class hero(pygame.sprite.DirtySprite):
         self.gold = 0
         
         self.step = False
-        
-        self.dirty = 1
-    
 
-    def update(self):
-        self.dirty = 1
-
-
-    
     def takeStep(self):
         if self.step == True:
             self.imgIdx -= 1
@@ -107,6 +93,8 @@ class hero(pygame.sprite.DirtySprite):
         (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX) = stats
         if cHP > mHP:
             cHP = mHP
+        if cMP > mMP:
+            cMP = mMP
         self.currHP = cHP
         self.currMP = cMP
         self.strength = sth
@@ -132,9 +120,6 @@ class hero(pygame.sprite.DirtySprite):
     def getCurrHP(self):
         return self.currHP
     
-    def getSpells(self):
-        return self.spells
-    
     # increases level, next exp for lev up, max HP and MP and refills both
     def gainLevel(self):
         self.level += 1
@@ -143,7 +128,6 @@ class hero(pygame.sprite.DirtySprite):
         self.maxMP = int( math.ceil( self.maxMP * 1.15 ) )
         self.currHP = self.maxHP
         self.currMP = self.maxMP
-    
     def increaseExp(self, exp):
         self.currExp += exp
         if self.currExp >= self.nextExp:
@@ -152,17 +136,16 @@ class hero(pygame.sprite.DirtySprite):
     
     def setItem(self, item, num=1):
         self.items[item] += num
-    
     # Input: tile number denoting item
     def getItem(self, itype):
         if itype == KEY:
             self.keys += 1
+            return
         entry = self.items[itype]
         if hasattr(entry, "__iter__"):
-            self.items[itype].append( items.Item(itype+86) )
+            self.items[itype].append( item.Item(itype+86) )
         else:
-            self.items[itype] = [items.Item(itype+86)]
-    
+            self.items[itype] = [item.Item(itype+86)]
     def getItems(self):
         availableItems = []
         for i in self.items:
@@ -171,48 +154,60 @@ class hero(pygame.sprite.DirtySprite):
                     i[0].qty = len(i)
                     availableItems.append(i[0])
         return availableItems
-    
-    def getSpells(self):
-        return self.spells
+    def useItem(self, item):
+        if item == None:
+            return
+        item.execute(self)
+        self.items[item.getType()-86].remove(item)
     
     def getWeapons(self):
         return self.weapons
-    
     def getWeaponEquipped(self):
         return self.weaponEquipped
+    # called when the player buys or finds a new weapon
+    def gainWeapon(self, type, level):
+        self.weapons.append(weapon.Weapon(type, level))
+    def equipWeapon(self, weapon):
+        self.weaponEquipped = weapon
+        self.weapons.remove(weapon)
     
     def getArmor(self):
         return self.armor
-    
     def getArmorEquipped(self):
         return self.armorEquipped
+    def gainArmor(self, type, level):
+        self.armor.append(armor.Armor(type, level))
+    def equipArmor(self, armor):
+        if self.armorEquipped[armor.getType()] == None:
+            self.armorEquipped[armor.getType()] = armor
+        else: 
+            self.armor.append(self.armorEquipped[armor.getType()])
+            self.armorEquipped[armor.getType()] = armor
     
     def addGold(self, amt):
         self.gold += amt
+    def getGold(self):
+        return self.gold
+    def takeGold(self, amt):
+        if self.gold >= amt:
+            self.gold -= amt
+            return True
+        else:
+            return False
     
     def learnSpell(self, num):
-        self.spells += [spells.Spell( num )]
-    
+        self.spells += [spell.Spell( num )]
     def castSpell(self, spell, battle=False):
         if spell == None:
             return
         if spell.getType() == 1 and battle==False:
             return -1
         spell.execute(self)
-        return spell.getType()
+        return spell.getType()    
+    def getSpells(self):
+        return self.spells
     
-    def useItem(self, item):
-        if item == None:
-            return
-        item.execute(self)
-        self.items[item.getType()-86].remove(item)
-
-
-    #There is duplicate code here. at some point it would be wise to implement
-    #a project-wide messaging/menu utility.
-    #UPDATE: done.
-
-    
+    # for debugging purposes
     def showLocation(self, gameBoard):
         (x1,y1,x2,y2) = self.rect
         locBox = pygame.Surface( (350,50) )

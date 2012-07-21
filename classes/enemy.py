@@ -9,7 +9,8 @@ class enemy():
         self.currHP = self.maxHP
         self.level = random.randrange(level, level+2)
     
-    
+    def getLevel(self):
+        return self.level
     def getHP(self):
         return self.currHP
     

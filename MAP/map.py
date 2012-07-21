@@ -19,8 +19,8 @@ class miniMap():
         self.miniMapBoard.fill( black )
         
         self.colorDict = {-1:0, 0:0, 3:3, 4:3, 5:4, 6:4, 7:4, 8:10, 9:6, 10:5, 11:5, 12:7, 13:7, 
-                          16:6, 20:10, 21:10, 22:10, 23:10, 24:1, 25:1, 28:3, 29:10, 32:3, 33:3, 34:3, 35:3, 36:3, 37:3,
-                          42:5, 42:5, 43:5, 44:5, 45:5, 46:5, 47:5, 48:1, 49:1, 50:1, 51:8, 52:8, 53:8, 55:3, 64:5, 
+                          16:6, 20:10, 21:10, 22:10, 23:10, 24:1, 25:1, 28:3, 29:10, 32:3, 33:3, 34:3, 35:3, 36:3, 37:3, 41:1,
+                          42:5, 42:5, 43:5, 44:5, 45:5, 46:5, 47:5, 48:1, 49:1, 50:1, 51:8, 52:8, 53:8, 55:3, 59:1, 60:8, 61:3, 62:3, 63:1, 64:5, 
                           65:9, 66:9, 67:9, 68:9, 69:9, 70:9, 72:5, 73:5, 92:4, 95:4, 98:2, 99:6, 
                           100:6, 110:6, 111:6, 112:3, 116:3, 117:3, 118:3, 120:3, 121:3, 126:0, 127:5}
     
@@ -33,6 +33,9 @@ class miniMap():
         if len(self.maptext) <= DIM:
             topCorner = (0,0)
         (tx, ty) = topCorner
+        (px, py) = playerXY
+        tx = px - HALFDIM
+        ty = py - HALFDIM
         for i in range(DIM):
             for j in range(DIM):
                 if (i+tx,j+ty) == playerXY:
@@ -67,6 +70,8 @@ class map():
         self.DIM = len(self.maptext)
         
         self.xGameBoard = pygame.Surface( (self.DIM*blocksize, self.DIM*blocksize) )
+        
+        self.redrawXMap()
     
     def setLOV(self, num):
         self.lineOfVision = num
@@ -130,42 +135,23 @@ class map():
     def distanceFunc(self, pos1, pos2):
         (x1,y1) = pos1
         (x2,y2) = pos2
-        return max( abs(y2-y1), abs(x2-x1) )
+        return max(abs(y2-y1), abs(x2-x1), abs(y2-y1) + abs(x2-x1))
     
-    def getScrollingMap(self, dir):
-        oldTopX, oldTopY = self.topMapCorner
-        if dir == 'u':
-            if oldTopX == 0:
-                return
-            scrollingMap = pygame.Surface( (self.getDIM()*blocksize, (self.getDIM()+1)*blocksize) )
-        if dir == 'd':
-            pass
-            
-    
-    # complete list of tiles is in tiles1.txt
-    
-    
-    def drawMapWindow(self, heroLoc, heroRect, gameBoard):
-        pass
-
-    # draws entire map to DIMxDIM Surface
-    def redraw(self, heroLoc, heroRect, gameBoard):
+    # calculate location of map window based on hero location and hero sprite rect
+    def updateWindowCoordinates(self, heroLoc, heroRect):
         DIMEN = self.getDIM()
         oldX, oldY = self.playerXY
-        #self.updateUnit(oldX,oldY,0)
         # Compute top map corner
         (px,py) = heroLoc
         px = px/blocksize
         py = py/blocksize
-        #Erase old player
         self.playerXY = (px, py)
-        #self.updateUnit(px,py,10)
         
         if DIMEN <= HALFDIM:
             topX = 0
             topY = 0
-            WINDOWOFFSET = (HALFDIM - DIMEN)/2
-            WINDOWSIZE = DIMEN
+            self.WINDOWOFFSET = (HALFDIM - DIMEN)/2
+            self.WINDOWSIZE = DIMEN
         else:
             if px < 5:
                 topX = 0
@@ -180,36 +166,62 @@ class map():
                 topY = py - 5
             else:
                 topY = DIMEN - 10
-            WINDOWSIZE = HALFDIM
-            WINDOWOFFSET = 0
+            self.WINDOWSIZE = HALFDIM
+            self.WINDOWOFFSET = 0
         oldTopX, oldTopY = self.topMapCorner
-        if oldTopX < topX:
-            pass
-        elif oldTopX > topX:
-            pass
-        elif oldTopY < topY:
-            pass
-        elif oldTopY > topY:
-            pass
-        #Redraw map on screen from current map matrix
         self.topMapCorner = (topX, topY)
-        (rx, ry, r2x, r2y) = heroRect
+        return (topX, topY), (oldTopX, oldTopY)
+    
+    # complete list of tiles is in tiles1.txt
+    
+    # takes map coordinates, returns map window
+    def getMapWindow(self, pos, wsize=10):
+        (x1, y1) = pos
+        window = pygame.Surface( (wsize*blocksize, wsize*blocksize) )
+        window.blit( self.xGameBoard, ( -(x1*blocksize), -(y1*blocksize) ) )
+        return window
+    
+    # takes pixel coordinates of top left corner of DIMxDIM window of xGameBoard, returns map window
+    def getScrollingMapWindow(self, pos, wsize = 10, darkness=True):
+        (x1,y1) = pos
+        window = pygame.Surface( (wsize*blocksize, wsize*blocksize) )
+        window.blit( self.xGameBoard, ( -x1, -y1 ) )
+        #self.drawDarkness
+        return window
+    
+    # draws entire map to DIMxDIM Surface
+    def redrawXMap(self):
+        for x in range(self.getDIM()):
+            for y in range(self.getDIM()):
+                tile = self.getUnit(x,y)
+                if tile != VOID:
+                    self.xGameBoard.blit( self.images[ tile ], ( (x*blocksize), (y*blocksize) ) )
+    
+    def scroll(self,x,y):
+        self.xGameBoard.scroll(x,y)
+    
+    # Takes first two coordinates of hero rect, gameBoard and
+    # draws darkness
+    def drawDarkness(self, rx, ry, gameBoard):
+        for x in range(self.WINDOWSIZE):
+            for y in range(self.WINDOWSIZE):
+                dist = self.distanceFunc( (x,y), (rx,ry) )
+                if dist <= self.lineOfVision + 2:
+                    self.fog.set_alpha( 0 )
+                elif dist == self.lineOfVision + 3:
+                    self.fog.set_alpha( 70 )
+                elif dist == self.lineOfVision + 4:
+                    self.fog.set_alpha( 140 )
+                elif dist >= self.lineOfVision + 5:
+                    self.fog.set_alpha( 210 )
+                gameBoard.blit(self.fog, (x*blocksize,y*blocksize), area=(0,0,blocksize,blocksize) )
+    
+    def redraw(self, heroLoc, heroRect, gameBoard):
+        # Redraw map on screen from current map matrix
+        (rx,ry,rx2,ry2) = heroRect
         rx = rx/blocksize
         ry = ry/blocksize
-        for x in range(WINDOWSIZE):
-            for y in range(WINDOWSIZE):
-                tile = self.getUnit(x+topX,y+topY)
-                if tile != HEROSTART and tile != VOID:
-                    self.image = self.images[tile]
-                    gameBoard.blit(self.image, ( (x+WINDOWOFFSET)*blocksize, (y+WINDOWOFFSET)*blocksize), area=(0,0,blocksize,blocksize) )
-                    dist = self.distanceFunc( (x,y), (rx,ry) )
-                    if dist <= self.lineOfVision + 1:
-                        self.fog.set_alpha( 0 )
-                    elif dist == self.lineOfVision + 2:
-                        self.fog.set_alpha( 70 )
-                    elif dist == self.lineOfVision + 3:
-                        self.fog.set_alpha( 140 )
-                    elif dist >= self.lineOfVision + 4:
-                        self.fog.set_alpha( 210 )
-                    gameBoard.blit(self.fog, (x*blocksize,y*blocksize), area=(0,0,blocksize,blocksize) )
+        (topX, topY), (oldTopX, oldTopY) = self.updateWindowCoordinates(heroLoc, heroRect)
+        gameBoard.blit( self.getMapWindow( (topX, topY), self.WINDOWSIZE ), (self.WINDOWOFFSET,self.WINDOWOFFSET) )
+        self.drawDarkness(rx, ry, gameBoard)
     

@@ -38,19 +38,19 @@
     # 35: portcullis 4
     # 36: portcullis 5
     # 37: portcullis 6
-    # 38: portcullis 7
-    # 39: portcullis 8
+    # 38: 
+    # 39: 
     # 40: 
-    # 41: 
+    # 41: blacksmith window
     # 42: house 1 lower left
-    # 43: house 1 lower center
+    # 43: house 1 door
     # 44: house 1 lower right
     # 45: house 1 upper left
     # 46: house 1 upper center
     # 47: house 1 upper right
-    # 48: house roof 1
-    # 49: house roof 2
-    # 50: house roof 3
+    # 48: house 1 roof 1
+    # 49: house 1 roof 2
+    # 50: house 1 roof 3
     # 51: tree 1
     # 52: tree 2
     # 53: tree 3
@@ -59,12 +59,12 @@
     # 56: river 1
     # 57: river 2
     # 58: river 3
-    # 59: river 4
-    # 60: river 5
-    # 61: river 6
-    # 62: river 7
-    # 63: river 8
-    # 64: 
+    # 59: blacksmith door
+    # 60: house 2 door (green)
+    # 61: blacksmith roof 1
+    # 62: blacksmith roof 2
+    # 63: blacksmith roof 3
+    # 64: blacksmith shield
     # 65: lake 1
     # 66: lake 2
     # 67: lake 3

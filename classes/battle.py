@@ -21,7 +21,7 @@ class battle():
         
         self.myHud = hud
     
-    def writeText(self, surface, loc, text, fgc, bgc, size=18, font="arial"):
+    def writeText(self, surface, loc, text, fgc, bgc, size=18, font="URW Chancery L"):
         font = pygame.font.SysFont(font, size)
         surface.blit( font.render(text, 1, fgc, bgc), loc )
         
@@ -41,7 +41,7 @@ class battle():
         while True:
             menuBox.fill( yellow )
             if pygame.font:
-                font = pygame.font.SysFont("arial", 10)
+                font = pygame.font.SysFont("URW Chancery L", 14)
                 for i in range(4):
                     menuBox.blit( font.render(options[i], 1, white, yellow), (25,i*25) )
             for event in pygame.event.get():
@@ -75,20 +75,10 @@ class battle():
     # calls message
     def boxMessage(self, msg):
         self.myHud.boxMessage(msg)
-        '''
-        self.queueLock.acquire()
-        self.hudQueue.put( (0, msg) )
-        self.queueLock.release()
-        '''
     
     # calls msgSystem
     def textMessage(self, msg):
         self.myHud.txtMessage(msg)
-        '''
-        self.queueLock.acquire()
-        self.hudQueue.put( (1, msg) )
-        self.queueLock.release()
-        '''
     
     def fireball(self, itl):
         dmg = random.randrange(itl,2*itl)
@@ -150,4 +140,4 @@ class battle():
         self.textMessage("The monster is dead!")
         if hero.increaseExp(5):
             self.textMessage("Congratulations! You have gained a level!")
-        return True
+        return random.randrange(enemy.getLevel()*2, enemy.getLevel()*4)

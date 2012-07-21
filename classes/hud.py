@@ -21,15 +21,8 @@ class hud( ):
         
         self.invItems = []
         
-        self.frameBox1, r = load_image("hudBox1.bmp",-1)
+        self.frameBox1, r = load_image("hudBox1.bmp",None)
         self.frameBox2, r = load_image("hudBox2.bmp",-1)
-        
-        self.weaponImg = range(4)
-        self.weaponImg[0], r = load_image("sword.bmp",-1)
-        
-        self.armorImg = range(3)
-        self.armorImg[0], r = load_image("bplate.bmp",None)
-        self.armorImg[2], r = load_image("shield.bmp",None)
         
         self.scrollText = ['']*3
         
@@ -38,12 +31,9 @@ class hud( ):
         
         self.On = True
         
-        #self.Queue = Q
-        #self.queueLock = QL
-        
-        #threading.Thread.__init__ ( self )
+        images.load()
     
-    def writeText(self, surface, loc, text, fgc, bgc, size=18, font="arial"):
+    def writeText(self, surface, loc, text, fgc, bgc, size=18, font="URW Chancery L"):
         font = pygame.font.SysFont(font, size)
         surface.blit( font.render(text, 1, fgc, bgc), loc )
         
@@ -51,37 +41,38 @@ class hud( ):
         stats = self.game.myHero.getPlayerStats()
         (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX) = stats
         (armor, weapon) = ( self.game.myHero.getArmorEquipped(), self.game.myHero.getWeaponEquipped() )
-        self.textBox1 = pygame.Surface((100, 250))
+        self.textBox1 = pygame.Surface((100, 150))
         self.textBox1.fill( yellow )
         self.frameBox1 = self.frameBox1.copy()
         if pygame.font:
             self.writeText(self.textBox1, (0,0), "Score: "+str(scr), white, yellow)
             self.writeText(self.textBox1, (0,25), "HP: "+str(cHP)+"/"+str(mHP), white, yellow)
             self.writeText(self.textBox1, (0,50), "MP: "+str(cMP)+"/"+str(mMP), white, yellow)
-            self.writeText(self.textBox1, (0,75), "Int: "+str(itl), white, yellow,12)
-            self.writeText(self.textBox1, (25,75), "Str: "+str(sth), white, yellow,12)
-            self.writeText(self.textBox1, (50,75), "Dex: "+str(dex), white, yellow,12)
-            self.writeText(self.textBox1, (0,125), "Exp: "+str(cEX)+"/"+str(nEX), white, yellow)
-            self.writeText(self.textBox1, (0,150), "Keys: "+str(kys), white, yellow)
+            self.writeText(self.textBox1, (0,75), "Int: "+str(itl), white, yellow,14)
+            self.writeText(self.textBox1, (30,75), "Str: "+str(sth), white, yellow,14)
+            self.writeText(self.textBox1, (60,75), "Dex: "+str(dex), white, yellow,14)
+            self.writeText(self.textBox1, (0,100), "Exp: "+str(cEX)+"/"+str(nEX), white, yellow)
+            self.writeText(self.textBox1, (0,125), "Keys: "+str(kys), white, yellow)
         self.frameBox1.blit(self.textBox1,(25,25))
         #show equipped armor and weapon
-        weaponCopy = self.weaponImg[weapon[1]]
-        self.writeText(weaponCopy, (20,20), str(weapon[0]), white, black, 8)
-        self.frameBox1.blit(weaponCopy, (25, 210))
+        weaponCopy = images.mapImages[ weapon.getImgNum() ]
+        self.writeText(weaponCopy, (20,20), 'L'+str(weapon.getLevel()), white, black, 14)
+        self.frameBox1.blit(weaponCopy, (30, 180))
         
-        armorLocList = [(60,210), (25,250), (60,250)]
+        armorLocList = [(70,180), (35,220), (70,220)]
         for A in range( len(armor) ):
             if armor[A] == None:
                 pass
             else:
-                armorCopy = self.armorImg[ A ]
-                self.writeText(armorCopy, (20,20), str(armor[A]), white, black,8)
+                armorCopy = images.mapImages[ armor[A].getImgNum() ]
+                self.writeText(armorCopy, (20,20), 'L'+str(armor[A].getLevel()), white, black,14)
                 self.frameBox1.blit(armorCopy, armorLocList[A])
         goldBox = pygame.Surface( (30,30) )
         goldBox.blit( images.mapImages[109], (0,0) )
-        self.frameBox1.blit( goldBox, (25, 290) )
-        self.gameBoard.blit(self.frameBox1, (blocksize*10, 0) )
-        self.gameBoard.blit(self.frameBox2, (0, blocksize*10) )
+        self.writeText(goldBox, (20,20), '$'+str(self.game.myHero.getGold()), white, black,14)
+        self.frameBox1.blit( goldBox, (30, 260) )
+        self.screen.blit(self.frameBox1, (blocksize*10+75, 75) )
+        self.screen.blit(self.frameBox2, (75, blocksize*10+75) )
         self.screen.blit(self.gameBoard, (75,75) )
 
     
@@ -92,7 +83,7 @@ class hud( ):
         self.scrollText[1] = self.scrollText[2]
         self.scrollText[2] = msg
         if pygame.font:
-            font = pygame.font.SysFont("arial", 18)
+            font = pygame.font.SysFont("URW Chancery L", 18)
             for i in range(3):
                 Msg = font.render( self.scrollText[i], 1, white, yellow)
                 self.textBox2.blit(Msg, (0,20*i) )
@@ -114,7 +105,7 @@ class hud( ):
         borderBox = pygame.Surface( ( 186, 60 ) )
         borderBox.fill( grey )
         if pygame.font:
-            font = pygame.font.SysFont("arial", 18)
+            font = pygame.font.SysFont("URW Chancery L", 18)
             msgText = font.render( text, 1, white, yellow )
             msgBox.blit(msgText, (10,10) )
         borderBox.blit( msgBox, (5, 5) )

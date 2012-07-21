@@ -26,6 +26,8 @@ TREE1     = 51
 
 WELLSP    = 55
 
+BLKSMDOOR = 59
+
 FRUIT1    = 86
 FRUIT2    = 87
 MEAT1     = 88
@@ -42,7 +44,10 @@ KEY       = 98
 SPELLBOOK = 100
 CHEST     = 110
 OCHEST    = 111
+SWORD     = 112
 DOOR      = 116
+SHIELD    = 117
+BPLATE    = 118
 STAIRUP   = 120
 STAIRDN   = 121
 VOID      = 126
@@ -77,6 +82,8 @@ itemMsgs = { 86: 'You found a piece of fruit.',
              95: 'You found a magic potion',
              98: 'You found a key!',
              100: 'You found a spellbook.' }
+
+scrollingDict = { 'up': (0, -1), 'down': (0, 1), 'left': (-1, 0), 'right': (1, 0) }
 
 # Define the colors we will use in RGB format
 black = [  0,  0,  0]
