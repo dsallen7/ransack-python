@@ -110,6 +110,49 @@ class Map():
         else: return
         self.DIM = nDim
         self.cursorPos = (0,0)
+    
+    def mapCut(self, pos1, pos2):
+        (x1, y1) = pos1
+        (x2, y2) = pos2
+        return
+        grid = [range(x2-x1)]*(y2-y1)
+        for i in range(x2-x1):
+            for j in range(y2-y1):
+                grid[j][i] = self.getEntry(x1+i, y1+j)
+                self.setEntry(x1+i, y1+j, 0)
+        self.copyText = grid
+    
+    def mapCopy(self, pos1, pos2):
+        (x1, y1) = pos1
+        (x2, y2) = pos2
+        grid = [range(x2-x1)]*(y2-y1)
+        for i in range(x2-x1):
+            for j in range(y2-y1):
+                grid[j][i] = self.getEntry(x1+i, y1+j)
+                self.setEntry(x1+i, y1+j, 0)
+        self.copyText = grid
+    
+    def mapPaste(self, pos):
+        x=0
+        y=0
+        grid = self.copyText
+        for i in len( grid[0] ):
+            for j in len( grid ):
+                self.setEntry(x+i, y+j, grid[j][i])
+    
+    def mapMove(self, source, size, dest):
+        (sX, sY) = source
+        (dX, dY) = dest
+        (xDim, yDim) = size
+        tmpGrid = [range(xDim)]*(yDim)
+        for i in range(xDim):
+            for j in range(yDim):
+                tmpGrid[j][i] = myMap.getEntry(i+sX, j+sY)
+        for i in range(xDim):
+            for j in range(yDim):
+                myMap.setEntry(i+dX, j+dY, tmpGrid[j][i])
+                myMap.setEntry(i+sX, j+sY, 0)
+                
 
 class Handler():
     
@@ -126,6 +169,11 @@ class Handler():
         self.visited = []
         
         self.BFSQueue = queue.Queue()
+        
+        self.mouseAction = 'draw'
+        self.selecting = False
+        
+        self.selectBoxPoints = None
     
     def drawBox(self, pos, color):
         (x,y) = pos
@@ -286,13 +334,99 @@ class Handler():
             myMap.setEntry(x/blocksize,y/blocksize,self.currentTile)
         self.cursorPos = (x,y)
     
+    def select(self, start):
+        startX, startY = start
+        endX = startX
+        endY = startY
+        self.selectBoxPoints = None
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                    self.selectBox = self.selectBoxPoints
+                    return (endX, endY)
+                (tempX, tempY) = pygame.mouse.get_pos()
+                if tempX > 600:
+                    tempX = 600
+                    pygame.mouse.set_pos([tempX,tempY])
+                if tempY > 600:
+                    tempY = 600
+                    pygame.mouse.set_pos([tempX,tempY])
+                endX = tempX/blocksize + 1
+                endY = tempY/blocksize + 1
+                self.updateDisplay()
+                self.selectBoxPoints = ( (startX*blocksize,startY*blocksize), 
+                                          (startX*blocksize,(startY+(endY-startY))*blocksize), 
+                                          (endX*blocksize,endY*blocksize), 
+                                          ((startX+(endX-startX))*blocksize,startY*blocksize) )
+                pygame.draw.lines( gridField, red, True, self.selectBoxPoints, 1 )
+                screen.blit(gridField, (0,0) )
+                pygame.display.flip()
+    
+    def move(self):
+        (p1, p2, p3, p4) = self.selectBoxPoints
+        (tempX, tempY) = pygame.mouse.get_pos()
+        xOffset = (tempX/blocksize)-(p1[0]/blocksize)
+        yOffset = (tempY/blocksize)-(p1[1]/blocksize)
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                    return
+                elif event.type == pygame.MOUSEMOTION:
+                    (tempX, tempY) = pygame.mouse.get_pos()
+                    # upper left hand corner
+                    oldTopX = p1[0]/blocksize
+                    oldTopY = p1[1]/blocksize
+                    newTopX = ( (tempX/blocksize)-xOffset )
+                    newTopY = ( (tempY/blocksize)-yOffset )
+                    if oldTopX == newTopX and oldTopY == newTopY :
+                        pass
+                    else:
+                        self.selectBoxPoints = ( (newTopX*blocksize,newTopY*blocksize), 
+                                                 (newTopX*blocksize,(newTopY+ ((p3[1]-p1[1])/blocksize) )*blocksize), 
+                                                 ((newTopX+ ((p3[0]-p1[0])/blocksize) )*blocksize,(newTopY+ ((p3[1]-p1[1])/blocksize) )*blocksize), 
+                                                 ((newTopX+ ((p3[0]-p1[0])/blocksize) )*blocksize,newTopY*blocksize) )
+                        (p1, p2, p3, p4) = self.selectBoxPoints
+                        myMap.mapMove( (oldTopX, oldTopY), ( (p3[0]-p1[0])/blocksize, (p3[1]-p1[1])/blocksize), (newTopX, newTopY) )
+                self.updateDisplay()
+                pygame.draw.lines( gridField, red, True, self.selectBoxPoints, 1 )
+                screen.blit(gridField, (0,0) )
+                pygame.display.flip()
+        
+
     def mouseHandler(self, e):
-        (mx, my) = pygame.mouse.get_pos()
+        (mx, my) = e.pos
         if 0 <= mx < 600 and 0 <= my < 600:
-            myMap.setEntry(mx/blocksize,my/blocksize,self.currentTile)
-            self.cursorPos = ( (mx/blocksize)*blocksize, (my/blocksize)*blocksize )
-        if 650 <= mx < 770 and 200 <= my < 440:
+            if e.button == 1:
+                if self.mouseAction == 'draw':
+                    myMap.setEntry(mx/blocksize,my/blocksize,self.currentTile)
+                    self.cursorPos = ( (mx/blocksize)*blocksize, (my/blocksize)*blocksize )
+                elif self.mouseAction == 'select':
+                    if self.selectBoxPoints is not None:
+                        (p1, p2, p3, p4) = self.selectBoxPoints
+                        if p1[0] <= mx < p3[0] and p1[1] <= my <= p3[1]:
+                            self.move()
+                        else: self.selection = ( (mx/blocksize, my/blocksize), self.select( (mx/blocksize, my/blocksize) ) )
+                    else: self.selection = ( (mx/blocksize, my/blocksize), self.select( (mx/blocksize, my/blocksize) ) )
+            elif e.button == 3:
+                pass
+        elif 650 <= mx < 770 and 200 <= my < 440:
             self.currentTile = self.offset + (mx-650)/blocksize + (my-200)/blocksize * 4
+        elif 665 <= mx < 695 and 500 <= my < 530:
+            #shift tilesheet left
+            pass
+        elif 695 <= mx < 725 and 500 <= my < 530:
+            #shift tilesheet right
+            pass
+        elif 650 <= mx < 680 and 530 <= my < 560:
+            myMap.mapCut()
+        elif 680 <= mx < 710 and 530 <= my < 560:
+            myMap.mapCopy(self.selection)
+        elif 710 <= mx < 740 and 530 <= my < 560:
+            myMap.mapPaste()
+        elif 665 <= mx < 695 and 560 <= my < 590:
+            self.mouseAction = 'draw'
+        elif 695 <= mx < 725 and 560 <= my < 590:
+            self.mouseAction = 'select'
         
     
     def mouseUpdate(self):
@@ -316,14 +450,29 @@ class Handler():
             self.cursorColor = yellow
         else:
             self.cursorColor = white
+        if self.selectBoxPoints is not None:
+            pygame.draw.lines( gridField, red, True, self.selectBoxPoints, 1 )
+
         boxPoints = ( (x,y), (x,y+blocksize), (x+blocksize,y+blocksize), (x+blocksize,y) )
         pygame.draw.lines( gridField, self.cursorColor, True, boxPoints, 1 )
         self.sideImg, sideRect = load_image('sidebar.bmp')
         self.sideImg.blit(images.mapImages[self.currentTile],(50,50))
+        if self.mouseAction == 'draw':
+            self.sideImg.blit(images.editorImages[5], (50,80) )
+        else: self.sideImg.blit(images.editorImages[6], (50,80) )
         for i in range(8):
             for j in range(4):
                 self.sideImg.blit(images.mapImages[self.offset + j + (4*i)], (50+j*blocksize, 200+(i*blocksize)))
         
+        toolBox = pygame.Surface( (90, 90) )
+        toolBox.blit( images.editorImages[0], (15,0) )
+        toolBox.blit( images.editorImages[1], (45,0) )
+        toolBox.blit( images.editorImages[2], (0,30) )
+        toolBox.blit( images.editorImages[3], (30,30) )
+        toolBox.blit( images.editorImages[4], (60,30) )
+        toolBox.blit( images.editorImages[5], (15,60) )
+        toolBox.blit( images.editorImages[6], (45,60) )
+        self.sideImg.blit(toolBox, (50,500) )
         (x,y) = self.cursorPos
         entryBox = pygame.Surface((30,30))
         entryBox.fill(black)
@@ -368,7 +517,7 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 myHandler.event_handler(event)
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.MOUSEBUTTONUP:
                 myHandler.mouseHandler(event)
             if event.type == pygame.QUIT:
                 os.sys.exit()

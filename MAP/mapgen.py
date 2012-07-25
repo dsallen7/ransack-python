@@ -8,12 +8,25 @@ dirDict = { 'w':(-1,0), 'e':(1,0), 'n':(0,-1), 's':(0,1) }
 DefaultWallTile = 29
 
 class Room():
-    def __init__(self, xdim, ydim, pos=(0,0)):
+    def __init__(self, xdim, ydim, pos=(0,0), shape='Square'):
         self.pos = pos
         self.xdim = xdim
         self.ydim = ydim
-        
+        self.grid = []
         self.entrances = []
+        
+        if shape == 'square':
+            (xpos, ypos) = self.getPos()
+            (xdim, ydim) = room.getDimensions()
+            for i in range(xdim+1):
+                self.setGrid(i+xpos, ypos, DefaultWallTile)
+                self.setGrid(i+xpos, ypos+ydim, DefaultWallTile)
+            for i in range(ydim+1):
+                self.setGrid(xpos, i+ypos, DefaultWallTile)
+                self.setGrid(xpos+xdim, i+ypos, DefaultWallTile)
+            for i in range(1,xdim):
+                for j in range(1,ydim):
+                    self.setGrid(xpos+i, ypos+j, 0)
         
     def getDimensions(self):
         return (self.xdim, self.ydim)
@@ -23,6 +36,12 @@ class Room():
     
     def setPos(self, pos):
         self.pos = pos
+    
+    def setGrid(self, x, y, e):
+        pass
+    
+    def getGrid(self, x, y):
+        pass
 
 class Map():
     def __init__(self, DIM):
@@ -50,21 +69,8 @@ class Map():
         else: return -1
     
     def genRoom(self, pos=(0,0) ):
-        return Room( randrange(4,7), randrange(4,7), pos )
-    
-    def addRoom(self, room):
-        (xpos, ypos) = room.getPos()
-        (xdim, ydim) = room.getDimensions()
-        for i in range(xdim+1):
-            self.setMapEntry(i+xpos, ypos, DefaultWallTile)
-            self.setMapEntry(i+xpos, ypos+ydim, DefaultWallTile)
-        for i in range(ydim+1):
-            self.setMapEntry(xpos, i+ypos, DefaultWallTile)
-            self.setMapEntry(xpos+xdim, i+ypos, DefaultWallTile)
-        for i in range(1,xdim):
-            for j in range(1,ydim):
-                self.setMapEntry(xpos+i, ypos+j, 0)
-    
+        return Room( randrange(4,7), randrange(4,7), pos, shape='square' )
+        
     def branchTile(self, room):
         (xpos, ypos) = room.getPos()
         (xdim, ydim) = room.getDimensions()
@@ -213,6 +219,15 @@ class Map():
         except pygame.error, message:
             print 'Cannot save map:', name
             raise SystemExit, message
+    
+    def mapCut(self, x, y):
+        pass
+    
+    def mapCopy(self, x, y):
+        pass
+    
+    def mapPaste(self, pos):
+        pass
     
     def draw(self):
         gridField.fill( [0,0,0] )

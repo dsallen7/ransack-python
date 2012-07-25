@@ -69,7 +69,7 @@ class hud( ):
                 self.frameBox1.blit(armorCopy, armorLocList[A])
         goldBox = pygame.Surface( (30,30) )
         goldBox.blit( images.mapImages[109], (0,0) )
-        self.writeText(goldBox, (20,20), '$'+str(self.game.myHero.getGold()), white, black,14)
+        self.writeText(goldBox, (15,20), '$'+str(self.game.myHero.getGold()), white, black,14)
         self.frameBox1.blit( goldBox, (30, 260) )
         self.screen.blit(self.frameBox1, (blocksize*10+75, 75) )
         self.screen.blit(self.frameBox2, (75, blocksize*10+75) )

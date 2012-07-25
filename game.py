@@ -13,7 +13,7 @@ from MAP import map, mapgen
 class game():
     def __init__(self, screen, clock):
         self.myHero = hero.hero()
-        self.myMenu = menu.menu()
+        self.myMenu = menu.menu(screen)
         self.myMap = None
         self.levelDepth = 2
         
@@ -101,10 +101,10 @@ class game():
             if event.key == pygame.K_SPACE:
                 pass
             elif event.key == pygame.K_s:
-                if self.myHero.castSpell( self.myMenu.invMenu(self.screen, self.myHero.getSpells(), "Spells:" ) ) == -1:
+                if self.myHero.castSpell( self.myMenu.invMenu(self.myHero.getSpells(), "Spells:" ) ) == -1:
                     self.textMessage('That spell may only be cast in battle.')
             elif event.key == pygame.K_i:
-                self.myHero.useItem( self.myMenu.invMenu(self.screen, self.myHero.getItems(), "Items:" ) )
+                self.myHero.useItem( self.myMenu.invMenu(self.myHero.getItems(), "Items:" ) )
             elif event.key == pygame.K_t:
                 self.screenShot()
             elif event.key == pygame.K_m:
@@ -225,7 +225,7 @@ class game():
         # Chest
         if i == CHEST:
             chestlist = self.myMap.chests[(X + moveX)/blocksize, (Y + moveY)/blocksize]
-            for item in self.myMenu.displayChest( self.screen, chestlist ):
+            for item in self.myMenu.displayChest( chestlist ):
                 self.myHero.getItem(item)
             self.myMap.updateUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize, OCHEST )
         #check if open space
@@ -241,7 +241,9 @@ class game():
                 self.boxMessage("The battle is joined!")
                 self.gameBoard.fill( black )
                 g = self.myBattle.fightBattle(self.myHero, enemy.enemy(self.levelDepth))
-                if not g:
+                if g == True:
+                    pass
+                elif g == False:
                     self.gameOver()
                 else: 
                     self.textMessage('You find '+str(g)+' gold pieces!')

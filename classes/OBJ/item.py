@@ -18,6 +18,9 @@ class Item():
     def getImg(self):
         return self.img
     
+    def setQty(self, qty):
+        self.qty = qty
+    
     def execute(self, hero):
         [cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX] = hero.getPlayerStats()
         stats = [cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX]

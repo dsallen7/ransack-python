@@ -14,7 +14,7 @@ class Store():
         self.screen = screen
         self.myHud = hud
         images.load()
-        self.myMenu = menu.menu()
+        self.myMenu = menu.menu(screen)
         self.images = range(2)
         self.images[0], r = load_image('cursor.bmp')
     

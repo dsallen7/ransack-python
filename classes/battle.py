@@ -15,7 +15,7 @@ class battle():
         
         self.screen = screen
         
-        self.myMenu = menu.menu()
+        self.myMenu = menu.menu(screen)
         
         self.images[0], r = load_image('cursor.bmp')
         
@@ -47,17 +47,19 @@ class battle():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     os.sys.exit()
-                if event.type == pygame.KEYDOWN:
+                elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_UP:
                         selection -= 1
                         if selection == -1:
                             selection = 3
-                    if event.key == pygame.K_DOWN:
+                    elif event.key == pygame.K_DOWN:
                         selection += 1
                         if selection == 4:
                             selection = 0
-                    if event.key == pygame.K_RETURN:
+                    elif event.key == pygame.K_RETURN:
                         return options[selection]
+                    elif event.key == pygame.K_ESCAPE:
+                        pass
             menuBox.blit( self.images[0], (0, selection*25) )            
             self.battleField.blit( menuBox, (200,150) )
             self.drawBattleScreen()
@@ -110,13 +112,13 @@ class battle():
                     self.textMessage("You missed the monster!")
                     #self.sounds[2].play()
             elif action == 'Magic':
-                attack = hero.castSpell( self.myMenu.invMenu(self.screen, hero.getSpells(), "Spells:" ), True )
+                attack = hero.castSpell( self.myMenu.invMenu(hero.getSpells(), "Spells:" ), True )
                 if attack == 0:
                     pass
                 elif attack == 1:
                     engagedEnemy.takeDmg(self.fireball(itl))
             elif action == 'Item':
-                hero.useItem(self.myMenu.invMenu(self.screen, hero.getItems(), "Items:" ) )
+                hero.useItem(self.myMenu.invMenu(hero.getItems(), "Items:" ) )
             elif action == 'Flee':
                 if self.rollDie(1,3):
                     self.textMessage("You escaped safely.")

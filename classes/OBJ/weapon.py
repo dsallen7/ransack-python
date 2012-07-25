@@ -6,6 +6,7 @@ class Weapon():
         self.type = type
         self.level = level
         self.imgNum = type + SWORD
+        self.name = 'weapon'
     
     def getType(self):
         return self.type
