@@ -46,9 +46,10 @@ class miniMap():
         while (pygame.event.wait().type != pygame.KEYDOWN): pass
 
 class map():
-    def __init__(self, filename=None, mapball = None):
+    def __init__(self, filename=None, mapball = None, level=0):
         images.load()
         self.maptext = []
+        self.level = level
         self.lineOfVision = 0
         if filename != None:
             self.loadMap(filename)
@@ -223,5 +224,6 @@ class map():
         ry = ry/blocksize
         (topX, topY), (oldTopX, oldTopY) = self.updateWindowCoordinates(heroLoc, heroRect)
         gameBoard.blit( self.getMapWindow( (topX, topY), self.WINDOWSIZE ), (self.WINDOWOFFSET,self.WINDOWOFFSET) )
-        self.drawDarkness(rx, ry, gameBoard)
+        if self.level >= 1:
+            self.drawDarkness(rx, ry, gameBoard)
     

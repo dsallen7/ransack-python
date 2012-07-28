@@ -18,18 +18,9 @@ weaponPrices = { (0,0): 100,
                   (1,2): 1000,
                   (2,2): 1000,
                   (3,2): 1000,
-                
-                
-                
                 }
-itemPrices = { 92: 25,
-               93: 50,
-               94: 75,
-               95: 25,
-               96: 50,
-               97: 75 }
 
-class Store():
+class Blacksmith():
     
     def __init__(self, screen, hud, items, type):
         self.storeScreen = pygame.Surface( (300,300) )

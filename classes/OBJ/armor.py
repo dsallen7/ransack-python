@@ -12,5 +12,7 @@ class Armor():
         return self.type
     def getLevel(self):
         return self.level
-    def getImgNum(self):
+    def getImg(self):
         return self.imgNum
+    def getName(self):
+        return self.name

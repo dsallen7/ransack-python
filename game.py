@@ -3,7 +3,7 @@ import os
 import random
 import pickle
 
-from classes import hero, hud, battle, menu, enemy, store
+from classes import hero, hud, battle, menu, enemy, blacksmith, itemshop
 from IMG import images
 from const import *
 from load_image import *
@@ -15,14 +15,15 @@ class game():
         self.myHero = hero.hero()
         self.myMenu = menu.menu(screen)
         self.myMap = None
-        self.levelDepth = 2
+        self.levelDepth = 0
+        self.currentMap = 2
         
         # a dungeon is just an array of maps
         self.myDungeon = []
         for mapFileName in mapList:
             self.myDungeon += [map.map(mapFileName)]
         
-        self.myMap = self.myDungeon[self.levelDepth]
+        self.myMap = self.myDungeon[self.currentMap]
         
         self.screen = screen
         self.gameBoard = pygame.Surface( [300,300] )
@@ -46,7 +47,9 @@ class game():
         self.sounds[2] = pygame.mixer.Sound(os.path.join('SND', 'miss.wav' ))
         
         self.myHud = hud.hud(self.screen, self)
-        self.myBlacksmith = store.Store(screen, self.myHud)
+        self.myBlacksmith = blacksmith.Blacksmith(screen, self.myHud, [(0,0),(1,0),(2,0),(3,0),(0,1),(1,1),(2,1),(3,1)], 'blacksmith')
+        #self.myArmory = store.Store(screen, self.myHud, items, 'armory')
+        self.myItemShop = itemshop.Itemshop(screen, self.myHud, [6,7,8,9,10,11], 'itemshop')
         self.myBattle = battle.battle(self.screen,self.myHud)
         self.clock = clock
     
@@ -57,16 +60,16 @@ class game():
     def generateMap(self, dimension):
         rndMap = mapgen.Map(dimension)
         rndMap.generateMap(20)
-        newMap = map.map(None, rndMap.getMapBall())
+        newMap = map.map(None, rndMap.getMapBall(), level=self.levelDepth)
         return newMap
         
     def nextLevel(self):
-        self.levelDepth += 1
-        if self.levelDepth == len(self.myDungeon):
+        self.currentMap += 1
+        if self.currentMap == len(self.myDungeon):
             self.myDungeon.append(self.generateMap(40))
-            self.myMap = self.myDungeon[self.levelDepth]
+            self.myMap = self.myDungeon[self.currentMap]
         else:
-            self.myMap = self.myDungeon[self.levelDepth]
+            self.myMap = self.myDungeon[self.currentMap]
         self.DIM = self.myMap.getDIM()
         (x,y) = self.myMap.getPOE()
         self.myHero.setXY( x*blocksize,y*blocksize )
@@ -75,12 +78,12 @@ class game():
         else: self.myMap.setLOV(0)
     
     def prevLevel(self):
-        self.levelDepth -= 1
-        self.myMap = self.myDungeon[self.levelDepth]
+        self.currentMap -= 1
+        self.myMap = self.myDungeon[self.currentMap]
         self.DIM = self.myMap.getDIM()
         (x,y) = self.myMap.getPOEx()
         self.myHero.setXY( x*blocksize,y*blocksize )
-        if self.levelDepth <= 2:
+        if self.currentMap <= 2:
             self.myMap.setLOV(4)
         else: self.myMap.setLOV(0)
     
@@ -105,6 +108,8 @@ class game():
                     self.textMessage('That spell may only be cast in battle.')
             elif event.key == pygame.K_i:
                 self.myHero.useItem( self.myMenu.invMenu(self.myHero.getItems(), "Items:" ) )
+            elif event.key == pygame.K_w:
+                self.myHero.equipWeapon(self.myMenu.invMenu(self.myHero.getWeapons(), "Weapons:" ))
             elif event.key == pygame.K_t:
                 self.screenShot()
             elif event.key == pygame.K_m:
@@ -167,7 +172,9 @@ class game():
                 self.myHero.setRect( i, j, blocksize, blocksize)
                 if scrolling:
                     self.gameBoard.blit( self.myMap.getScrollingMapWindow( ( (topX*blocksize)+(idx*scrollX)-(blocksize*scrollX), (topY*blocksize)+(idx*scrollY)-(blocksize*scrollY) ) ), (0,0) )
-                    self.myMap.drawDarkness( newX/blocksize, newY/blocksize, self.gameBoard )
+                    
+                    if self.levelDepth >= 1:
+                        self.myMap.drawDarkness( newX/blocksize, newY/blocksize, self.gameBoard )
                 else: self.myMap.redraw(self.myHero.getXY(), self.myHero.getRect(), self.gameBoard)
                 self.myHero.takeStep()
                 self.displayGameBoard()
@@ -194,7 +201,10 @@ class game():
         # detect blocking tiles first, otherwise they will be ignored
         #stores
         if i == BLKSMDOOR:
-            self.myBlacksmith.enterStore()
+            self.myBlacksmith.enterStore(self.myHero)
+            return
+        if i == 43:
+            self.myItemShop.enterStore(self.myHero)
             return
         if i == -1 or i in range(24,86):
             return
@@ -237,7 +247,7 @@ class game():
             self.drawHero(x1,y1, direction)
             self.myHero.moving = False
             #roll the die to see if there will be a battle
-            if self.rollDie(0,30) and self.levelDepth > 2:
+            if self.rollDie(0,30) and self.currentMap > 2:
                 self.boxMessage("The battle is joined!")
                 self.gameBoard.fill( black )
                 g = self.myBattle.fightBattle(self.myHero, enemy.enemy(self.levelDepth))
@@ -259,15 +269,10 @@ class game():
         self.updateSprites()
         self.screen.blit( self.gameBoard, (75,75) )
         pygame.display.flip()
-    
-    def switchMap(self):
-        pass
 
     def mainLoop(self, mapList):
         self.screen.blit(self.gameFrame,(0,0))
         (X,Y) = self.myMap.getStartXY()
-        if self.levelDepth < 3:
-            self.myMap.setLOV(4)
         self.myHero.setXY( X*blocksize,Y*blocksize )
         self.updateSprites()
         self.drawHero( X*blocksize,Y*blocksize, animated=False )

@@ -21,6 +21,13 @@ class Item():
     def setQty(self, qty):
         self.qty = qty
     
+    def getQty(self):
+        if self.qty == 0:
+            return 999
+        else: return self.qty
+    def getName(self):
+        return self.name
+    
     def execute(self, hero):
         [cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX] = hero.getPlayerStats()
         stats = [cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX]

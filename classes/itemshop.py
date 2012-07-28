@@ -5,23 +5,8 @@ from const import *
 from classes import menu
 from IMG import images
 import random
+from OBJ import item
 
-weaponPrices = { (0,0): 100,
-                  (1,0): 100,
-                  (2,0): 100,
-                  (3,0): 100,
-                  (0,1): 500,
-                  (1,1): 500,
-                  (2,1): 500,
-                  (3,1): 500,
-                  (0,2): 1000,
-                  (1,2): 1000,
-                  (2,2): 1000,
-                  (3,2): 1000,
-                
-                
-                
-                }
 itemPrices = { 92: 25,
                93: 50,
                94: 75,
@@ -29,7 +14,7 @@ itemPrices = { 92: 25,
                96: 50,
                97: 75 }
 
-class Store():
+class Itemshop():
     
     def __init__(self, screen, hud, items, type):
         self.storeScreen = pygame.Surface( (300,300) )
@@ -42,19 +27,9 @@ class Store():
         self.images[0], r = load_image('cursor.bmp')
         self.items = []
         self.type = type
-        
-        if type == 'blacksmith':
-            from OBJ import weapon
-            for i in items:
-                self.items.append( weapon.Weapon(i[0], i[1]) )
-        elif type == 'armory':
-            from OBJ import armor
-            for i in items:
-                self.items.append( armor.Armor(i[0], i[1]) )
-        elif type == 'itemshop':
-            from OBJ import item
-            for i in items:
-                self.items.append( item.Item( i + 86 ) )
+
+        for i in items:
+            self.items.append( item.Item( i + 86 ) )
     
     def drawStoreScreen(self):
         self.myHud.update()
@@ -106,13 +81,13 @@ class Store():
             elif action == 'Buy':
                 purchase = self.buy()
                 if purchase == None: pass
-                elif hero.takeGold( weaponPrices[purchase] ):
-                    hero.gainWeapon( purchase[0],purchase[1] )
+                elif hero.takeGold( itemPrices[purchase] ):
+                    hero.getItem( purchase-86 )
                 else: self.myHud.txtMessage("You don't have enough money!")
             elif action == 'Sell':
-                sale = self.sell(hero.getWeapons())
+                sale = self.sell(hero.getItems())
                 if sale == None: pass
                 else: 
-                    hero.addGold( weaponPrices[ (sale.getType(),sale.getLevel()) ]/2 )
-                    hero.loseWeapon(sale)
+                    hero.addGold( itemPrices[ sale.getType() ]/2 )
+                    hero.takeItem(sale)
             self.drawStoreScreen()

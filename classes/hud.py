@@ -55,7 +55,8 @@ class hud( ):
             self.writeText(self.textBox1, (0,125), "Keys: "+str(kys), white, yellow)
         self.frameBox1.blit(self.textBox1,(25,25))
         #show equipped armor and weapon
-        weaponCopy = images.mapImages[ weapon.getImgNum() ]
+        weaponCopy = pygame.Surface( (30,30) )
+        weaponCopy.blit( images.mapImages[ weapon.getImg() ], (0,0) )
         self.writeText(weaponCopy, (20,20), 'L'+str(weapon.getLevel()), white, black, 14)
         self.frameBox1.blit(weaponCopy, (30, 180))
         
@@ -69,7 +70,7 @@ class hud( ):
                 self.frameBox1.blit(armorCopy, armorLocList[A])
         goldBox = pygame.Surface( (30,30) )
         goldBox.blit( images.mapImages[109], (0,0) )
-        self.writeText(goldBox, (15,20), '$'+str(self.game.myHero.getGold()), white, black,14)
+        self.writeText(goldBox, (0,20), '$'+str(self.game.myHero.getGold()), white, black,14)
         self.frameBox1.blit( goldBox, (30, 260) )
         self.screen.blit(self.frameBox1, (blocksize*10+75, 75) )
         self.screen.blit(self.frameBox2, (75, blocksize*10+75) )

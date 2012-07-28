@@ -5,9 +5,9 @@ import random
 
 class enemy():
     def __init__(self, level):
-        self.maxHP = random.randrange(10,20)
-        self.currHP = self.maxHP
         self.level = random.randrange(level, level+2)
+        self.maxHP = random.randrange(level+10,level+20)
+        self.currHP = self.maxHP
     
     def getLevel(self):
         return self.level

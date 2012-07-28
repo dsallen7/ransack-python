@@ -12,21 +12,21 @@ class Room():
         self.pos = pos
         self.xdim = xdim
         self.ydim = ydim
-        self.grid = []
+        self.grid = [range(xdim) for _ in range(ydim)]
         self.entrances = []
         
         if shape == 'square':
             (xpos, ypos) = self.getPos()
-            (xdim, ydim) = room.getDimensions()
-            for i in range(xdim+1):
-                self.setGrid(i+xpos, ypos, DefaultWallTile)
-                self.setGrid(i+xpos, ypos+ydim, DefaultWallTile)
-            for i in range(ydim+1):
-                self.setGrid(xpos, i+ypos, DefaultWallTile)
-                self.setGrid(xpos+xdim, i+ypos, DefaultWallTile)
-            for i in range(1,xdim):
-                for j in range(1,ydim):
-                    self.setGrid(xpos+i, ypos+j, 0)
+            (xdim, ydim) = self.getDimensions()
+            for i in range(xdim):
+                self.setGrid(i, 0, DefaultWallTile)
+                self.setGrid(i, ydim-1, DefaultWallTile)
+            for i in range(ydim):
+                self.setGrid(0, i, DefaultWallTile)
+                self.setGrid(xdim-1, i, DefaultWallTile)
+            for i in range(1,xdim-1):
+                for j in range(1,ydim-1):
+                    self.setGrid(i, j, 0)
         
     def getDimensions(self):
         return (self.xdim, self.ydim)
@@ -38,10 +38,11 @@ class Room():
         self.pos = pos
     
     def setGrid(self, x, y, e):
-        pass
+        #self.grid[y] = self.grid[y][:x] + [e] + self.grid[y][x+1:]
+        self.grid[y][x] = e
     
     def getGrid(self, x, y):
-        pass
+        return self.grid[y][x]
 
 class Map():
     def __init__(self, DIM):
@@ -49,6 +50,7 @@ class Map():
         for i in range(DIM):
             self.grid += [[126]*DIM]
         self.DIM = DIM
+        self.copyText = []
         
         self.chests = {}
     
@@ -69,24 +71,24 @@ class Map():
         else: return -1
     
     def genRoom(self, pos=(0,0) ):
-        return Room( randrange(4,7), randrange(4,7), pos, shape='square' )
+        return Room( randrange(5,8), randrange(5,8), pos, shape='square' )
         
     def branchTile(self, room):
         (xpos, ypos) = room.getPos()
         (xdim, ydim) = room.getDimensions()
         candidateList = []
-        for i in range(1,xdim-2):
-            candidateList += [(i+xpos,ypos)] + [(i+xpos,ypos+ydim)]
-        for j in range(1,ydim-2):
-            candidateList += [(xpos,i+ypos)] + [(xpos+xdim,i+ypos)]
+        for i in range(1,xdim-1):
+            candidateList += [(i+xpos,ypos)] + [(i+xpos,ypos+ydim-1)]
+        for i in range(1,ydim-1):
+            candidateList += [(xpos,i+ypos)] + [(xpos+xdim-1,i+ypos)]
         cand = choice(candidateList)
         if cand[0] == xpos:
             return (cand, 'w')
-        elif cand[0] == xpos+xdim:
+        elif cand[0] == xpos+xdim-1:
             return (cand, 'e')
         elif cand[1] == ypos:
             return (cand, 'n')
-        elif cand[1] == ypos+ydim:
+        elif cand[1] == ypos+ydim-1:
             return (cand, 's')
     
     def checkNewRoom(self, newRoom, tile, dir):
@@ -97,11 +99,11 @@ class Map():
         if xpos - xdim - 1 < 0 or ypos - ydim - 1 < 0:
             return False
         if dir == 'n':
-            newRoomPos = ( xpos - xdim/2, (ypos - ydim) -1 )
+            newRoomPos = ( xpos - xdim/2, (ypos - ydim) )
         elif dir == 's':
             newRoomPos = ( xpos - xdim/2, ypos + 1 )
         elif dir == 'w':
-            newRoomPos = ( (xpos - xdim)-1, ypos - ydim/2 )
+            newRoomPos = ( (xpos - xdim), ypos - ydim/2 )
         elif dir == 'e':
             newRoomPos = ( xpos + 1, ypos - ydim/2 )
         for i in range(newRoomPos[0], newRoomPos[0]+xdim):
@@ -116,9 +118,8 @@ class Map():
         startingRoom = self.genRoom()
         (xdim, ydim) = startingRoom.getDimensions()
         startingRoom.setPos( ( (self.DIM/2)-(xdim/2), (self.DIM/2)-(ydim/2) ) )
-        self.addRoom(startingRoom)
+        self.addRoom(startingRoom, startingRoom.getPos() )
         rooms += [startingRoom]
-        #self.draw()
         
         while len(rooms) < maxRooms:
         
@@ -136,10 +137,11 @@ class Map():
             
             # 7 see if new room fits next to selected room
             if self.checkNewRoom(newRoom, tile, dir):
+                startingRoom.setPos( ( (self.DIM/2)-(xdim/2), (self.DIM/2)-(ydim/2) ) )
             # 8  if yes - continue, if not go back to step 4
             
             # 9 add new room to map and list of rooms
-                self.addRoom(newRoom)
+                self.addRoom(newRoom, newRoom.getPos() )
                 rooms += [newRoom]
                 
             #10 create doorway into new room
@@ -150,7 +152,7 @@ class Map():
                 self.setMapEntry( x1+x2, y1+y2, 0)
                 newRoom.entrances.append( (x1+x2,y1+y2) )
             # 11 repeat step 4
-            #self.draw()
+            
         # set staircases
         # up
         choice1 = choice(rooms)
@@ -204,13 +206,11 @@ class Map():
             rooms.remove(choice4)
         self.chests = dict(chestlist)
         
-        #self.draw()
     
     def getMapBall(self):
         return (self.grid, self.POE, self.POEx, self.POE, self.chests )
     
     def saveMap(self):
-        #filename = self.getFilename()
         ball = self.getMapBall()
         try:
             save = open('rmap.dat', "w")
@@ -227,7 +227,15 @@ class Map():
         pass
     
     def mapPaste(self, pos):
-        pass
+        (sX, sY) = pos
+        copyText = self.copyText
+        for i in range( len(copyText[0]) ):
+            for j in range( len(copyText) ):
+                self.setMapEntry(sX+i, sY+j, copyText[j][i] )
+    
+    def addRoom(self, room, pos):
+        self.copyText = room.grid
+        self.mapPaste( pos )
     
     def draw(self):
         gridField.fill( [0,0,0] )

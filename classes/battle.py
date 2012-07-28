@@ -104,7 +104,7 @@ class battle():
             if action == 'Fight':
                 #hero attacks
                 if self.rollDie(0,2):
-                    dmg = random.randrange(sth/2,sth)
+                    dmg = random.randrange(sth/2,sth) + 10*weapon.getLevel()
                     self.textMessage("You hit the monster for "+str(dmg)+" points!")
                     #self.sounds[1].play()
                     engagedEnemy.takeDmg(dmg)
@@ -128,7 +128,7 @@ class battle():
             #enemy attacks
             if engagedEnemy.getHP() > 0:
                 if self.rollDie(0,2):
-                    dmg = random.randrange(1,5)
+                    dmg = random.randrange(enemy.getLevel(),enemy.getLevel()+5) - random.randrange(dex/2)
                     self.textMessage("The monster hits you for "+str(dmg)+" points!")
                     #self.sounds[1].play()
                     if hero.takeDmg(dmg) < 1:

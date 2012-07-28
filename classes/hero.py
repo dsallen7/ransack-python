@@ -40,6 +40,7 @@ class hero(pygame.sprite.Sprite):
         self.nextExp = 20
         
         self.weapons = []
+        self.weaponEquipped = None
         self.gainWeapon(0,0)
         self.equipWeapon(self.weapons[0])
         
@@ -52,7 +53,7 @@ class hero(pygame.sprite.Sprite):
         self.learnSpell(0)
         self.learnSpell(1)
         
-        self.gold = 0
+        self.gold = 1000
         
         self.step = False
 
@@ -154,11 +155,13 @@ class hero(pygame.sprite.Sprite):
                     i[0].qty = len(i)
                     availableItems.append(i[0])
         return availableItems
+    def takeItem(self, type):
+        self.items[type-86] = self.items[type-86][1:]
     def useItem(self, item):
         if item == None:
             return
         item.execute(self)
-        self.items[item.getType()-86].remove(item)
+        self.takeItem(item.getType())
     
     def getWeapons(self):
         return self.weapons
@@ -167,9 +170,14 @@ class hero(pygame.sprite.Sprite):
     # called when the player buys or finds a new weapon
     def gainWeapon(self, type, level):
         self.weapons.append(weapon.Weapon(type, level))
+    def loseWeapon(self, weapon):
+        self.weapons.remove(weapon)        
     def equipWeapon(self, weapon):
+        if weapon == None: return
+        if self.weaponEquipped is not None:
+            self.weapons.append(self.getWeaponEquipped() )
         self.weaponEquipped = weapon
-        self.weapons.remove(weapon)
+        self.loseWeapon(weapon)
     
     def getArmor(self):
         return self.armor

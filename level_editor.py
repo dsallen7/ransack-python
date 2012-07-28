@@ -144,15 +144,20 @@ class Map():
         (sX, sY) = source
         (dX, dY) = dest
         (xDim, yDim) = size
-        tmpGrid = [range(xDim)]*(yDim)
+        tmpGrid = [range(xDim) for _ in range(yDim)]
         for i in range(xDim):
             for j in range(yDim):
                 tmpGrid[j][i] = myMap.getEntry(i+sX, j+sY)
         for i in range(xDim):
             for j in range(yDim):
-                myMap.setEntry(i+dX, j+dY, tmpGrid[j][i])
                 myMap.setEntry(i+sX, j+sY, 0)
-                
+        for i in range(xDim):
+            for j in range(yDim):
+                myMap.setEntry(i+dX, j+dY, tmpGrid[j][i])
+    
+    def mapErase(self):
+        pass
+
 
 class Handler():
     
@@ -362,35 +367,55 @@ class Handler():
                 screen.blit(gridField, (0,0) )
                 pygame.display.flip()
     
-    def move(self):
+    def move(self, start):
         (p1, p2, p3, p4) = self.selectBoxPoints
+        sX, sY = start
+        xDim = (p3[0]-p1[0])/blocksize
+        yDim = (p3[1]-p1[1])/blocksize
         (tempX, tempY) = pygame.mouse.get_pos()
         xOffset = (tempX/blocksize)-(p1[0]/blocksize)
         yOffset = (tempY/blocksize)-(p1[1]/blocksize)
+        oldTopX = ( (tempX/blocksize)-xOffset )
+        oldTopY = ( (tempY/blocksize)-yOffset )
+        newTopX = None
+        newTopY = None
+        selectionImg = pygame.Surface( (xDim*blocksize, yDim*blocksize) )
+        emptyImg = pygame.Surface( (xDim*blocksize, yDim*blocksize) )
+        for i in range(xDim):
+            for j in range(yDim):
+                selectionImg.blit( images.mapImages[ myMap.getEntry(oldTopX+i, oldTopY+j) ], (i*blocksize, j*blocksize) )
+                emptyImg.blit( images.mapImages[ 0 ], (i*blocksize, j*blocksize) )
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                    if newTopX == None or newTopY == None:
+                        return
+                    else:
+                        myMap.mapMove( (sX/blocksize, sY/blocksize), ( xDim, yDim ), (newTopX, newTopY) )
+                        return
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
                     return
                 elif event.type == pygame.MOUSEMOTION:
                     (tempX, tempY) = pygame.mouse.get_pos()
                     # upper left hand corner
-                    oldTopX = p1[0]/blocksize
-                    oldTopY = p1[1]/blocksize
                     newTopX = ( (tempX/blocksize)-xOffset )
                     newTopY = ( (tempY/blocksize)-yOffset )
+                    oldTopX = p1[0]/blocksize
+                    oldTopY = p1[1]/blocksize
                     if oldTopX == newTopX and oldTopY == newTopY :
                         pass
-                    else:
+                    elif 0 <= newTopX*blocksize and (newTopX+ ((p3[0]-p1[0])/blocksize) )*blocksize < 600 and 0 <= newTopX*blocksize and (newTopY+ ((p3[1]-p1[1])/blocksize) )*blocksize < 600:
                         self.selectBoxPoints = ( (newTopX*blocksize,newTopY*blocksize), 
                                                  (newTopX*blocksize,(newTopY+ ((p3[1]-p1[1])/blocksize) )*blocksize), 
                                                  ((newTopX+ ((p3[0]-p1[0])/blocksize) )*blocksize,(newTopY+ ((p3[1]-p1[1])/blocksize) )*blocksize), 
                                                  ((newTopX+ ((p3[0]-p1[0])/blocksize) )*blocksize,newTopY*blocksize) )
                         (p1, p2, p3, p4) = self.selectBoxPoints
-                        myMap.mapMove( (oldTopX, oldTopY), ( (p3[0]-p1[0])/blocksize, (p3[1]-p1[1])/blocksize), (newTopX, newTopY) )
-                self.updateDisplay()
-                pygame.draw.lines( gridField, red, True, self.selectBoxPoints, 1 )
-                screen.blit(gridField, (0,0) )
-                pygame.display.flip()
+                        self.updateDisplay()
+                        gridField.blit( emptyImg, (sX*blocksize, sY*blocksize) )
+                        gridField.blit( selectionImg, (newTopX*blocksize, newTopY*blocksize) )
+                        pygame.draw.lines( gridField, red, True, self.selectBoxPoints, 1 )
+                        screen.blit(gridField, (0,0) )
+                        pygame.display.flip()
         
 
     def mouseHandler(self, e):
@@ -403,8 +428,8 @@ class Handler():
                 elif self.mouseAction == 'select':
                     if self.selectBoxPoints is not None:
                         (p1, p2, p3, p4) = self.selectBoxPoints
-                        if p1[0] <= mx < p3[0] and p1[1] <= my <= p3[1]:
-                            self.move()
+                        if p1[0] <= mx < p3[0] and p1[1] <= my < p3[1]:
+                            self.move( (p1[0], p1[1]) )
                         else: self.selection = ( (mx/blocksize, my/blocksize), self.select( (mx/blocksize, my/blocksize) ) )
                     else: self.selection = ( (mx/blocksize, my/blocksize), self.select( (mx/blocksize, my/blocksize) ) )
             elif e.button == 3:
