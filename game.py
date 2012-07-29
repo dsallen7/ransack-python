@@ -3,7 +3,7 @@ import os
 import random
 import pickle
 
-from classes import hero, hud, battle, menu, enemy, blacksmith, itemshop
+from classes import hero, hud, battle, menu, enemy, shop
 from IMG import images
 from const import *
 from load_image import *
@@ -21,7 +21,7 @@ class game():
         # a dungeon is just an array of maps
         self.myDungeon = []
         for mapFileName in mapList:
-            self.myDungeon += [map.map(mapFileName)]
+            self.myDungeon += [map.map(mapFileName, type='village')]
         
         self.myMap = self.myDungeon[self.currentMap]
         
@@ -47,9 +47,9 @@ class game():
         self.sounds[2] = pygame.mixer.Sound(os.path.join('SND', 'miss.wav' ))
         
         self.myHud = hud.hud(self.screen, self)
-        self.myBlacksmith = blacksmith.Blacksmith(screen, self.myHud, [(0,0),(1,0),(2,0),(3,0),(0,1),(1,1),(2,1),(3,1)], 'blacksmith')
+        self.myBlacksmith = shop.Shop(screen, self.myHud, 1, 'blacksmith')
         #self.myArmory = store.Store(screen, self.myHud, items, 'armory')
-        self.myItemShop = itemshop.Itemshop(screen, self.myHud, [6,7,8,9,10,11], 'itemshop')
+        self.myItemShop = shop.Shop(screen, self.myHud, 1, 'itemshop')
         self.myBattle = battle.battle(self.screen,self.myHud)
         self.clock = clock
     
@@ -66,16 +66,19 @@ class game():
     def nextLevel(self):
         self.currentMap += 1
         if self.currentMap == len(self.myDungeon):
+            self.levelDepth += 1
             self.myDungeon.append(self.generateMap(40))
             self.myMap = self.myDungeon[self.currentMap]
         else:
             self.myMap = self.myDungeon[self.currentMap]
+            if self.myMap.getType() == 'dungeon':
+                self.levelDepth += 1
         self.DIM = self.myMap.getDIM()
         (x,y) = self.myMap.getPOE()
         self.myHero.setXY( x*blocksize,y*blocksize )
-        if self.levelDepth <= 2:
-            self.myMap.setLOV(4)
-        else: self.myMap.setLOV(0)
+        if self.myMap.getType() == 'dungeon':
+            self.myMap.setLOV(0)
+        else: self.myMap.setLOV(4)
     
     def prevLevel(self):
         self.currentMap -= 1
@@ -83,9 +86,9 @@ class game():
         self.DIM = self.myMap.getDIM()
         (x,y) = self.myMap.getPOEx()
         self.myHero.setXY( x*blocksize,y*blocksize )
-        if self.currentMap <= 2:
-            self.myMap.setLOV(4)
-        else: self.myMap.setLOV(0)
+        if self.myMap.getType() == 'dungeon':
+            self.myMap.setLOV(0)
+        else: self.myMap.setLOV(4)
     
     #takes screen shot and saves as bmp in serial fashion, beginning with 1
     def screenShot(self):
@@ -173,8 +176,9 @@ class game():
                 if scrolling:
                     self.gameBoard.blit( self.myMap.getScrollingMapWindow( ( (topX*blocksize)+(idx*scrollX)-(blocksize*scrollX), (topY*blocksize)+(idx*scrollY)-(blocksize*scrollY) ) ), (0,0) )
                     
-                    if self.levelDepth >= 1:
-                        self.myMap.drawDarkness( newX/blocksize, newY/blocksize, self.gameBoard )
+                    if self.myMap.type == 'dungeon':
+                        self.myMap.drawShade( self.gameBoard )
+                        #self.myMap.drawDarkness( newX/blocksize, newY/blocksize, self.gameBoard )
                 else: self.myMap.redraw(self.myHero.getXY(), self.myHero.getRect(), self.gameBoard)
                 self.myHero.takeStep()
                 self.displayGameBoard()

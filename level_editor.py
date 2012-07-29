@@ -10,9 +10,6 @@ from UTIL import queue
 
 # Eztext courtesy of http://www.pygame.org/project-EzText-920-.html
 
-#NSWE
-CARDINALS = [ (0,-1), (0,1), (-1,0), (1,0) ]
-
 def load_image(name, colorkey=None):
     fullname = os.path.join('IMG', name)
     try:
@@ -270,9 +267,9 @@ class Handler():
             save = open(filename, "w")
             pickle.dump(ball, save)
             save.close()
-        except pygame.error, message:
-            print 'Cannot save map:', name
-            raise SystemExit, message
+        except IOError, message:
+            print 'Cannot load map:', filename
+            return
     
     def loadMap(self):
         filename = self.getFilename()
@@ -281,9 +278,9 @@ class Handler():
             ball = pickle.load(save)
             save.close()
             myMap.installBall(ball)
-        except pygame.error, message:
-            print 'Cannot load map:', name
-            raise SystemExit, message
+        except IOError, message:
+            print 'Cannot load map:', filename
+            return
     
     def generateMap(self, rooms):
         newMap = mapgen.Map(myMap.DIM)

@@ -6,17 +6,12 @@ from classes import menu
 from IMG import images
 import random
 from OBJ import item
+from SCRIPTS import shopScr
 
-itemPrices = { 92: 25,
-               93: 50,
-               94: 75,
-               95: 25,
-               96: 50,
-               97: 75 }
 
-class Itemshop():
+class Shop():
     
-    def __init__(self, screen, hud, items, type):
+    def __init__(self, screen, hud, level, type):
         self.storeScreen = pygame.Surface( (300,300) )
         self.inventory = []
         self.screen = screen
@@ -25,11 +20,24 @@ class Itemshop():
         self.myMenu = menu.menu(screen)
         self.images = range(2)
         self.images[0], r = load_image('cursor.bmp')
-        self.items = []
         self.type = type
+        self.level = level
+        self.items = []
+        if type == 'blacksmith':
+            items = shopScr.blacksmithShopsByLevel[self.level]
+            from OBJ import weapon
+            from prices import weaponPrices as prices
+            self.prices = prices
+            for i in items:
+                self.items.append( weapon.Weapon(i[0], i[1]) )
+        elif type == 'itemshop':
+            from OBJ import item
+            from prices import itemPrices as prices
+            self.prices = prices
+            items = shopScr.itemShopsByLevel[self.level]
+            for i in items:
+                self.items.append( item.Item( i + 86 ) )
 
-        for i in items:
-            self.items.append( item.Item( i + 86 ) )
     
     def drawStoreScreen(self):
         self.myHud.update()
@@ -67,10 +75,10 @@ class Itemshop():
             self.drawStoreScreen()
     
     def sell(self, items):
-        return self.myMenu.invMenu(items, 'Select item to buy:')
+        return self.myMenu.invMenu(items, 'Select item to sell:')
     
     def buy(self):
-        return self.myMenu.storeMenu(self.items, 'Select item to sell:')
+        return self.myMenu.storeMenu(self.items, 'Select item to buy:')
     
     def enterStore(self, hero):
         self.drawStoreScreen()
@@ -81,13 +89,23 @@ class Itemshop():
             elif action == 'Buy':
                 purchase = self.buy()
                 if purchase == None: pass
-                elif hero.takeGold( itemPrices[purchase] ):
-                    hero.getItem( purchase-86 )
+                elif hero.takeGold( self.prices[purchase] ):
+                    if self.type == 'blacksmith':
+                        hero.gainWeapon( purchase[0],purchase[1] )
+                    elif self.type == 'itemshop':
+                        hero.getItem( purchase-86 )
                 else: self.myHud.txtMessage("You don't have enough money!")
             elif action == 'Sell':
-                sale = self.sell(hero.getItems())
+                if self.type == 'blacksmith':
+                    sale = self.sell(hero.getWeapons())
+                elif self.type == 'itemshop':
+                    sale = self.sell(hero.getItems())
                 if sale == None: pass
                 else: 
-                    hero.addGold( itemPrices[ sale.getType() ]/2 )
-                    hero.takeItem(sale)
+                    if self.type == 'blacksmith':
+                        hero.addGold( self.prices[ (sale.getType(),sale.getLevel()) ]/2 )
+                        hero.loseWeapon(sale)
+                    elif self.type == 'itemshop':
+                        hero.addGold( self.prices[ sale.getType() ]/2 )
+                        hero.takeItem(sale.getType())
             self.drawStoreScreen()

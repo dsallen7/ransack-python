@@ -71,15 +71,15 @@
     # 68: lake 4
     # 69: lake 5
     # 70: lake 6
-    # 71: lake 7
+    # 71: lava
     # 72: house 2 upper left
     # 73: house 2 upper right
     # 74: bridge 1
     # 75: bridge 2
     # 76: rampart 1
     # 77: rampart 2
-    # 78: rampart 3
-    # 79: rampart 4
+    # 78: lava river 1
+    # 79: lava river 2
     # 80: tower 1
     # 81: tower 2
     # 82: tower 3
@@ -88,7 +88,7 @@
     # 85: crenellations 2
     # --------ITEMS---------
     # 86: fruit 1
-    # 87: fruit 2
+    # 87: cheese
     # 88: meat 1
     # 89: meat 2
     # 90: bread 1

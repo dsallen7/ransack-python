@@ -6,6 +6,8 @@ miniblocksize = 15
 
 DIM = 20
 
+#NSWE
+CARDINALS = [ (0,-1), (0,1), (-1,0), (1,0) ]
 HALFDIM = 10
 
 # Map tiles

@@ -77,10 +77,12 @@ class battle():
     # calls message
     def boxMessage(self, msg):
         self.myHud.boxMessage(msg)
+        self.myHud.update()
     
     # calls msgSystem
     def textMessage(self, msg):
         self.myHud.txtMessage(msg)
+        self.myHud.update()
     
     def fireball(self, itl):
         dmg = random.randrange(itl,2*itl)
@@ -98,6 +100,7 @@ class battle():
         engagedEnemy = enemy
         (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX) = hero.getPlayerStats()
         (armor, weapon) = ( hero.getArmorEquipped(), hero.getWeaponEquipped() )
+        self.textMessage( 'You are facing a level '+str(enemy.getLevel())+' '+enemy.getName()+'!' )
         while engagedEnemy.getHP() > 0:
             #clock.tick(15)
             action = self.getAction()
@@ -105,11 +108,11 @@ class battle():
                 #hero attacks
                 if self.rollDie(0,2):
                     dmg = random.randrange(sth/2,sth) + 10*weapon.getLevel()
-                    self.textMessage("You hit the monster for "+str(dmg)+" points!")
+                    self.textMessage('You hit the '+enemy.getName() +' for '+str(dmg)+' points!')
                     #self.sounds[1].play()
                     engagedEnemy.takeDmg(dmg)
                 else:
-                    self.textMessage("You missed the monster!")
+                    self.textMessage("You missed the "+enemy.getName()+"!")
                     #self.sounds[2].play()
             elif action == 'Magic':
                 attack = hero.castSpell( self.myMenu.invMenu(hero.getSpells(), "Spells:" ), True )
@@ -129,17 +132,17 @@ class battle():
             if engagedEnemy.getHP() > 0:
                 if self.rollDie(0,2):
                     dmg = random.randrange(enemy.getLevel(),enemy.getLevel()+5) - random.randrange(dex/2)
-                    self.textMessage("The monster hits you for "+str(dmg)+" points!")
+                    self.textMessage("The "+enemy.getName()+" hits you for "+str(dmg)+" points!")
                     #self.sounds[1].play()
                     if hero.takeDmg(dmg) < 1:
                         self.textMessage("You have died!")
                         return False
                 else:
-                    self.textMessage("The monster missed you!")
+                    self.textMessage("The "+enemy.getName()+" missed you!")
                     #self.sounds[2].play()
             self.myHud.update()
             self.drawBattleScreen()
-        self.textMessage("The monster is dead!")
+        self.textMessage("The "+enemy.getName()+" is dead!")
         if hero.increaseExp(5):
             self.textMessage("Congratulations! You have gained a level!")
         return random.randrange(enemy.getLevel()*2, enemy.getLevel()*4)
