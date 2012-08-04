@@ -60,12 +60,12 @@ class Shop():
     # returns choice to fightBattle()
     def getAction(self):
         menuBox = pygame.Surface( (124,99) )
-        options = ['Buy', 'Sell', 'Exit']
+        options = ['Buy', 'Sell', 'ExiT']
         selection = 0
         while True:
             menuBox.fill( gold )
             if pygame.font:
-                font = pygame.font.SysFont("URW Chancery L", 14)
+                font = pygame.font.Font(os.getcwd()+"/FONTS/SpinalTfanboy.ttf", 18)
                 for i in range(3):
                     menuBox.blit( font.render(options[i], 1, white, gold), (25,i*25) )
             for event in pygame.event.get():
@@ -87,16 +87,16 @@ class Shop():
             self.drawStoreScreen()
     
     def sell(self, items):
-        return self.myMenu.invMenu(items, 'Select item to sell:')
+        return self.myMenu.invMenu(items, 'SelecT iTem to sell:')
     
     def buy(self):
-        return self.myMenu.storeMenu(self.items, 'Select item to buy:', self.prices)
+        return self.myMenu.storeMenu(self.items, 'SelecT iTem to buy:', self.prices)
     
     def enterStore(self, hero):
         self.drawStoreScreen()
         while True:
             action = self.getAction()
-            if action == 'Exit':
+            if action == 'ExiT':
                 return
             elif action == 'Buy':
                 purchase = self.buy()
@@ -106,7 +106,7 @@ class Shop():
                         hero.gainWeapon( purchase[0],purchase[1] )
                     elif self.type == 'itemshop':
                         hero.getItem( purchase-86 )
-                else: self.myHud.txtMessage("You don't have enough money!")
+                else: self.myHud.txtMessage("You don'T have enough money!")
             elif action == 'Sell':
                 if self.type == 'blacksmith':
                     sale = self.sell(hero.getWeapons())

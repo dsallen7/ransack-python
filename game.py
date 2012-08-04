@@ -118,9 +118,9 @@ class game():
                 pass
             elif event.key == pygame.K_s:
                 if self.myHero.castSpell( self.myMenu.invMenu(self.myHero.getSpells(), "Spells:" ) ) == -1:
-                    self.textMessage('That spell may only be cast in battle.')
+                    self.textMessage('ThaT spell may only be casT in baTTle.')
             elif event.key == pygame.K_i:
-                self.myHero.useItem( self.myMenu.invMenu(self.myHero.getItems(), "Items:" ) )
+                self.myHero.useItem( self.myMenu.invMenu(self.myHero.getItems(), "ITems:" ) )
             elif event.key == pygame.K_w:
                 self.myHero.equipWeapon(self.myMenu.invMenu(self.myHero.getWeapons(), "Weapons:" ))
             elif event.key == pygame.K_t:

@@ -1,6 +1,8 @@
 ransack-python
 ==============
 
+*** WARNING *** Currently "broken" on Windows or Mac. Will fix soon.
+
 Ransack - a Python based roguelike
 
 In very early stages at the moment. Our hero can explore the levels, collect items, and fight monsters.

@@ -21,8 +21,8 @@ class battle():
         
         self.myHud = hud
     
-    def writeText(self, surface, loc, text, fgc, bgc, size=18, font="URW Chancery L"):
-        font = pygame.font.SysFont(font, size)
+    def writeText(self, surface, loc, text, fgc, bgc, size=18, font="SpinalTfanboy.ttf"):
+        font = pygame.font.Font("../FONTS/"+font, size)
         surface.blit( font.render(text, 1, fgc, bgc), loc )
         
     def drawBattleScreen(self):
@@ -36,12 +36,12 @@ class battle():
     # returns choice to fightBattle()
     def getAction(self):
         menuBox = pygame.Surface( (60,100) )
-        options = ['Fight', 'Magic', 'Item', 'Flee']
+        options = ['FighT', 'Magic', 'Item', 'Flee']
         selection = 0
         while True:
             menuBox.fill( gold )
             if pygame.font:
-                font = pygame.font.SysFont("URW Chancery L", 14)
+                font = pygame.font.Font("../FONTS/SpinalTfanboy.ttf", 14)
                 for i in range(4):
                     menuBox.blit( font.render(options[i], 1, white, gold), (25,i*25) )
             for event in pygame.event.get():
@@ -86,7 +86,7 @@ class battle():
     
     def fireball(self, itl):
         dmg = random.randrange(itl,2*itl)
-        self.textMessage('The fireball hits the monster for '+str(dmg)+' points!')
+        self.textMessage('The fireball hiTs The monsTer for '+str(dmg)+' poinTs!')
         return dmg
     
     def iceball(self):
@@ -104,15 +104,15 @@ class battle():
         while engagedEnemy.getHP() > 0:
             #clock.tick(15)
             action = self.getAction()
-            if action == 'Fight':
+            if action == 'FighT':
                 #hero attacks
                 if self.rollDie(0,2):
                     dmg = random.randrange(sth/2,sth) + 10*weapon.getLevel()
-                    self.textMessage('You hit the '+enemy.getName() +' for '+str(dmg)+' points!')
+                    self.textMessage('You hiT The '+enemy.getName() +' for '+str(dmg)+' poinTs!')
                     #self.sounds[1].play()
                     engagedEnemy.takeDmg(dmg)
                 else:
-                    self.textMessage("You missed the "+enemy.getName()+"!")
+                    self.textMessage("You missed The "+enemy.getName()+"!")
                     #self.sounds[2].play()
             elif action == 'Magic':
                 attack = hero.castSpell( self.myMenu.invMenu(hero.getSpells(), "Spells:" ), True )
@@ -121,18 +121,18 @@ class battle():
                 elif attack == 1:
                     engagedEnemy.takeDmg(self.fireball(itl))
             elif action == 'Item':
-                hero.useItem(self.myMenu.invMenu(hero.getItems(), "Items:" ) )
+                hero.useItem(self.myMenu.invMenu(hero.getItems(), "ITems:" ) )
             elif action == 'Flee':
                 if self.rollDie(1,3):
                     self.textMessage("You escaped safely.")
                     return True
                 else:
-                    self.textMessage("You can't escape!")                    
+                    self.textMessage("You can'T escape!")       
             #enemy attacks
             if engagedEnemy.getHP() > 0:
                 if self.rollDie(0,2):
                     dmg = random.randrange(enemy.getLevel(),enemy.getLevel()+5) - random.randrange(dex/2)
-                    self.textMessage("The "+enemy.getName()+" hits you for "+str(dmg)+" points!")
+                    self.textMessage("The "+enemy.getName()+" hiTs you for "+str(dmg)+" poinTs!")
                     #self.sounds[1].play()
                     if enemy.poison:
                         if self.rollDie(1,5):
@@ -148,5 +148,5 @@ class battle():
             self.drawBattleScreen()
         self.textMessage("The "+enemy.getName()+" is dead!")
         if hero.increaseExp(5):
-            self.textMessage("Congratulations! You have gained a level!")
+            self.textMessage("CongraTulaTions! You have gained a level!")
         return random.randrange(enemy.getLevel()*2, enemy.getLevel()*4)

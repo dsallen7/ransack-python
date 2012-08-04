@@ -33,8 +33,8 @@ class hud( ):
         
         images.load()
     
-    def writeText(self, surface, loc, text, fgc, bgc, size=18, font="spinaltfanboy"):
-        font = pygame.font.SysFont(font, size)
+    def writeText(self, surface, loc, text, fgc, bgc, size=14, font=os.getcwd()+"/FONTS/gothic.ttf"):
+        font = pygame.font.Font(font, size)
         surface.blit( font.render(text, 1, fgc, bgc), loc )
     
     def boxStat(self, stat, mStat, fgCol, bgCol):
@@ -51,16 +51,16 @@ class hud( ):
             #self.writeText(self.textBox1, (0,0), "Score: "+str(scr), white, gold)
             #self.writeText(self.textBox1, (0,25), "HP: "+str(cHP)+"/"+str(mHP), white, gold)
             #self.writeText(self.textBox1, (0,50), "MP: "+str(cMP)+"/"+str(mMP), white, gold)
-            self.writeText(self.textBox1, (0,0), "Int: "+str(itl), white, gold,14)
-            self.writeText(self.textBox1, (30,0), "Str: "+str(sth), white, gold,14)
-            self.writeText(self.textBox1, (60,0), "Dex: "+str(dex), white, gold,14)
-            self.writeText(self.textBox1, (0,25), "Exp: "+str(cEX)+"/"+str(nEX), white, gold)
+            self.writeText(self.textBox1, (0,0), "INT: "+str(itl), white, gold,12)
+            self.writeText(self.textBox1, (30,0), "STR: "+str(sth), white, gold,12)
+            self.writeText(self.textBox1, (60,0), "DEX: "+str(dex), white, gold,12)
+            self.writeText(self.textBox1, (0,25), "EXP: "+str(cEX)+"/"+str(nEX), white, gold)
             self.writeText(self.textBox1, (0,50), "Keys: "+str(kys), white, gold)
         self.frameBox1.blit(self.textBox1,(25,100))
         #show equipped armor and weapon
         weaponCopy = pygame.Surface( (30,30) )
         weaponCopy.blit( images.mapImages[ weapon.getImg() ], (0,0) )
-        self.writeText(weaponCopy, (20,20), 'L'+str(weapon.getLevel()), white, black, 14)
+        self.writeText(weaponCopy, (17,17), 'L'+str(weapon.getLevel()), white, black, 10)
         self.frameBox1.blit(weaponCopy, (30, 180))
         
         armorLocList = [(70,180), (30,220), (70,220)]
@@ -69,11 +69,11 @@ class hud( ):
                 pass
             else:
                 armorCopy = images.mapImages[ armor[A].getImgNum() ]
-                self.writeText(armorCopy, (20,20), 'L'+str(armor[A].getLevel()), white, black,14)
+                self.writeText(armorCopy, (20,20), 'L'+str(armor[A].getLevel()), white, black,10)
                 self.frameBox1.blit(armorCopy, armorLocList[A])
         goldBox = pygame.Surface( (30,30) )
         goldBox.blit( images.mapImages[109], (0,0) )
-        self.writeText(goldBox, (0,20), '$'+str(self.game.myHero.getGold()), white, black,14)
+        self.writeText(goldBox, (5,17), '$'+str(self.game.myHero.getGold()), white, black,10)
         self.frameBox1.blit( goldBox, (30, 260) )
         self.screen.blit(self.frameBox1, (blocksize*10+75, 75) )
         self.screen.blit(self.frameBox2, (75, blocksize*10+75) )
@@ -89,7 +89,7 @@ class hud( ):
         self.scrollText[3] = self.scrollText[4]
         self.scrollText[4] = msg
         if pygame.font:
-            font = pygame.font.SysFont("spinaltfanboy", 18)
+            font = pygame.font.Font(os.getcwd()+"/FONTS/SpinalTfanboy.ttf", 18)
             for i in range(5):
                 Msg = font.render( self.scrollText[i], 1, white, gold)
                 self.textBox2.blit(Msg, (0,20*i) )
@@ -111,7 +111,7 @@ class hud( ):
         borderBox = pygame.Surface( ( 186, 60 ) )
         borderBox.fill( grey )
         if pygame.font:
-            font = pygame.font.SysFont("spinaltfanboy", 18)
+            font = pygame.font.Font(os.getcwd()+"/FONTS/SpinalTfanboy.ttf", 18)
             msgText = font.render( text, 1, white, gold )
             msgBox.blit(msgText, (10,10) )
         borderBox.blit( msgBox, (5, 5) )

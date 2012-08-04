@@ -1,4 +1,4 @@
-import pygame, random
+import pygame, random, os
 from load_image import *
 from const import *
 
@@ -44,10 +44,10 @@ class menu():
                 itemBox.fill( black )
                 itemBox.blit( images.mapImages[item.getImg()], (0, 0) )
                 if pygame.font:
-                    font = pygame.font.SysFont("spinaltfanboy", 14)
+                    font = pygame.font.Font(os.getcwd()+"/FONTS/gothic.ttf", 10)
                     if item.name == 'item': msgText = font.render( 'x'+str(item.qty), 1, white, black )
                     else: msgText = font.render( 'L'+str(item.getLevel()), 1, white, black )
-                    itemBox.blit(msgText, (20,20) )
+                    itemBox.blit(msgText, (17,17) )
                 menuBox.blit( itemBox, positions[i] )
                 availableItems.append(item)
         return menuBox, availableItems
@@ -55,8 +55,8 @@ class menu():
     def displayChest(self, chest):
         menuBox = self.openWindow(188, 120)
         if pygame.font:
-            font = pygame.font.SysFont("spinaltfanboy", 18)
-            msgText = font.render( 'Chest', 1, white, gold )
+            font = pygame.font.Font("../FONTS/SpinalTfanboy.ttf", 10)
+            msgText = font.render( 'ChesT', 1, white, gold )
             menuBox.blit(msgText, (10,10) )
         #draw available items in window
         w = 10 #var to draw items across screen
@@ -68,9 +68,9 @@ class menu():
             itemBox.fill( black )
             itemBox.blit( images.mapImages[img+86], (0, 0) )
             if pygame.font:
-                font = pygame.font.SysFont("spinaltfanboy", 8)
+                font = pygame.font.Font(os.getcwd()+"/FONTS/gothic.ttf", 14)
                 msgText = font.render( 'x'+str(qty), 1, white, black )
-                itemBox.blit(msgText, (20,20) )
+                itemBox.blit(msgText, (17,17) )
             menuBox.blit( itemBox, (w, 30) )
             if w not in hPosList:
                 hPosList += [w]
@@ -93,7 +93,8 @@ class menu():
         menuBox = self.openWindow(200, 125)
                 
         if pygame.font:
-            font = pygame.font.SysFont("spinaltfanboy", 18)
+            #print os.getcwd()
+            font = pygame.font.Font(os.getcwd()+"/FONTS/SpinalTfanboy.ttf", 14)
             msgText = font.render( text, 1, white, gold )
             menuBox.blit(msgText, (10,10) )
         
@@ -144,7 +145,7 @@ class menu():
         menuBox = self.openWindow(200, 125)
         
         if pygame.font:
-            font = pygame.font.SysFont("spinaltfanboy", 18)
+            font = pygame.font.Font(os.getcwd()+"/FONTS/SpinalTfanboy.ttf", 14)
             msgText = font.render( text, 1, white, gold )
             menuBox.blit(msgText, (10,10) )
         

@@ -60,7 +60,7 @@ def main():
     titleImg, titleRect = load_image('titlescreen.bmp', -1)
     titleScreen.blit(titleImg, (50,50) )
     selection = 0
-    options = ['Begin New Game', 'Load Saved Game', 'Level Editor']
+    options = ['Begin New Game', 'Load Saved Game', 'Level EdiTor']
     screen.blit(titleScreen, (0,0))
     menuBox = pygame.Surface( (200,80) )
     while True:
@@ -69,7 +69,7 @@ def main():
         clock.tick(20)
         
         if pygame.font:
-            font = pygame.font.SysFont("spinaltfanboy", 28)
+            font = pygame.font.Font("./FONTS/SpinalTfanboy.ttf", 28)
             for i in range(len(options)):
                 menuBox.blit( font.render(options[i], 1, gold, brown), (30,(i*25)) )
     

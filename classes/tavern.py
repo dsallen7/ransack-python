@@ -3,7 +3,7 @@ from load_image import *
 from const import *
 from classes import menu
 from IMG import images
-import random
+import random, os
 from OBJ import item
 from SCRIPTS import shopScr
 
@@ -30,12 +30,12 @@ class Tavern():
     
     def getAction(self):
         menuBox = pygame.Surface( (124,99) )
-        options = ['Save', 'Load', 'Return to Game', 'Exit to Main Menu']
+        options = ['Save', 'Load', 'ReTurn to Game', 'ExiT To Main Menu']
         selection = 0
         while True:
             menuBox.fill( gold )
             if pygame.font:
-                font = pygame.font.SysFont("URW Chancery L", 14)
+                font = pygame.font.Font(os.getcwd()+"/FONTS/SpinalTfanboy.ttf", 18)
                 for i in range(len(options)):
                     menuBox.blit( font.render(options[i], 1, white, gold), (25,i*25) )
             for event in pygame.event.get():
@@ -68,7 +68,7 @@ class Tavern():
         while True:
             saveBox.fill( gold )
             if pygame.font:
-                font = pygame.font.SysFont("URW Chancery L", 14)
+                font = pygame.font.Font("../FONTS/SpinalTfanboy.ttf", 14)
                 for i in range(3):
                     saveBox.blit( font.render(saveFiles[i], 1, white, gold), (25,i*25) )
             for event in pygame.event.get():
@@ -104,7 +104,7 @@ class Tavern():
         self.drawStoreScreen()
         while True:
             action = self.getAction()
-            if action == 'Return to Game':
+            if action == 'ReTurn To Game':
                 return
             elif action == 'Save':
                 #game.gameOn = False
@@ -117,7 +117,7 @@ class Tavern():
                 self.load( filename )
                 game.loadFileName = filename
                 return
-            elif action == 'Exit to Main Menu':
+            elif action == 'ExiT to Main Menu':
                 game.gameOn = False
                 game.exitCode = 0
                 game.loadFileName = None
