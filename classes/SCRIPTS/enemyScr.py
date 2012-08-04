@@ -1,7 +1,10 @@
-enemiesByLevel = { 1: ['Skeleton', 'Kobold', 'Orc'],
-                    2: ['Skeleton', 'Kobold', 'Orc'],
+enemiesByLevel = {  1: ['Skeleton', 'Kobold', 'Orc', 'Scorpion'],
+                    2: ['Skeleton', 'Kobold', 'Orc', 'Scorpion'],
                     3: ['Skeleton', 'Kobold', 'Orc', 'Dragon'],
                     4: ['Skeleton', 'Kobold', 'Orc', 'Dragon'],
-                    5: ['Skeleton', 'Kobold', 'Orc', 'Dragon', 'Zombie']
+                    5: ['Orc', 'Dragon', 'Zombie', 'Cobra'],
+                    6: ['Orc', 'Dragon', 'Zombie', 'Cobra']
 
 }
+
+pEnemies = ['Cobra', 'Scorpion']

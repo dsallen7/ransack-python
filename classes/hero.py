@@ -9,7 +9,7 @@ import Queue
 
 class hero(pygame.sprite.Sprite):
     
-    def __init__(self):
+    def __init__(self, load=None):
         pygame.sprite.Sprite.__init__(self) #call Sprite intializer
         images.load()
         self.images = images.heroImages
@@ -19,53 +19,64 @@ class hero(pygame.sprite.Sprite):
         
         self.dir = 'd'
         
-        self.strength = random.randrange(5,10)
-        self.intell = random.randrange(5,10)
-        self.dex = random.randrange(5,10)
-        
-        self.X = blocksize
-        self.Y = blocksize
-        
-        self.currHP = 50
-        self.maxHP = 50
-        
-        self.currMP = 20
-        self.maxMP = 20
-        
-        self.score = 0
-        self.keys = 0
-        
-        self.level = 1
-        self.currExp = 0
-        self.nextExp = 20
-        
-        self.weapons = []
-        self.weaponEquipped = None
-        self.gainWeapon(0,0)
-        self.equipWeapon(self.weapons[0])
-        
-        self.armor = []
-        self.armorEquipped = [None,None,None]
-        
-        self.items = range(20)
-        
-        self.spells = []
-        self.learnSpell(0)
-        self.learnSpell(1)
-        
-        self.gold = 1000
+        if load == None:
+            
+            self.strength = random.randrange(5,10)
+            self.intell = random.randrange(5,10)
+            self.dex = random.randrange(5,10)
+            
+            self.X = blocksize
+            self.Y = blocksize
+            
+            self.currHP = 50
+            self.maxHP = 50
+            
+            self.currMP = 20
+            self.maxMP = 20
+            
+            self.score = 0
+            self.keys = 0
+            
+            self.level = 1
+            self.currExp = 0
+            self.nextExp = 20
+            
+            self.weapons = []
+            self.weaponEquipped = None
+            self.gainWeapon(0,0)
+            self.equipWeapon(self.weapons[0])
+            
+            self.armor = []
+            self.armorEquipped = [None,None,None]
+            
+            self.items = range(20)
+            
+            self.spells = []
+            self.learnSpell(0)
+            self.learnSpell(1)
+            
+            self.gold = 50
+            self.isPoisoned = False
+        else: self.installLoadedHero(load)
         
         self.step = False
+        self.stepIdx = 1
 
     def takeStep(self):
+        self.imgIdx = ( 1 - (self.imgIdx % 2) ) + (2 * (self.imgIdx / 2))
+        self.image = self.images[self.imgIdx]
+        '''
+        if self.dir == 'up':
+            if self.imgIdx == 0: self.imgIdx = 1
         if self.step == True:
             self.imgIdx -= 1
             self.image = self.images[self.imgIdx]
             self.step = False
-        else: 
+        else:
             self.imgIdx += 1
             self.image = self.images[self.imgIdx]
             self.step = True
+        '''
 
     def getXY(self):
         return (self.X,self.Y)
@@ -215,6 +226,73 @@ class hero(pygame.sprite.Sprite):
     def getSpells(self):
         return self.spells
     
+    def getSaveBall(self):
+        str = self.strength
+        itl = self.intell
+        dex = self.dex
+        
+        X = self.X
+        Y = self.Y
+        
+        cHP = self.currHP
+        mHP = self.maxHP
+        
+        cMP = self.currMP
+        mMP = self.maxMP
+        
+        scr = self.score
+        kys = self.keys
+        
+        lvl = self.level
+        cXP = self.currExp
+        nXP = self.nextExp
+        
+        wpn = self.weapons
+        weq = self.weaponEquipped
+        
+        arm = self.armor
+        aeq = self.armorEquipped
+        
+        itm = self.items
+        spl = self.spells
+        gld = self.gold
+        return (str, itl, dex, X, Y, cHP, mHP, cMP, mMP, scr, kys, lvl, cXP, nXP, wpn, weq, arm, aeq, itm, spl, gld)
+    
+    def installLoadedHero(self, load):
+        (str, itl, dex, X, Y, cHP, mHP, cMP, mMP, scr, kys, lvl, cXP, nXP, wpn, weq, arm, aeq, itm, spl, gld) = load
+        self.strength = str
+        self.intell = itl
+        self.dex = dex
+        
+        self.X = X
+        self.Y = Y
+        
+        self.currHP = cHP
+        self.maxHP = mHP
+        
+        self.currMP = cMP
+        self.maxMP = mMP
+        
+        self.score = scr
+        self.keys = kys
+        
+        self.level = lvl
+        self.currExp = cXP
+        self.nextExp = nXP
+        
+        self.weapons = wpn
+        self.weaponEquipped = weq
+        
+        self.armor = arm
+        self.armorEquipped = aeq
+        
+        self.items = itm
+        
+        self.spells = spl
+        
+        self.gold = gld
+        
+    
     # for debugging purposes
     def showLocation(self, gameBoard):
         (x1,y1,x2,y2) = self.rect
@@ -224,6 +302,6 @@ class hero(pygame.sprite.Sprite):
             font = pygame.font.SysFont("arial", 14)
             locText = font.render( "Self.X:"+str(self.X)+"Self.Y:"+str(self.Y)+"RectX:"+str(x1)+"RectY"+str(y1), 1, red, yellow )
             locBox.blit(locText, (10,10) )
-        gameBoard.blit(locBox, (100, 300) )
+        gameBoard.blit(locBox, (0, 200) )
         pygame.display.flip()
     

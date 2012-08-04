@@ -1,4 +1,4 @@
-import pygame, game, random
+import pygame, game, random, pickle
 from const import *
 from load_image import *
 
@@ -16,24 +16,93 @@ pygame.init()
 clock = pygame.time.Clock()
 random.seed()
 
+
+images = range(3)
+images[0], r = load_image('cursor.bmp', -1)
+
+
+def getFile():
+    saveFiles = range(3)
+    for i in range(3):
+        if os.access("ransack"+str(i)+".sav", os.F_OK):
+            saveFiles[i] = "ransack"+str(i)+".sav"
+        else: saveFiles[i] = 'No file'
+    
+    saveBox = pygame.Surface( (150,100) )
+    selection = 0
+    while True:
+        saveBox.fill( gold )
+        if pygame.font:
+            font = pygame.font.SysFont("URW Chancery L", 14)
+            for i in range(3):
+                saveBox.blit( font.render(saveFiles[i], 1, white, gold), (25,i*25) )
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                os.sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    selection -= 1
+                    if selection == -1:
+                        selection = 2
+                if event.key == pygame.K_DOWN:
+                    selection += 1
+                    if selection == 3:
+                        selection = 0
+                if event.key == pygame.K_RETURN:
+                    return "ransack"+str(selection)+".sav"
+        saveBox.blit( images[0], (0, selection*25) )
+        screen.blit( saveBox, (200,200) )
+        pygame.display.flip()
+
 def main():    
     titleScreen = pygame.Surface(screenSize)
     titleScreen.fill(black)
     titleImg, titleRect = load_image('titlescreen.bmp', -1)
     titleScreen.blit(titleImg, (50,50) )
-    
+    selection = 0
+    options = ['Begin New Game', 'Load Saved Game', 'Level Editor']
     screen.blit(titleScreen, (0,0))
+    menuBox = pygame.Surface( (200,80) )
     while True:
+        menuBox.fill( brown )
         screen.blit(titleScreen, (0,0))
         clock.tick(20)
+        
+        if pygame.font:
+            font = pygame.font.SysFont("spinaltfanboy", 28)
+            for i in range(len(options)):
+                menuBox.blit( font.render(options[i], 1, gold, brown), (30,(i*25)) )
     
         for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                os.sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     os.sys.exit()
-                if event.key == pygame.K_SPACE:
-                    newGame = game.game(screen, clock)
-                    newGame.mainLoop(mapList)
+                if event.key == pygame.K_UP:
+                    selection -= 1
+                    if selection == -1:
+                        selection = len(options)-1
+                if event.key == pygame.K_DOWN:
+                    selection += 1
+                    if selection == len(options):
+                        selection = 0
+                if event.key == pygame.K_RETURN:
+                    if options[selection] == 'Begin New Game':
+                        newGame = game.game(screen, clock)
+                        newGame.mainLoop()
+                    elif options[selection] == 'Load Saved Game':
+                        try:
+                            savFile = open(getFile(), 'r')
+                            ball = pickle.load(savFile)
+                            savFile.close()
+                        except IOError, e:
+                            print 'File I/O error', e
+                        Game = game.game(screen, clock, loadHero=ball[0], loadDungeon=ball[1], currentMap=ball[2])
+                        Game.mainLoop()
+        
+        menuBox.blit( images[0], (0, selection*25) )
+        titleScreen.blit(menuBox, (200, 375) )
         pygame.display.flip()
     
 main()

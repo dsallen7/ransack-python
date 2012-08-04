@@ -1,7 +1,6 @@
 import pygame, random, pickle, ppov
 from load_image import *
 from const import *
-from IMG import images
 from UTIL import queue
 from types import *
 
@@ -9,16 +8,7 @@ class miniMap():
     def __init__(self, maptext):
         self.maptext = maptext
         self.mapColors = [black,brickred,yellow,grey,red,white,brown,green,dkgreen,blue,ltgrey]
-        
-        self.mapColorBlocks = range(11)
-        
-        for i in range(11):
-            self.mapColorBlocks[i] = pygame.Surface( (miniblocksize,miniblocksize) )
-            self.mapColorBlocks[i].fill( self.mapColors[i] )
-        
-        self.miniMapBoard = pygame.Surface( [300,300] )
-        self.miniMapBoard.fill( black )
-        
+                
         self.colorDict = {-1:0, 0:0, 3:3, 4:3, 5:4, 6:4, 7:4, 8:10, 9:6, 10:5, 11:5, 12:7, 13:7, 
                           16:6, 20:10, 21:10, 22:10, 23:10, 24:1, 25:1, 28:3, 29:10, 32:3, 33:3, 34:3, 35:3, 36:3, 37:3, 41:1,
                           42:5, 42:5, 43:5, 44:5, 45:5, 46:5, 47:5, 48:1, 49:1, 50:1, 51:8, 52:8, 53:8, 55:3, 59:1, 60:8, 61:3, 62:3, 63:1, 64:5, 
@@ -37,7 +27,8 @@ class miniMap():
             return False
     
     def drawMiniMap(self,screen, topCorner, playerXY, visDict):
-        self.miniMapBoard.fill(black)
+        miniMapBoard = pygame.Surface( [300,300] )
+        miniMapBoard.fill(black)
         self.visDict = visDict
         if len(self.maptext) <= DIM:
             topCorner = (0,0)
@@ -47,16 +38,19 @@ class miniMap():
         ty = py - HALFDIM
         for i in range(DIM):
             for j in range(DIM):
+                mapColorBlock = pygame.Surface( (miniblocksize,miniblocksize) )
                 if (i+tx,j+ty) == playerXY:
-                    self.miniMapBoard.blit( self.mapColorBlocks[ 5 ], ( i*miniblocksize, j*miniblocksize) )
-                elif self.isMapped( (i+tx,j+ty) ): self.miniMapBoard.blit( self.mapColorBlocks[ self.colorDict[self.getEntry(i+tx,j+ty)] ], ( i*miniblocksize, j*miniblocksize) )
-        screen.blit(self.miniMapBoard, (75,75) )
+                    mapColorBlock.fill( self.mapColors[5] )
+                    miniMapBoard.blit( mapColorBlock, ( i*miniblocksize, j*miniblocksize) )
+                elif self.isMapped( (i+tx,j+ty) ):
+                    mapColorBlock.fill( self.mapColors[self.colorDict[self.getEntry(i+tx,j+ty)]] )
+                    miniMapBoard.blit( mapColorBlock, ( i*miniblocksize, j*miniblocksize) )
+        screen.blit(miniMapBoard, (75,75) )
         pygame.display.flip()
         while (pygame.event.wait().type != pygame.KEYDOWN): pass
 
 class map():
     def __init__(self, filename=None, mapball = None, level=0, type='dungeon'):
-        images.load()
         self.maptext = []
         self.level = level
         self.lineOfVision = 0
@@ -69,20 +63,15 @@ class map():
         
         self.playerXY = self.startXY
         self.type = type
-        self.fog = pygame.Surface( (30,30) )
-        self.fog.fill( black )
                 
         self.topMapCorner = (0,0)
-        self.images = images.mapImages
         self.DIM = len(self.maptext)
-        self.xGameBoard = pygame.Surface( (self.DIM*blocksize, self.DIM*blocksize) )
         self.visDict = {}
         for i in range( self.DIM ):
             for j in range( self.DIM ):
                 if self.type == 'dungeon': self.visDict[ (i,j) ] = False
                 else: self.visDict[ (i,j) ] = True
         self.myMiniMap = miniMap(self.maptext)
-        self.redrawXMap()
     
     def setLOV(self, num):
         self.lineOfVision = num
@@ -98,7 +87,7 @@ class map():
         (grid, poe, poex, hs, chests) = ball
         self.maptext = grid
         self.heroStart = hs
-        self.startXY = poe
+        self.startXY = hs
         self.pointOfEntry = poe
         self.pointOfExit = poex
         self.chests = chests
@@ -176,35 +165,6 @@ class map():
         return (topX, topY), (oldTopX, oldTopY)
     
     # complete list of tiles is in tiles1.txt
-    
-    # takes map coordinates, returns map window
-    def getMapWindow(self, pos, wsize=10):
-        (x1, y1) = pos
-        window = pygame.Surface( (wsize*blocksize, wsize*blocksize) )
-        window.blit( self.xGameBoard, ( -(x1*blocksize), -(y1*blocksize) ) )
-        return window
-    
-    # takes pixel coordinates of top left corner of DIMxDIM window of xGameBoard, returns map window
-    def getScrollingMapWindow(self, pos, wsize = 10, darkness=True):
-        (x1,y1) = pos
-        window = pygame.Surface( (wsize*blocksize, wsize*blocksize) )
-        window.blit( self.xGameBoard, ( -x1, -y1 ) )
-        #self.drawDarkness
-        return window
-    
-    # draws entire map to DIMxDIM Surface
-    def redrawXMap(self):
-        if self.type == 'dungeon':
-            self.revealMap()
-        for x in range(self.getDIM()):
-            for y in range(self.getDIM()):
-                tile = self.getUnit(x,y)
-                if tile != VOID and self.visDict[(x,y)]:
-                    self.xGameBoard.blit( self.images[ tile ], ( (x*blocksize), (y*blocksize) ) )
-    
-    def scroll(self,x,y):
-        self.xGameBoard.scroll(x,y)
-    
     def revealMap(self):
         litTiles = self.getLitTiles()
         self.litTiles = litTiles
@@ -212,46 +172,6 @@ class map():
         for tile in litTiles:
             self.visDict[ tile ] = True
         return
-    
-    # Takes first two coordinates of hero rect, gameBoard and
-    # draws darkness
-    def drawDarkness(self, rx, ry, gameBoard):
-        for x in range(self.WINDOWSIZE):
-            for y in range(self.WINDOWSIZE):
-                dist = self.distanceFunc( (x,y), (rx,ry) )
-                if dist <= self.lineOfVision + 2:
-                    self.fog.set_alpha( 0 )
-                elif dist == self.lineOfVision + 3:
-                    self.fog.set_alpha( 70 )
-                elif dist == self.lineOfVision + 4:
-                    self.fog.set_alpha( 140 )
-                elif dist >= self.lineOfVision + 5:
-                    self.fog.set_alpha( 210 )
-                gameBoard.blit(self.fog, (x*blocksize,y*blocksize), area=(0,0,blocksize,blocksize) )
-    
-    def drawShade(self, gameBoard):
-        (topX, topY) = self.topMapCorner
-        (px, py) = self.playerXY
-        tiles = self.litTiles
-        for x in range( self.WINDOWSIZE ):
-            for y in range( self.WINDOWSIZE ):
-                if (x+topX, y+topY) in tiles:
-                    self.fog.set_alpha( 0 )
-                else:
-                    self.fog.set_alpha( 140 )
-                gameBoard.blit(self.fog, ( (x)*blocksize, (y)*blocksize), area=(0,0,blocksize,blocksize) )
-    
-    def redraw(self, heroLoc, heroRect, gameBoard):
-        # Redraw map on screen from current map matrix
-        #self.revealMap()
-        (rx,ry,rx2,ry2) = heroRect
-        rx = rx/blocksize
-        ry = ry/blocksize
-        (topX, topY), (oldTopX, oldTopY) = self.updateWindowCoordinates(heroLoc, heroRect)
-        gameBoard.blit( self.getMapWindow( (topX, topY), self.WINDOWSIZE ), (self.WINDOWOFFSET,self.WINDOWOFFSET) )
-        if self.type == 'dungeon':
-            self.drawShade(gameBoard)
-            #self.drawDarkness(rx, ry, gameBoard)
     
     def flatten(self, x):
         result = []
@@ -275,12 +195,11 @@ class map():
                 self.visited += [ (x+Cx,y+Cy) ]
         if len( entryList ) <= 1:
             return (x,y)
-        elif len( entryList ) == 2:
-            return [ (x, y) ] + [ self.litBFS(self.BFSQueue.pop()) ] + [ self.litBFS(self.BFSQueue.pop()) ]
-        elif len( entryList ) == 3:
-            return [ (x, y) ] + [ self.litBFS(self.BFSQueue.pop()) ] + [ self.litBFS(self.BFSQueue.pop()) ] + [ self.litBFS(self.BFSQueue.pop()) ]
-        elif len( entryList ) == 4:
-            return [ (x, y) ] + [ self.litBFS(self.BFSQueue.pop()) ] + [ self.litBFS(self.BFSQueue.pop()) ] + [ self.litBFS(self.BFSQueue.pop()) ] + [ self.litBFS(self.BFSQueue.pop()) ]
+        else:
+            returnList = []
+            for i in range( len( entryList ) ): 
+                returnList += [ self.litBFS(self.BFSQueue.pop()) ]
+            return [ (x,y) ] + returnList
     
     def getLitTiles(self):
         (px, py) = self.playerXY

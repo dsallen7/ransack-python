@@ -23,7 +23,7 @@ class menu():
             borderBox = pygame.Surface( ( ((i*2)+5 ), yDim) )
             borderBox.fill( grey )
             msgBox = pygame.Surface( ( i*2, yDim-10 ) )
-            msgBox.fill( yellow )
+            msgBox.fill( gold )
             borderBox.blit(msgBox, (5, 5) )
             self.screen.blit(borderBox, ( (self.screen.get_size()[0]/2)-i, 100) )
             pygame.display.flip()
@@ -44,7 +44,7 @@ class menu():
                 itemBox.fill( black )
                 itemBox.blit( images.mapImages[item.getImg()], (0, 0) )
                 if pygame.font:
-                    font = pygame.font.SysFont("URW Chancery L", 14)
+                    font = pygame.font.SysFont("spinaltfanboy", 14)
                     if item.name == 'item': msgText = font.render( 'x'+str(item.qty), 1, white, black )
                     else: msgText = font.render( 'L'+str(item.getLevel()), 1, white, black )
                     itemBox.blit(msgText, (20,20) )
@@ -55,8 +55,8 @@ class menu():
     def displayChest(self, chest):
         menuBox = self.openWindow(188, 120)
         if pygame.font:
-            font = pygame.font.SysFont("URW Chancery L", 18)
-            msgText = font.render( 'Chest', 1, white, yellow )
+            font = pygame.font.SysFont("spinaltfanboy", 18)
+            msgText = font.render( 'Chest', 1, white, gold )
             menuBox.blit(msgText, (10,10) )
         #draw available items in window
         w = 10 #var to draw items across screen
@@ -68,7 +68,7 @@ class menu():
             itemBox.fill( black )
             itemBox.blit( images.mapImages[img+86], (0, 0) )
             if pygame.font:
-                font = pygame.font.SysFont("URW Chancery L", 8)
+                font = pygame.font.SysFont("spinaltfanboy", 8)
                 msgText = font.render( 'x'+str(qty), 1, white, black )
                 itemBox.blit(msgText, (20,20) )
             menuBox.blit( itemBox, (w, 30) )
@@ -93,8 +93,8 @@ class menu():
         menuBox = self.openWindow(200, 125)
                 
         if pygame.font:
-            font = pygame.font.SysFont("URW Chancery L", 18)
-            msgText = font.render( text, 1, white, yellow )
+            font = pygame.font.SysFont("spinaltfanboy", 18)
+            msgText = font.render( text, 1, white, gold )
             menuBox.blit(msgText, (10,10) )
         
         #draw available items in window
@@ -140,12 +140,12 @@ class menu():
             pygame.display.flip()
         #while (pygame.event.wait().type != pygame.KEYDOWN): pass
 
-    def storeMenu(self, items, text):
+    def storeMenu(self, items, text, prices):
         menuBox = self.openWindow(200, 125)
-                
+        
         if pygame.font:
-            font = pygame.font.SysFont("URW Chancery L", 18)
-            msgText = font.render( text, 1, white, yellow )
+            font = pygame.font.SysFont("spinaltfanboy", 18)
+            msgText = font.render( text, 1, white, gold )
             menuBox.blit(msgText, (10,10) )
         
         #draw available items in window
@@ -161,6 +161,10 @@ class menu():
         numItems = len(availableItems)
         # wait for selection
         while True:
+            if availableItems[selection].getName() == 'item':
+                priceText = font.render( '$'+str( prices[availableItems[selection].getType()] ), 1, white, gold )
+            else: priceText = font.render( '$'+str( prices[(availableItems[selection].getType(), availableItems[selection].getLevel() )] ), 1, white, gold )
+            menuBox.blit(priceText, (10,20) )
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     pygame.draw.lines( itemsBox, black, True, boxPoints, 1 )

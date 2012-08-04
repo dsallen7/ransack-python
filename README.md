@@ -7,13 +7,13 @@ In very early stages at the moment. Our hero can explore the levels, collect ite
 
 Move with arrow keys. Battles occur Final Fantasy style. Use battle menu to fight.
 
-'s' brings up spell menu and 'i' brings up item inventory. 'w' brings up weapon menu. Select a weapon from here and it will be automatically equipped.
+'s' brings up spell menu and 'i' brings up item inventory. 'w' brings up weapon menu. Select a weapon from here and it will be automatically equipped. If it is currently equipped, it will not be listed in the weapon menu.
 'm' brings up mini-map which displays current level.
 't' takes a screenshot.
 
 Stairs lead hero to the next or previous level. If next level has not been visited yet, it will be generated automatically.
 
-The game begins in the 'village'. Currently the village has an item shop (white bldg on right hand side) and blacksmith (brick bldg). Coming soon: inn, temple, magic shop, and probably a tavern. 
+The game begins in the 'village'. Currently the village has an item shop (white bldg on right hand side) and blacksmith (brick bldg). Actually, two of each, but they're exactly the same. You can save your game but only at the Inn/Tavern which is the three story building.
 
 On venturing into the dungeon, new levels are automatically generated. Each dungeon has a key which unlocks the door to the next stairs down.
 

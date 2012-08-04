@@ -25,18 +25,30 @@ class Shop():
         self.items = []
         if type == 'blacksmith':
             items = shopScr.blacksmithShopsByLevel[self.level]
+            self.images[1], r = load_image('blacksmith.bmp')
             from OBJ import weapon
             from prices import weaponPrices as prices
             self.prices = prices
             for i in items:
                 self.items.append( weapon.Weapon(i[0], i[1]) )
+        elif type == 'armory':
+            items = shopScr.blacksmithShopsByLevel[self.level]
+            self.images[1], r = load_image('armory.bmp')
+            from OBJ import armor
+            from prices import armorPrices as prices
+            self.prices = prices
+            for i in items:
+                self.items.append( armor.Armor(i[0], i[1]) )
         elif type == 'itemshop':
             from OBJ import item
+            self.images[1], r = load_image('itemshop.bmp')
             from prices import itemPrices as prices
             self.prices = prices
             items = shopScr.itemShopsByLevel[self.level]
             for i in items:
                 self.items.append( item.Item( i + 86 ) )
+        self.storeScreen.fill( black )
+        self.storeScreen.blit( self.images[1], (0,0) )
 
     
     def drawStoreScreen(self):
@@ -47,15 +59,15 @@ class Shop():
     # displays battle menu and waits for player to select choice,
     # returns choice to fightBattle()
     def getAction(self):
-        menuBox = pygame.Surface( (60,75) )
+        menuBox = pygame.Surface( (124,99) )
         options = ['Buy', 'Sell', 'Exit']
         selection = 0
         while True:
-            menuBox.fill( yellow )
+            menuBox.fill( gold )
             if pygame.font:
                 font = pygame.font.SysFont("URW Chancery L", 14)
                 for i in range(3):
-                    menuBox.blit( font.render(options[i], 1, white, yellow), (25,i*25) )
+                    menuBox.blit( font.render(options[i], 1, white, gold), (25,i*25) )
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     os.sys.exit()
@@ -71,14 +83,14 @@ class Shop():
                     if event.key == pygame.K_RETURN:
                         return options[selection]
             menuBox.blit( self.images[0], (0, selection*25) )            
-            self.storeScreen.blit( menuBox, (200,150) )
+            self.storeScreen.blit( menuBox, (165,190) )
             self.drawStoreScreen()
     
     def sell(self, items):
         return self.myMenu.invMenu(items, 'Select item to sell:')
     
     def buy(self):
-        return self.myMenu.storeMenu(self.items, 'Select item to buy:')
+        return self.myMenu.storeMenu(self.items, 'Select item to buy:', self.prices)
     
     def enterStore(self, hero):
         self.drawStoreScreen()

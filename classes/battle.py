@@ -39,11 +39,11 @@ class battle():
         options = ['Fight', 'Magic', 'Item', 'Flee']
         selection = 0
         while True:
-            menuBox.fill( yellow )
+            menuBox.fill( gold )
             if pygame.font:
                 font = pygame.font.SysFont("URW Chancery L", 14)
                 for i in range(4):
-                    menuBox.blit( font.render(options[i], 1, white, yellow), (25,i*25) )
+                    menuBox.blit( font.render(options[i], 1, white, gold), (25,i*25) )
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     os.sys.exit()
@@ -134,6 +134,10 @@ class battle():
                     dmg = random.randrange(enemy.getLevel(),enemy.getLevel()+5) - random.randrange(dex/2)
                     self.textMessage("The "+enemy.getName()+" hits you for "+str(dmg)+" points!")
                     #self.sounds[1].play()
+                    if enemy.poison:
+                        if self.rollDie(1,5):
+                            hero.isPoisoned = True
+                            self.textMessage("You are poisoned!")
                     if hero.takeDmg(dmg) < 1:
                         self.textMessage("You have died!")
                         return False

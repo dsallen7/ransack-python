@@ -3,31 +3,37 @@ import os
 import random
 import pickle
 
-from classes import hero, hud, battle, menu, enemy, shop
+from classes import hero, hud, battle, menu, enemy, shop, tavern
 from IMG import images
+from DISPLAY import display
 from const import *
 from load_image import *
 
 from MAP import map, mapgen
 
 class game():
-    def __init__(self, screen, clock):
-        self.myHero = hero.hero()
+    
+    def __init__(self, screen, clock, loadHero=None, loadDungeon=None, currentMap=2, levelDepth=0):
+        self.Display = display.Display(screen)
+        if loadHero == None:
+            self.myHero = hero.hero()
+        else: self.myHero = hero.hero(load=loadHero)
         self.myMenu = menu.menu(screen)
-        self.myMap = None
-        self.levelDepth = 0
-        self.currentMap = 2
+        self.levelDepth = levelDepth
+        self.currentMap = currentMap
         
         # a dungeon is just an array of maps
-        self.myDungeon = []
-        for mapFileName in mapList:
-            self.myDungeon += [map.map(mapFileName, type='village')]
+        self.myMap = None
+        if loadDungeon == None:
+            self.myDungeon = []
+            for mapFileName in mapList:
+                self.myDungeon += [map.map(mapFileName, type='village')]
+        else: self.myDungeon = loadDungeon
         
         self.myMap = self.myDungeon[self.currentMap]
         
         self.screen = screen
         self.gameBoard = pygame.Surface( [300,300] )
-        self.gameFrame, self.gameFrameRect = load_image('gamescreen600.bmp', -1)
         
         self.allsprites = pygame.sprite.RenderPlain((self.myHero))
         self.allsprites.clear(self.screen, self.gameBoard)
@@ -48,8 +54,9 @@ class game():
         
         self.myHud = hud.hud(self.screen, self)
         self.myBlacksmith = shop.Shop(screen, self.myHud, 1, 'blacksmith')
-        #self.myArmory = store.Store(screen, self.myHud, items, 'armory')
+        self.myArmory = shop.Shop(screen, self.myHud, 1, 'armory')
         self.myItemShop = shop.Shop(screen, self.myHud, 1, 'itemshop')
+        self.myTavern = tavern.Tavern(screen, self.myHud)
         self.myBattle = battle.battle(self.screen,self.myHud)
         self.clock = clock
     
@@ -69,8 +76,10 @@ class game():
             self.levelDepth += 1
             self.myDungeon.append(self.generateMap(40))
             self.myMap = self.myDungeon[self.currentMap]
+            self.Display.redrawXMap(self.myMap)
         else:
             self.myMap = self.myDungeon[self.currentMap]
+            self.Display.redrawXMap(self.myMap)
             if self.myMap.getType() == 'dungeon':
                 self.levelDepth += 1
         self.DIM = self.myMap.getDIM()
@@ -83,6 +92,7 @@ class game():
     def prevLevel(self):
         self.currentMap -= 1
         self.myMap = self.myDungeon[self.currentMap]
+        self.Display.redrawXMap(self.myMap)
         self.DIM = self.myMap.getDIM()
         (x,y) = self.myMap.getPOEx()
         self.myHero.setXY( x*blocksize,y*blocksize )
@@ -117,81 +127,12 @@ class game():
                 self.screenShot()
             elif event.key == pygame.K_m:
                 self.myMap.callDrawMiniMap(self.screen)
+            elif event.key == pygame.K_SPACE:
+                pass
+                #action command
             else:
-                self.move(pygame.key.name(event.key))
-    
-    def rollDie(self, target, range):
-        d = random.randrange(range)
-        if target >= d:
-            return True
-        else:
-            return False
-    
-    # called immediately after player makes a move or arrives in a new level
-    # takes x,y of old myHero.rect location and finds new
-    def drawHero(self,oldX,oldY, dir=None, animated=True):
-        DIMEN = self.myMap.getDIM()
-        (newX,newY) = self.myHero.getXY()
-        scrolling = False
-        if DIMEN > HALFDIM:
-            if 5*blocksize < newX <= (DIMEN-5)*blocksize:
-                newX = 5 * blocksize
-                if dir in ['left','right']:
-                    scrolling = True
-            if newX > (DIMEN-5)*blocksize:
-                newX = newX - (DIMEN/2)*blocksize
-            if 5*blocksize < newY <= (DIMEN-5)*blocksize:
-                newY = 5 * blocksize
-                if dir in ['up','down']:
-                    scrolling = True
-            if newY > (DIMEN-5)*blocksize:
-                newY = newY - (DIMEN/2)*blocksize
-        else:
-            newX += (HALFDIM - DIMEN)/2*blocksize
-            newY += (HALFDIM - DIMEN)/2*blocksize
-        
-        #make the move animated
-        if animated:
-            if dir == None:
-                scrolling = False
-            else: scrollX , scrollY = scrollingDict[dir]
-            (px,py) = self.myHero.getXY()
-            pos, oldPos = self.myMap.updateWindowCoordinates( self.myHero.getXY(), self.myHero.getRect() )
-            (topX, topY) = pos
-            if oldX == newX:
-                xAxis = [oldX]*blocksize
-            elif oldX < newX:
-                xAxis = range(oldX, newX)
-            else:
-                xAxis = range(oldX, newX, -1)
-            if oldY == newY:
-                yAxis = [oldY]*blocksize
-            elif oldY < newY:
-                yAxis = range(oldY, newY)
-            elif oldY > newY:
-                yAxis = range(oldY, newY, -1)
-            for (idx, (i, j)) in list( enumerate(zip(xAxis, yAxis), start=1) ):
-                self.clock.tick(100)
-                self.myHero.setRect( i, j, blocksize, blocksize)
-                if scrolling:
-                    self.gameBoard.blit( self.myMap.getScrollingMapWindow( ( (topX*blocksize)+(idx*scrollX)-(blocksize*scrollX), (topY*blocksize)+(idx*scrollY)-(blocksize*scrollY) ) ), (0,0) )
-                    
-                    if self.myMap.type == 'dungeon':
-                        self.myMap.drawShade( self.gameBoard )
-                        #self.myMap.drawDarkness( newX/blocksize, newY/blocksize, self.gameBoard )
-                else: self.myMap.redraw(self.myHero.getXY(), self.myHero.getRect(), self.gameBoard)
-                self.myHero.takeStep()
-                self.displayGameBoard()
-        
-        self.myHero.setRect( newX, newY, blocksize, blocksize)
-    
-    # calls hud.boxMessage
-    def boxMessage(self, msg):
-        self.myHud.boxMessage(msg)
-    
-    # calls hud.txtMessage
-    def textMessage(self, msg):
-        self.myHud.txtMessage(msg)
+                if self.move(pygame.key.name(event.key)):
+                    return 
     
     def move(self, direction):
         if direction not in ['up','down','left','right']: return
@@ -210,6 +151,8 @@ class game():
         if i == 43:
             self.myItemShop.enterStore(self.myHero)
             return
+        if i == 60:
+            return self.myTavern.enterStore(self.myHero, self)
         if i == -1 or i in range(24,86):
             return
         # dungeon door
@@ -229,12 +172,12 @@ class game():
         # Stairs down
         if i == STAIRDN:
             self.nextLevel()
-            self.drawHero(x1,y1,animated=False)
+            self.Display.drawHero(x1,y1,self.myHero,self.myMap,self.gameBoard,animated=False)
             return
         # Stairs up
         if i == STAIRUP:
             self.prevLevel()
-            self.drawHero(x1,y1,animated=False)
+            self.Display.drawHero(x1,y1,self.myHero,self.myMap,self.gameBoard,animated=False)
             return
         # Chest
         if i == CHEST:
@@ -248,7 +191,7 @@ class game():
             X += moveX
             Y += moveY
             self.myHero.setXY(X,Y)
-            self.drawHero(x1,y1, direction)
+            self.Display.drawHero(x1,y1, self.myHero, self.myMap, self.gameBoard, self, direction)
             self.myHero.moving = False
             #roll the die to see if there will be a battle
             if self.rollDie(0,30) and self.currentMap > 2:
@@ -262,8 +205,28 @@ class game():
                 else: 
                     self.textMessage('You find '+str(g)+' gold pieces!')
                     self.myHero.addGold(g)
-        self.myMap.redrawXMap()
-       
+        self.Display.redrawXMap(self.myMap)
+    
+    def rollDie(self, target, range):
+        d = random.randrange(range)
+        if target >= d:
+            return True
+        else:
+            return False
+
+    # calls hud.boxMessage
+    def boxMessage(self, msg):
+        self.myHud.boxMessage(msg)
+    
+    # calls hud.txtMessage
+    def textMessage(self, msg):
+        self.myHud.txtMessage(msg)
+    
+    def getSaveBall(self):
+        saveBall = (self.myHero.getSaveBall(), self.myDungeon, self.currentMap)
+        
+        return saveBall
+    
     def updateSprites(self):
         self.allsprites.update()
         rects = self.allsprites.draw(self.gameBoard)
@@ -274,12 +237,14 @@ class game():
         self.screen.blit( self.gameBoard, (75,75) )
         pygame.display.flip()
 
-    def mainLoop(self, mapList):
-        self.screen.blit(self.gameFrame,(0,0))
+    def mainLoop(self):
+        gameFrame, gameFrameRect = load_image('gamescreen600.bmp', None)
+        self.screen.blit(gameFrame,(0,0))
         (X,Y) = self.myMap.getStartXY()
         self.myHero.setXY( X*blocksize,Y*blocksize )
         self.updateSprites()
-        self.drawHero( X*blocksize,Y*blocksize, animated=False )
+        self.Display.drawHero( X*blocksize,Y*blocksize, self.myHero, self.myMap, self.gameBoard, animated=False)
+        self.Display.redrawXMap(self.myMap)
         while self.gameOn:
             self.clock.tick(30)
             for event in pygame.event.get():
@@ -287,6 +252,9 @@ class game():
                 if event.type == pygame.QUIT:
                     os.sys.exit()
             self.gameBoard.fill(black)
-            self.myMap.redraw(self.myHero.getXY(), self.myHero.getRect(), self.gameBoard)
+            self.Display.redrawMap(self.myMap, self.myHero.getXY(), self.myHero.getRect(), self.gameBoard)
             self.myHud.update()
+            #self.myHero.showLocation(self.gameBoard)
             self.displayGameBoard()
+        print self.loadFileName
+        return self.exitCode
