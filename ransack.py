@@ -13,6 +13,7 @@ if not pygame.font: print 'Warning, fonts disabled'
 pygame.display.set_caption("Ransack")
 
 pygame.init()
+pygame.key.set_repeat(100, 100)
 clock = pygame.time.Clock()
 random.seed()
 
@@ -20,22 +21,31 @@ random.seed()
 images = range(3)
 images[0], r = load_image('cursor.bmp', -1)
 
-
 def getFile():
     saveFiles = range(3)
+    desc = range(3)
     for i in range(3):
         if os.access("ransack"+str(i)+".sav", os.F_OK):
+            peekFile = open("ransack"+str(i)+".sav", 'r')
+            ball = pickle.load(peekFile)
+            peekFile.close()
+            desc[i] = 'Saved game '+str(i)+' Level '+str(ball[0][11])+' '+str(ball[2].getDays())+' Days '+ \
+                                                                            str(ball[2].getHours())+':'+ \
+                                                                            str(ball[2].getMins())+'.'+ \
+                                                                            str(ball[2].getSecs())
             saveFiles[i] = "ransack"+str(i)+".sav"
-        else: saveFiles[i] = 'No file'
+        else:
+            saveFiles[i] = 'No file'
+            desc[i] = 'No file'
     
-    saveBox = pygame.Surface( (150,100) )
+    saveBox = pygame.Surface( (300,100) )
     selection = 0
     while True:
         saveBox.fill( gold )
         if pygame.font:
-            font = pygame.font.SysFont("URW Chancery L", 14)
+            font = pygame.font.Font("./FONTS/gothic.ttf", 14)
             for i in range(3):
-                saveBox.blit( font.render(saveFiles[i], 1, white, gold), (25,i*25) )
+                saveBox.blit( font.render(desc[i], 1, white, gold), (25,i*25) )
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 os.sys.exit()
@@ -50,8 +60,10 @@ def getFile():
                         selection = 0
                 if event.key == pygame.K_RETURN:
                     return "ransack"+str(selection)+".sav"
+                if event.key == pygame.K_ESCAPE:
+                    return None
         saveBox.blit( images[0], (0, selection*25) )
-        screen.blit( saveBox, (200,200) )
+        screen.blit( saveBox, (100,200) )
         pygame.display.flip()
 
 def main():    
@@ -93,13 +105,16 @@ def main():
                         newGame.mainLoop()
                     elif options[selection] == 'Load Saved Game':
                         try:
-                            savFile = open(getFile(), 'r')
-                            ball = pickle.load(savFile)
-                            savFile.close()
+                            loadFile = getFile()
+                            if loadFile == None: pass
+                            else:
+                                savFile = open(loadFile, 'r')
+                                ball = pickle.load(savFile)
+                                savFile.close()
+                                Game = game.game(screen, clock, loadHero=ball[0], loadDungeon=ball[1], loadTicker = ball[2], currentMap = ball[3])
+                                Game.mainLoop()
                         except IOError, e:
                             print 'File I/O error', e
-                        Game = game.game(screen, clock, loadHero=ball[0], loadDungeon=ball[1], currentMap=ball[2])
-                        Game.mainLoop()
         
         menuBox.blit( images[0], (0, selection*25) )
         titleScreen.blit(menuBox, (200, 375) )

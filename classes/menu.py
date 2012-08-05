@@ -55,7 +55,7 @@ class menu():
     def displayChest(self, chest):
         menuBox = self.openWindow(188, 120)
         if pygame.font:
-            font = pygame.font.Font("../FONTS/SpinalTfanboy.ttf", 10)
+            font = pygame.font.Font(os.getcwd()+"/FONTS/SpinalTfanboy.ttf", 14)
             msgText = font.render( 'ChesT', 1, white, gold )
             menuBox.blit(msgText, (10,10) )
         #draw available items in window
@@ -68,13 +68,13 @@ class menu():
             itemBox.fill( black )
             itemBox.blit( images.mapImages[img+86], (0, 0) )
             if pygame.font:
-                font = pygame.font.Font(os.getcwd()+"/FONTS/gothic.ttf", 14)
+                font = pygame.font.Font(os.getcwd()+"/FONTS/gothic.ttf", 10)
                 msgText = font.render( 'x'+str(qty), 1, white, black )
                 itemBox.blit(msgText, (17,17) )
             menuBox.blit( itemBox, (w, 30) )
             if w not in hPosList:
                 hPosList += [w]
-            availableItems += [img]
+            availableItems += [(img, qty)]
             w += blocksize
         hPos = 10 #horizontal position of selection box
         boxPointsFn = lambda x: ( (x,blocksize), (x,2*blocksize), (x+blocksize, 2*blocksize), (x+blocksize, blocksize) )
@@ -145,7 +145,7 @@ class menu():
         menuBox = self.openWindow(200, 125)
         
         if pygame.font:
-            font = pygame.font.Font(os.getcwd()+"/FONTS/SpinalTfanboy.ttf", 14)
+            font = pygame.font.Font(os.getcwd()+"/FONTS/gothic.ttf", 14)
             msgText = font.render( text, 1, white, gold )
             menuBox.blit(msgText, (10,10) )
         

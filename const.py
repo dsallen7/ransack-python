@@ -28,6 +28,7 @@ TREE1     = 51
 
 WELLSP    = 55
 
+ARMRYDOOR = 58
 BLKSMDOOR = 59
 
 FRUIT1    = 86
@@ -44,6 +45,7 @@ MMP       = 96
 LMP       = 97
 KEY       = 98
 SPELLBOOK = 100
+GOLD      = 109
 CHEST     = 110
 OCHEST    = 111
 SWORD     = 112
@@ -76,7 +78,9 @@ KEY       = 98
 
 
 # List of maps in dungeon
-mapList = ['tower1.dat','village1.dat','village2.dat']#,'map.dat', 'map2.dat']
+mapList = ['castle2.dat','castle1.dat','village1.dat','village2.dat']#,'map.dat', 'map2.dat']
+
+fMapList = ['fortress1.dat', 'fortress2.dat']
 
 # Messages to display for item found
 itemMsgs = { 86: 'You found a piece of fruit.',
@@ -91,12 +95,16 @@ scrollingDict = { 'up': (0, -1), 'down': (0, 1), 'left': (-1, 0), 'right': (1, 0
 black = [  0,  0,  0]
 white = [255,255,255]
 blue =  [  0,  0,192]
+dkblue =  [  0,  0,128]
 green = [  0,193,  0]
 dkgreen = [0, 128, 0] 
-red =   [255,  0,  0]
+red =   [192,  0,  0]
+dkred = [128, 0, 0]
 brickred = [128, 0, 0]
 yellow = [255, 255, 0]
 gold = [127, 127, 0]
 grey = [64, 64, 64]
 ltgrey = [128,128,128]
 brown = [87, 43, 0]
+violet = [192, 0, 192]
+purple = [64, 0, 64]

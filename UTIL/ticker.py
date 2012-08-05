@@ -1,0 +1,22 @@
+class Ticker():
+    
+    def __init__(self):
+        self.count = 0
+    
+    def tick(self, ticks):
+        self.count = self.count + ticks
+    
+    def getTicks(self):
+        return self.ticks
+    
+    def getSecs(self):
+        return self.count % 60
+    
+    def getMins(self):
+        return self.count / 60
+    
+    def getHours(self):
+        return self.count / 3600
+    
+    def getDays(self):
+        return self.count / 86400

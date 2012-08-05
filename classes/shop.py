@@ -11,7 +11,7 @@ from SCRIPTS import shopScr
 
 class Shop():
     
-    def __init__(self, screen, hud, level, type):
+    def __init__(self, screen, hud, level, type, ticker):
         self.storeScreen = pygame.Surface( (300,300) )
         self.inventory = []
         self.screen = screen
@@ -22,6 +22,7 @@ class Shop():
         self.images[0], r = load_image('cursor.bmp')
         self.type = type
         self.level = level
+        self.ticker = ticker
         self.items = []
         if type == 'blacksmith':
             items = shopScr.blacksmithShopsByLevel[self.level]
@@ -32,7 +33,7 @@ class Shop():
             for i in items:
                 self.items.append( weapon.Weapon(i[0], i[1]) )
         elif type == 'armory':
-            items = shopScr.blacksmithShopsByLevel[self.level]
+            items = shopScr.armoriesByLevel[self.level]
             self.images[1], r = load_image('armory.bmp')
             from OBJ import armor
             from prices import armorPrices as prices
@@ -99,19 +100,25 @@ class Shop():
             if action == 'ExiT':
                 return
             elif action == 'Buy':
+                self.ticker.tick(60)
                 purchase = self.buy()
                 if purchase == None: pass
                 elif hero.takeGold( self.prices[purchase] ):
                     if self.type == 'blacksmith':
                         hero.gainWeapon( purchase[0],purchase[1] )
+                    elif self.type == 'armory':
+                        hero.gainArmor( purchase[0],purchase[1] )
                     elif self.type == 'itemshop':
                         hero.getItem( purchase-86 )
                 else: self.myHud.txtMessage("You don'T have enough money!")
             elif action == 'Sell':
+                self.ticker.tick(120)
                 if self.type == 'blacksmith':
                     sale = self.sell(hero.getWeapons())
                 elif self.type == 'itemshop':
                     sale = self.sell(hero.getItems())
+                elif self.type == 'armory':
+                    sale = self.sell(hero.getArmor())
                 if sale == None: pass
                 else: 
                     if self.type == 'blacksmith':

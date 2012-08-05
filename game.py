@@ -10,11 +10,15 @@ from const import *
 from load_image import *
 
 from MAP import map, mapgen
+from UTIL import ticker
 
 class game():
     
-    def __init__(self, screen, clock, loadHero=None, loadDungeon=None, currentMap=2, levelDepth=0):
+    def __init__(self, screen, clock, loadTicker=None, loadHero=None, loadDungeon=None, currentMap=2, levelDepth=0):
         self.Display = display.Display(screen)
+        if loadTicker == None:
+            self.Ticker = ticker.Ticker()
+        else: self.Ticker = loadTicker
         if loadHero == None:
             self.myHero = hero.hero()
         else: self.myHero = hero.hero(load=loadHero)
@@ -29,6 +33,10 @@ class game():
             for mapFileName in mapList:
                 self.myDungeon += [map.map(mapFileName, type='village')]
         else: self.myDungeon = loadDungeon
+        
+        self.fortressMaps = []
+        for mapFileName in fMapList:
+            self.fortressMaps += [map.map(mapFileName, type='dungeon')]
         
         self.myMap = self.myDungeon[self.currentMap]
         
@@ -53,11 +61,11 @@ class game():
         self.sounds[2] = pygame.mixer.Sound(os.path.join('SND', 'miss.wav' ))
         
         self.myHud = hud.hud(self.screen, self)
-        self.myBlacksmith = shop.Shop(screen, self.myHud, 1, 'blacksmith')
-        self.myArmory = shop.Shop(screen, self.myHud, 1, 'armory')
-        self.myItemShop = shop.Shop(screen, self.myHud, 1, 'itemshop')
-        self.myTavern = tavern.Tavern(screen, self.myHud)
-        self.myBattle = battle.battle(self.screen,self.myHud)
+        self.myBlacksmith = shop.Shop(screen, self.myHud, 1, 'blacksmith', self.Ticker)
+        self.myArmory = shop.Shop(screen, self.myHud, 1, 'armory', self.Ticker)
+        self.myItemShop = shop.Shop(screen, self.myHud, 1, 'itemshop', self.Ticker)
+        self.myTavern = tavern.Tavern(screen, self.myHud, self.Ticker)
+        self.myBattle = battle.battle(self.screen,self.myHud, self.Ticker)
         self.clock = clock
     
     #toggles switch to continue running game
@@ -74,7 +82,9 @@ class game():
         self.currentMap += 1
         if self.currentMap == len(self.myDungeon):
             self.levelDepth += 1
-            self.myDungeon.append(self.generateMap(40))
+            if self.levelDepth == 2:
+                self.myDungeon = self.myDungeon + self.fortressMaps
+            else: self.myDungeon.append(self.generateMap(40))
             self.myMap = self.myDungeon[self.currentMap]
             self.Display.redrawXMap(self.myMap)
         else:
@@ -123,6 +133,8 @@ class game():
                 self.myHero.useItem( self.myMenu.invMenu(self.myHero.getItems(), "ITems:" ) )
             elif event.key == pygame.K_w:
                 self.myHero.equipWeapon(self.myMenu.invMenu(self.myHero.getWeapons(), "Weapons:" ))
+            elif event.key == pygame.K_a:
+                self.myHero.equipArmor(self.myMenu.invMenu(self.myHero.getArmor(), "Armor:" ))
             elif event.key == pygame.K_t:
                 self.screenShot()
             elif event.key == pygame.K_m:
@@ -148,11 +160,17 @@ class game():
         if i == BLKSMDOOR:
             self.myBlacksmith.enterStore(self.myHero)
             return
+        if i == ARMRYDOOR:
+            self.myArmory.enterStore(self.myHero)
+            return
         if i == 43:
             self.myItemShop.enterStore(self.myHero)
             return
         if i == 60:
             return self.myTavern.enterStore(self.myHero, self)
+        if i == 38:
+            self.myMap.updateUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize,19)
+            self.Display.redrawXMap(self.myMap)
         if i == -1 or i in range(24,86):
             return
         # dungeon door
@@ -166,7 +184,7 @@ class game():
                 self.myMap.updateUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize,0)
         #item
         if i in range(86,109): 
-            self.myHero.getItem(i)
+            self.myHero.getItem((i,1))
             self.myMap.updateUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize, 0)
             self.myHud.boxMessage(itemMsgs[i])
         # Stairs down
@@ -194,8 +212,8 @@ class game():
             self.Display.drawHero(x1,y1, self.myHero, self.myMap, self.gameBoard, self, direction)
             self.myHero.moving = False
             #roll the die to see if there will be a battle
-            if self.rollDie(0,30) and self.currentMap > 2:
-                self.boxMessage("The battle is joined!")
+            if self.rollDie(0,30) and self.myMap.type == 'dungeon':
+                self.boxMessage("The baTTle is joined!")
                 self.gameBoard.fill( black )
                 g = self.myBattle.fightBattle(self.myHero, enemy.enemy(self.levelDepth))
                 if g == True:
@@ -206,6 +224,7 @@ class game():
                     self.textMessage('You find '+str(g)+' gold pieces!')
                     self.myHero.addGold(g)
         self.Display.redrawXMap(self.myMap)
+        self.Ticker.tick(1)
     
     def rollDie(self, target, range):
         d = random.randrange(range)
@@ -223,7 +242,7 @@ class game():
         self.myHud.txtMessage(msg)
     
     def getSaveBall(self):
-        saveBall = (self.myHero.getSaveBall(), self.myDungeon, self.currentMap)
+        saveBall = (self.myHero.getSaveBall(), self.myDungeon, self.Ticker, self.currentMap)
         
         return saveBall
     
@@ -256,5 +275,4 @@ class game():
             self.myHud.update()
             #self.myHero.showLocation(self.gameBoard)
             self.displayGameBoard()
-        print self.loadFileName
         return self.exitCode

@@ -10,11 +10,12 @@ from SCRIPTS import shopScr
 
 class Tavern():
     
-    def __init__(self, screen, hud):
+    def __init__(self, screen, hud, ticker):
         self.storeScreen = pygame.Surface( (300,300) )
         self.inventory = []
         self.screen = screen
         self.myHud = hud
+        self.ticker = ticker
         images.load()
         self.myMenu = menu.menu(screen)
         self.images = range(2)
@@ -30,7 +31,7 @@ class Tavern():
     
     def getAction(self):
         menuBox = pygame.Surface( (124,99) )
-        options = ['Save', 'Load', 'ReTurn to Game', 'ExiT To Main Menu']
+        options = ['Save', 'Load', 'ReTurn To Game', 'ExiT To Main Menu']
         selection = 0
         while True:
             menuBox.fill( gold )
@@ -55,7 +56,7 @@ class Tavern():
             menuBox.blit( self.images[0], (0, selection*25) )            
             self.storeScreen.blit( menuBox, (165,190) )
             self.drawStoreScreen()
-    
+    '''
     def getFile(self):
         saveFiles = range(3)
         for i in range(3):
@@ -68,7 +69,7 @@ class Tavern():
         while True:
             saveBox.fill( gold )
             if pygame.font:
-                font = pygame.font.Font("../FONTS/SpinalTfanboy.ttf", 14)
+                font = pygame.font.Font(os.getcwd()+"/FONTS/gothic.ttf", 18)
                 for i in range(3):
                     saveBox.blit( font.render(saveFiles[i], 1, white, gold), (25,i*25) )
             for event in pygame.event.get():
@@ -87,6 +88,50 @@ class Tavern():
                         return "ransack"+str(selection)+".sav"
             saveBox.blit( self.images[0], (0, selection*25) )
             self.storeScreen.blit( saveBox, (50,50) )
+            self.drawStoreScreen()'''
+    def getFile(self):
+        saveFiles = range(3)
+        desc = range(3)
+        for i in range(3):
+            if os.access("ransack"+str(i)+".sav", os.F_OK):
+                peekFile = open("ransack"+str(i)+".sav", 'r')
+                ball = pickle.load(peekFile)
+                peekFile.close()
+                desc[i] = 'Saved game '+str(i)+' Level '+str(ball[0][11])+' '+str(ball[2].getDays())+' Days '+ \
+                                                                                str(ball[2].getHours())+':'+str(ball[2].getHours())+':'+ \
+                                                                                str(ball[2].getMins())+'.'+ \
+                                                                                str(ball[2].getSecs())
+                saveFiles[i] = "ransack"+str(i)+".sav"
+            else:
+                saveFiles[i] = 'No file'
+                desc[i] = 'No file'
+        
+        saveBox = pygame.Surface( (300,100) )
+        selection = 0
+        while True:
+            saveBox.fill( gold )
+            if pygame.font:
+                font = pygame.font.Font("./FONTS/gothic.ttf", 14)
+                for i in range(3):
+                    saveBox.blit( font.render(desc[i], 1, white, gold), (25,i*25) )
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    os.sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_UP:
+                        selection -= 1
+                        if selection == -1:
+                            selection = 2
+                    if event.key == pygame.K_DOWN:
+                        selection += 1
+                        if selection == 3:
+                            selection = 0
+                    if event.key == pygame.K_RETURN:
+                        return "ransack"+str(selection)+".sav"
+                    if event.key == pygame.K_ESCAPE:
+                        return None
+            saveBox.blit( self.images[0], (0, selection*25) )
+            self.storeScreen.blit( saveBox, (100,200) )
             self.drawStoreScreen()
     
     def save(self, fileName, game):
@@ -117,7 +162,7 @@ class Tavern():
                 self.load( filename )
                 game.loadFileName = filename
                 return
-            elif action == 'ExiT to Main Menu':
+            elif action == 'ExiT To Main Menu':
                 game.gameOn = False
                 game.exitCode = 0
                 game.loadFileName = None

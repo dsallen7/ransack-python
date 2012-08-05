@@ -35,7 +35,7 @@ class subMap():
 
 class Map():
     
-    def __init__(self, DIM=20):
+    def __init__(self, DIM=40):
         self.grid = []
         self.DIM = DIM
         for i in range(self.DIM):
@@ -82,6 +82,7 @@ class Map():
     def installBall(self, ball):
         (grid, poe, poex, hs, chests) = ball
         self.grid = grid
+        self.DIM = len(grid)
         self.heroStart = hs
         self.pointOfEntry = poe
         self.pointOfExit = poex
@@ -417,7 +418,7 @@ class Handler():
 
     def mouseHandler(self, e):
         (mx, my) = e.pos
-        if 0 <= mx < 600 and 0 <= my < 600:
+        if 0 <= mx < gridField.get_width() and 0 <= my < gridField.get_height():
             if e.button == 1:
                 if self.mouseAction == 'draw':
                     myMap.setEntry(mx/blocksize,my/blocksize,self.currentTile)
@@ -431,23 +432,23 @@ class Handler():
                     else: self.selection = ( (mx/blocksize, my/blocksize), self.select( (mx/blocksize, my/blocksize) ) )
             elif e.button == 3:
                 pass
-        elif 650 <= mx < 770 and 200 <= my < 440:
-            self.currentTile = self.offset + (mx-650)/blocksize + (my-200)/blocksize * 4
-        elif 665 <= mx < 695 and 500 <= my < 530:
+        elif gridField.get_width()+50 <= mx < gridField.get_width()+170 and 200 <= my < 440:
+            self.currentTile = ( self.offset + (mx-gridField.get_width()+50)/blocksize + (my-200)/blocksize * 4 ) - 3
+        elif gridField.get_width()+65 <= mx < gridField.get_width()+95 and 500 <= my < 530:
             #shift tilesheet left
             pass
-        elif 695 <= mx < 725 and 500 <= my < 530:
+        elif gridField.get_width()+95 <= mx < gridField.get_width()+125 and 500 <= my < 530:
             #shift tilesheet right
             pass
-        elif 650 <= mx < 680 and 530 <= my < 560:
+        elif gridField.get_width()+50 <= mx < gridField.get_width()+80 and 530 <= my < 560:
             myMap.mapCut()
-        elif 680 <= mx < 710 and 530 <= my < 560:
+        elif gridField.get_width()+80 <= mx < gridField.get_width()+110 and 530 <= my < 560:
             myMap.mapCopy(self.selection)
-        elif 710 <= mx < 740 and 530 <= my < 560:
+        elif gridField.get_width()+110 <= mx < gridField.get_width()+140 and 530 <= my < 560:
             myMap.mapPaste()
-        elif 665 <= mx < 695 and 560 <= my < 590:
+        elif gridField.get_width()+65 <= mx < gridField.get_width()+95 and 560 <= my < 590:
             self.mouseAction = 'draw'
-        elif 695 <= mx < 725 and 560 <= my < 590:
+        elif gridField.get_width()+95 <= mx < gridField.get_width()+125 and 560 <= my < 590:
             self.mouseAction = 'select'
         
     
@@ -459,8 +460,8 @@ class Handler():
     
     def updateDisplay(self):
         gridField.fill(black)
-        for i in range(self.topX, self.topX+20):
-            for j in range(self.topY, self.topY+20):
+        for i in range(self.topX, self.topX+40):
+            for j in range(self.topY, self.topY+40):
                 gridField.blit( images.mapImages[myMap.getEntry(i,j)], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
                 if (i,j) == myMap.heroStart:
                     gridField.blit( images.mapImages[HEROSTART], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
@@ -512,14 +513,15 @@ class Handler():
                 msgBox.blit(msgText, (10,10) )
             self.sideImg.blit( msgBox, (50,100) )
             #pygame.display.flip()
-        screen.blit(self.sideImg, (600,0) )
+        screen.blit(self.sideImg, (1200,0) )
 
 # Set the height and width of the screen
-size=[800,800]
+size=[1400,800]
 screen=pygame.display.set_mode(size)
 
 images.load()
 pygame.init()
+pygame.key.set_repeat(50, 100)
 clock = pygame.time.Clock()
 
 cursorPos = (0,0)
@@ -529,7 +531,7 @@ myHandler = Handler(cursorPos)
 
 blocksize = 30
 
-gridField = pygame.Surface( [DIM*blocksize, DIM*blocksize] )
+gridField = pygame.Surface( [2*DIM*blocksize, 2*DIM*blocksize] )
 
 os.sys.setrecursionlimit(15000)
 

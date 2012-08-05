@@ -55,7 +55,7 @@ class hero(pygame.sprite.Sprite):
             self.learnSpell(0)
             self.learnSpell(1)
             
-            self.gold = 50
+            self.gold = 500
             self.isPoisoned = False
         else: self.installLoadedHero(load)
         
@@ -149,9 +149,13 @@ class hero(pygame.sprite.Sprite):
     def setItem(self, item, num=1):
         self.items[item] += num
     # Input: tile number denoting item
-    def getItem(self, itype):
+    def getItem(self, itm):
+        (itype, qty) = itm
         if itype == KEY:
             self.keys += 1
+            return
+        if itype+86 == GOLD:
+            self.addGold(qty)
             return
         entry = self.items[itype]
         if hasattr(entry, "__iter__"):
@@ -196,12 +200,16 @@ class hero(pygame.sprite.Sprite):
         return self.armorEquipped
     def gainArmor(self, type, level):
         self.armor.append(armor.Armor(type, level))
+    def loseArmor(self, armor):
+        self.armor.remove(armor)
     def equipArmor(self, armor):
+        if armor == None: return
         if self.armorEquipped[armor.getType()] == None:
             self.armorEquipped[armor.getType()] = armor
         else: 
             self.armor.append(self.armorEquipped[armor.getType()])
             self.armorEquipped[armor.getType()] = armor
+        self.loseArmor(armor)
     
     def addGold(self, amt):
         self.gold += amt

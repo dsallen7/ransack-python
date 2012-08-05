@@ -146,7 +146,7 @@ class Map():
                 
             #10 create doorway into new room
                 (x1,y1) = tile
-                self.setMapEntry( x1,y1,0 )
+                self.setMapEntry( x1,y1,38 )
                 candidateRoom.entrances.append( (x1,y1) )
                 (x2,y2) = dirDict[dir]
                 self.setMapEntry( x1+x2, y1+y2, 0)
@@ -191,16 +191,23 @@ class Map():
         
         #add chests
         chestlist = []
-        for i in range(maxRooms/10):
+        for i in range(maxRooms/5):
             choice4 = choice(rooms)
             (xpos, ypos) = choice4.getPos()
             (xdim, ydim) = choice4.getDimensions()
             chestItems = []
             if self.rollDie(0,2) and self.rollDie(0,2):
-                chestItems = [(6,1),(9,1)]
+                #gold
+                chestItems = [(23,randrange(15,30))]
             elif self.rollDie(0,2):
+                #chestItems = [(23,randrange(15,30))]
                 chestItems.append((0,1))
-            else: chestItems.append((4,1))
+            elif self.rollDie(0,2):
+                #chestItems = [(23,randrange(15,30))]
+                chestItems.append((1,1))
+            else:
+                #chestItems = [(23,randrange(15,30))]
+                chestItems.append((4,1))
             self.setMapEntry( xpos + xdim/2, ypos + ydim/2, 110)
             chestlist += [( ( xpos + xdim/2, ypos + ydim/2), chestItems )]
             rooms.remove(choice4)

@@ -8,11 +8,11 @@ import random
 
 class battle():
     
-    def __init__(self, screen, hud):
+    def __init__(self, screen, hud, ticker):
         self.battleField = pygame.Surface( (300,300) )
         self.battleField.fill( black )
         self.images = range(3)
-        
+        self.ticker = ticker
         self.screen = screen
         
         self.myMenu = menu.menu(screen)
@@ -22,7 +22,7 @@ class battle():
         self.myHud = hud
     
     def writeText(self, surface, loc, text, fgc, bgc, size=18, font="SpinalTfanboy.ttf"):
-        font = pygame.font.Font("../FONTS/"+font, size)
+        font = pygame.font.Font(os.getcwd()+"/FONTS/"+font, size)
         surface.blit( font.render(text, 1, fgc, bgc), loc )
         
     def drawBattleScreen(self):
@@ -41,7 +41,7 @@ class battle():
         while True:
             menuBox.fill( gold )
             if pygame.font:
-                font = pygame.font.Font("../FONTS/SpinalTfanboy.ttf", 14)
+                font = pygame.font.Font(os.getcwd()+"/FONTS/SpinalTfanboy.ttf", 14)
                 for i in range(4):
                     menuBox.blit( font.render(options[i], 1, white, gold), (25,i*25) )
             for event in pygame.event.get():
@@ -101,6 +101,7 @@ class battle():
         (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX) = hero.getPlayerStats()
         (armor, weapon) = ( hero.getArmorEquipped(), hero.getWeaponEquipped() )
         self.textMessage( 'You are facing a level '+str(enemy.getLevel())+' '+enemy.getName()+'!' )
+        time = 0
         while engagedEnemy.getHP() > 0:
             #clock.tick(15)
             action = self.getAction()
@@ -127,7 +128,8 @@ class battle():
                     self.textMessage("You escaped safely.")
                     return True
                 else:
-                    self.textMessage("You can'T escape!")       
+                    self.textMessage("You can'T escape!")
+            self.ticker.tick(15)
             #enemy attacks
             if engagedEnemy.getHP() > 0:
                 if self.rollDie(0,2):
@@ -144,6 +146,7 @@ class battle():
                 else:
                     self.textMessage("The "+enemy.getName()+" missed you!")
                     #self.sounds[2].play()
+            self.ticker.tick(10)
             self.myHud.update()
             self.drawBattleScreen()
         self.textMessage("The "+enemy.getName()+" is dead!")
