@@ -183,7 +183,7 @@ class game():
                 self.myHero.takeKey()
                 self.myMap.updateUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize,0)
         #item
-        if i in range(86,109): 
+        if i in range(86,109):
             self.myHero.getItem((i,1))
             self.myMap.updateUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize, 0)
             self.myHud.boxMessage(itemMsgs[i])
@@ -203,6 +203,7 @@ class game():
             for item in self.myMenu.displayChest( chestlist ):
                 self.myHero.getItem(item)
             self.myMap.updateUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize, OCHEST )
+            self.Ticker
         #check if open space
         if ( (0 < X+moveX <= blocksize*self.DIM) and (0 < Y+moveY <= blocksize*self.DIM ) and i in range(24) ):
             self.myHero.moving = True

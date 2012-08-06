@@ -2,7 +2,7 @@
 # carry out the effects of the spells
 
 from const import *
-from effects import *
+from SCRIPTS import spellScr
 
 class Spell():
     
@@ -25,7 +25,7 @@ class Spell():
     def execute(self, hero):
         [cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX] = hero.getPlayerStats()
         stats = [cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX]
-        fn = spellDict[self.getType()]
+        fn = spellScr.spellDict[self.getType()]
         stats = fn(stats)
         [cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX] = stats
         hero.setPlayerStats( (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX) )

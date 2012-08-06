@@ -4,7 +4,6 @@ from const import *
 
 from IMG import images
 
-
 positions = [ (0,0), (35,0), (70,0), (105,0),
                (0,35), (35,35), (70,35), (105,35) ]
 

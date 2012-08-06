@@ -93,7 +93,7 @@ class map():
         self.chests = chests
     def loadMap(self, filename):
         try:
-            save = open(filename, "r")
+            save = open(os.getcwd()+'/MAP/LEVELS/'+filename, "r")
             ball = pickle.load(save)
             save.close()
             self.installBall(ball)

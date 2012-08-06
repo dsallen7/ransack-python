@@ -132,7 +132,7 @@ class hud( ):
         self.scrollText[1] = self.scrollText[2]
         self.scrollText[2] = self.scrollText[3]
         self.scrollText[3] = self.scrollText[4]
-        self.scrollText[4] = msg
+        self.scrollText[4] = str(self.game.Ticker.getMins())+'.'+str(self.game.Ticker.getSecs())+msg
         if pygame.font:
             font = pygame.font.Font(os.getcwd()+"/FONTS/gothic.ttf", 18)
             for i in range(5):

@@ -2,7 +2,7 @@
 # carry out the effects of the items
 
 from const import *
-from effects import *
+from SCRIPTS import itemScr
 
 class Item():
     
