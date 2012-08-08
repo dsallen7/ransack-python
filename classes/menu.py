@@ -170,8 +170,10 @@ class menu():
         self.screen.blit(menuBox, ( (self.screen.get_size()[0]/2)-(200/2), 100) )    
         pygame.display.flip()
         numItems = len(availableItems)
+        copyBox = menuBox
         # wait for selection
         while True:
+            menuBox = copyBox.copy()
             if availableItems[selection].getName() == 'item':
                 priceText = font.render( '$'+str( prices[availableItems[selection].getType()] ), 1, white, gold )
             elif availableItems[selection].getName() == 'spellbook' or availableItems[selection].getName() == 'parchment':
@@ -179,7 +181,7 @@ class menu():
             elif availableItems[selection].getName() == 'armor' or availableItems[selection].getName() == 'weapon':
                 priceText = font.render( '$'+str( prices[(availableItems[selection].getType(), availableItems[selection].getLevel() )] ), 1, white, gold )
             menuBox.blit(priceText, (10,20) )
-            menuBox.blit( font.render( availableItems[selection].getDesc(), 1, white, gold ), (30,20) )
+            menuBox.blit( font.render( availableItems[selection].getDesc(), 1, white, gold ), (35,20) )
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     pygame.draw.lines( itemsBox, black, True, boxPoints, 1 )

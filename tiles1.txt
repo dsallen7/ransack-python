@@ -74,7 +74,7 @@
     # 71: lava
     # 72: house 2 upper left
     # 73: house 2 upper right
-    # 74: bridge 1
+    # 74: magicshop sign
     # 75: bridge 2
     # 76: rampart 1
     # 77: rampart 2
