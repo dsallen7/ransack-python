@@ -64,6 +64,7 @@ class game():
         self.myBlacksmith = shop.Shop(screen, self.myHud, 1, 'blacksmith', self.Ticker)
         self.myArmory = shop.Shop(screen, self.myHud, 1, 'armory', self.Ticker)
         self.myItemShop = shop.Shop(screen, self.myHud, 1, 'itemshop', self.Ticker)
+        self.myMagicShop = shop.Shop(screen, self.myHud, 1, 'magicshop', self.Ticker)
         self.myTavern = tavern.Tavern(screen, self.myHud, self.Ticker)
         self.myBattle = battle.battle(self.screen,self.myHud, self.Ticker)
         self.clock = clock
@@ -82,7 +83,7 @@ class game():
         self.currentMap += 1
         if self.currentMap == len(self.myDungeon):
             self.levelDepth += 1
-            if self.levelDepth == 2:
+            if self.levelDepth == 5:
                 self.myDungeon = self.myDungeon + self.fortressMaps
             else: self.myDungeon.append(self.generateMap(40))
             self.myMap = self.myDungeon[self.currentMap]
@@ -127,10 +128,10 @@ class game():
             if event.key == pygame.K_SPACE:
                 pass
             elif event.key == pygame.K_s:
-                if self.myHero.castSpell( self.myMenu.invMenu(self.myHero.getSpells(), "Spells:" ) ) == -1:
+                if self.myHero.castSpell( self.myMenu.invMenu(self.myHero.getSpells(), "Spells:" ), self.myHud ) == -1:
                     self.textMessage('ThaT spell may only be casT in baTTle.')
             elif event.key == pygame.K_i:
-                self.myHero.useItem( self.myMenu.invMenu(self.myHero.getItems(), "ITems:" ) )
+                self.Ticker.tick( self.myHero.useItem( self.myMenu.invMenu(self.myHero.getItems(), "ITems:" ) ) )
             elif event.key == pygame.K_w:
                 self.myHero.equipWeapon(self.myMenu.invMenu(self.myHero.getWeapons(), "Weapons:" ))
             elif event.key == pygame.K_a:
@@ -166,6 +167,8 @@ class game():
         if i == 43:
             self.myItemShop.enterStore(self.myHero)
             return
+        if i == 57:
+            self.myMagicShop.enterStore(self.myHero)
         if i == 60:
             return self.myTavern.enterStore(self.myHero, self)
         if i == 38:

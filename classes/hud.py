@@ -132,9 +132,9 @@ class hud( ):
         self.scrollText[1] = self.scrollText[2]
         self.scrollText[2] = self.scrollText[3]
         self.scrollText[3] = self.scrollText[4]
-        self.scrollText[4] = str(self.game.Ticker.getMins())+'.'+str(self.game.Ticker.getSecs())+msg
+        self.scrollText[4] = str(self.game.Ticker.getMins())+'.'+str(self.game.Ticker.getSecs())+' - '+msg
         if pygame.font:
-            font = pygame.font.Font(os.getcwd()+"/FONTS/gothic.ttf", 18)
+            font = pygame.font.Font(os.getcwd()+"/FONTS/courier.ttf", 12)
             for i in range(5):
                 Msg = font.render( self.scrollText[i], 1, white, gold)
                 self.textBox2.blit(Msg, (0,20*i) )

@@ -44,9 +44,15 @@ class menu():
                 itemBox.blit( images.mapImages[item.getImg()], (0, 0) )
                 if pygame.font:
                     font = pygame.font.Font(os.getcwd()+"/FONTS/gothic.ttf", 10)
-                    if item.name == 'item': msgText = font.render( 'x'+str(item.qty), 1, white, black )
-                    else: msgText = font.render( 'L'+str(item.getLevel()), 1, white, black )
-                    itemBox.blit(msgText, (17,17) )
+                    if item.name == 'item': 
+                        msgText = font.render( 'x'+str(item.qty), 1, white, black )
+                        itemBox.blit(msgText, (17,17) )
+                    elif item.name == 'magicitem': pass
+                    elif item.name == 'spellbook': pass
+                    elif item.name == 'parchment': pass
+                    else: 
+                        msgText = font.render( 'L'+str(item.getLevel()), 1, white, black )
+                        itemBox.blit(msgText, (17,17) )
                 menuBox.blit( itemBox, positions[i] )
                 availableItems.append(item)
         return menuBox, availableItems
@@ -62,18 +68,18 @@ class menu():
         availableItems = []
         hPosList = [10]
         for item in chest:
-            (img, qty) = item
+            (type, num) = item
             itemBox = pygame.Surface( (blocksize, blocksize) )
             itemBox.fill( black )
-            itemBox.blit( images.mapImages[img+86], (0, 0) )
+            itemBox.blit( images.mapImages[type+86], (0, 0) )
             if pygame.font:
                 font = pygame.font.Font(os.getcwd()+"/FONTS/gothic.ttf", 10)
-                msgText = font.render( 'x'+str(qty), 1, white, black )
+                msgText = font.render( 'x'+str(num), 1, white, black )
                 itemBox.blit(msgText, (17,17) )
             menuBox.blit( itemBox, (w, 30) )
             if w not in hPosList:
                 hPosList += [w]
-            availableItems += [(img, qty)]
+            availableItems += [(type, num)]
             w += blocksize
         hPos = 10 #horizontal position of selection box
         boxPointsFn = lambda x: ( (x,blocksize), (x,2*blocksize), (x+blocksize, 2*blocksize), (x+blocksize, blocksize) )
@@ -108,8 +114,13 @@ class menu():
         self.screen.blit(menuBox, ( (self.screen.get_size()[0]/2)-(200/2), 100) )    
         pygame.display.flip()
         numItems = len(availableItems)
+        font = pygame.font.Font(os.getcwd()+"/FONTS/courier.ttf", 14)
+        copyBox = menuBox
         # wait for selection
         while True:
+            menuBox = copyBox.copy()
+            if numItems >= 1:
+                menuBox.blit( font.render( availableItems[selection].getDesc(), 1, white, gold ), (10,25) )
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     pygame.draw.lines( itemsBox, black, True, boxPoints, 1 )
@@ -144,7 +155,7 @@ class menu():
         menuBox = self.openWindow(200, 125)
         
         if pygame.font:
-            font = pygame.font.Font(os.getcwd()+"/FONTS/gothic.ttf", 14)
+            font = pygame.font.Font(os.getcwd()+"/FONTS/courier.ttf", 14)
             msgText = font.render( text, 1, white, gold )
             menuBox.blit(msgText, (10,10) )
         
@@ -163,8 +174,12 @@ class menu():
         while True:
             if availableItems[selection].getName() == 'item':
                 priceText = font.render( '$'+str( prices[availableItems[selection].getType()] ), 1, white, gold )
-            else: priceText = font.render( '$'+str( prices[(availableItems[selection].getType(), availableItems[selection].getLevel() )] ), 1, white, gold )
+            elif availableItems[selection].getName() == 'spellbook' or availableItems[selection].getName() == 'parchment':
+                priceText = font.render( '$'+str( prices[(availableItems[selection].getType(), availableItems[selection].getLevel(), availableItems[selection].getSpellNum() )] ), 1, white, gold )
+            elif availableItems[selection].getName() == 'armor' or availableItems[selection].getName() == 'weapon':
+                priceText = font.render( '$'+str( prices[(availableItems[selection].getType(), availableItems[selection].getLevel() )] ), 1, white, gold )
             menuBox.blit(priceText, (10,20) )
+            menuBox.blit( font.render( availableItems[selection].getDesc(), 1, white, gold ), (30,20) )
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     pygame.draw.lines( itemsBox, black, True, boxPoints, 1 )
@@ -187,6 +202,7 @@ class menu():
                     if event.key == pygame.K_RETURN:
                         if availableItems == []: return None
                         elif availableItems[selection].getName() == 'item': return availableItems[selection].getType()
+                        elif availableItems[selection].getName() == 'spellbook': return ( availableItems[selection].getType(), availableItems[selection].getLevel(),availableItems[selection].getSpellNum() )
                         else: return (availableItems[selection].getType(), availableItems[selection].getLevel() )
             cursorPos = positions[selection]
             boxPoints = boxPointsFn(cursorPos)

@@ -43,7 +43,7 @@ class hero(pygame.sprite.Sprite):
             
             self.weapons = []
             self.weaponEquipped = None
-            self.gainWeapon(0,0)
+            self.gainWeapon(26,0)
             self.equipWeapon(self.weapons[0])
             
             self.armor = []
@@ -149,19 +149,34 @@ class hero(pygame.sprite.Sprite):
     def setItem(self, item, num=1):
         self.items[item] += num
     # Input: tile number denoting item
-    def getItem(self, itm):
+    def getItem(self, itm, level=None, spellNum=None):
         (itype, qty) = itm
-        if itype == KEY:
+        print itype+FRUIT1
+        if itype == KEY or itype+FRUIT1 == KEY:
             self.keys += 1
             return
-        if itype+86 == GOLD:
+        elif itype+FRUIT1 == GOLD:
             self.addGold(qty)
             return
+        elif itype+FRUIT1 in [112,113,114]:
+            level = qty
+            self.gainWeapon(itype, level)
+            return
+        elif itype+FRUIT1 in [117,118,119]:
+            level = qty
+            self.gainArmor(itype, level)
+            return
+        elif itype == SPELLBOOK or itype == PARCHMENT:
+            newItem = item.Item( itype, level, spellNum )
+            itype = itype - FRUIT1
+        elif itype+FRUIT1 in range(86, 100): 
+            newItem = item.Item(itype+FRUIT1)
         entry = self.items[itype]
         if hasattr(entry, "__iter__"):
-            self.items[itype].append( item.Item(itype+86) )
+            self.items[itype].append( newItem )
         else:
-            self.items[itype] = [item.Item(itype+86)]
+            self.items[itype] = [newItem]
+    
     def getItems(self):
         availableItems = []
         for i in self.items:
@@ -174,9 +189,10 @@ class hero(pygame.sprite.Sprite):
         self.items[type-86] = self.items[type-86][1:]
     def useItem(self, item):
         if item == None:
-            return
+            return 0
         item.execute(self)
         self.takeItem(item.getType())
+        return 60
     
     def getWeapons(self):
         return self.weapons
@@ -204,11 +220,12 @@ class hero(pygame.sprite.Sprite):
         self.armor.remove(armor)
     def equipArmor(self, armor):
         if armor == None: return
-        if self.armorEquipped[armor.getType()] == None:
-            self.armorEquipped[armor.getType()] = armor
+        print armor.getType()
+        if self.armorEquipped[armor.getType()-31] == None:
+            self.armorEquipped[armor.getType()-31] = armor
         else: 
             self.armor.append(self.armorEquipped[armor.getType()])
-            self.armorEquipped[armor.getType()] = armor
+            self.armorEquipped[armor.getType()-31] = armor
         self.loseArmor(armor)
     
     def addGold(self, amt):
@@ -224,12 +241,12 @@ class hero(pygame.sprite.Sprite):
     
     def learnSpell(self, num):
         self.spells += [spell.Spell( num )]
-    def castSpell(self, spell, battle=False):
+    def castSpell(self, spell, hud, battle=False):
         if spell == None:
             return
-        if spell.getType() == 1 and battle==False:
+        if spell.getType() in [1,2] and battle==False:
             return -1
-        spell.execute(self)
+        spell.execute(self, hud)
         return spell.getType()    
     def getSpells(self):
         return self.spells

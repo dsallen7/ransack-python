@@ -44,14 +44,18 @@ SMP       = 95
 MMP       = 96
 LMP       = 97
 KEY       = 98
+GOLD      = 99
 SPELLBOOK = 100
-GOLD      = 109
+PARCHMENT = 101
 CHEST     = 110
 OCHEST    = 111
 SWORD     = 112
+AXE       = 113
+SPEAR     = 114
 DOOR      = 116
 SHIELD    = 117
 BPLATE    = 118
+HELMET    = 119
 STAIRUP   = 120
 STAIRDN   = 121
 VOID      = 126
@@ -60,6 +64,11 @@ HEROSTART = 127
 # Spells
 HEAL = 0
 FRBL = 1
+ICBL = 2
+TLPT = 3
+ASCD = 4
+DSCD = 5
+ACD2 = 6
 
 # Items
 FRUIT1_I = 0

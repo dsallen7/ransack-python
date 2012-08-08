@@ -48,6 +48,14 @@ class Shop():
             items = shopScr.itemShopsByLevel[self.level]
             for i in items:
                 self.items.append( item.Item( i + 86 ) )
+        elif type == 'magicshop':
+            from OBJ import item
+            self.images[1], r = load_image('magicshop.bmp')
+            from prices import magicPrices as prices
+            self.prices = prices
+            items = shopScr.magicShopsByLevel[self.level]
+            for i in items:
+                self.items.append( item.Item( i[0], i[1], i[2] ) )
         self.storeScreen.fill( black )
         self.storeScreen.blit( self.images[1], (0,0) )
 
@@ -109,7 +117,9 @@ class Shop():
                     elif self.type == 'armory':
                         hero.gainArmor( purchase[0],purchase[1] )
                     elif self.type == 'itemshop':
-                        hero.getItem( purchase-86 )
+                        hero.getItem( (purchase-86,1) )
+                    elif self.type == 'magicshop':
+                        hero.getItem( (purchase[0],1), purchase[1], purchase[2] )
                 else: self.myHud.txtMessage("You don'T have enough money!")
             elif action == 'Sell':
                 self.ticker.tick(120)

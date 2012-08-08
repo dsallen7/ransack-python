@@ -6,10 +6,27 @@ from SCRIPTS import itemScr
 
 class Item():
     
-    def __init__(self, type):
+    def __init__(self, type, level=None, spellNum = None):
         self.type = type
+        if self.type == 100:
+            from SCRIPTS import spellScr
+            self.name = 'spellbook'
+            self.spellNum = spellNum
+            self.level = level
+            self.descrip = itemScr.descDict[self.type] + ': ' + spellScr.descDict[spellNum]
+        elif self.type == 101:
+            from SCRIPTS import spellScr
+            self.name = 'parchment'
+            self.spellNum = spellNum
+            self.level = level
+            self.descrip = itemScr.descDict[self.type] + ': ' + spellScr.descDict[spellNum]
+        elif type in range(102, 108):
+            self.name = 'magicitem'
+            self.level = level
+        else: 
+            self.name = 'item'
+            self.descrip = itemScr.descDict[self.type]
         self.img = type
-        self.name = 'item'
         self.qty = 0
     
     def getType(self):
@@ -27,11 +44,20 @@ class Item():
         else: return self.qty
     def getName(self):
         return self.name
+    def getLevel(self):
+        return self.level
+    def getSpellNum(self):
+        return self.spellNum
+    def getDesc(self):
+        return self.descrip
     
     def execute(self, hero):
+        if self.name == 'spellbook':
+            hero.learnSpell( self.spellNum )
+            return
         [cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX] = hero.getPlayerStats()
         stats = [cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX]
-        fn = itemDict[self.getType()]
+        fn = itemScr.itemDict[self.getType()]
         stats = fn(stats)
         [cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX] = stats
         hero.setPlayerStats( (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX) )

@@ -86,11 +86,13 @@ class battle():
     
     def fireball(self, itl):
         dmg = random.randrange(itl,2*itl)
-        self.textMessage('The fireball hiTs The monsTer for '+str(dmg)+' poinTs!')
+        self.textMessage('The fireball hits the monster for '+str(dmg)+' points!')
         return dmg
     
     def iceball(self):
-        pass
+        dmg = random.randrange(itl,2*itl)
+        self.textMessage('The iceball hits the monster for '+str(dmg)+' points!')
+        return dmg
     
     def lightningball(self):
         pass
@@ -109,7 +111,7 @@ class battle():
                 #hero attacks
                 if self.rollDie(0,2):
                     dmg = random.randrange(sth/2,sth) + 10*weapon.getLevel()
-                    self.textMessage('You hiT The '+enemy.getName() +' for '+str(dmg)+' poinTs!')
+                    self.textMessage('You hit the '+enemy.getName() +' for '+str(dmg)+' poinTs!')
                     #self.sounds[1].play()
                     engagedEnemy.takeDmg(dmg)
                 else:
@@ -121,6 +123,8 @@ class battle():
                     pass
                 elif attack == 1:
                     engagedEnemy.takeDmg(self.fireball(itl))
+                elif attack == 2:
+                    engagedEnemy.takeDmg(self.iceball(itl))
             elif action == 'Item':
                 hero.useItem(self.myMenu.invMenu(hero.getItems(), "ITems:" ) )
             elif action == 'Flee':

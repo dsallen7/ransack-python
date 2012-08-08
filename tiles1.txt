@@ -57,8 +57,8 @@
     # 54: tree 4
     # 55: wellspring
     # 56: river 1
-    # 57: river 2
-    # 58: river 3
+    # 57: magic shop door
+    # 58: armory door
     # 59: blacksmith door
     # 60: house 2 door (green)
     # 61: blacksmith roof 1
@@ -100,22 +100,22 @@
     # 96: medium magic potion
     # 97: large magic potion
     # 98: key
-    # 99: chest
+    # 99: gold
     # 100: spellbook
     # 101: parchment
     # 102: healing
     # 103: fireball
-    # 104: 
-    # 105: 
+    # 104: iceball
+    # 105: teleport
     # 106: 
     # 107: 
     # 108: 
-    # 109: gold
+    # 109: 
     # 110: chest
     # 111: open chest
     # 112: sword
-    # 113: 
-    # 114: 
+    # 113: axe
+    # 114: spear
     # 115: 
     # 116: dungeon door
     # 117: shield

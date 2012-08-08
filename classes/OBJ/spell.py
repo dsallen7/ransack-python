@@ -12,6 +12,7 @@ class Spell():
         self.cost = 5
         self.level = 0
         self.name = 'spell'
+        self.desc = spellScr.descDict[self.type]
     
     def getType(self):
         return self.type
@@ -21,8 +22,10 @@ class Spell():
     
     def getLevel(self):
         return self.level
+    def getDesc(self):
+        return self.desc
     
-    def execute(self, hero):
+    def execute(self, hero, hud):
         [cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX] = hero.getPlayerStats()
         stats = [cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX]
         fn = spellScr.spellDict[self.getType()]

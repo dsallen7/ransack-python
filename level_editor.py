@@ -76,6 +76,9 @@ class Map():
         else:
             return VOID
     
+    def addChest(self, loc, chest):
+        self.chests[loc] = chest
+    
     def getGrid(self):
         return self.grid
     
@@ -258,6 +261,37 @@ class Handler():
             pygame.display.flip()
         return input
     
+    def fillChest(self):
+        menuBox = pygame.Surface( (150, 250) )
+        itemsList = range(86, 102)+[112,113,114,117,117]
+        for i in range( len( itemsList ) ):
+            print i
+            menuBox.blit(images.mapImages[itemsList[i]], (15+((i)%4)*blocksize, 50+((i)/4)*blocksize))
+        chestItems = []
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        return chestItems
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    (mx, my) = event.pos
+                    if 115 <= mx < 235 and 150 <= my < 330:
+                        itemNum = itemsList[(mx-115)/blocksize + (my-150)/blocksize * 4]
+                        #print itemNum
+                        if itemNum in range(86, 99):
+                            chestItems.append( (itemNum-FRUIT1, 1) )
+                        elif itemNum == GOLD:
+                            chestItems.append( (itemNum-FRUIT1, int(self.getInput('Enter amount of gold: ')) ) )
+                        elif itemNum == SPELLBOOK or itemNum == PARCHMENT:
+                            chestItems.append( (itemNum-FRUIT1, 0, 0) )
+                        elif itemNum in [112,113,114,117,118]:
+                            chestItems.append( (itemNum-FRUIT1, 0) )
+                    print chestItems
+            for item in chestItems:
+                menuBox.blit(images.mapImages[item[0]+FRUIT1], (len(chestItems)*blocksize, 15) )
+            screen.blit(menuBox, (100,100) )
+            pygame.display.flip()
+    
     def getFilename(self):
         return self.getInput('Enter filename: ')
     
@@ -265,7 +299,7 @@ class Handler():
         filename = self.getFilename()
         ball = myMap.getMapBall()
         try:
-            save = open(filename, "w")
+            save = open(os.getcwd()+'/MAP/LEVELS/'+filename, "w")
             pickle.dump(ball, save)
             save.close()
         except IOError, message:
@@ -275,7 +309,7 @@ class Handler():
     def loadMap(self):
         filename = self.getFilename()
         try:
-            save = open(filename, "r")
+            save = open(os.getcwd()+'/MAP/LEVELS/'+filename, "r")
             ball = pickle.load(save)
             save.close()
             myMap.installBall(ball)
@@ -314,6 +348,8 @@ class Handler():
         if event.key == pygame.K_t:
             self.switchTile()
         if event.key == pygame.K_SPACE:
+            if self.currentTile == CHEST:
+                myMap.addChest( (x/blocksize,y/blocksize), self.fillChest())
             myMap.setEntry(x/blocksize,y/blocksize,self.currentTile)
         if event.key == pygame.K_ESCAPE:
             os.sys.exit()
@@ -421,6 +457,8 @@ class Handler():
         if 0 <= mx < gridField.get_width() and 0 <= my < gridField.get_height():
             if e.button == 1:
                 if self.mouseAction == 'draw':
+                    if self.currentTile == CHEST:
+                        myMap.addChest( (mx/blocksize,my/blocksize), self.fillChest())
                     myMap.setEntry(mx/blocksize,my/blocksize,self.currentTile)
                     self.cursorPos = ( (mx/blocksize)*blocksize, (my/blocksize)*blocksize )
                 elif self.mouseAction == 'select':
@@ -433,13 +471,15 @@ class Handler():
             elif e.button == 3:
                 pass
         elif gridField.get_width()+50 <= mx < gridField.get_width()+170 and 200 <= my < 440:
-            self.currentTile = ( self.offset + (mx-gridField.get_width()+50)/blocksize + (my-200)/blocksize * 4 ) - 3
+            self.currentTile = ( self.offset + (mx-gridField.get_width()-45)/blocksize + (my-200)/blocksize * 4 )
         elif gridField.get_width()+65 <= mx < gridField.get_width()+95 and 500 <= my < 530:
-            #shift tilesheet left
-            pass
+            self.offset -= 32
+            if self.offset < 0:
+                self.offset = 96
         elif gridField.get_width()+95 <= mx < gridField.get_width()+125 and 500 <= my < 530:
-            #shift tilesheet right
-            pass
+            self.offset += 32
+            if self.offset == 128:
+                self.offset = 0
         elif gridField.get_width()+50 <= mx < gridField.get_width()+80 and 530 <= my < 560:
             myMap.mapCut()
         elif gridField.get_width()+80 <= mx < gridField.get_width()+110 and 530 <= my < 560:
@@ -514,6 +554,7 @@ class Handler():
             self.sideImg.blit( msgBox, (50,100) )
             #pygame.display.flip()
         screen.blit(self.sideImg, (1200,0) )
+    
 
 # Set the height and width of the screen
 size=[1400,800]
@@ -541,7 +582,7 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 myHandler.event_handler(event)
-            if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.MOUSEBUTTONUP:
+            if event.type == pygame.MOUSEBUTTONDOWN:# or event.type == pygame.MOUSEBUTTONUP:
                 myHandler.mouseHandler(event)
             if event.type == pygame.QUIT:
                 os.sys.exit()

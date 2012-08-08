@@ -198,7 +198,7 @@ class Map():
             chestItems = []
             if self.rollDie(0,2) and self.rollDie(0,2):
                 #gold
-                chestItems = [(23,randrange(15,30))]
+                chestItems = [(13,randrange(15,30))]
             elif self.rollDie(0,2):
                 #chestItems = [(23,randrange(15,30))]
                 chestItems.append((0,1))
