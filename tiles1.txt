@@ -27,20 +27,20 @@
     # 24: brick 1
     # 25: brick 2
     # 26: brick 3
-    # 27: brick 4
+    # 27: upper right wall
     # 28: stone 1
     # 29: stone 2
-    # 30: stone 3
-    # 31: stone 4
+    # 30: E/W wall
+    # 31: N/S wall
     # 32: portcullis 1
     # 33: portcullis 2
     # 34: portcullis 3
     # 35: portcullis 4
     # 36: portcullis 5
     # 37: portcullis 6
-    # 38: 
-    # 39: 
-    # 40: 
+    # 38: E/W door
+    # 39: E/W window
+    # 40: upper left wall
     # 41: blacksmith window
     # 42: house 1 lower left
     # 43: house 1 door
@@ -49,9 +49,9 @@
     # 46: house 1 upper center
     # 47: house 1 upper right
     # 48: house 1 roof 1
-    # 49: house 1 roof 2
-    # 50: house 1 roof 3
-    # 51: tree 1
+    # 49: 
+    # 50: 
+    # 51: lower left wall
     # 52: tree 2
     # 53: tree 3
     # 54: tree 4
@@ -75,13 +75,13 @@
     # 72: house 2 upper left
     # 73: house 2 upper right
     # 74: magicshop sign
-    # 75: bridge 2
+    # 75: lower right wall
     # 76: rampart 1
     # 77: rampart 2
     # 78: lava river 1
     # 79: lava river 2
-    # 80: tower 1
-    # 81: tower 2
+    # 80: N/S window
+    # 81: N/S door
     # 82: tower 3
     # 83: tower 4
     # 84: crenellations 1

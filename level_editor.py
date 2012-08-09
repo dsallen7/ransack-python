@@ -438,7 +438,7 @@ class Handler():
                     oldTopY = p1[1]/blocksize
                     if oldTopX == newTopX and oldTopY == newTopY :
                         pass
-                    elif 0 <= newTopX*blocksize and (newTopX+ ((p3[0]-p1[0])/blocksize) )*blocksize < 600 and 0 <= newTopX*blocksize and (newTopY+ ((p3[1]-p1[1])/blocksize) )*blocksize < 600:
+                    elif 0 <= newTopX*blocksize and (newTopX+ ((p3[0]-p1[0])/blocksize) )*blocksize < 1200 and 0 <= newTopX*blocksize and (newTopY+ ((p3[1]-p1[1])/blocksize) )*blocksize < 1200:
                         self.selectBoxPoints = ( (newTopX*blocksize,newTopY*blocksize), 
                                                  (newTopX*blocksize,(newTopY+ ((p3[1]-p1[1])/blocksize) )*blocksize), 
                                                  ((newTopX+ ((p3[0]-p1[0])/blocksize) )*blocksize,(newTopY+ ((p3[1]-p1[1])/blocksize) )*blocksize), 

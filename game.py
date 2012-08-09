@@ -174,6 +174,9 @@ class game():
         if i == 38:
             self.myMap.updateUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize,19)
             self.Display.redrawXMap(self.myMap)
+        if i == 81:
+            self.myMap.updateUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize,18)
+            self.Display.redrawXMap(self.myMap)
         if i == -1 or i in range(24,86):
             return
         # dungeon door
@@ -279,4 +282,4 @@ class game():
             self.myHud.update()
             #self.myHero.showLocation(self.gameBoard)
             self.displayGameBoard()
-        return self.exitCode
+        return

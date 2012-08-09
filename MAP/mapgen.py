@@ -7,8 +7,16 @@ from random import choice, randrange
 dirDict = { 'w':(-1,0), 'e':(1,0), 'n':(0,-1), 's':(0,1) }
 DefaultWallTile = 29
 
+EWWALL = 30
+NSWALL = 31
+URWALL = 27
+LRWALL = 75
+ULWALL = 40
+LLWALL = 51
+
+
 class Room():
-    def __init__(self, xdim, ydim, pos=(0,0), shape='Square'):
+    def __init__(self, xdim, ydim, pos=(0,0), shape='square'):
         self.pos = pos
         self.xdim = xdim
         self.ydim = ydim
@@ -18,15 +26,33 @@ class Room():
         if shape == 'square':
             (xpos, ypos) = self.getPos()
             (xdim, ydim) = self.getDimensions()
-            for i in range(xdim):
-                self.setGrid(i, 0, DefaultWallTile)
-                self.setGrid(i, ydim-1, DefaultWallTile)
-            for i in range(ydim):
-                self.setGrid(0, i, DefaultWallTile)
-                self.setGrid(xdim-1, i, DefaultWallTile)
+            for i in range(1, xdim-1):
+                self.setGrid(i, 0, EWWALL)
+                self.setGrid(i, ydim-1, EWWALL)
+            for i in range(1, ydim-1):
+                self.setGrid(0, i, NSWALL)
+                self.setGrid(xdim-1, i, NSWALL)
+            self.setGrid(0,0, ULWALL)
+            self.setGrid(xdim-1,0, URWALL)
+            self.setGrid(0,ydim-1, LLWALL)
+            self.setGrid(xdim-1,ydim-1, LRWALL)
             for i in range(1,xdim-1):
                 for j in range(1,ydim-1):
                     self.setGrid(i, j, 0)
+        if shape == 'round':
+            (xpos, ypos) = self.getPos()
+            self.xdim = 9
+            self.ydim = 9
+            self.grid = [ [126,126,ULWALL,EWWALL,EWWALL,EWWALL,URWALL,126,126],
+                           [126,ULWALL,LRWALL,0,0,0,LLWALL,URWALL,126],
+                           [ULWALL,LRWALL,0,0,0,0,0,LLWALL,URWALL],
+                           [NSWALL,0,0,0,0,0,0,0,NSWALL],
+                           [NSWALL,0,0,0,0,0,0,0,NSWALL],
+                           [NSWALL,0,0,0,0,0,0,0,NSWALL],
+                           [LLWALL,URWALL,0,0,0,0,0,ULWALL,LRWALL],
+                           [126,LLWALL,URWALL,0,0,0,ULWALL,LRWALL,126],
+                           [126,126,LLWALL,EWWALL,EWWALL,EWWALL,LRWALL,126,126]
+                        ]
         
     def getDimensions(self):
         return (self.xdim, self.ydim)
@@ -70,17 +96,19 @@ class Map():
             return self.grid[y][x]
         else: return -1
     
-    def genRoom(self, pos=(0,0) ):
-        return Room( randrange(5,8), randrange(5,8), pos, shape='square' )
+    def genRoom(self, pos=(0,0), shape='square' ):
+        return Room( randrange(5,8), randrange(5,8), pos, shape )
         
     def branchTile(self, room):
         (xpos, ypos) = room.getPos()
         (xdim, ydim) = room.getDimensions()
         candidateList = []
         for i in range(1,xdim-1):
-            candidateList += [(i+xpos,ypos)] + [(i+xpos,ypos+ydim-1)]
+            if self.getMapEntry(i+xpos,ypos) == EWWALL:
+                candidateList += [(i+xpos,ypos)] + [(i+xpos,ypos+ydim-1)]
         for i in range(1,ydim-1):
-            candidateList += [(xpos,i+ypos)] + [(xpos+xdim-1,i+ypos)]
+            if self.getMapEntry(xpos,i+ypos) == NSWALL:
+                candidateList += [(xpos,i+ypos)] + [(xpos+xdim-1,i+ypos)]
         cand = choice(candidateList)
         if cand[0] == xpos:
             return (cand, 'w')
@@ -115,7 +143,7 @@ class Map():
     
     def generateMap(self, maxRooms):
         rooms = []
-        startingRoom = self.genRoom()
+        startingRoom = self.genRoom((0,0),'round')
         (xdim, ydim) = startingRoom.getDimensions()
         startingRoom.setPos( ( (self.DIM/2)-(xdim/2), (self.DIM/2)-(ydim/2) ) )
         self.addRoom(startingRoom, startingRoom.getPos() )
@@ -132,7 +160,11 @@ class Map():
             tile, dir = self.branchTile(candidateRoom)
             
             # 6 generate new room
-            
+            '''
+            if len(rooms) in [5,10,15]:
+                newRoom = self.genRoom((0,0), 'round')
+            else: newRoom = self.genRoom()
+            '''
             newRoom = self.genRoom()
             
             # 7 see if new room fits next to selected room
@@ -146,7 +178,9 @@ class Map():
                 
             #10 create doorway into new room
                 (x1,y1) = tile
-                self.setMapEntry( x1,y1,38 )
+                if dir in ['n','s']:
+                    self.setMapEntry( x1,y1,38 )
+                else: self.setMapEntry( x1,y1,81 )
                 candidateRoom.entrances.append( (x1,y1) )
                 (x2,y2) = dirDict[dir]
                 self.setMapEntry( x1+x2, y1+y2, 0)
