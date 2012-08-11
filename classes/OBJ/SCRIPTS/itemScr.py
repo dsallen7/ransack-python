@@ -6,10 +6,12 @@ addHP3 = lambda s: [s[0] + 20] + s[1:]
 addMP1 = lambda s: s[:2] + [s[2]+5] + s[3:]
 addMP2 = lambda s: s[:2] + [s[2]+10] + s[3:]
 addMP3 = lambda s: s[:2] + [s[2]+20] + s[3:]
+curePSN = lambda s: s[:11] + [False]
+
 itemDict = { FRUIT1: addHP1,
              CHEESE: addHP1,
              BREAD1: addHP2,
-             BREAD2: addHP2,
+             ANT: curePSN,
              SHP: addHP1,
              MHP: addHP2,
              LHP: addHP3,
@@ -25,6 +27,7 @@ descDict = {
              FRUIT1: 'A small apple',
              CHEESE: 'A wedge of cheese',
              BREAD1: 'A loaf of bread',
+             ANT: 'Poison antidote',
              SHP: 'Small Healing Potion',
              MHP: 'Medium Healing Potion',
              SMP: 'Small Magic Potion',

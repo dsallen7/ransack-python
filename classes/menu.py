@@ -19,7 +19,7 @@ class menu():
     
     def openWindow(self, xDim, yDim):
         for i in range(xDim/2):
-            borderBox = pygame.Surface( ( ((i*2)+5 ), yDim) )
+            borderBox = pygame.Surface( ( ((i*2)+10 ), yDim) )
             borderBox.fill( grey )
             msgBox = pygame.Surface( ( i*2, yDim-10 ) )
             msgBox.fill( gold )

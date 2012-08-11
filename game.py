@@ -73,8 +73,8 @@ class game():
     def gameOver(self):
         self.gameOn = False
     
-    def generateMap(self, dimension):
-        rndMap = mapgen.Map(dimension)
+    def generateMap(self, dimension, level):
+        rndMap = mapgen.Map(dimension, level)
         rndMap.generateMap(20)
         newMap = map.map(None, rndMap.getMapBall(), level=self.levelDepth)
         return newMap
@@ -85,7 +85,7 @@ class game():
             self.levelDepth += 1
             if self.levelDepth == 5:
                 self.myDungeon = self.myDungeon + self.fortressMaps
-            else: self.myDungeon.append(self.generateMap(40))
+            else: self.myDungeon.append(self.generateMap(40, self.levelDepth))
             self.myMap = self.myDungeon[self.currentMap]
             self.Display.redrawXMap(self.myMap)
         else:
@@ -128,8 +128,27 @@ class game():
             if event.key == pygame.K_SPACE:
                 pass
             elif event.key == pygame.K_s:
-                if self.myHero.castSpell( self.myMenu.invMenu(self.myHero.getSpells(), "Spells:" ), self.myHud ) == -1:
-                    self.textMessage('ThaT spell may only be casT in baTTle.')
+                result = self.myHero.castSpell( self.myMenu.invMenu(self.myHero.getSpells(), "Spells:" ), self.myHud )
+                if result[0] == -1:
+                    pass
+                elif result[0] == -2:
+                    self.textMessage('That spell may only be cast in battle.')
+                elif result[0] == -3:
+                    self.textMessage("You don't have enough MP!!")
+                elif result[0] == 3:
+                    (x,y) = self.myMap.getRandomTile()
+                    print x,y
+                    self.myHero.setXY( x*blocksize, y*blocksize )
+                    self.myMap.playerXY = (x, y)
+                    self.Display.drawHero(self.myHero,self.myMap,self.gameBoard,animated=False)
+                    self.myMap.revealMap()
+                    self.Display.redrawXMap(self.myMap)
+                    self.Display.redrawMap(self.myMap, self.myHero.getXY(), self.myHero.getRect(), self.gameBoard)
+                    self.displayGameBoard()
+                    self.textMessage( result[1] )
+                else:
+                    self.textMessage( result[1] )
+                    self.Ticker.tick(30)
             elif event.key == pygame.K_i:
                 self.Ticker.tick( self.myHero.useItem( self.myMenu.invMenu(self.myHero.getItems(), "ITems:" ) ) )
             elif event.key == pygame.K_w:
@@ -157,7 +176,7 @@ class game():
         
         i = self.myMap.getUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize)
         # detect blocking tiles first, otherwise they will be ignored
-        #stores
+        # stores
         if i == BLKSMDOOR:
             self.myBlacksmith.enterStore(self.myHero)
             return
@@ -196,12 +215,12 @@ class game():
         # Stairs down
         if i == STAIRDN:
             self.nextLevel()
-            self.Display.drawHero(x1,y1,self.myHero,self.myMap,self.gameBoard,animated=False)
+            self.Display.drawHero(self.myHero,self.myMap,self.gameBoard,animated=False)
             return
         # Stairs up
         if i == STAIRUP:
             self.prevLevel()
-            self.Display.drawHero(x1,y1,self.myHero,self.myMap,self.gameBoard,animated=False)
+            self.Display.drawHero(self.myHero,self.myMap,self.gameBoard,animated=False)
             return
         # Chest
         if i == CHEST:
@@ -216,7 +235,7 @@ class game():
             X += moveX
             Y += moveY
             self.myHero.setXY(X,Y)
-            self.Display.drawHero(x1,y1, self.myHero, self.myMap, self.gameBoard, self, direction)
+            self.Display.drawHero(self.myHero, self.myMap, self.gameBoard, self, direction)
             self.myHero.moving = False
             #roll the die to see if there will be a battle
             if self.rollDie(0,30) and self.myMap.type == 'dungeon':
@@ -231,7 +250,17 @@ class game():
                     self.textMessage('You find '+str(g)+' gold pieces!')
                     self.myHero.addGold(g)
         self.Display.redrawXMap(self.myMap)
-        self.Ticker.tick(1)
+        if self.myHero.isPoisoned:
+            self.Ticker.tick(5)
+            if self.Ticker.getTicks() - self.myHero.poisonedAt >= 120:
+                self.textMessage('The poison has left your system.')
+                self.myHero.isPoisoned = False
+            else:
+                self.textMessage('The poison hurts you...')
+                if self.myHero.takeDmg(1) < 1:
+                    self.textMessage("You have died!")
+                    self.gameOn = False
+        self.Ticker.tick(2)
     
     def rollDie(self, target, range):
         d = random.randrange(range)
@@ -269,7 +298,7 @@ class game():
         (X,Y) = self.myMap.getStartXY()
         self.myHero.setXY( X*blocksize,Y*blocksize )
         self.updateSprites()
-        self.Display.drawHero( X*blocksize,Y*blocksize, self.myHero, self.myMap, self.gameBoard, animated=False)
+        self.Display.drawHero(self.myHero, self.myMap, self.gameBoard, animated=False)
         self.Display.redrawXMap(self.myMap)
         while self.gameOn:
             self.clock.tick(30)

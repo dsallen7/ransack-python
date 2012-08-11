@@ -31,7 +31,7 @@ class Tavern():
     
     def getAction(self):
         menuBox = pygame.Surface( (124,99) )
-        options = ['Save', 'Load', 'ReTurn To Game', 'ExiT To Main Menu']
+        options = ['Save', 'Sleep', 'ReTurn To Game', 'ExiT To Main Menu']
         selection = 0
         while True:
             menuBox.fill( gold )
@@ -135,6 +135,8 @@ class Tavern():
             self.drawStoreScreen()
     
     def save(self, fileName, game):
+        if fileName == None:
+            return
         try:
             savFile = open(fileName, 'w')
             pickle.dump(game.getSaveBall(), savFile)
@@ -146,6 +148,7 @@ class Tavern():
         pass
     
     def enterStore(self, hero, game):
+        self.storeScreen.blit( self.images[1], (0,0) )
         self.drawStoreScreen()
         while True:
             action = self.getAction()
@@ -155,6 +158,11 @@ class Tavern():
                 #game.gameOn = False
                 self.save( self.getFile(), game )
                 return
+            elif action == 'Sleep':
+                if hero.takeGold( (hero.getMaxHP()-hero.getCurrHP()) /2 ):
+                    self.myHud.txtMessage('Your HP and MP are now full')
+                    self.myHud.txtMessage('Thank you for staying with us!')
+                    hero.refillPts()
             elif action == 'Load':
                 game.gameOn = False
                 game.exitCode = 1

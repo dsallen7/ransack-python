@@ -70,31 +70,36 @@ class hud( ):
         pygame.draw.line(self.frameBox1, fgc, (cx,cy), (cx+ radius*math.sin( rad ), cy- radius*math.cos( rad ) ) )
         rect = (cx-radius,cy-radius,radius*2,radius*2)
         pygame.draw.arc(self.frameBox1,fgc,rect,0,rad,1)
-        
-    def update( self ):
-        stats = self.game.myHero.getPlayerStats()
-        (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX) = stats
-        (armor, weapon) = ( self.game.myHero.getArmorEquipped(), self.game.myHero.getWeaponEquipped() )
-        self.textBox1 = pygame.Surface((100, 75))
-        self.textBox1.fill( gold )
-        self.frameBox1, r = load_image("hudBox1.bmp",None)
-        #draw stats
-        self.boxStat(cHP, mHP, dkred, red, (29,53) )
-        self.boxStat(cMP, mMP, dkblue, blue, (29,79) )
-        self.circleStat(sth, dkred, red, (41,107), 12)
-        self.circleStat(itl, grey, ltgrey, (74,107), 12)
-        self.circleStat(dex, purple, violet, (107,107), 12)
-        self.boxStat(cEX, nEX, green, dkgreen, (29,129) )
-        # ticker
+    
+    def drawClock(self, x, y):
         secs = self.game.Ticker.getSecs()
         mins = self.game.Ticker.getMins()
         hrs = self.game.Ticker.getHours()
         sRad = math.radians( 360* ( float(secs)/float(60) ) )
         mRad = math.radians( 360* ( float(mins)/float(60) ) )
         hRad = math.radians( 360* ( float(hrs)/float(60) ) )
-        pygame.draw.line(self.frameBox1, black, (106,159), (106+ 14*math.sin( sRad ), 159- 14*math.cos( sRad ) ) )
-        pygame.draw.line(self.frameBox1, grey, (106,159), (106+ 12*math.sin( mRad ), 159- 12*math.cos( mRad ) ), 2 )
-        pygame.draw.line(self.frameBox1, grey, (106,159), (106+ 9*math.sin( hRad ), 159- 9*math.cos( hRad ) ), 2)
+        pygame.draw.line(self.frameBox1, black, (x,y), (x+ 14*math.sin( sRad ), y- 14*math.cos( sRad ) ) )
+        pygame.draw.line(self.frameBox1, grey, (x,y), (x+ 12*math.sin( mRad ), y- 12*math.cos( mRad ) ), 2 )
+        pygame.draw.line(self.frameBox1, grey, (x,y), (x+ 9*math.sin( hRad ), y- 9*math.cos( hRad ) ), 2)
+        
+    def update( self ):
+        stats = self.game.myHero.getPlayerStats()
+        (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX, psn) = stats
+        (armor, weapon) = ( self.game.myHero.getArmorEquipped(), self.game.myHero.getWeaponEquipped() )
+        self.textBox1 = pygame.Surface((100, 75))
+        self.textBox1.fill( gold )
+        self.frameBox1, r = load_image("hudBox1.bmp",None)
+        #draw stats
+        self.boxStat(cHP, mHP, dkred, red, (29,53) )
+        self.boxStat(cMP, mMP, dkblue, blue, (29,73) )
+        #self.circleStat(sth, dkred, red, (41,107), 12)
+        #self.circleStat(itl, grey, ltgrey, (74,107), 12)
+        #self.circleStat(dex, purple, violet, (107,107), 12)
+        self.boxStat(cEX, nEX, green, dkgreen, (29,93) )
+        if self.game.myHero.isPoisoned:
+            self.frameBox1.blit(images.mapImages[122], (30,111))
+        # ticker
+        self.drawClock(106, 159)
         #show equipped armor and weapon
         weaponCopy = pygame.Surface( (30,30) )
         weaponCopy.blit( images.mapImages[ weapon.getImg() ], (0,0) )

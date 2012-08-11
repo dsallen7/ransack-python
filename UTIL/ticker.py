@@ -7,7 +7,7 @@ class Ticker():
         self.count = self.count + ticks
     
     def getTicks(self):
-        return self.ticks
+        return self.count
     
     def getSecs(self):
         return self.count % 60

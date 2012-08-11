@@ -7,6 +7,11 @@ from random import choice, randrange
 dirDict = { 'w':(-1,0), 'e':(1,0), 'n':(0,-1), 's':(0,1) }
 DefaultWallTile = 29
 
+DEFAULTBKGD = 0
+
+EWDOOR = 38
+NSDOOR = 81
+
 EWWALL = 30
 NSWALL = 31
 URWALL = 27
@@ -22,6 +27,7 @@ class Room():
         self.ydim = ydim
         self.grid = [range(xdim) for _ in range(ydim)]
         self.entrances = []
+        self.neighbors = []
         
         if shape == 'square':
             (xpos, ypos) = self.getPos()
@@ -71,13 +77,13 @@ class Room():
         return self.grid[y][x]
 
 class Map():
-    def __init__(self, DIM):
+    def __init__(self, DIM, level=1):
         self.grid = []
         for i in range(DIM):
             self.grid += [[126]*DIM]
         self.DIM = DIM
         self.copyText = []
-        
+        self.level = level
         self.chests = {}
     
     def rollDie(self, target, range):
@@ -175,26 +181,44 @@ class Map():
             # 9 add new room to map and list of rooms
                 self.addRoom(newRoom, newRoom.getPos() )
                 rooms += [newRoom]
+            
+            # 9.5 add rooms as neighbors
+                candidateRoom.neighbors.append(newRoom)
+                newRoom.neighbors.append(candidateRoom)
                 
             #10 create doorway into new room
                 (x1,y1) = tile
                 if dir in ['n','s']:
-                    self.setMapEntry( x1,y1,38 )
-                else: self.setMapEntry( x1,y1,81 )
+                    self.setMapEntry( x1,y1,EWDOOR )
+                else: 
+                    self.setMapEntry( x1,y1,NSDOOR )
                 candidateRoom.entrances.append( (x1,y1) )
                 (x2,y2) = dirDict[dir]
+                if dir == 'n':
+                    self.setMapEntry( x1+x2-1, y1+y2, URWALL)
+                    self.setMapEntry( x1+x2+1, y1+y2, ULWALL)
+                elif dir == 's':
+                    self.setMapEntry( x1+x2-1, y1+y2, LRWALL)
+                    self.setMapEntry( x1+x2+1, y1+y2, LLWALL)
+                elif dir == 'e':
+                    self.setMapEntry( x1+x2, y1+y2-1, LRWALL)
+                    self.setMapEntry( x1+x2, y1+y2+1, URWALL)
+                elif dir == 'w':
+                    self.setMapEntry( x1+x2, y1+y2-1, LLWALL)
+                    self.setMapEntry( x1+x2, y1+y2+1, ULWALL)
                 self.setMapEntry( x1+x2, y1+y2, 0)
                 newRoom.entrances.append( (x1+x2,y1+y2) )
             # 11 repeat step 4
             
         # set staircases
-        # up
+        '''
         choice1 = choice(rooms)
         (xpos, ypos) = choice1.getPos()
         (xdim, ydim) = choice1.getDimensions()
         self.setMapEntry( xpos + xdim/2, ypos + ydim/2, 120)
         self.POE = ( xpos + xdim/2, ypos + ydim/2 )
         rooms.remove(choice1)
+        '''
         # down
         choice2 = choice(rooms)
         # find room with only 1 entrance
@@ -207,6 +231,15 @@ class Map():
         self.setMapEntry( xpos + xdim/2, ypos + ydim/2, 121)
         self.setMapEntry( doorX, doorY, 116)
         self.POEx = ( xpos + xdim/2, ypos + ydim/2 )
+        
+        # up
+        choice1 = choice2.neighbors[0]
+        (xpos, ypos) = choice1.getPos()
+        (xdim, ydim) = choice1.getDimensions()
+        self.setMapEntry( xpos + xdim/2, ypos + ydim/2, 120)
+        self.POE = ( xpos + xdim/2, ypos + ydim/2 )
+        rooms.remove(choice1)
+        
         rooms.remove(choice2)
         
         # add key for door
@@ -249,7 +282,7 @@ class Map():
         
     
     def getMapBall(self):
-        return (self.grid, self.POE, self.POEx, self.POE, self.chests )
+        return (self.grid, DEFAULTBKGD, self.POE, self.POEx, self.POE, self.chests )
     
     def saveMap(self):
         ball = self.getMapBall()

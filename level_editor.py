@@ -45,6 +45,7 @@ class Map():
         self.pointOfExit = None
         self.portals = []
         self.chests = {}
+        self.defaultBkgdTile = 0
     
     def setEntry(self, x, y, e):
         if e == HEROSTART:
@@ -59,14 +60,14 @@ class Map():
                 self.pointOfEntry = (x,y)
             else:
                 (px,py) = self.pointOfEntry
-                self.setEntry(px,py,0)
+                self.setEntry(px,py,defaultBkgdTile)
                 self.pointOfEntry = (x,y)
         if e == STAIRDN:
             if self.pointOfExit == None:
                 self.pointOfExit = (x,y)
             else:
                 (px,py) = self.pointOfExit
-                self.setEntry(px,py,0)
+                self.setEntry(px,py,defaultBkgdTile)
                 self.pointOfExit = (x,y)
         self.grid[y] = self.grid[y][:x] + [e] + self.grid[y][x+1:]
     
@@ -83,16 +84,17 @@ class Map():
         return self.grid
     
     def installBall(self, ball):
-        (grid, poe, poex, hs, chests) = ball
+        (grid, DBKGT, poe, poex, hs, chests) = ball
         self.grid = grid
         self.DIM = len(grid)
         self.heroStart = hs
         self.pointOfEntry = poe
         self.pointOfExit = poex
         self.chests = chests
+        self.defaultBkgdTile = DBKGT
     
     def getMapBall(self):
-        return (self.grid, self.pointOfEntry, self.pointOfExit, self.heroStart, self.chests)
+        return (self.grid, self.defaultBkgdTile, self.pointOfEntry, self.pointOfExit, self.heroStart, self.chests)
     
     
     def changeDimensions(self, nDim):
@@ -471,7 +473,9 @@ class Handler():
             elif e.button == 3:
                 pass
         elif gridField.get_width()+50 <= mx < gridField.get_width()+170 and 200 <= my < 440:
-            self.currentTile = ( self.offset + (mx-gridField.get_width()-45)/blocksize + (my-200)/blocksize * 4 )
+            if e.button == 1:
+                self.currentTile = ( self.offset + (mx-gridField.get_width()-45)/blocksize + (my-200)/blocksize * 4 )
+            elif e.button == 3: myMap.defaultBkgdTile = ( self.offset + (mx-gridField.get_width()-45)/blocksize + (my-200)/blocksize * 4 )
         elif gridField.get_width()+65 <= mx < gridField.get_width()+95 and 500 <= my < 530:
             self.offset -= 32
             if self.offset < 0:
@@ -502,6 +506,8 @@ class Handler():
         gridField.fill(black)
         for i in range(self.topX, self.topX+40):
             for j in range(self.topY, self.topY+40):
+                if myMap.getEntry(i,j) in range(24, 86):
+                    gridField.blit( images.mapImages[myMap.defaultBkgdTile], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
                 gridField.blit( images.mapImages[myMap.getEntry(i,j)], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
                 if (i,j) == myMap.heroStart:
                     gridField.blit( images.mapImages[HEROSTART], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
@@ -520,6 +526,7 @@ class Handler():
         pygame.draw.lines( gridField, self.cursorColor, True, boxPoints, 1 )
         self.sideImg, sideRect = load_image('sidebar.bmp')
         self.sideImg.blit(images.mapImages[self.currentTile],(50,50))
+        self.sideImg.blit(images.mapImages[myMap.defaultBkgdTile],(50,130))
         if self.mouseAction == 'draw':
             self.sideImg.blit(images.editorImages[5], (50,80) )
         else: self.sideImg.blit(images.editorImages[6], (50,80) )

@@ -65,18 +65,6 @@ class hero(pygame.sprite.Sprite):
     def takeStep(self):
         self.imgIdx = ( 1 - (self.imgIdx % 2) ) + (2 * (self.imgIdx / 2))
         self.image = self.images[self.imgIdx]
-        '''
-        if self.dir == 'up':
-            if self.imgIdx == 0: self.imgIdx = 1
-        if self.step == True:
-            self.imgIdx -= 1
-            self.image = self.images[self.imgIdx]
-            self.step = False
-        else:
-            self.imgIdx += 1
-            self.image = self.images[self.imgIdx]
-            self.step = True
-        '''
 
     def getXY(self):
         return (self.X,self.Y)
@@ -99,10 +87,10 @@ class hero(pygame.sprite.Sprite):
         elif dir == 'right': self.imgIdx = 6; self.image = self.images[self.imgIdx]; return (blocksize,0)
     
     def getPlayerStats(self):
-        return (self.currHP, self.maxHP, self.currMP, self.maxMP, self.strength, self.dex, self.intell, self.score, self.keys, self.currExp, self.nextExp)
+        return (self.currHP, self.maxHP, self.currMP, self.maxMP, self.strength, self.dex, self.intell, self.score, self.keys, self.currExp, self.nextExp, self.isPoisoned)
     
     def setPlayerStats(self, stats):
-        (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX) = stats
+        (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX, psn) = stats
         if cHP > mHP:
             cHP = mHP
         if cMP > mMP:
@@ -114,6 +102,7 @@ class hero(pygame.sprite.Sprite):
         self.intell = itl
         self.score = scr
         self.keys = kys
+        self.isPoisoned = psn
     
     def takeKey(self):
         self.keys -= 1
@@ -131,6 +120,11 @@ class hero(pygame.sprite.Sprite):
     
     def getCurrHP(self):
         return self.currHP
+    def getMaxHP(self):
+        return self.maxHP
+    def refillPts(self):
+        self.currHP = self.maxHP
+        self.currMP = self.maxMP
     
     # increases level, next exp for lev up, max HP and MP and refills both
     def gainLevel(self):
@@ -138,8 +132,7 @@ class hero(pygame.sprite.Sprite):
         self.nextExp = int( math.ceil( self.nextExp * 2.5 ) )
         self.maxHP = int( math.ceil( self.maxHP * 1.15 ) )
         self.maxMP = int( math.ceil( self.maxMP * 1.15 ) )
-        self.currHP = self.maxHP
-        self.currMP = self.maxMP
+        self.refillPts()
     def increaseExp(self, exp):
         self.currExp += exp
         if self.currExp >= self.nextExp:
@@ -151,7 +144,6 @@ class hero(pygame.sprite.Sprite):
     # Input: tile number denoting item
     def getItem(self, itm, level=None, spellNum=None):
         (itype, qty) = itm
-        print itype+FRUIT1
         if itype == KEY or itype+FRUIT1 == KEY:
             self.keys += 1
             return
@@ -243,11 +235,17 @@ class hero(pygame.sprite.Sprite):
         self.spells += [spell.Spell( num )]
     def castSpell(self, spell, hud, battle=False):
         if spell == None:
-            return
-        if spell.getType() in [1,2] and battle==False:
-            return -1
-        spell.execute(self, hud)
-        return spell.getType()    
+            sType = -1
+            return (sType, None)
+        sType = spell.getType()
+        if (spell.getType() in [1,2] and battle==False) or (spell.getType() in [3] and battle == True):
+            sType = -2
+        elif spell.getType() in [1,2] and battle==True:
+            sType = spell.getType()
+        if spell.cost > self.currMP:
+            sType = -3
+        spell.execute(self, hud, battle)
+        return (sType, spell.getCastMsg())
     def getSpells(self):
         return self.spells
     
@@ -281,10 +279,11 @@ class hero(pygame.sprite.Sprite):
         itm = self.items
         spl = self.spells
         gld = self.gold
-        return (str, itl, dex, X, Y, cHP, mHP, cMP, mMP, scr, kys, lvl, cXP, nXP, wpn, weq, arm, aeq, itm, spl, gld)
+        psn = self.isPoisoned
+        return (str, itl, dex, X, Y, cHP, mHP, cMP, mMP, scr, kys, lvl, cXP, nXP, wpn, weq, arm, aeq, itm, spl, gld, psn)
     
     def installLoadedHero(self, load):
-        (str, itl, dex, X, Y, cHP, mHP, cMP, mMP, scr, kys, lvl, cXP, nXP, wpn, weq, arm, aeq, itm, spl, gld) = load
+        (str, itl, dex, X, Y, cHP, mHP, cMP, mMP, scr, kys, lvl, cXP, nXP, wpn, weq, arm, aeq, itm, spl, gld, psn) = load
         self.strength = str
         self.intell = itl
         self.dex = dex
@@ -316,6 +315,7 @@ class hero(pygame.sprite.Sprite):
         self.spells = spl
         
         self.gold = gld
+        self.isPoisoned = psn
         
     
     # for debugging purposes

@@ -70,13 +70,18 @@ class Display():
             for y in range(map.getDIM()):
                 tile = map.getUnit(x,y)
                 if tile != const.VOID and map.visDict[(x,y)]:
+                    if tile > 24:
+                        shortList = [map.getUnit(tx, ty) for (tx, ty) in map.neighbors((x,y))]
+                        if const.VOID not in shortList:
+                            self.xGameBoard.blit( self.images[ map.DEFAULTBKGD ], ( (x*const.blocksize), (y*const.blocksize) ) )
                     self.xGameBoard.blit( self.images[ tile ], ( (x*const.blocksize), (y*const.blocksize) ) )
     
     # called immediately after player makes a move or arrives in a new level
     # takes x,y of old myHero.rect location and finds new
-    def drawHero(self,oldX,oldY, hero, map, gameBoard, game=None, dir=None, animated=True):
+    def drawHero(self, hero, map, gameBoard, game=None, dir=None, animated=True):
         DIMEN = map.getDIM()
         (newX,newY) = hero.getXY()
+        (oldX, oldY, c, d) = hero.getRect()
         scrolling = False
         if DIMEN > const.HALFDIM:
             if (5*const.blocksize <= newX <= (DIMEN-5)*const.blocksize):

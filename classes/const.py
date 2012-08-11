@@ -32,11 +32,11 @@ ARMRYDOOR = 58
 BLKSMDOOR = 59
 
 FRUIT1    = 86
-FRUIT2    = 87
+CHEESE    = 87
 MEAT1     = 88
 MEAT2     = 89
 BREAD1    = 90
-BREAD2    = 91
+ANT       = 91
 SHP       = 92
 MHP       = 93
 LHP       = 94
@@ -102,6 +102,7 @@ scrollingDict = { 'up': (0, -1), 'down': (0, 1), 'left': (-1, 0), 'right': (1, 0
 
 # Define the colors we will use in RGB format
 black = [  0,  0,  0]
+offblack = [16, 16, 16]
 white = [255,255,255]
 blue =  [  0,  0,192]
 dkblue =  [  0,  0,128]

@@ -7,13 +7,15 @@ from types import *
 class miniMap():
     def __init__(self, maptext):
         self.maptext = maptext
-        self.mapColors = [black,brickred,yellow,grey,red,white,brown,green,dkgreen,blue,ltgrey]
+        self.mapColors = [black,brickred,yellow,grey,red,white,brown,green,dkgreen,blue,offblack,ltgrey]
                 
-        self.colorDict = {-1:0, 0:0, 1:-1, 3:3, 4:3, 5:4, 6:4, 7:4, 8:10, 9:6, 10:5, 11:5, 12:7, 13:7, 
-                          16:6, 18:-1, 19:-1, 20:10, 21:10, 22:10, 23:10, 24:1, 25:1, 27:3, 28:3, 29:10, 30:3, 31:3, 32:3, 33:3, 34:3, 35:3, 36:3, 37:3, 38:6, 40:3, 41:1,
-                          42:5, 42:5, 43:5, 44:5, 45:5, 46:5, 47:5, 48:1, 49:1, 50:1, 51:3, 52:8, 53:8, 55:3, 57:-1, 58:1, 59:1, 60:8, 61:3, 62:3, 63:1, 64:5, 
-                          65:9, 66:9, 67:9, 68:9, 69:9, 70:9, 72:5, 73:5, 74:6, 75:3, 81:3, 92:4, 95:4, 98:2, 99:6, 
-                          100:6, 110:6, 111:6, 112:3, 116:3, 117:3, 118:3, 120:3, 121:3, 126:0, 127:5}
+        self.colorDict = {-1:0, 0:10, 1:11, 3:3, 4:3, 5:4, 6:4, 7:4, 8:10, 9:6, 10:5, 11:5, 12:7, 13:7, 
+                          16:6, 18:-1, 19:11, 20:10, 21:10, 22:10, 23:10, 24:1, 25:1, 27:3, 28:3, 29:10, 
+                          30:3, 31:3, 32:3, 33:3, 34:3, 35:3, 36:3, 37:3, 38:6, 40:3, 41:1, 42:5, 42:5, 
+                          43:5, 44:5, 45:5, 46:5, 47:5, 48:1, 49:1, 50:1, 51:3, 52:8, 53:8, 55:3, 57:11, 
+                          58:1, 59:1, 60:8, 61:3, 62:3, 63:1, 64:5, 65:9, 66:9, 67:9, 68:9, 69:9, 70:9, 
+                          72:5, 73:5, 74:6, 75:3, 81:3, 92:4, 95:4, 98:2, 99:6, 100:6, 110:6, 111:6, 112:3, 
+                          116:3, 117:3, 118:3, 120:3, 121:3, 126:0, 127:5}
     
     def getEntry(self, x, y):
         if x in range( len(self.maptext) ) and y in range( len(self.maptext) ):
@@ -84,13 +86,14 @@ class map():
     def getImages(self):
         return self.images
     def installBall(self, ball):
-        (grid, poe, poex, hs, chests) = ball
+        (grid, DBGD, poe, poex, hs, chests) = ball
         self.maptext = grid
         self.heroStart = hs
         self.startXY = hs
         self.pointOfEntry = poe
         self.pointOfExit = poex
         self.chests = chests
+        self.DEFAULTBKGD = DBGD
     def loadMap(self, filename):
         try:
             save = open(os.getcwd()+'/MAP/LEVELS/'+filename, "r")
@@ -128,7 +131,20 @@ class map():
         (x1,y1) = pos1
         (x2,y2) = pos2
         return max(abs(y2-y1), abs(x2-x1), abs(y2-y1) + abs(x2-x1))
-    
+    def neighbors(self, tile):
+        returnList = []
+        (x,y) = tile
+        for (Cx, Cy) in CARDINALS:
+            returnList.append((Cx+x, Cy+y))
+        return returnList
+    def getRandomTile(self):
+        x = random.randrange(0, self.DIM)
+        y = random.randrange(0, self.DIM)
+        while ( self.getUnit(x, y) not in range(0, 25) ):
+            x = random.randrange(0, self.DIM)
+            y = random.randrange(0, self.DIM)
+        return x, y
+            
     # calculate location of map window based on hero location and hero sprite rect
     def updateWindowCoordinates(self, heroLoc, heroRect):
         DIMEN = self.getDIM()
@@ -189,7 +205,12 @@ class map():
             returnList = [(x,y)]
             for (Cx, Cy) in CARDINALS:
                 if self.getUnit(x+Cx,y+Cy) in range(24, 86):
-                    returnList.append((x+Cx,y+Cy))
+                    count = 0
+                    for (Nx, Ny) in CARDINALS:
+                        if self.visDict[ (x+Cx+Nx, y+Cy+Ny) ]:
+                            count += 1
+                    if count >= 2:
+                        returnList.append((x+Cx,y+Cy))
             return returnList
         entryList = []
         for (Cx,Cy) in CARDINALS:

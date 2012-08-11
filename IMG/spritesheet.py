@@ -25,6 +25,8 @@ class spritesheet(object):
         if colorkey is not None:
             if colorkey is -1:
                 colorkey = image.get_at((0,0))
+            if colorkey is 1:
+                colorkey = [1,1,1]
             image.set_colorkey(colorkey, pygame.RLEACCEL)
         return image
     # Load a whole bunch of images and return them as a list

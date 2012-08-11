@@ -5,7 +5,6 @@ from load_image import *
 # Set the height and width of the screen
 screenSize=[600,600]
 screen=pygame.display.set_mode(screenSize)
-
 pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=4096)
 
 if not pygame.font: print 'Warning, fonts disabled'
@@ -30,8 +29,8 @@ def getFile():
             ball = pickle.load(peekFile)
             peekFile.close()
             desc[i] = 'Saved game '+str(i)+' Level '+str(ball[0][11])+' '+str(ball[2].getDays())+' Days '+ \
-                                                                            str(ball[2].getHours())+':'+ \
-                                                                            str(ball[2].getMins())+'.'+ \
+                                                                            str(ball[2].getHours()%24)+':'+ \
+                                                                            str(ball[2].getMins()%60)+'.'+ \
                                                                             str(ball[2].getSecs())
             saveFiles[i] = "ransack"+str(i)+".sav"
         else:

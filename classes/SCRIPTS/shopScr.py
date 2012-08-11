@@ -1,4 +1,4 @@
-itemShopsByLevel = { 1: [6,7,9,10]
+itemShopsByLevel = { 1: [5,6,7,9,10]
 
 
 

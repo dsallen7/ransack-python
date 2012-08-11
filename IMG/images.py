@@ -11,7 +11,7 @@ def load():
 
     mapSpriteSheet = spritesheet('mastersheet.bmp')
     for i in range(128):
-        mapImages[i] = mapSpriteSheet.image_at( ( (i*blocksize)%240, (i/8)*blocksize, blocksize, blocksize) )
+        mapImages[i] = mapSpriteSheet.image_at( ( (i*blocksize)%240, (i/8)*blocksize, blocksize, blocksize), 1 )
     
     heroSpriteSheet = spritesheet('herosheet.bmp')
     for i in range(8):
