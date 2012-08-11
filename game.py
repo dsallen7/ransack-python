@@ -61,17 +61,35 @@ class game():
         self.sounds[2] = pygame.mixer.Sound(os.path.join('SND', 'miss.wav' ))
         
         self.myHud = hud.hud(self.screen, self)
-        self.myBlacksmith = shop.Shop(screen, self.myHud, 1, 'blacksmith', self.Ticker)
-        self.myArmory = shop.Shop(screen, self.myHud, 1, 'armory', self.Ticker)
-        self.myItemShop = shop.Shop(screen, self.myHud, 1, 'itemshop', self.Ticker)
-        self.myMagicShop = shop.Shop(screen, self.myHud, 1, 'magicshop', self.Ticker)
-        self.myTavern = tavern.Tavern(screen, self.myHud, self.Ticker)
+        self.addShops(self.myMap)
+
         self.myBattle = battle.battle(self.screen,self.myHud, self.Ticker)
         self.clock = clock
     
     #toggles switch to continue running game
     def gameOver(self):
         self.gameOn = False
+    
+    def addShops(self, map):        
+        self.Blacksmiths = range(4)
+        self.Armories = range(4)
+        self.Itemshops = range(4)
+        self.Magicshops = range(4)
+        self.Taverns = range(4)
+        print map.shops
+        if map.shops is not None:
+            for s in map.shops:
+                if map.shops[s][0] == 'itemshop':
+                    self.Itemshops[map.shops[s][1]] = shop.Shop(self.screen, self.myHud, map.shops[s][1], 'itemshop', self.Ticker)
+                print self.Itemshops
+                if map.shops[s][0] == 'magicshop':
+                    self.Magicshops[map.shops[s][1]] = shop.Shop(self.screen, self.myHud, map.shops[s][1], 'magicshop', self.Ticker)
+                if map.shops[s][0] == 'blacksmith':
+                    self.Blacksmiths[map.shops[s][1]] = shop.Shop(self.screen, self.myHud, map.shops[s][1], 'blacksmith', self.Ticker)
+                if map.shops[s][0] == 'armory':
+                    self.Armories[map.shops[s][1]] = shop.Shop(self.screen, self.myHud, map.shops[s][1], 'armory', self.Ticker)
+                if map.shops[s][0] == 'tavern':
+                    self.Tavern = tavern.Tavern(self.screen, self.myHud, self.Ticker)
     
     def generateMap(self, dimension, level):
         rndMap = mapgen.Map(dimension, level)
@@ -90,6 +108,7 @@ class game():
             self.Display.redrawXMap(self.myMap)
         else:
             self.myMap = self.myDungeon[self.currentMap]
+            self.addShops(self.myMap)
             self.Display.redrawXMap(self.myMap)
             if self.myMap.getType() == 'dungeon':
                 self.levelDepth += 1
@@ -103,6 +122,7 @@ class game():
     def prevLevel(self):
         self.currentMap -= 1
         self.myMap = self.myDungeon[self.currentMap]
+        self.addShops(self.myMap)
         self.Display.redrawXMap(self.myMap)
         self.DIM = self.myMap.getDIM()
         (x,y) = self.myMap.getPOEx()
@@ -159,8 +179,12 @@ class game():
                 self.screenShot()
             elif event.key == pygame.K_m:
                 self.myMap.callDrawMiniMap(self.screen)
-            elif event.key == pygame.K_SPACE:
-                pass
+            elif event.key == pygame.K_RETURN:
+                print 'return'
+                self.boxMessage('NoThing here....')
+                #action command
+            elif event.key == pygame.K_r:
+                self.Ticker.tick(60)
                 #action command
             else:
                 if self.move(pygame.key.name(event.key)):
@@ -178,23 +202,23 @@ class game():
         # detect blocking tiles first, otherwise they will be ignored
         # stores
         if i == BLKSMDOOR:
-            self.myBlacksmith.enterStore(self.myHero)
+            self.Blacksmiths[self.myMap.shops[( (X + moveX)/blocksize, (Y + moveY)/blocksize)][1]].enterStore(self.myHero)
             return
         if i == ARMRYDOOR:
-            self.myArmory.enterStore(self.myHero)
+            self.Armories[self.myMap.shops[( (X + moveX)/blocksize, (Y + moveY)/blocksize)][1]].enterStore(self.myHero)
             return
-        if i == 43:
-            self.myItemShop.enterStore(self.myHero)
+        if i == ITEMSDOOR:
+            self.Itemshops[self.myMap.shops[( (X + moveX)/blocksize, (Y + moveY)/blocksize)][1]].enterStore(self.myHero)
             return
-        if i == 57:
-            self.myMagicShop.enterStore(self.myHero)
-        if i == 60:
-            return self.myTavern.enterStore(self.myHero, self)
-        if i == 38:
-            self.myMap.updateUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize,19)
+        if i == MAGICDOOR:
+            self.Magicshops[self.myMap.shops[( (X + moveX)/blocksize, (Y + moveY)/blocksize)][1]].enterStore(self.myHero)
+        if i == TAVRNDOOR:
+            return self.Tavern.enterStore(self.myHero, self)
+        if i == EWDOOR:
+            self.myMap.updateUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize,EWDOORO)
             self.Display.redrawXMap(self.myMap)
-        if i == 81:
-            self.myMap.updateUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize,18)
+        if i == NSDOOR:
+            self.myMap.updateUnit( (X + moveX)/blocksize, (Y + moveY)/blocksize,NSDOORO)
             self.Display.redrawXMap(self.myMap)
         if i == -1 or i in range(24,86):
             return

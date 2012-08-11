@@ -77,7 +77,7 @@ class hud( ):
         hrs = self.game.Ticker.getHours()
         sRad = math.radians( 360* ( float(secs)/float(60) ) )
         mRad = math.radians( 360* ( float(mins)/float(60) ) )
-        hRad = math.radians( 360* ( float(hrs)/float(60) ) )
+        hRad = math.radians( 360* ( float(hrs)/float(12) ) )
         pygame.draw.line(self.frameBox1, black, (x,y), (x+ 14*math.sin( sRad ), y- 14*math.cos( sRad ) ) )
         pygame.draw.line(self.frameBox1, grey, (x,y), (x+ 12*math.sin( mRad ), y- 12*math.cos( mRad ) ), 2 )
         pygame.draw.line(self.frameBox1, grey, (x,y), (x+ 9*math.sin( hRad ), y- 9*math.cos( hRad ) ), 2)

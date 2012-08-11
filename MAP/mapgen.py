@@ -85,6 +85,7 @@ class Map():
         self.copyText = []
         self.level = level
         self.chests = {}
+        self.shops = None
     
     def rollDie(self, target, range):
         d = randrange(range)
@@ -282,7 +283,7 @@ class Map():
         
     
     def getMapBall(self):
-        return (self.grid, DEFAULTBKGD, self.POE, self.POEx, self.POE, self.chests )
+        return (self.grid, DEFAULTBKGD, self.POE, self.POEx, self.POE, self.shops, self.chests )
     
     def saveMap(self):
         ball = self.getMapBall()

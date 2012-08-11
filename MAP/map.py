@@ -86,13 +86,14 @@ class map():
     def getImages(self):
         return self.images
     def installBall(self, ball):
-        (grid, DBGD, poe, poex, hs, chests) = ball
+        (grid, DBGD, poe, poex, hs, shops, chests) = ball
         self.maptext = grid
         self.heroStart = hs
         self.startXY = hs
         self.pointOfEntry = poe
         self.pointOfExit = poex
         self.chests = chests
+        self.shops = shops
         self.DEFAULTBKGD = DBGD
     def loadMap(self, filename):
         try:
@@ -182,11 +183,12 @@ class map():
     
     # complete list of tiles is in tiles1.txt
     def revealMap(self):
-        litTiles = self.getLitTiles()
-        self.litTiles = litTiles
-        if litTiles == None: return
-        for tile in litTiles:
-            self.visDict[ tile ] = True
+        if self.type == 'dungeon':
+            litTiles = self.getLitTiles()
+            self.litTiles = litTiles
+            if litTiles == None: return
+            for tile in litTiles:
+                self.visDict[ tile ] = True
         return
     
     def flatten(self, x):

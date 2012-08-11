@@ -43,7 +43,7 @@
     # 40: upper left wall
     # 41: blacksmith window
     # 42: house 1 lower left
-    # 43: house 1 door
+    # 43: item shop door
     # 44: house 1 lower right
     # 45: house 1 upper left
     # 46: house 1 upper center
@@ -60,7 +60,7 @@
     # 57: magic shop door
     # 58: armory door
     # 59: blacksmith door
-    # 60: house 2 door (green)
+    # 60: tavern door
     # 61: blacksmith roof 1
     # 62: blacksmith roof 2
     # 63: blacksmith roof 3

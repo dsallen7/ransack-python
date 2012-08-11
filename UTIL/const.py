@@ -28,15 +28,33 @@ TREE1     = 51
 
 WELLSP    = 55
 
+EWDOOR  = 38
+NSDOOR  = 81
+
+EWDOORO = 19
+NSDOORO = 18
+
+EWWALL = 30
+NSWALL = 31
+URWALL = 27
+LRWALL = 75
+ULWALL = 40
+LLWALL = 51
+
+ITEMSDOOR = 43
+MAGICDOOR = 57
 ARMRYDOOR = 58
 BLKSMDOOR = 59
+TAVRNDOOR = 60
+
+shopDoors = [ITEMSDOOR, MAGICDOOR, ARMRYDOOR, BLKSMDOOR, TAVRNDOOR]
 
 FRUIT1    = 86
-FRUIT2    = 87
+CHEESE    = 87
 MEAT1     = 88
 MEAT2     = 89
 BREAD1    = 90
-BREAD2    = 91
+ANT       = 91
 SHP       = 92
 MHP       = 93
 LHP       = 94
@@ -44,14 +62,18 @@ SMP       = 95
 MMP       = 96
 LMP       = 97
 KEY       = 98
+GOLD      = 99
 SPELLBOOK = 100
-GOLD      = 109
+PARCHMENT = 101
 CHEST     = 110
 OCHEST    = 111
 SWORD     = 112
+AXE       = 113
+SPEAR     = 114
 DOOR      = 116
 SHIELD    = 117
 BPLATE    = 118
+HELMET    = 119
 STAIRUP   = 120
 STAIRDN   = 121
 VOID      = 126
@@ -60,6 +82,11 @@ HEROSTART = 127
 # Spells
 HEAL = 0
 FRBL = 1
+ICBL = 2
+TLPT = 3
+ASCD = 4
+DSCD = 5
+ACD2 = 6
 
 # Items
 FRUIT1_I = 0
@@ -93,6 +120,7 @@ scrollingDict = { 'up': (0, -1), 'down': (0, 1), 'left': (-1, 0), 'right': (1, 0
 
 # Define the colors we will use in RGB format
 black = [  0,  0,  0]
+offblack = [16, 16, 16]
 white = [255,255,255]
 blue =  [  0,  0,192]
 dkblue =  [  0,  0,128]

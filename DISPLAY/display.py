@@ -74,7 +74,26 @@ class Display():
                         shortList = [map.getUnit(tx, ty) for (tx, ty) in map.neighbors((x,y))]
                         if const.VOID not in shortList:
                             self.xGameBoard.blit( self.images[ map.DEFAULTBKGD ], ( (x*const.blocksize), (y*const.blocksize) ) )
-                    self.xGameBoard.blit( self.images[ tile ], ( (x*const.blocksize), (y*const.blocksize) ) )
+                    if map.getUnit(x, y) == const.ITEMSDOOR:
+                        self.xGameBoard.blit( self.images[128], (x*const.blocksize - const.blocksize, y*const.blocksize - 2*const.blocksize), area = self.images[128].get_rect() )
+                    else: self.xGameBoard.blit( self.images[ tile ], ( (x*const.blocksize), (y*const.blocksize) ) )
+        if map.type == 'village':
+            for s in map.shops:
+                if map.shops[s][0] == 'itemshop':
+                    (sX, sY) = s
+                    self.xGameBoard.blit( self.images[128], (sX*const.blocksize - const.blocksize, sY*const.blocksize - (2*const.blocksize)) )
+                if map.shops[s][0] == 'magicshop':
+                    (sX, sY) = s
+                    self.xGameBoard.blit( self.images[129], (sX*const.blocksize - const.blocksize, sY*const.blocksize - (2*const.blocksize)) )
+                if map.shops[s][0] == 'blacksmith':
+                    (sX, sY) = s
+                    self.xGameBoard.blit( self.images[130], (sX*const.blocksize - const.blocksize, sY*const.blocksize - (2*const.blocksize)) )
+                if map.shops[s][0] == 'armory':
+                    (sX, sY) = s
+                    self.xGameBoard.blit( self.images[131], (sX*const.blocksize - const.blocksize, sY*const.blocksize - (2*const.blocksize)) )
+                if map.shops[s][0] == 'tavern':
+                    (sX, sY) = s
+                    self.xGameBoard.blit( self.images[132], (sX*const.blocksize - const.blocksize, sY*const.blocksize - (3*const.blocksize)) )
     
     # called immediately after player makes a move or arrives in a new level
     # takes x,y of old myHero.rect location and finds new
