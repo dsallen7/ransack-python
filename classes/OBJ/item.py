@@ -1,7 +1,7 @@
 # A dictionary assigning item ID numbers to functions which
 # carry out the effects of the items
 
-from const import *
+from UTIL import const
 from SCRIPTS import itemScr
 
 class Item():

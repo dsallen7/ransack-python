@@ -1,5 +1,5 @@
 import pygame, game, random, pickle
-from const import *
+from UTIL import const, colors
 from load_image import *
 
 # Set the height and width of the screen
@@ -40,11 +40,11 @@ def getFile():
     saveBox = pygame.Surface( (300,100) )
     selection = 0
     while True:
-        saveBox.fill( gold )
+        saveBox.fill( colors.gold )
         if pygame.font:
             font = pygame.font.Font("./FONTS/gothic.ttf", 14)
             for i in range(3):
-                saveBox.blit( font.render(desc[i], 1, white, gold), (25,i*25) )
+                saveBox.blit( font.render(desc[i], 1, colors.white, colors.gold), (25,i*25) )
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 os.sys.exit()
@@ -67,7 +67,7 @@ def getFile():
 
 def main():    
     titleScreen = pygame.Surface(screenSize)
-    titleScreen.fill(black)
+    titleScreen.fill(colors.black)
     titleImg, titleRect = load_image('titlescreen.bmp', -1)
     titleScreen.blit(titleImg, (50,50) )
     selection = 0
@@ -75,14 +75,14 @@ def main():
     screen.blit(titleScreen, (0,0))
     menuBox = pygame.Surface( (200,80) )
     while True:
-        menuBox.fill( brown )
+        menuBox.fill( colors.brown )
         screen.blit(titleScreen, (0,0))
         clock.tick(20)
         
         if pygame.font:
             font = pygame.font.Font("./FONTS/SpinalTfanboy.ttf", 28)
             for i in range(len(options)):
-                menuBox.blit( font.render(options[i], 1, gold, brown), (30,(i*25)) )
+                menuBox.blit( font.render(options[i], 1, colors.gold, colors.brown), (30,(i*25)) )
     
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

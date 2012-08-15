@@ -1,12 +1,11 @@
 from pygame import *
 from types import *
 import pygame, os, pickle, random, eztext, const
-from const import *
 from IMG import images
 
 from MAP import mapgen
 
-from UTIL import queue
+from UTIL import queue, const, colors
 
 # Eztext courtesy of http://www.pygame.org/project-EzText-920-.html
 
@@ -58,28 +57,28 @@ class Map():
         self.defaultBkgdTile = 0
     
     def setEntry(self, x, y, e, level=None):
-        if e == HEROSTART:
+        if e == const.HEROSTART:
             if self.heroStart == None:
                 self.heroStart = (x,y)
             else:
                 (px,py) = self.heroStart
                 self.heroStart = (x,y)
                 return
-        if e == STAIRUP:
+        if e == const.STAIRUP:
             if self.pointOfEntry == None:
                 self.pointOfEntry = (x,y)
             else:
                 (px,py) = self.pointOfEntry
                 self.setEntry(px,py,self.defaultBkgdTile)
                 self.pointOfEntry = (x,y)
-        if e == STAIRDN:
+        if e == const.STAIRDN:
             if self.pointOfExit == None:
                 self.pointOfExit = (x,y)
             else:
                 (px,py) = self.pointOfExit
                 self.setEntry(px,py,self.defaultBkgdTile)
                 self.pointOfExit = (x,y)
-        if e == ITEMSDOOR:
+        if e == const.ITEMSDOOR:
             if self.itemShop == None:
                 self.itemShop = (x, y)
                 self.shops[(x,y)] = ('itemshop', level )
@@ -89,7 +88,7 @@ class Map():
                 self.shops.pop((px,py))
                 self.shops[(x,y)] = ('itemshop', level )
                 self.itemShop = (x, y)
-        if e == ARMRYDOOR:
+        if e == const.ARMRYDOOR:
             if self.Armory == None:
                 self.Armory = (x, y)
                 self.shops[(x,y)] = ( 'armory', level )
@@ -99,7 +98,7 @@ class Map():
                 self.shops.pop((px,py))
                 self.shops[(x,y)] = ('armory', level )
                 self.Armory = (x, y)
-        if e == BLKSMDOOR:
+        if e == const.BLKSMDOOR:
             if self.Blacksmith == None:
                 self.Blacksmith = (x, y)
                 self.shops[(x,y)] = ( 'blacksmith', level )
@@ -109,7 +108,7 @@ class Map():
                 self.shops.pop((px,py))
                 self.shops[(x,y)] = ( 'blacksmith', level )
                 self.Blacksmith = (x, y)
-        if e == MAGICDOOR:
+        if e == const.MAGICDOOR:
             if self.magicShop == None:
                 self.magicShop = (x, y)
                 self.shops[(x,y)] = ( 'magicshop', level )
@@ -119,7 +118,7 @@ class Map():
                 self.shops.pop((px,py))
                 self.shops[(x,y)] = ( 'magicshop', level )
                 self.magicShop = (x, y)
-        if e == TAVRNDOOR:
+        if e == const.TAVRNDOOR:
             if self.Tavern == None:
                 self.Tavern = (x, y)
                 self.shops[(x,y)] = ( 'tavern', level )
@@ -135,7 +134,7 @@ class Map():
         if x in range(self.DIM) and y in range(self.DIM):
             return self.grid[y][x]
         else:
-            return VOID
+            return const.VOID
     
     def addChest(self, loc, chest):
         self.chests[loc] = chest
@@ -230,7 +229,7 @@ class Handler():
         self.currentTile = 0
         self.sideImg, sideRect = load_image('sidebar.bmp')
         self.drawMode = False
-        self.cursorColor = white
+        self.cursorColor = colors.white
         self.offset = 0
         self.numImages = len(mapImages)
         self.topX = 0
@@ -342,16 +341,16 @@ class Handler():
                         itemNum = itemsList[(mx-115)/blocksize + (my-150)/blocksize * 4]
                         #print itemNum
                         if itemNum in range(86, 99):
-                            chestItems.append( (itemNum-FRUIT1, 1) )
-                        elif itemNum == GOLD:
-                            chestItems.append( (itemNum-FRUIT1, int(self.getInput('Enter amount of gold: ')) ) )
-                        elif itemNum == SPELLBOOK or itemNum == PARCHMENT:
-                            chestItems.append( (itemNum-FRUIT1, 0, 0) )
+                            chestItems.append( (itemNum-const.FRUIT1, 1) )
+                        elif itemNum == const.GOLD:
+                            chestItems.append( (itemNum-const.FRUIT1, int(self.getInput('Enter amount of gold: ')) ) )
+                        elif itemNum == const.SPELLBOOK or itemNum == const.PARCHMENT:
+                            chestItems.append( (itemNum-const.FRUIT1, int(self.getInput('Enter spell number: ')) ) )
                         elif itemNum in [112,113,114,117,118]:
-                            chestItems.append( (itemNum-FRUIT1, 0) )
+                            chestItems.append( (itemNum-const.FRUIT1, 0) )
                     print chestItems
             for item in chestItems:
-                menuBox.blit(mapImages[item[0]+FRUIT1], (len(chestItems)*blocksize, 15) )
+                menuBox.blit(mapImages[item[0]+const.FRUIT1], (len(chestItems)*blocksize, 15) )
             screen.blit(menuBox, (100,100) )
             pygame.display.flip()
     
@@ -387,7 +386,7 @@ class Handler():
 
     def event_handler(self, event):
         (x,y) = self.cursorPos
-        self.drawBox( (x,y), black)
+        self.drawBox( (x,y), colors.black)
         if event.key == pygame.K_RIGHT:
             if( x+blocksize < myMap.DIM*blocksize ):
                 x += blocksize
@@ -411,15 +410,16 @@ class Handler():
         if event.key == pygame.K_t:
             self.switchTile()
         if event.key == pygame.K_SPACE:
-            if self.currentTile == CHEST:
+            if self.currentTile == const.CHEST:
                 myMap.addChest( (x/blocksize,y/blocksize), self.fillChest())
-            elif self.currentTile == ITEMSDOOR:
+                level=None
+            elif self.currentTile == const.ITEMSDOOR:
                 level = int(self.getInput('Itemshop level: '))
-            elif self.currentTile == ARMRYDOOR:
+            elif self.currentTile == const.ARMRYDOOR:
                 level = int(self.getInput('Armory level: '))
-            elif self.currentTile == BLKSMDOOR:
+            elif self.currentTile == const.BLKSMDOOR:
                 level = int(self.getInput('Blacksmith level: '))
-            elif self.currentTile == MAGICDOOR:
+            elif self.currentTile == const.MAGICDOOR:
                 level = int(self.getInput('Magicshop level: '))
             else: level=None
             myMap.setEntry(x/blocksize,y/blocksize,self.currentTile, level)
@@ -469,7 +469,7 @@ class Handler():
                                           (startX*blocksize,(startY+(endY-startY))*blocksize), 
                                           (endX*blocksize,endY*blocksize), 
                                           ((startX+(endX-startX))*blocksize,startY*blocksize) )
-                pygame.draw.lines( gridField, red, True, self.selectBoxPoints, 1 )
+                pygame.draw.lines( gridField, colors.red, True, self.selectBoxPoints, 1 )
                 screen.blit(gridField, (0,0) )
                 pygame.display.flip()
     
@@ -519,7 +519,7 @@ class Handler():
                         self.updateDisplay()
                         gridField.blit( emptyImg, (sX*blocksize, sY*blocksize) )
                         gridField.blit( selectionImg, (newTopX*blocksize, newTopY*blocksize) )
-                        pygame.draw.lines( gridField, red, True, self.selectBoxPoints, 1 )
+                        pygame.draw.lines( gridField, colors.red, True, self.selectBoxPoints, 1 )
                         screen.blit(gridField, (0,0) )
                         pygame.display.flip()
         
@@ -529,15 +529,16 @@ class Handler():
         if 0 <= mx < gridField.get_width() and 0 <= my < gridField.get_height():
             if e.button == 1:
                 if self.mouseAction == 'draw':
-                    if self.currentTile == CHEST:
+                    if self.currentTile == const.CHEST:
                         myMap.addChest( (mx/blocksize,my/blocksize), self.fillChest())
-                    elif self.currentTile == ITEMSDOOR:
+                        level=None
+                    elif self.currentTile == const.ITEMSDOOR:
                         level = int(self.getInput('Itemshop level: '))
-                    elif self.currentTile == ARMRYDOOR:
+                    elif self.currentTile == const.ARMRYDOOR:
                         level = int(self.getInput('Armory level: '))
-                    elif self.currentTile == BLKSMDOOR:
+                    elif self.currentTile == const.BLKSMDOOR:
                         level = int(self.getInput('Blacksmith level: '))
-                    elif self.currentTile == MAGICDOOR:
+                    elif self.currentTile == const.MAGICDOOR:
                         level = int(self.getInput('Magicshop level: '))
                     else: level = None
                     myMap.setEntry(mx/blocksize,my/blocksize,self.currentTile, level)
@@ -579,43 +580,44 @@ class Handler():
         (mx, my) = pygame.mouse.get_pos()
         if 650 <= mx < 770 and 200 <= my < 440:
             boxPoints = ( (mx,my), (mx,my+blocksize), (mx+blocksize,my+blocksize), (mx+blocksize,my) )
-            pygame.draw.lines( screen, red, True, boxPoints, 1 )
+            pygame.draw.lines( screen, colors.red, True, boxPoints, 1 )
     
     def updateDisplay(self):
-        gridField.fill(black)
+        gridField.fill(colors.black)
         for i in range(self.topX, self.topX+40):
             for j in range(self.topY, self.topY+40):
                 if myMap.getEntry(i,j) in range(24, 86):
                     gridField.blit( mapImages[myMap.defaultBkgdTile], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
                 gridField.blit( mapImages[myMap.getEntry(i,j)], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
                 if (i,j) == myMap.heroStart:
-                    gridField.blit( mapImages[HEROSTART], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
-                for s in myMap.shops:
-                    if myMap.shops[s][0] == 'itemshop':
-                        (sX, sY) = s
-                        gridField.blit( mapImages[128], (sX*blocksize - blocksize, sY*blocksize - (2*blocksize)) )
-                    if myMap.shops[s][0] == 'magicshop':
-                        (sX, sY) = s
-                        gridField.blit( mapImages[129], (sX*blocksize - blocksize, sY*blocksize - (2*blocksize)) )
-                    if myMap.shops[s][0] == 'blacksmith':
-                        (sX, sY) = s
-                        gridField.blit( mapImages[130], (sX*blocksize - blocksize, sY*blocksize - (2*blocksize)) )
-                    if myMap.shops[s][0] == 'armory':
-                        (sX, sY) = s
-                        gridField.blit( mapImages[131], (sX*blocksize - blocksize, sY*blocksize - (2*blocksize)) )
-                    if myMap.shops[s][0] == 'tavern':
-                        (sX, sY) = s
-                        gridField.blit( mapImages[132], (sX*blocksize - blocksize, sY*blocksize - (3*blocksize)) )
+                    gridField.blit( mapImages[const.HEROSTART], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
+                if myMap.shops is not None:
+                    for s in myMap.shops:
+                        if myMap.shops[s][0] == 'itemshop':
+                            (sX, sY) = s
+                            gridField.blit( mapImages[128], (sX*blocksize - blocksize, sY*blocksize - (2*blocksize)) )
+                        if myMap.shops[s][0] == 'magicshop':
+                            (sX, sY) = s
+                            gridField.blit( mapImages[129], (sX*blocksize - blocksize, sY*blocksize - (2*blocksize)) )
+                        if myMap.shops[s][0] == 'blacksmith':
+                            (sX, sY) = s
+                            gridField.blit( mapImages[130], (sX*blocksize - blocksize, sY*blocksize - (2*blocksize)) )
+                        if myMap.shops[s][0] == 'armory':
+                            (sX, sY) = s
+                            gridField.blit( mapImages[131], (sX*blocksize - blocksize, sY*blocksize - (2*blocksize)) )
+                        if myMap.shops[s][0] == 'tavern':
+                            (sX, sY) = s
+                            gridField.blit( mapImages[132], (sX*blocksize - blocksize, sY*blocksize - (3*blocksize)) )
                     
         (x,y) = self.cursorPos
         x = x - self.topX*blocksize
         y = y - self.topY*blocksize
         if self.drawMode:
-            self.cursorColor = yellow
+            self.cursorColor = colors.yellow
         else:
-            self.cursorColor = white
+            self.cursorColor = colors.white
         if self.selectBoxPoints is not None:
-            pygame.draw.lines( gridField, red, True, self.selectBoxPoints, 1 )
+            pygame.draw.lines( gridField, colors.red, True, self.selectBoxPoints, 1 )
 
         boxPoints = ( (x,y), (x,y+blocksize), (x+blocksize,y+blocksize), (x+blocksize,y) )
         pygame.draw.lines( gridField, self.cursorColor, True, boxPoints, 1 )
@@ -640,10 +642,10 @@ class Handler():
         self.sideImg.blit(toolBox, (50,500) )
         (x,y) = self.cursorPos
         entryBox = pygame.Surface((30,30))
-        entryBox.fill(black)
+        entryBox.fill(colors.black)
         if pygame.font:
             font = pygame.font.SysFont("arial",20)
-            entry = font.render(str(myMap.getEntry( (x+self.topX)/blocksize, (y+self.topY)/blocksize)),1, white, black )
+            entry = font.render(str(myMap.getEntry( (x+self.topX)/blocksize, (y+self.topY)/blocksize)),1, colors.white, colors.black )
             entryBox.blit(entry,(0,0))
             self.sideImg.blit(entryBox,(80,50))
         if self.drawMode:
@@ -651,7 +653,7 @@ class Handler():
             msgBox.fill( grey )
             if pygame.font:
                 font = pygame.font.SysFont("arial", 24)
-                msgText = font.render( 'draw', 1, red, yellow )
+                msgText = font.render( 'draw', 1, colors.red, colors.yellow )
                 msgBox.blit(msgText, (10,10) )
             self.sideImg.blit( msgBox, (50,100) )
             #pygame.display.flip()
@@ -664,14 +666,6 @@ screen=pygame.display.set_mode(size)
 
 images.load()
 mapImages = images.mapImages
-'''
-mapImages[128] = load_image('house1.bmp', 1)[0]
-mapImages[129] = load_image('mShop.bmp', 1)[0]
-mapImages[130] = load_image('bSmith.bmp', 1)[0]
-mapImages[131] = load_image('armry.bmp', 1)[0]
-mapImages[132] = load_image('tavrn.bmp', 1)[0]
-'''
-print mapImages
 pygame.init()
 pygame.key.set_repeat(50, 100)
 clock = pygame.time.Clock()
@@ -683,7 +677,7 @@ myHandler = Handler(cursorPos)
 
 blocksize = 30
 
-gridField = pygame.Surface( [2*DIM*blocksize, 2*DIM*blocksize] )
+gridField = pygame.Surface( [2*const.DIM*blocksize, 2*const.DIM*blocksize] )
 
 os.sys.setrecursionlimit(15000)
 

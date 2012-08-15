@@ -1,13 +1,12 @@
 import pygame, random, pickle, ppov
 from load_image import *
-from const import *
-from UTIL import queue
+from UTIL import queue, const, colors
 from types import *
 
 class miniMap():
     def __init__(self, maptext):
         self.maptext = maptext
-        self.mapColors = [black,brickred,yellow,grey,red,white,brown,green,dkgreen,blue,offblack,ltgrey]
+        self.mapColors = colors.mapColors
                 
         self.colorDict = {-1:0, 0:10, 1:11, 3:3, 4:3, 5:4, 6:4, 7:4, 8:10, 9:6, 10:5, 11:5, 12:7, 13:7, 
                           16:6, 18:-1, 19:11, 20:10, 21:10, 22:10, 23:10, 24:1, 25:1, 27:3, 28:3, 29:10, 
@@ -30,23 +29,23 @@ class miniMap():
     
     def drawMiniMap(self,screen, topCorner, playerXY, visDict):
         miniMapBoard = pygame.Surface( [300,300] )
-        miniMapBoard.fill(black)
+        miniMapBoard.fill(colors.black)
         self.visDict = visDict
-        if len(self.maptext) <= DIM:
+        if len(self.maptext) <= const.DIM:
             topCorner = (0,0)
         (tx, ty) = topCorner
         (px, py) = playerXY
-        tx = px - HALFDIM
-        ty = py - HALFDIM
-        for i in range(DIM):
-            for j in range(DIM):
-                mapColorBlock = pygame.Surface( (miniblocksize,miniblocksize) )
+        tx = px - const.HALFDIM
+        ty = py - const.HALFDIM
+        for i in range(const.DIM):
+            for j in range(const.DIM):
+                mapColorBlock = pygame.Surface( (const.miniblocksize,const.miniblocksize) )
                 if (i+tx,j+ty) == playerXY:
                     mapColorBlock.fill( self.mapColors[5] )
-                    miniMapBoard.blit( mapColorBlock, ( i*miniblocksize, j*miniblocksize) )
+                    miniMapBoard.blit( mapColorBlock, ( i*const.miniblocksize, j*const.miniblocksize) )
                 elif self.isMapped( (i+tx,j+ty) ):
                     mapColorBlock.fill( self.mapColors[self.colorDict[self.getEntry(i+tx,j+ty)]] )
-                    miniMapBoard.blit( mapColorBlock, ( i*miniblocksize, j*miniblocksize) )
+                    miniMapBoard.blit( mapColorBlock, ( i*const.miniblocksize, j*const.miniblocksize) )
         screen.blit(miniMapBoard, (75,75) )
         pygame.display.flip()
         while (pygame.event.wait().type != pygame.KEYDOWN): pass
@@ -135,7 +134,7 @@ class map():
     def neighbors(self, tile):
         returnList = []
         (x,y) = tile
-        for (Cx, Cy) in CARDINALS:
+        for (Cx, Cy) in const.CARDINALS:
             returnList.append((Cx+x, Cy+y))
         return returnList
     def getRandomTile(self):
@@ -152,14 +151,14 @@ class map():
         oldX, oldY = self.playerXY
         # Compute top map corner
         (px,py) = heroLoc
-        px = px/blocksize
-        py = py/blocksize
+        px = px/const.blocksize
+        py = py/const.blocksize
         self.playerXY = (px, py)
         
-        if DIMEN <= HALFDIM:
+        if DIMEN <= const.HALFDIM:
             topX = 0
             topY = 0
-            self.WINDOWOFFSET = (HALFDIM - DIMEN)/2
+            self.WINDOWOFFSET = (const.HALFDIM - DIMEN)/2
             self.WINDOWSIZE = DIMEN
         else:
             if px < 5:
@@ -175,7 +174,7 @@ class map():
                 topY = py - 5
             else:
                 topY = DIMEN - 10
-            self.WINDOWSIZE = HALFDIM
+            self.WINDOWSIZE = const.HALFDIM
             self.WINDOWOFFSET = 0
         oldTopX, oldTopY = self.topMapCorner
         self.topMapCorner = (topX, topY)
@@ -205,17 +204,17 @@ class map():
         (x,y) = start
         if self.getUnit(x,y) in range(24,86):
             returnList = [(x,y)]
-            for (Cx, Cy) in CARDINALS:
+            for (Cx, Cy) in const.CARDINALS:
                 if self.getUnit(x+Cx,y+Cy) in range(24, 86):
                     count = 0
-                    for (Nx, Ny) in CARDINALS:
+                    for (Nx, Ny) in const.CARDINALS:
                         if self.visDict[ (x+Cx+Nx, y+Cy+Ny) ]:
                             count += 1
                     if count >= 2:
                         returnList.append((x+Cx,y+Cy))
             return returnList
         entryList = []
-        for (Cx,Cy) in CARDINALS:
+        for (Cx,Cy) in const.CARDINALS:
             if (x+Cx,y+Cy) not in self.visited and ~self.BFSQueue.has( (x+Cy, y+Cy) ):
                 self.BFSQueue.push( (x+Cx, y+Cy) )
                 entryList += [ (x+Cx,y+Cy) ]

@@ -46,8 +46,8 @@
     # 43: item shop door
     # 44: house 1 lower right
     # 45: house 1 upper left
-    # 46: house 1 upper center
-    # 47: house 1 upper right
+    # 46: E/W fake wall
+    # 47: N/S fake wall
     # 48: house 1 roof 1
     # 49: 
     # 50: 

@@ -4,6 +4,7 @@ from const import *
 
 from IMG import images
 from OBJ import spell, item, weapon, armor
+from UTIL import const, colors
 
 import Queue
 
@@ -15,9 +16,9 @@ class hero(pygame.sprite.Sprite):
         self.images = images.heroImages
         self.imgIdx = 2
         self.image = self.images[self.imgIdx]
-        self.rect = (blocksize, blocksize, blocksize, blocksize)
+        self.rect = (const.blocksize, const.blocksize, const.blocksize, const.blocksize)
         
-        self.dir = 'd'
+        self.dir = 'down'
         
         if load == None:
             
@@ -25,8 +26,8 @@ class hero(pygame.sprite.Sprite):
             self.intell = random.randrange(5,10)
             self.dex = random.randrange(5,10)
             
-            self.X = blocksize
-            self.Y = blocksize
+            self.X = const.blocksize
+            self.Y = const.blocksize
             
             self.currHP = 50
             self.maxHP = 50
@@ -81,10 +82,10 @@ class hero(pygame.sprite.Sprite):
     
     def changeDirection(self, dir):
         self.dir = dir
-        if dir == 'up': self.imgIdx = 0; self.image = self.images[self.imgIdx]; return (0,-blocksize)
-        elif dir == 'down': self.imgIdx = 2; self.image = self.images[self.imgIdx]; return (0,blocksize)
-        elif dir == 'left': self.imgIdx = 4; self.image = self.images[self.imgIdx]; return (-blocksize,0)
-        elif dir == 'right': self.imgIdx = 6; self.image = self.images[self.imgIdx]; return (blocksize,0)
+        if dir == 'up': self.imgIdx = 0; self.image = self.images[self.imgIdx]; return (0,-const.blocksize)
+        elif dir == 'down': self.imgIdx = 2; self.image = self.images[self.imgIdx]; return (0,const.blocksize)
+        elif dir == 'left': self.imgIdx = 4; self.image = self.images[self.imgIdx]; return (-const.blocksize,0)
+        elif dir == 'right': self.imgIdx = 6; self.image = self.images[self.imgIdx]; return (const.blocksize,0)
     
     def getPlayerStats(self):
         return (self.currHP, self.maxHP, self.currMP, self.maxMP, self.strength, self.dex, self.intell, self.score, self.keys, self.currExp, self.nextExp, self.isPoisoned)
@@ -144,30 +145,29 @@ class hero(pygame.sprite.Sprite):
     # Input: tile number denoting item
     def getItem(self, itm, level=None, spellNum=None):
         (itype, qty) = itm
-        if itype == KEY or itype+FRUIT1 == KEY:
+        if itype == KEY or itype+const.FRUIT1 == KEY:
             self.keys += 1
             return
-        elif itype+FRUIT1 == GOLD:
+        elif itype+const.FRUIT1 == GOLD:
             self.addGold(qty)
-            return
-        elif itype+FRUIT1 in [112,113,114]:
+            return str(qty)+' gold pieces'
+        elif itype+const.FRUIT1 in [112,113,114]:
             level = qty
-            self.gainWeapon(itype, level)
-            return
-        elif itype+FRUIT1 in [117,118,119]:
+            return self.gainWeapon(itype, level)
+        elif itype+const.FRUIT1 in [117,118,119]:
             level = qty
-            self.gainArmor(itype, level)
-            return
-        elif itype == SPELLBOOK or itype == PARCHMENT:
-            newItem = item.Item( itype, level, spellNum )
-            itype = itype - FRUIT1
-        elif itype+FRUIT1 in range(86, 100): 
-            newItem = item.Item(itype+FRUIT1)
+            return self.gainArmor(itype, level)
+        elif itype+const.FRUIT1 == SPELLBOOK or itype+const.FRUIT1 == PARCHMENT:
+            newItem = item.Item( itype, level, 0 )
+            itype = itype - const.FRUIT1
+        elif itype+const.FRUIT1 in range(86, 100): 
+            newItem = item.Item(itype+const.FRUIT1)
         entry = self.items[itype]
         if hasattr(entry, "__iter__"):
             self.items[itype].append( newItem )
         else:
             self.items[itype] = [newItem]
+        return newItem.getDesc()
     
     def getItems(self):
         availableItems = []
@@ -178,7 +178,7 @@ class hero(pygame.sprite.Sprite):
                     availableItems.append(i[0])
         return availableItems
     def takeItem(self, type):
-        self.items[type-86] = self.items[type-86][1:]
+        self.items[type-const.FRUIT1] = self.items[type-const.FRUIT1][1:]
     def useItem(self, item):
         if item == None:
             return 0
@@ -192,7 +192,9 @@ class hero(pygame.sprite.Sprite):
         return self.weaponEquipped
     # called when the player buys or finds a new weapon
     def gainWeapon(self, type, level):
-        self.weapons.append(weapon.Weapon(type, level))
+        newW = weapon.Weapon(type, level)
+        self.weapons.append(newW)
+        return newW.getDesc()
     def loseWeapon(self, weapon):
         self.weapons.remove(weapon)        
     def equipWeapon(self, weapon):
@@ -207,7 +209,9 @@ class hero(pygame.sprite.Sprite):
     def getArmorEquipped(self):
         return self.armorEquipped
     def gainArmor(self, type, level):
-        self.armor.append(armor.Armor(type, level))
+        newA = armor.Armor(type, level)
+        self.armor.append(newA)
+        return newA.getDesc()
     def loseArmor(self, armor):
         self.armor.remove(armor)
     def equipArmor(self, armor):
