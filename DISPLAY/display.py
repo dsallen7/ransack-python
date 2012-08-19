@@ -107,6 +107,7 @@ class Display():
             newX += (const.HALFDIM - DIMEN)/2*const.blocksize
             newY += (const.HALFDIM - DIMEN)/2*const.blocksize
         
+       
         #make the move animated
         if animated:
             if dir == None:
@@ -128,20 +129,35 @@ class Display():
             elif oldY > newY:
                 yAxis = range(oldY, newY, -1)
             for (idx, (i, j)) in list( enumerate(zip(xAxis, yAxis), start=1) ):
-                game.clock.tick(100)
+                
+                #game.clock.tick(100)
                 hero.setRect( i, j, const.blocksize, const.blocksize)
+                for npc in game.NPCs:
+                    if npc.moving:
+                        npc.shiftOnePixel(npc.dir, -1)
+                        if (idx % 2 == 0): npc.takeStep()
                 if scrolling:
                     for npc in game.NPCs:
                         npc.shiftOnePixel(dir, 1)
+                    
                     gameBoard.blit( self.getScrollingMapWindow( ( (topX*const.blocksize)+(idx*scrollX)-(const.blocksize*scrollX), (topY*const.blocksize)+(idx*scrollY)-(const.blocksize*scrollY) ) ), (0,0) )
                     
                     if map.type == 'dungeon':
                         self.drawShade( map, gameBoard )
                         #self.myMap.drawDarkness( newX/blocksize, newY/blocksize, self.gameBoard )
                 else: self.redrawMap(map, hero.getXY(), hero.getRect(), gameBoard)
-                if (idx % 2 == 0): hero.takeStep()
+                if (idx % 2 == 0) and hero.moving: hero.takeStep()
                 game.displayGameBoard()
         
+        for npc in game.NPCs:
+            npcdir = npc.dir
+            (cX, cY) = npc.getXY()
+            (tX, tY) = map.topMapCorner
+            (oRX, oRY, oRX2, oRY2) = npc.getRect()
+            nRX = cX*const.blocksize-(tX*const.blocksize)
+            nRY = cY*const.blocksize-(tY*const.blocksize)
+            npc.setRect(nRX, nRY, const.blocksize, const.blocksize)
+            npc.moving = False
         hero.setRect( newX, newY, const.blocksize, const.blocksize)
         
     def drawNPC(self, npc, map, game, animated=False):
@@ -151,6 +167,7 @@ class Display():
         (oRX, oRY, oRX2, oRY2) = npc.getRect()
         nRX = cX*const.blocksize-(tX*const.blocksize)
         nRY = cY*const.blocksize-(tY*const.blocksize)
+        '''
         if npc.moving:
             if oRX == nRX:
                 xAxis = [oRX]*const.blocksize
@@ -170,5 +187,6 @@ class Display():
                 if (idx % 2 == 0): npc.takeStep()
                 self.redrawMap(map, game.myHero.getXY(), game.myHero.getRect(), game.gameBoard)
                 game.displayGameBoard()
+        '''
         npc.setRect(nRX, nRY, const.blocksize, const.blocksize)
         npc.moving = False

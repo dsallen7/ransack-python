@@ -60,6 +60,7 @@ class hero(pygame.sprite.Sprite):
         else: self.installLoadedHero(load)
         
         self.step = False
+        self.moving = False
         self.stepIdx = 1
 
     def takeStep(self):
@@ -144,6 +145,7 @@ class hero(pygame.sprite.Sprite):
     # Input: tile number denoting item
     def getItem(self, itm, level=None, spellNum=None):
         (itype, qty) = itm
+        print itype
         if itype == KEY or itype+const.FRUIT1 == KEY:
             self.keys += 1
             return
@@ -156,9 +158,10 @@ class hero(pygame.sprite.Sprite):
         elif itype+const.FRUIT1 in [117,118,119]:
             level = qty
             return self.gainArmor(itype, level)
-        elif itype+const.FRUIT1 == SPELLBOOK or itype+const.FRUIT1 == PARCHMENT:
-            newItem = item.Item( itype, level, 0 )
+        elif itype == const.SPELLBOOK or itype == const.PARCHMENT:
+            newItem = item.Item( itype, level, spellNum )
             itype = itype - const.FRUIT1
+            print itype
         elif itype+const.FRUIT1 in range(86, 100): 
             newItem = item.Item(itype+const.FRUIT1)
         entry = self.items[itype]

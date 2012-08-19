@@ -117,11 +117,11 @@ class game():
         else:
             self.myMap = self.myDungeon[self.currentMap]
             self.addShops(self.myMap)
-            self.addNPCs(self.myMap)
             self.Display.redrawXMap(self.myMap)
             if self.myMap.getType() == 'dungeon':
                 self.levelDepth += 1
         self.DIM = self.myMap.getDIM()
+        self.addNPCs(self.myMap)
         (x,y) = self.myMap.getPOE()
         self.myHero.setXY( x*const.blocksize,y*const.blocksize )
     
@@ -163,7 +163,7 @@ class game():
                     (x,y) = self.myMap.getRandomTile()
                     self.myHero.setXY( x*const.blocksize, y*const.blocksize )
                     self.myMap.playerXY = (x, y)
-                    self.Display.drawHero(self.myHero,self.myMap,self.gameBoard,animated=False)
+                    self.Display.drawHero(self.myHero,self.myMap,self.gameBoard,self,animated=False)
                     self.myMap.revealMap()
                     self.Display.redrawXMap(self.myMap)
                     self.Display.redrawMap(self.myMap, self.myHero.getXY(), self.myHero.getRect(), self.gameBoard)
@@ -276,12 +276,12 @@ class game():
         # Stairs down
         if i == const.STAIRDN:
             self.nextLevel()
-            self.Display.drawHero(self.myHero,self.myMap,self.gameBoard,animated=False)
+            self.Display.drawHero(self.myHero,self.myMap,self.gameBoard,self,animated=False)
             return
         # Stairs up
         if i == const.STAIRUP:
             self.prevLevel()
-            self.Display.drawHero(self.myHero,self.myMap,self.gameBoard,animated=False)
+            self.Display.drawHero(self.myHero,self.myMap,self.gameBoard,self,animated=False)
             return
         # open space
         if ( (0 <= X+moveX < const.blocksize*self.myMap.getDIM() ) and (0 <= Y+moveY < const.blocksize*self.myMap.getDIM() ) and i in range(24) ):
@@ -352,10 +352,10 @@ class game():
         (X,Y) = self.myMap.getPlayerXY()
         self.myHero.setXY( X*const.blocksize,Y*const.blocksize )
         self.updateSprites()
-        self.Display.drawHero(self.myHero, self.myMap, self.gameBoard, animated=False)
+        self.Display.drawHero(self.myHero, self.myMap, self.gameBoard, self, animated=False)
         self.Display.redrawXMap(self.myMap)
         while self.gameOn:
-            self.clock.tick(30)
+            #self.clock.tick(30)
             for event in pygame.event.get():
                 self.event_handler(event)
                 if event.type == pygame.QUIT:
@@ -365,7 +365,8 @@ class game():
             self.myHud.update()
             for npc in self.NPCs:
                 npc.update(self.myMap, self.myHero.getXY() )
-                self.Display.drawNPC(npc, self.myMap, self, animated=True)
+                #self.Display.drawNPC(npc, self.myMap, self, animated=True)
+            self.Display.drawHero(self.myHero, self.myMap, self.gameBoard, self, animated=True)
             #self.myHero.showLocation(self.gameBoard)
             self.displayGameBoard()
         return
