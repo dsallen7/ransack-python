@@ -9,16 +9,16 @@
     # 7: fortress floor 4
     # 8: road 1
     # 9: road 2 
-    # 10: road  3
-    # 11: road  4
+    # 10: NS bridge
+    # 11: EW bridge
     # 12: grass 1
     # 13: grass 2
     # 14: grass 3
     # 15: grass 4
     # 16: wood floor 1
     # 17: wood floor 2
-    # 18: wood floor 3
-    # 19: wood floor 4
+    # 18: NS open door
+    # 19: EW open door
     # 20: castle floor 1
     # 21: castle floor 2
     # 22: castle floor 3
@@ -26,7 +26,7 @@
     # --------BLOCKING TILES---------
     # 24: brick 1
     # 25: brick 2
-    # 26: brick 3
+    # 26: 
     # 27: upper right wall
     # 28: stone 1
     # 29: stone 2
@@ -52,11 +52,11 @@
     # 49: 
     # 50: 
     # 51: lower left wall
-    # 52: tree 2
-    # 53: tree 3
-    # 54: tree 4
+    # 52: tree 1
+    # 53: tree 2
+    # 54: tree 3
     # 55: wellspring
-    # 56: river 1
+    # 56: transparent block
     # 57: magic shop door
     # 58: armory door
     # 59: blacksmith door
@@ -92,7 +92,7 @@
     # 88: meat 1
     # 89: meat 2
     # 90: bread 1
-    # 91: bread 2
+    # 91: antidote
     # 92: small healing potion
     # 93: medium healing potion
     # 94: large healing potion
@@ -123,7 +123,7 @@
     # 119: 
     # 120: stairs up
     # 121: stairs down
-    # 122: 
+    # 122: poison
     # 123: 
     # 124: 
     # 125: 

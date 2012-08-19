@@ -3,7 +3,7 @@ import os
 import random
 import pickle
 
-from classes import hero, hud, battle, menu, enemy, shop, tavern
+from classes import hero, hud, battle, menu, enemy, shop, tavern, npc
 from IMG import images
 from DISPLAY import display
 from load_image import *
@@ -30,21 +30,18 @@ class game():
         if loadDungeon == None:
             self.myDungeon = []
             for mapFileName in const.mapList:
-                self.myDungeon += [map.map(mapFileName, type='village')]
+                self.myDungeon += [map.gameMap(mapFileName, type='village')]
         else: self.myDungeon = loadDungeon
         
         self.fortressMaps = []
-        for mapFileName in const.fMapList:
-            self.fortressMaps += [map.map(mapFileName, type='dungeon')]
+        #for mapFileName in const.fMapList:
+        #    self.fortressMaps += [map.gameMap(mapFileName, type='dungeon')]
         
         self.myMap = self.myDungeon[self.currentMap]
-        
+        self.NPCs = []
         self.screen = screen
         self.gameBoard = pygame.Surface( [300,300] )
-        
-        self.allsprites = pygame.sprite.RenderPlain((self.myHero))
-        self.allsprites.clear(self.screen, self.gameBoard)
-        
+                
         #this is true while player is in a particular game
         self.gameOn = True
         self.DIM = const.DIM
@@ -61,6 +58,10 @@ class game():
         
         self.myHud = hud.hud(self.screen, self)
         self.addShops(self.myMap)
+        self.addNPCs(self.myMap)
+        
+        #self.allsprites = pygame.sprite.RenderPlain((self.myHero, self.NPCs))
+        #self.allsprites.clear(self.screen, self.gameBoard)
 
         self.myBattle = battle.battle(self.screen,self.myHud, self.Ticker)
         self.clock = clock
@@ -69,6 +70,15 @@ class game():
     def gameOver(self):
         self.gameOn = False
     
+    def addNPCs(self, map):
+        self.NPCs = []
+        for n in map.NPCs:
+            print 'NPC at: '
+            print n
+            (x,y) = n
+            self.NPCs.append( npc.npc(x, y, 'npcbase.bmp') )
+        self.allsprites = pygame.sprite.RenderPlain((self.myHero, self.NPCs))
+        self.allsprites.clear(self.screen, self.gameBoard)
     def addShops(self, map):        
         self.Blacksmiths = range(4)
         self.Armories = range(4)
@@ -90,9 +100,9 @@ class game():
                     self.Tavern = tavern.Tavern(self.screen, self.myHud, self.Ticker)
     
     def generateMap(self, dimension, level):
-        rndMap = mapgen.Map(dimension, level)
-        rndMap.generateMap(20)
-        newMap = map.map(None, rndMap.getMapBall(), level=self.levelDepth)
+        MG = mapgen.Generator(dimension, level)
+        MG.generateMap(20)
+        newMap = map.gameMap(None, MG.getMapBall(), level=self.levelDepth)
         return newMap
         
     def nextLevel(self):
@@ -107,27 +117,23 @@ class game():
         else:
             self.myMap = self.myDungeon[self.currentMap]
             self.addShops(self.myMap)
+            self.addNPCs(self.myMap)
             self.Display.redrawXMap(self.myMap)
             if self.myMap.getType() == 'dungeon':
                 self.levelDepth += 1
         self.DIM = self.myMap.getDIM()
         (x,y) = self.myMap.getPOE()
         self.myHero.setXY( x*const.blocksize,y*const.blocksize )
-        if self.myMap.getType() == 'dungeon':
-            self.myMap.setLOV(0)
-        else: self.myMap.setLOV(4)
     
     def prevLevel(self):
         self.currentMap -= 1
         self.myMap = self.myDungeon[self.currentMap]
         self.addShops(self.myMap)
+        self.addNPCs(self.myMap)
         self.Display.redrawXMap(self.myMap)
         self.DIM = self.myMap.getDIM()
         (x,y) = self.myMap.getPOEx()
         self.myHero.setXY( x*const.blocksize,y*const.blocksize )
-        if self.myMap.getType() == 'dungeon':
-            self.myMap.setLOV(0)
-        else: self.myMap.setLOV(4)
     
     #takes screen shot and saves as bmp in serial fashion, beginning with 1
     def screenShot(self):
@@ -191,7 +197,11 @@ class game():
         (x, y) = self.myHero.getXY()
         x = (x / const.blocksize) + dX
         y = (y / const.blocksize) + dY
-        i = self.myMap.getUnit(x, y)
+        for n in self.NPCs:
+            if ( x, y ) == n.getXY():
+                n.interact(self.myHud)
+                return
+        i = self.myMap.getEntry(x, y)
         # Chest
         if i == const.CHEST:
             self.textMessage( 'The chest contains:')
@@ -200,19 +210,19 @@ class game():
                 msg = self.myHero.getItem(item)
                 self.Ticker.tick(30)
                 self.textMessage(msg)
-            self.myMap.updateUnit( x, y, const.OCHEST )
+            self.myMap.setEntry( x, y, const.OCHEST )
             self.Display.redrawXMap(self.myMap)
             return
         elif i == const.EWFAKE:
             self.Ticker.tick(60)
             self.textMessage( 'You find a secret door!')
-            self.myMap.updateUnit( x, y, const.EWDOOR )
+            self.myMap.setEntry( x, y, const.EWDOOR )
             self.Display.redrawXMap(self.myMap)
             return
         elif i == const.NSFAKE:
             self.Ticker.tick(60)
             self.textMessage( 'You find a secret door!')
-            self.myMap.updateUnit( x, y, const.NSDOOR )
+            self.myMap.setEntry( x, y, const.NSDOOR )
             self.Display.redrawXMap(self.myMap)
             return
         self.boxMessage( 'Nothing here...')
@@ -220,12 +230,12 @@ class game():
     def move(self, direction):
         if direction not in ['up','down','left','right']: return
         x1,y1,x2,y2 = self.myHero.getRect()
-        moveX = 0
-        moveY = 0
         (X,Y) = self.myHero.getXY()
         (moveX,moveY) = self.myHero.changeDirection(direction)
-        
-        i = self.myMap.getUnit( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize)
+        for n in self.NPCs:
+            if ( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize ) == n.getXY():
+                return
+        i = self.myMap.getEntry( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize)
         # detect blocking tiles first, otherwise they will be ignored
         # stores
         if i == const.BLKSMDOOR:
@@ -242,10 +252,10 @@ class game():
         if i == const.TAVRNDOOR:
             return self.Tavern.enterStore(self.myHero, self)
         if i == const.EWDOOR:
-            self.myMap.updateUnit( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize,const.EWDOORO)
+            self.myMap.setEntry( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize,const.EWDOORO)
             self.Display.redrawXMap(self.myMap)
         if i == const.NSDOOR:
-            self.myMap.updateUnit( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize,const.NSDOORO)
+            self.myMap.setEntry( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize,const.NSDOORO)
             self.Display.redrawXMap(self.myMap)
         if i == -1 or i in range(24,86):
             return
@@ -257,11 +267,11 @@ class game():
             else:
                 self.boxMessage( "The door creaks open..." )
                 self.myHero.takeKey()
-                self.myMap.updateUnit( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize,0)
+                self.myMap.setEntry( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize,0)
         #item
         if i in range(86,109):
             self.myHero.getItem((i,1))
-            self.myMap.updateUnit( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize, 0)
+            self.myMap.setEntry( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize, 0)
             self.myHud.boxMessage(const.itemMsgs[i])
         # Stairs down
         if i == const.STAIRDN:
@@ -273,8 +283,8 @@ class game():
             self.prevLevel()
             self.Display.drawHero(self.myHero,self.myMap,self.gameBoard,animated=False)
             return
-        #check if open space
-        if ( (0 < X+moveX <= const.blocksize*self.DIM) and (0 < Y+moveY <= const.blocksize*self.DIM ) and i in range(24) ):
+        # open space
+        if ( (0 <= X+moveX < const.blocksize*self.myMap.getDIM() ) and (0 <= Y+moveY < const.blocksize*self.myMap.getDIM() ) and i in range(24) ):
             self.myHero.moving = True
             X += moveX
             Y += moveY
@@ -327,7 +337,7 @@ class game():
         return saveBall
     
     def updateSprites(self):
-        self.allsprites.update()
+        #self.allsprites.update()
         rects = self.allsprites.draw(self.gameBoard)
         pygame.display.update(rects)
     
@@ -339,7 +349,7 @@ class game():
     def mainLoop(self):
         gameFrame, gameFrameRect = load_image('gamescreen600.bmp', None)
         self.screen.blit(gameFrame,(0,0))
-        (X,Y) = self.myMap.getStartXY()
+        (X,Y) = self.myMap.getPlayerXY()
         self.myHero.setXY( X*const.blocksize,Y*const.blocksize )
         self.updateSprites()
         self.Display.drawHero(self.myHero, self.myMap, self.gameBoard, animated=False)
@@ -353,6 +363,9 @@ class game():
             self.gameBoard.fill(colors.black)
             self.Display.redrawMap(self.myMap, self.myHero.getXY(), self.myHero.getRect(), self.gameBoard)
             self.myHud.update()
+            for npc in self.NPCs:
+                npc.update(self.myMap, self.myHero.getXY() )
+                self.Display.drawNPC(npc, self.myMap, self, animated=True)
             #self.myHero.showLocation(self.gameBoard)
             self.displayGameBoard()
         return

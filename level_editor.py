@@ -3,25 +3,15 @@ from types import *
 import pygame, os, pickle, random, eztext, const
 from IMG import images
 
-from MAP import mapgen
+from load_image import *
+
+from MAP import mapgen, map
 
 from UTIL import queue, const, colors
 
-# Eztext courtesy of http://www.pygame.org/project-EzText-920-.html
+displayOpts = ['fore', 'back', 'both']
 
-def load_image(name, colorkey=None):
-    fullname = os.path.join('IMG', name)
-    try:
-        image = pygame.image.load(fullname)
-    except pygame.error, message:
-        print 'Cannot load image:', name
-        raise SystemExit, message
-    image = image.convert()
-    if colorkey is not None:
-        if colorkey is -1:
-            colorkey = image.get_at((0,0))
-        image.set_colorkey(colorkey, pygame.RLEACCEL)
-    return image, image.get_rect()
+# Eztext courtesy of http://www.pygame.org/project-EzText-920-.html
 
 class subMap():
     def __init__(self):
@@ -32,202 +22,13 @@ class subMap():
         for i in range(DIMX):
             self.maptext += [0]*DIMY
 
-class Map():
-    
-    def __init__(self, DIM=40):
-        self.grid = []
-        self.DIM = DIM
-        for i in range(self.DIM):
-            self.grid += [self.DIM*[0]]
-        self.heroStart = None
-        self.pointOfEntry = None
-        self.pointOfExit = None
-        
-        self.itemShop = None
-        self.magicShop = None
-        self.Armory = None
-        self.Blacksmith = None
-        self.Tavern = None
-        
-        self.portals = []
-        # location : (type, level)
-        self.shops = {}
-        # location : contents
-        self.chests = {}
-        self.defaultBkgdTile = 0
-    
-    def setEntry(self, x, y, e, level=None):
-        if e == const.HEROSTART:
-            if self.heroStart == None:
-                self.heroStart = (x,y)
-            else:
-                (px,py) = self.heroStart
-                self.heroStart = (x,y)
-                return
-        if e == const.STAIRUP:
-            if self.pointOfEntry == None:
-                self.pointOfEntry = (x,y)
-            else:
-                (px,py) = self.pointOfEntry
-                self.setEntry(px,py,self.defaultBkgdTile)
-                self.pointOfEntry = (x,y)
-        if e == const.STAIRDN:
-            if self.pointOfExit == None:
-                self.pointOfExit = (x,y)
-            else:
-                (px,py) = self.pointOfExit
-                self.setEntry(px,py,self.defaultBkgdTile)
-                self.pointOfExit = (x,y)
-        if e == const.ITEMSDOOR:
-            if self.itemShop == None:
-                self.itemShop = (x, y)
-                self.shops[(x,y)] = ('itemshop', level )
-            else:
-                (px, py) = self.itemShop
-                self.setEntry(px, py, self.defaultBkgdTile)
-                self.shops.pop((px,py))
-                self.shops[(x,y)] = ('itemshop', level )
-                self.itemShop = (x, y)
-        if e == const.ARMRYDOOR:
-            if self.Armory == None:
-                self.Armory = (x, y)
-                self.shops[(x,y)] = ( 'armory', level )
-            else:
-                (px, py) = self.Armory
-                self.setEntry(px, py, self.defaultBkgdTile)
-                self.shops.pop((px,py))
-                self.shops[(x,y)] = ('armory', level )
-                self.Armory = (x, y)
-        if e == const.BLKSMDOOR:
-            if self.Blacksmith == None:
-                self.Blacksmith = (x, y)
-                self.shops[(x,y)] = ( 'blacksmith', level )
-            else:
-                (px, py) = self.Blacksmith
-                self.setEntry(px, py, self.defaultBkgdTile)
-                self.shops.pop((px,py))
-                self.shops[(x,y)] = ( 'blacksmith', level )
-                self.Blacksmith = (x, y)
-        if e == const.MAGICDOOR:
-            if self.magicShop == None:
-                self.magicShop = (x, y)
-                self.shops[(x,y)] = ( 'magicshop', level )
-            else:
-                (px, py) = self.magicShop
-                self.setEntry(px, py, self.defaultBkgdTile)
-                self.shops.pop((px,py))
-                self.shops[(x,y)] = ( 'magicshop', level )
-                self.magicShop = (x, y)
-        if e == const.TAVRNDOOR:
-            if self.Tavern == None:
-                self.Tavern = (x, y)
-                self.shops[(x,y)] = ( 'tavern', level )
-            else:
-                (px, py) = self.Tavern
-                self.setEntry(px, py, self.defaultBkgdTile)
-                self.shops.pop((px,py))
-                self.shops[(x,y)] = ( 'tavern', level )
-                self.Tavern = (x, y)
-        self.grid[y] = self.grid[y][:x] + [e] + self.grid[y][x+1:]
-    
-    def getEntry(self, x, y):
-        if x in range(self.DIM) and y in range(self.DIM):
-            return self.grid[y][x]
-        else:
-            return const.VOID
-    
-    def addChest(self, loc, chest):
-        self.chests[loc] = chest
-    
-    def getGrid(self):
-        return self.grid
-    
-    def installBall(self, ball):
-        (grid, DBKGT, poe, poex, hs, shops, chests) = ball
-        self.grid = grid
-        self.DIM = len(grid)
-        self.heroStart = hs
-        self.pointOfEntry = poe
-        self.pointOfExit = poex
-        self.chests = chests
-        self.shops = shops
-        self.defaultBkgdTile = DBKGT
-    
-    def getMapBall(self):
-        return (self.grid, self.defaultBkgdTile, self.pointOfEntry, self.pointOfExit, self.heroStart, self.shops, self.chests)
-    
-    
-    def changeDimensions(self, nDim):
-        # expanding
-        if nDim > self.DIM:
-            for i in range(nDim):
-                if i < self.DIM:
-                    self.grid[i] = self.grid[i] + [0]*(nDim-self.DIM)
-                else: self.grid.append( [0]*nDim )
-        #shrinking
-        elif self.DIM > nDim:
-            self.grid = self.grid[:nDim]
-            for i in range(nDim):
-                self.grid[i] = self.grid[i][:nDim]
-        #same
-        else: return
-        self.DIM = nDim
-        self.cursorPos = (0,0)
-    
-    def mapCut(self, pos1, pos2):
-        (x1, y1) = pos1
-        (x2, y2) = pos2
-        return
-        grid = [range(x2-x1)]*(y2-y1)
-        for i in range(x2-x1):
-            for j in range(y2-y1):
-                grid[j][i] = self.getEntry(x1+i, y1+j)
-                self.setEntry(x1+i, y1+j, 0)
-        self.copyText = grid
-    
-    def mapCopy(self, pos1, pos2):
-        (x1, y1) = pos1
-        (x2, y2) = pos2
-        grid = [range(x2-x1)]*(y2-y1)
-        for i in range(x2-x1):
-            for j in range(y2-y1):
-                grid[j][i] = self.getEntry(x1+i, y1+j)
-                self.setEntry(x1+i, y1+j, 0)
-        self.copyText = grid
-    
-    def mapPaste(self, pos):
-        x=0
-        y=0
-        grid = self.copyText
-        for i in len( grid[0] ):
-            for j in len( grid ):
-                self.setEntry(x+i, y+j, grid[j][i])
-    
-    def mapMove(self, source, size, dest):
-        (sX, sY) = source
-        (dX, dY) = dest
-        (xDim, yDim) = size
-        tmpGrid = [range(xDim) for _ in range(yDim)]
-        for i in range(xDim):
-            for j in range(yDim):
-                tmpGrid[j][i] = myMap.getEntry(i+sX, j+sY)
-        for i in range(xDim):
-            for j in range(yDim):
-                myMap.setEntry(i+sX, j+sY, 0)
-        for i in range(xDim):
-            for j in range(yDim):
-                myMap.setEntry(i+dX, j+dY, tmpGrid[j][i])
-    
-    def mapErase(self):
-        pass
-
-
 class Handler():
     
     def __init__(self, cPos):
         self.cursorPos = cPos
         self.currentTile = 0
         self.sideImg, sideRect = load_image('sidebar.bmp')
+        self.npcImg, npcR = load_image('npc.bmp')
         self.drawMode = False
         self.cursorColor = colors.white
         self.offset = 0
@@ -242,6 +43,8 @@ class Handler():
         self.selecting = False
         
         self.selectBoxPoints = None
+        
+        self.placeNPC = False
     
     def drawBox(self, pos, color):
         (x,y) = pos
@@ -267,7 +70,7 @@ class Handler():
             return
         (x,y) = pieceLocation
         entryList = []
-        for (Cx,Cy) in CARDINALS:
+        for (Cx,Cy) in const.CARDINALS:
             if (myMap.getEntry(x,y) == myMap.getEntry(x+Cx,y+Cy) and (x+Cx,y+Cy) not in self.visited and ~self.BFSQueue.has( (x+Cy, y+Cy) ) ):
                 self.BFSQueue.push( (x+Cx, y+Cy) )
                 entryList += [ (x+Cx,y+Cy) ]
@@ -380,9 +183,9 @@ class Handler():
             return
     
     def generateMap(self, rooms):
-        newMap = mapgen.Map(myMap.DIM)
-        newMap.generateMap(rooms)
-        myMap.installBall( newMap.getMapBall() )
+        MG = mapgen.Generator(myMap.DIM)
+        MG.generateMap(rooms)
+        myMap.installBall( MG.map.getMapBall() )
 
     def event_handler(self, event):
         (x,y) = self.cursorPos
@@ -529,19 +332,22 @@ class Handler():
         if 0 <= mx < gridField.get_width() and 0 <= my < gridField.get_height():
             if e.button == 1:
                 if self.mouseAction == 'draw':
-                    if self.currentTile == const.CHEST:
-                        myMap.addChest( (mx/blocksize,my/blocksize), self.fillChest())
-                        level=None
-                    elif self.currentTile == const.ITEMSDOOR:
-                        level = int(self.getInput('Itemshop level: '))
-                    elif self.currentTile == const.ARMRYDOOR:
-                        level = int(self.getInput('Armory level: '))
-                    elif self.currentTile == const.BLKSMDOOR:
-                        level = int(self.getInput('Blacksmith level: '))
-                    elif self.currentTile == const.MAGICDOOR:
-                        level = int(self.getInput('Magicshop level: '))
-                    else: level = None
-                    myMap.setEntry(mx/blocksize,my/blocksize,self.currentTile, level)
+                    if self.placeNPC:
+                        myMap.NPCs.append( (mx/blocksize, my/blocksize) )
+                    else:
+                        if self.currentTile == const.CHEST:
+                            myMap.addChest( (mx/blocksize,my/blocksize), self.fillChest())
+                            level=None
+                        elif self.currentTile == const.ITEMSDOOR:
+                            level = int(self.getInput('Itemshop level: '))
+                        elif self.currentTile == const.ARMRYDOOR:
+                            level = int(self.getInput('Armory level: '))
+                        elif self.currentTile == const.BLKSMDOOR:
+                            level = int(self.getInput('Blacksmith level: '))
+                        elif self.currentTile == const.MAGICDOOR:
+                            level = int(self.getInput('Magicshop level: '))
+                        else: level = None
+                        myMap.setEntry(mx/blocksize,my/blocksize,self.currentTile, level)
                     self.cursorPos = ( (mx/blocksize)*blocksize, (my/blocksize)*blocksize )
                 elif self.mouseAction == 'select':
                     if self.selectBoxPoints is not None:
@@ -552,10 +358,12 @@ class Handler():
                     else: self.selection = ( (mx/blocksize, my/blocksize), self.select( (mx/blocksize, my/blocksize) ) )
             elif e.button == 3:
                 pass
+        elif gridField.get_width()+50 <= mx < gridField.get_width()+80 and 170 <= my < 200:
+            self.placeNPC = not self.placeNPC
         elif gridField.get_width()+50 <= mx < gridField.get_width()+170 and 200 <= my < 440:
             if e.button == 1:
                 self.currentTile = ( self.offset + (mx-gridField.get_width()-45)/blocksize + (my-200)/blocksize * 4 )
-            elif e.button == 3: myMap.defaultBkgdTile = ( self.offset + (mx-gridField.get_width()-45)/blocksize + (my-200)/blocksize * 4 )
+            elif e.button == 3: myMap.defaultBkgd = ( self.offset + (mx-gridField.get_width()-45)/blocksize + (my-200)/blocksize * 4 )
         elif gridField.get_width()+65 <= mx < gridField.get_width()+95 and 500 <= my < 530:
             self.offset -= 32
             if self.offset < 0:
@@ -587,7 +395,7 @@ class Handler():
         for i in range(self.topX, self.topX+40):
             for j in range(self.topY, self.topY+40):
                 if myMap.getEntry(i,j) in range(24, 86):
-                    gridField.blit( mapImages[myMap.defaultBkgdTile], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
+                    gridField.blit( mapImages[myMap.defaultBkgd], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
                 gridField.blit( mapImages[myMap.getEntry(i,j)], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
                 if (i,j) == myMap.heroStart:
                     gridField.blit( mapImages[const.HEROSTART], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
@@ -608,7 +416,9 @@ class Handler():
                         if myMap.shops[s][0] == 'tavern':
                             (sX, sY) = s
                             gridField.blit( mapImages[132], (sX*blocksize - blocksize, sY*blocksize - (3*blocksize)) )
-                    
+        for n in myMap.NPCs:
+            (x,y) = n
+            gridField.blit(self.npcImg, (x*blocksize, y*blocksize) )
         (x,y) = self.cursorPos
         x = x - self.topX*blocksize
         y = y - self.topY*blocksize
@@ -622,11 +432,13 @@ class Handler():
         boxPoints = ( (x,y), (x,y+blocksize), (x+blocksize,y+blocksize), (x+blocksize,y) )
         pygame.draw.lines( gridField, self.cursorColor, True, boxPoints, 1 )
         self.sideImg, sideRect = load_image('sidebar.bmp')
-        self.sideImg.blit(mapImages[self.currentTile],(50,50))
-        self.sideImg.blit(mapImages[myMap.defaultBkgdTile],(50,130))
+        if self.placeNPC: self.sideImg.blit(self.npcImg,(50,50))
+        else: self.sideImg.blit(mapImages[self.currentTile],(50,50))
+        self.sideImg.blit(mapImages[myMap.defaultBkgd],(50,130))
         if self.mouseAction == 'draw':
             self.sideImg.blit(images.editorImages[5], (50,80) )
         else: self.sideImg.blit(images.editorImages[6], (50,80) )
+        self.sideImg.blit(self.npcImg, (50,170) )
         for i in range(8):
             for j in range(4):
                 self.sideImg.blit(mapImages[self.offset + j + (4*i)], (50+j*blocksize, 200+(i*blocksize)))
@@ -650,7 +462,7 @@ class Handler():
             self.sideImg.blit(entryBox,(80,50))
         if self.drawMode:
             msgBox = pygame.Surface( ( 186, 60 ) )
-            msgBox.fill( grey )
+            msgBox.fill( colors.grey )
             if pygame.font:
                 font = pygame.font.SysFont("arial", 24)
                 msgText = font.render( 'draw', 1, colors.red, colors.yellow )
@@ -672,7 +484,7 @@ clock = pygame.time.Clock()
 
 cursorPos = (0,0)
 
-myMap = Map()
+myMap = map.edMap()
 myHandler = Handler(cursorPos)
 
 blocksize = 30

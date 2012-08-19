@@ -1,6 +1,7 @@
 import pygame
 from IMG import images
 from UTIL import colors, const
+import math
 
 class Display():
     
@@ -13,19 +14,6 @@ class Display():
 
     # Takes first two coordinates of hero rect, gameBoard and
     # draws darkness
-    def drawDarkness(self, rx, ry, gameBoard):
-        for x in range(self.WINDOWSIZE):
-            for y in range(self.WINDOWSIZE):
-                dist = self.distanceFunc( (x,y), (rx,ry) )
-                if dist <= self.lineOfVision + 2:
-                    self.fog.set_alpha( 0 )
-                elif dist == self.lineOfVision + 3:
-                    self.fog.set_alpha( 70 )
-                elif dist == self.lineOfVision + 4:
-                    self.fog.set_alpha( 140 )
-                elif dist >= self.lineOfVision + 5:
-                    self.fog.set_alpha( 210 )
-                gameBoard.blit(self.fog, (x*const.blocksize,y*const.blocksize), area=(0,0,const.blocksize,const.blocksize) )
     def drawShade(self, map, gameBoard):
         (topX, topY) = map.topMapCorner
         (px, py) = map.playerXY
@@ -68,13 +56,13 @@ class Display():
             map.revealMap()
         for x in range(map.getDIM()):
             for y in range(map.getDIM()):
-                tile = map.getUnit(x,y)
+                tile = map.getEntry(x,y)
                 if tile != const.VOID and map.visDict[(x,y)]:
                     if tile > 24:
-                        shortList = [map.getUnit(tx, ty) for (tx, ty) in map.neighbors((x,y))]
+                        shortList = [map.getEntry(tx, ty) for (tx, ty) in map.neighbors((x,y))]
                         if const.VOID not in shortList:
-                            self.xGameBoard.blit( self.images[ map.DEFAULTBKGD ], ( (x*const.blocksize), (y*const.blocksize) ) )
-                    if map.getUnit(x, y) == const.ITEMSDOOR:
+                            self.xGameBoard.blit( self.images[ map.defaultBkgd ], ( (x*const.blocksize), (y*const.blocksize) ) )
+                    if map.getEntry(x, y) == const.ITEMSDOOR:
                         self.xGameBoard.blit( self.images[128], (x*const.blocksize - const.blocksize, y*const.blocksize - 2*const.blocksize), area = self.images[128].get_rect() )
                     else: self.xGameBoard.blit( self.images[ tile ], ( (x*const.blocksize), (y*const.blocksize) ) )
         if map.type == 'village':
@@ -103,18 +91,18 @@ class Display():
         (oldX, oldY, c, d) = hero.getRect()
         scrolling = False
         if DIMEN > const.HALFDIM:
-            if (5*const.blocksize <= newX <= (DIMEN-5)*const.blocksize):
+            if (5*const.blocksize < newX <= (DIMEN-5)*const.blocksize):
                 newX = 5 * const.blocksize
                 if dir in ['left','right'] and oldX == 5*const.blocksize:
                     scrolling = True
             if newX > (DIMEN-5)*const.blocksize:
-                newX = newX - (DIMEN/2)*const.blocksize
-            if (5*const.blocksize <= newY <= (DIMEN-5)*const.blocksize):
+                newX = newX - int( math.ceil( float(DIMEN)/2.) )*const.blocksize
+            if (5*const.blocksize < newY <= (DIMEN-5)*const.blocksize):
                 newY = 5 * const.blocksize
                 if dir in ['up','down'] and oldY == 5*const.blocksize:
                     scrolling = True
             if newY > (DIMEN-5)*const.blocksize:
-                newY = newY - (DIMEN/2)*const.blocksize
+                newY = newY - int( math.ceil( float(DIMEN)/2.) )*const.blocksize
         else:
             newX += (const.HALFDIM - DIMEN)/2*const.blocksize
             newY += (const.HALFDIM - DIMEN)/2*const.blocksize
@@ -143,6 +131,8 @@ class Display():
                 game.clock.tick(100)
                 hero.setRect( i, j, const.blocksize, const.blocksize)
                 if scrolling:
+                    for npc in game.NPCs:
+                        npc.shiftOnePixel(dir, 1)
                     gameBoard.blit( self.getScrollingMapWindow( ( (topX*const.blocksize)+(idx*scrollX)-(const.blocksize*scrollX), (topY*const.blocksize)+(idx*scrollY)-(const.blocksize*scrollY) ) ), (0,0) )
                     
                     if map.type == 'dungeon':
@@ -153,3 +143,32 @@ class Display():
                 game.displayGameBoard()
         
         hero.setRect( newX, newY, const.blocksize, const.blocksize)
+        
+    def drawNPC(self, npc, map, game, animated=False):
+        dir = npc.dir
+        (cX, cY) = npc.getXY()
+        (tX, tY) = map.topMapCorner
+        (oRX, oRY, oRX2, oRY2) = npc.getRect()
+        nRX = cX*const.blocksize-(tX*const.blocksize)
+        nRY = cY*const.blocksize-(tY*const.blocksize)
+        if npc.moving:
+            if oRX == nRX:
+                xAxis = [oRX]*const.blocksize
+            elif oRX < nRX:
+                xAxis = range(oRX, nRX)
+            else:
+                xAxis = range(oRX, nRX, -1)
+            if oRY == nRY:
+                yAxis = [oRY]*const.blocksize
+            elif oRY < nRY:
+                yAxis = range(oRY, nRY)
+            elif oRY > nRY:
+                yAxis = range(oRY, nRY, -1)
+            for (idx, (i, j)) in list( enumerate(zip(xAxis, yAxis), start=1) ):
+                game.clock.tick(120)
+                npc.shiftOnePixel(dir, -1)
+                if (idx % 2 == 0): npc.takeStep()
+                self.redrawMap(map, game.myHero.getXY(), game.myHero.getRect(), game.gameBoard)
+                game.displayGameBoard()
+        npc.setRect(nRX, nRY, const.blocksize, const.blocksize)
+        npc.moving = False

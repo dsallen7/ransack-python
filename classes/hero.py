@@ -12,8 +12,7 @@ class hero(pygame.sprite.Sprite):
     
     def __init__(self, load=None):
         pygame.sprite.Sprite.__init__(self) #call Sprite intializer
-        images.load()
-        self.images = images.heroImages
+        self.images = images.loadNPC('herosheet.bmp')
         self.imgIdx = 2
         self.image = self.images[self.imgIdx]
         self.rect = (const.blocksize, const.blocksize, const.blocksize, const.blocksize)

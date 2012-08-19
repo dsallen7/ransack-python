@@ -3,7 +3,9 @@ ransack-python
 
 Ransack - a Python based roguelike
 
-In very early stages at the moment. Our hero can explore the levels, collect items, and fight monsters.
+In mid-early stage at the moment. Our hero can explore the levels, collect items, and fight monsters.
+
+Coming soon: Ransack for Android. I've gotten it to run on an Android emulator using Pygame Subset for Android, there's still a mountain of issues to work out, but I'll keep all updates posted here.
 
 Move with arrow keys. Battles occur Final Fantasy style. Use battle menu to fight.
 

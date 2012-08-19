@@ -41,3 +41,10 @@ def load():
     editorSpriteSheet = spritesheet('editorsheet.bmp')
     for i in range(7):
         editorImages[i] = editorSpriteSheet.image_at((i*blocksize, 0, blocksize, blocksize), -1 )
+
+def loadNPC(file):
+    npcSS = spritesheet(file)
+    npcImages = range(8)
+    for i in range(8):
+        npcImages[i] = npcSS.image_at( (i*blocksize, 0, blocksize, blocksize), -1 )
+    return npcImages
