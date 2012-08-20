@@ -7,10 +7,10 @@ from IMG import images
 class npc(pygame.sprite.Sprite):
     
     def __init__(self, x, y, imgFile):
-        pygame.sprite.Sprite.__init__(self) #call Sprite intializer
         self.X = x
         self.Y = y
         self.images = images.loadNPC(imgFile)
+        pygame.sprite.Sprite.__init__(self) #call Sprite intializer
         self.imgIdx = 2
         self.image = self.images[self.imgIdx]
         self.dir = 'down'
@@ -67,6 +67,8 @@ class npc(pygame.sprite.Sprite):
         i = random.randrange(1, 10)
         if i == 5:
             self.move(random.choice(['up','down','left','right']), map, heroPos )
+            return True
+        else: return False
     
     def shiftOnePixel(self, dir, sign):
         (x1, y1, x2, y2) = self.rect
@@ -78,3 +80,18 @@ class npc(pygame.sprite.Sprite):
             self.setRect(x1+sign, y1, x2, y2)
         if dir == 'right':
             self.setRect(x1-sign, y1, x2, y2)
+
+class Guard(npc):
+    
+    def __init__(self, x, y):
+        npc.__init__(self, x, y, 'guard1.bmp')
+    
+    def interact(self, hud):
+        hud.boxMessage('Halt there!')
+    
+    def update(self, map, heropos):
+        pass
+
+class Female(npc):
+    def __init__(self, x, y):
+        npc.__init__(self, x, y, 'female1.bmp')

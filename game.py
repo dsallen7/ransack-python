@@ -73,10 +73,13 @@ class game():
     def addNPCs(self, map):
         self.NPCs = []
         for n in map.NPCs:
-            print 'NPC at: '
-            print n
-            (x,y) = n
-            self.NPCs.append( npc.npc(x, y, 'npcbase.bmp') )
+            print n[1]+'NPC at: '
+            print n[0]
+            (x,y) = n[0]
+            if n[1] == 'guard':
+                self.NPCs.append( npc.Guard(x, y) )
+            elif n[1] == 'female':
+                self.NPCs.append( npc.Female(x, y) )
         self.allsprites = pygame.sprite.RenderPlain((self.myHero, self.NPCs))
         self.allsprites.clear(self.screen, self.gameBoard)
     def addShops(self, map):        
@@ -189,8 +192,7 @@ class game():
                 self.Ticker.tick(60)
                 #action command
             else:
-                if self.move(pygame.key.name(event.key)):
-                    return 
+                return self.move(pygame.key.name(event.key))
     
     def actionCommand(self):
         (dX, dY) = const.scrollingDict[self.myHero.dir]
@@ -315,6 +317,7 @@ class game():
                     self.textMessage("You have died!")
                     self.gameOn = False
         self.Ticker.tick(2)
+        return True
     
     def rollDie(self, target, range):
         d = random.randrange(range)
@@ -345,6 +348,14 @@ class game():
         self.updateSprites()
         self.screen.blit( self.gameBoard, (75,75) )
         pygame.display.flip()
+    
+    def updateNPCs(self):
+        redraw = False
+        for npc in self.NPCs:
+            if npc.update(self.myMap, self.myHero.getXY() ):
+                redraw = True
+        return redraw
+        
 
     def mainLoop(self):
         gameFrame, gameFrameRect = load_image('gamescreen600.bmp', None)
@@ -355,18 +366,17 @@ class game():
         self.Display.drawHero(self.myHero, self.myMap, self.gameBoard, self, animated=False)
         self.Display.redrawXMap(self.myMap)
         while self.gameOn:
-            #self.clock.tick(30)
+            self.clock.tick(30)
             for event in pygame.event.get():
-                self.event_handler(event)
                 if event.type == pygame.QUIT:
                     os.sys.exit()
+                else: heroMove = self.event_handler(event)
             self.gameBoard.fill(colors.black)
             self.Display.redrawMap(self.myMap, self.myHero.getXY(), self.myHero.getRect(), self.gameBoard)
             self.myHud.update()
-            for npc in self.NPCs:
-                npc.update(self.myMap, self.myHero.getXY() )
                 #self.Display.drawNPC(npc, self.myMap, self, animated=True)
-            self.Display.drawHero(self.myHero, self.myMap, self.gameBoard, self, animated=True)
+            if self.updateNPCs():
+                self.Display.drawHero(self.myHero, self.myMap, self.gameBoard, self, animated=True)
             #self.myHero.showLocation(self.gameBoard)
             self.displayGameBoard()
         return

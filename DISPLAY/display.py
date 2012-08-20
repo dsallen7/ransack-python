@@ -130,7 +130,7 @@ class Display():
                 yAxis = range(oldY, newY, -1)
             for (idx, (i, j)) in list( enumerate(zip(xAxis, yAxis), start=1) ):
                 
-                #game.clock.tick(100)
+                game.clock.tick(100)
                 hero.setRect( i, j, const.blocksize, const.blocksize)
                 for npc in game.NPCs:
                     if npc.moving:

@@ -12,7 +12,7 @@ if not pygame.font: print 'Warning, fonts disabled'
 pygame.display.set_caption("Ransack")
 
 pygame.init()
-pygame.key.set_repeat(10, 10)
+pygame.key.set_repeat(100, 100)
 clock = pygame.time.Clock()
 random.seed()
 

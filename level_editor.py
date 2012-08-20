@@ -213,19 +213,22 @@ class Handler():
         if event.key == pygame.K_t:
             self.switchTile()
         if event.key == pygame.K_SPACE:
-            if self.currentTile == const.CHEST:
-                myMap.addChest( (x/blocksize,y/blocksize), self.fillChest())
-                level=None
-            elif self.currentTile == const.ITEMSDOOR:
-                level = int(self.getInput('Itemshop level: '))
-            elif self.currentTile == const.ARMRYDOOR:
-                level = int(self.getInput('Armory level: '))
-            elif self.currentTile == const.BLKSMDOOR:
-                level = int(self.getInput('Blacksmith level: '))
-            elif self.currentTile == const.MAGICDOOR:
-                level = int(self.getInput('Magicshop level: '))
-            else: level=None
-            myMap.setEntry(x/blocksize,y/blocksize,self.currentTile, level)
+            if self.placeNPC:
+                myMap.NPCs.append( ( (x/blocksize, y/blocksize), self.getInput('Enter NPC type: ') ) )
+            else:
+                if self.currentTile == const.CHEST:
+                    myMap.addChest( (x/blocksize,y/blocksize), self.fillChest())
+                    level=None
+                elif self.currentTile == const.ITEMSDOOR:
+                    level = int(self.getInput('Itemshop level: '))
+                elif self.currentTile == const.ARMRYDOOR:
+                    level = int(self.getInput('Armory level: '))
+                elif self.currentTile == const.BLKSMDOOR:
+                    level = int(self.getInput('Blacksmith level: '))
+                elif self.currentTile == const.MAGICDOOR:
+                    level = int(self.getInput('Magicshop level: '))
+                else: level=None
+                myMap.setEntry(x/blocksize,y/blocksize,self.currentTile, level)
         if event.key == pygame.K_ESCAPE:
             os.sys.exit()
         if event.key == pygame.K_d:
@@ -333,7 +336,7 @@ class Handler():
             if e.button == 1:
                 if self.mouseAction == 'draw':
                     if self.placeNPC:
-                        myMap.NPCs.append( (mx/blocksize, my/blocksize) )
+                        myMap.NPCs.append( ( (mx/blocksize, my/blocksize), self.getInput('Enter NPC type: ') ) )
                     else:
                         if self.currentTile == const.CHEST:
                             myMap.addChest( (mx/blocksize,my/blocksize), self.fillChest())
@@ -417,7 +420,7 @@ class Handler():
                             (sX, sY) = s
                             gridField.blit( mapImages[132], (sX*blocksize - blocksize, sY*blocksize - (3*blocksize)) )
         for n in myMap.NPCs:
-            (x,y) = n
+            (x,y) = n[0]
             gridField.blit(self.npcImg, (x*blocksize, y*blocksize) )
         (x,y) = self.cursorPos
         x = x - self.topX*blocksize
