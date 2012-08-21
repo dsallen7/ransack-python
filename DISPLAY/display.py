@@ -25,13 +25,13 @@ class Display():
                 else:
                     self.fog.set_alpha( 140 )
                 gameBoard.blit(self.fog, ( (x)*const.blocksize, (y)*const.blocksize), area=(0,0,const.blocksize,const.blocksize) )
-    def redrawMap(self, map, heroLoc, heroRect, gameBoard):
+    def redrawMap(self, map, hero, gameBoard):
         # Redraw map on screen from current map matrix
         #self.revealMap()
-        (rx,ry,rx2,ry2) = heroRect
+        (rx,ry,rx2,ry2) = hero.getRect()
         rx = rx/const.blocksize
         ry = ry/const.blocksize
-        (topX, topY), (oldTopX, oldTopY) = map.updateWindowCoordinates(heroLoc, heroRect)
+        (topX, topY), (oldTopX, oldTopY) = map.updateWindowCoordinates(hero)
         gameBoard.blit( self.getMapWindow( (topX, topY), map.WINDOWSIZE ), (map.WINDOWOFFSET,map.WINDOWOFFSET) )
         if map.type == 'dungeon':
             self.drawShade(map, gameBoard)
@@ -85,24 +85,25 @@ class Display():
     
     # called immediately after player makes a move or arrives in a new level
     # takes x,y of old myHero.rect location and finds new
-    def drawHero(self, hero, map, gameBoard, game=None, dir=None, animated=True):
+    def drawSprites(self, hero, map, gameBoard, game=None, dir=None, animated=True):
         DIMEN = map.getDIM()
+        # by default, the hero is in the upper left corner of the map
         (newX,newY) = hero.getXY()
         (oldX, oldY, c, d) = hero.getRect()
         scrolling = False
         if DIMEN > const.HALFDIM:
-            if (5*const.blocksize < newX <= (DIMEN-5)*const.blocksize):
+            if (5*const.blocksize <= newX <= (DIMEN-5)*const.blocksize):
                 newX = 5 * const.blocksize
                 if dir in ['left','right'] and oldX == 5*const.blocksize:
                     scrolling = True
             if newX > (DIMEN-5)*const.blocksize:
-                newX = newX - int( math.ceil( float(DIMEN)/2.) )*const.blocksize
-            if (5*const.blocksize < newY <= (DIMEN-5)*const.blocksize):
+                newX = newX - const.blocksize - int( math.floor( float(DIMEN)/2.) )*const.blocksize
+            if (5*const.blocksize <= newY <= (DIMEN-5)*const.blocksize):
                 newY = 5 * const.blocksize
                 if dir in ['up','down'] and oldY == 5*const.blocksize:
                     scrolling = True
             if newY > (DIMEN-5)*const.blocksize:
-                newY = newY - int( math.ceil( float(DIMEN)/2.) )*const.blocksize
+                newY = newY - const.blocksize - int( math.floor( float(DIMEN)/2.) )*const.blocksize
         else:
             newX += (const.HALFDIM - DIMEN)/2*const.blocksize
             newY += (const.HALFDIM - DIMEN)/2*const.blocksize
@@ -110,11 +111,11 @@ class Display():
        
         #make the move animated
         if animated:
-            if dir == None:
+            if not hero.moving:
                 scrolling = False
             else: scrollX , scrollY = const.scrollingDict[dir]
             (px,py) = hero.getXY()
-            pos, oldPos = map.updateWindowCoordinates( hero.getXY(), hero.getRect() )
+            pos, oldPos = map.updateWindowCoordinates( hero )
             (topX, topY) = pos
             if oldX == newX:
                 xAxis = [oldX]*const.blocksize
@@ -145,9 +146,10 @@ class Display():
                     if map.type == 'dungeon':
                         self.drawShade( map, gameBoard )
                         #self.myMap.drawDarkness( newX/blocksize, newY/blocksize, self.gameBoard )
-                else: self.redrawMap(map, hero.getXY(), hero.getRect(), gameBoard)
+                else: self.redrawMap(map, hero, gameBoard)
                 if (idx % 2 == 0) and hero.moving: hero.takeStep()
                 game.displayGameBoard()
+            hero.moving = False
         
         for npc in game.NPCs:
             npcdir = npc.dir

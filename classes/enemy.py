@@ -6,9 +6,9 @@ from SCRIPTS import enemyScr
 from random import choice
 
 class enemy():
-    def __init__(self, level):
+    def __init__(self, name, level):
         self.level = random.randrange(level, level+2)
-        self.name = choice( enemyScr.enemiesByLevel[self.level] )
+        self.name = name
         if self.name in enemyScr.pEnemies:
             self.poison = True
         else: self.poison = False

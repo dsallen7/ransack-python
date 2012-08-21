@@ -421,7 +421,7 @@ class Handler():
                             gridField.blit( mapImages[132], (sX*blocksize - blocksize, sY*blocksize - (3*blocksize)) )
         for n in myMap.NPCs:
             (x,y) = n[0]
-            gridField.blit(self.npcImg, (x*blocksize, y*blocksize) )
+            gridField.blit(self.npcImg, ((x-self.topX)*blocksize, (y-self.topY)*blocksize) )
         (x,y) = self.cursorPos
         x = x - self.topX*blocksize
         y = y - self.topY*blocksize
@@ -456,11 +456,11 @@ class Handler():
         toolBox.blit( images.editorImages[6], (45,60) )
         self.sideImg.blit(toolBox, (50,500) )
         (x,y) = self.cursorPos
-        entryBox = pygame.Surface((30,30))
+        entryBox = pygame.Surface((150,30))
         entryBox.fill(colors.black)
         if pygame.font:
             font = pygame.font.SysFont("arial",20)
-            entry = font.render(str(myMap.getEntry( (x+self.topX)/blocksize, (y+self.topY)/blocksize)),1, colors.white, colors.black )
+            entry = font.render(str(myMap.getEntry( (x+self.topX)/blocksize, (y+self.topY)/blocksize))+' '+'x:'+str(x)+' y:'+str(y),1, colors.white, colors.black )
             entryBox.blit(entry,(0,0))
             self.sideImg.blit(entryBox,(80,50))
         if self.drawMode:

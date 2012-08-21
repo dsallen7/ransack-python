@@ -277,13 +277,21 @@ class Generator():
             self.map.setEntry( xpos + xdim/2, ypos + ydim/2, 110)
             chestlist += [( ( xpos + xdim/2, ypos + ydim/2), chestItems )]
             rooms.remove(choice4)
-        for r in self.secretRooms:
-            (xpos, ypos) = r.getPos()
-            (xdim, ydim) = r.getDimensions()
+        for room in self.secretRooms:
+            (xpos, ypos) = room.getPos()
+            (xdim, ydim) = room.getDimensions()
             self.map.setEntry( xpos + xdim/2, ypos + ydim/2, 110)
             chestlist += [( ( xpos + xdim/2, ypos + ydim/2), [(randrange(31,34),0)] )]
             
         self.map.chests = dict(chestlist)
+        print len(rooms)
+        # add enemies
+        while len(rooms) > 0:
+            room = choice(rooms)
+            (xpos, ypos) = room.getPos()
+            (xdim, ydim) = room.getDimensions()
+            self.map.NPCs.append( (( xpos + xdim/2, ypos + ydim/2), 'skeleton') )
+            rooms.remove(room)
                
     def addRoom(self, map, room, pos):
         map.copyText = room.grid

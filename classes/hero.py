@@ -148,7 +148,7 @@ class hero(pygame.sprite.Sprite):
         print itype
         if itype == KEY or itype+const.FRUIT1 == KEY:
             self.keys += 1
-            return
+            return 'A dungeon key'
         elif itype+const.FRUIT1 == GOLD:
             self.addGold(qty)
             return str(qty)+' gold pieces'
@@ -250,6 +250,7 @@ class hero(pygame.sprite.Sprite):
             sType = spell.getType()
         if spell.cost > self.currMP:
             sType = -3
+            return (sType, "You don't have enough MP!")
         spell.execute(self, hud, battle)
         return (sType, spell.getCastMsg())
     def getSpells(self):
@@ -325,7 +326,7 @@ class hero(pygame.sprite.Sprite):
         
     
     # for debugging purposes
-    def showLocation(self, gameBoard):
+    def showLocation(self, screen):
         (x1,y1,x2,y2) = self.rect
         locBox = pygame.Surface( (350,50) )
         locBox.fill( grey )
@@ -333,6 +334,6 @@ class hero(pygame.sprite.Sprite):
             font = pygame.font.SysFont("arial", 14)
             locText = font.render( "Self.X:"+str(self.X)+"Self.Y:"+str(self.Y)+"RectX:"+str(x1)+"RectY"+str(y1), 1, red, yellow )
             locBox.blit(locText, (10,10) )
-        gameBoard.blit(locBox, (0, 200) )
+        screen.blit(locBox, (0, 0) )
         pygame.display.flip()
     

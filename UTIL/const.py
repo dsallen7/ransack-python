@@ -120,6 +120,7 @@ itemMsgs = { 86: 'You found a piece of fruit.',
              100: 'You found a spellbook.' }
 
 scrollingDict = { 'up': (0, -1), 'down': (0, 1), 'left': (-1, 0), 'right': (1, 0) }
+imgDict       = { 'up': 0, 'down': 2, 'left': 4, 'right': 6 }
 
 # Define the colors we will use in RGB format
 black = [  0,  0,  0]

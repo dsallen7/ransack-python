@@ -143,9 +143,15 @@ class gameMap(map):
         self.visDict = {}
         for i in range( self.DIM ):
             for j in range( self.DIM ):
-                if self.type == 'dungeon': self.visDict[ (i,j) ] = False
-                else: self.visDict[ (i,j) ] = True
+                if self.type == 'dungeon': 
+                    self.visDict[ (i,j) ] = False
+                    self.grid[i][j].visible = False
+                else:
+                    self.visDict[ (i,j) ] = True
+                    self.grid[i][j].visible = True
         self.myMiniMap = miniMap(self.grid)
+        
+        self.litTiles = []
     
     def setLOV(self, num):
         self.lineOfVision = num
@@ -199,11 +205,11 @@ class gameMap(map):
         return x, y
             
     # calculate location of map window based on hero location and hero sprite rect
-    def updateWindowCoordinates(self, heroLoc, heroRect):
+    def updateWindowCoordinates(self, hero):
         DIMEN = self.getDIM()
         oldX, oldY = self.playerXY
         # Compute top map corner
-        (px,py) = heroLoc
+        (px,py) = hero.getXY()
         px = px/const.blocksize
         py = py/const.blocksize
         self.playerXY = (px, py)
@@ -286,7 +292,13 @@ class gameMap(map):
         self.visited = []
         litTiles = self.flatten( self.litBFS( (px,py) ) )
         litTiles = list( set( litTiles) )
+        self.litTiles = litTiles
         return litTiles
+    
+    def isVisible(self, x, y):
+        if (x, y) in self.litTiles:
+            return True
+        else: return False
 
 # inherited map class to be used by map generator
 class edMap(map):

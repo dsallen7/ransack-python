@@ -6,7 +6,7 @@ from IMG import images
 
 class npc(pygame.sprite.Sprite):
     
-    def __init__(self, x, y, imgFile):
+    def __init__(self, x, y, name, imgFile):
         self.X = x
         self.Y = y
         self.images = images.loadNPC(imgFile)
@@ -15,6 +15,7 @@ class npc(pygame.sprite.Sprite):
         self.image = self.images[self.imgIdx]
         self.dir = 'down'
         self.moving = False
+        self.name = name
         self.setRect(x*const.blocksize, y*const.blocksize, const.blocksize, const.blocksize)
     
     def setRect(self,x1,y1,x2,y2):
@@ -83,15 +84,54 @@ class npc(pygame.sprite.Sprite):
 
 class Guard(npc):
     
-    def __init__(self, x, y):
-        npc.__init__(self, x, y, 'guard1.bmp')
+    def __init__(self, x, y, name):
+        npc.__init__(self, x, y, name, 'guard1.bmp')
     
     def interact(self, hud):
-        hud.boxMessage('Halt there!')
+        hud.boxMessage('HalT There!')
     
     def update(self, map, heropos):
         pass
 
-class Female(npc):
-    def __init__(self, x, y):
-        npc.__init__(self, x, y, 'female1.bmp')
+class Citizen(npc):
+    def __init__(self, x, y, name, filename):
+        npc.__init__(self, x, y, name, filename)
+
+class Female(Citizen):
+    def __init__(self, x, y, name):
+        npc.__init__(self, x, y, name, 'female1.bmp')
+
+class Enemy(npc):
+    def __init__(self, x, y, name, filename):
+        npc.__init__(self, x, y, name, filename)
+    
+    def move(self, dir, map, heroPos):
+        (hX, hY) = heroPos
+        hX = hX /const.blocksize
+        hY = hY /const.blocksize
+        self.moving = True
+        (sX, sY) = self.getXY()
+        (mX, mY) = const.scrollingDict[dir]
+        self.dir = dir
+        sX += mX
+        sY += mY
+        if map.getEntry(sX, sY) in range(25):
+            if (sX, sY) != (hX,hY):
+                self.setXY(sX, sY)
+            else:
+                self.moving = False
+                return 'battle'
+        else: 
+            self.moving = False
+            return False
+        self.imgIdx = const.imgDict[dir]
+        self.image = self.images[self.imgIdx]
+        return True
+    
+    def interact(self, hud):
+        hud.txtMessage('The battle is joined!')
+        return 'battle'
+    def update(self, map, heroPos):
+        i = random.randrange(1, 10)
+        if i == 5:
+            return self.move(random.choice(['up','down','left','right']), map, heroPos )
