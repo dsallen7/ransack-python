@@ -1,4 +1,4 @@
-import pygame, pickle
+import pygame, cPickle, gzip
 from load_image import *
 from const import *
 from classes import menu
@@ -95,7 +95,7 @@ class Tavern():
         for i in range(3):
             if os.access("ransack"+str(i)+".sav", os.F_OK):
                 peekFile = open("ransack"+str(i)+".sav", 'r')
-                ball = pickle.load(peekFile)
+                ball = cPickle.load(peekFile)
                 peekFile.close()
                 desc[i] = 'Saved game '+str(i)+' Level '+str(ball[0][11])+' '+str(ball[2].getDays())+' Days '+ \
                                                                                 str(ball[2].getHours())+':'+str(ball[2].getHours())+':'+ \
@@ -138,8 +138,8 @@ class Tavern():
         if fileName == None:
             return
         try:
-            savFile = open(fileName, 'w')
-            pickle.dump(game.getSaveBall(), savFile)
+            savFile = gzip.GzipFile(fileName, 'wb')
+            cPickle.dump(game.getSaveBall(), savFile, 2)
             savFile.close()
         except IOError, e:
             print 'File I/O error', e

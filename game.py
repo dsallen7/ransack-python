@@ -60,9 +60,6 @@ class game():
         self.addShops(self.myMap)
         self.addNPCs(self.myMap)
         
-        #self.allsprites = pygame.sprite.RenderPlain((self.myHero, self.NPCs))
-        #self.allsprites.clear(self.screen, self.gameBoard)
-
         self.myBattle = battle.battle(self.screen,self.myHud, self.Ticker)
         self.clock = clock
     
@@ -76,9 +73,11 @@ class game():
         for n in map.NPCs:
             (x,y) = n[0]
             if n[1] == 'guard':
-                self.NPCs.append( npc.Guard(x, y, 'Guard') )
+                self.NPCs.append( npc.Guard(x, y, n[2]) )
             elif n[1] == 'female':
-                self.NPCs.append( npc.Female(x, y, 'Townswoman') )
+                self.NPCs.append( npc.Female(x, y, n[2]) )
+            elif n[1] == 'king':
+                self.NPCs.append( npc.King(x, y, n[2]) )
             elif n[1] == 'skeleton':
                 self.NPCs.append( npc.Enemy(x, y, 'Skeleton', 'skeleton.bmp') )
         self.allsprites = pygame.sprite.RenderPlain((self.myHero, self.NPCs))
@@ -367,7 +366,7 @@ class game():
     
     def displayGameBoard(self):
         self.updateSprites()
-        self.screen.blit( self.gameBoard, (75,75) )
+        self.screen.blit( self.gameBoard, (const.gameBoardOffset, const.gameBoardOffset) )
         pygame.display.flip()
     
     def updateNPCs(self):
@@ -395,11 +394,13 @@ class game():
         self.updateSprites()
         self.Display.redrawXMap(self.myMap)
         while self.gameOn:
-            #self.clock.tick(30)
+            self.clock.tick(30)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     os.sys.exit()
-                else: heroMove = self.event_handler(event)
+                else:
+                    if not self.myHero.moving: 
+                        heroMove = self.event_handler(event)
             self.gameBoard.fill(colors.black)
             self.Display.redrawMap(self.myMap, self.myHero, self.gameBoard)
             self.myHud.update()

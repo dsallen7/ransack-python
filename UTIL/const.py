@@ -4,6 +4,10 @@
 blocksize = 30
 miniblocksize = 15
 
+gameBoardOffset = 75
+
+maxLineWidth = 16
+
 DIM = 20
 
 #NSWE

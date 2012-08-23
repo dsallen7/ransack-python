@@ -1,4 +1,4 @@
-import pygame, random, pickle, ppov
+import pygame, random, pickle, ppov, gzip
 from load_image import *
 from UTIL import queue, const, colors
 from types import *
@@ -91,7 +91,7 @@ class map():
         self.shops = shops
         self.defaultBkgd = DBGD
         self.NPCs = npcs
-    
+            
     def mapCut(self, pos1, pos2):
         (x1, y1) = pos1
         (x2, y2) = pos2
@@ -156,16 +156,11 @@ class gameMap(map):
     def setLOV(self, num):
         self.lineOfVision = num
     
-    def saveMap(self):
-        grid = self.getGrid()
-        save = open("map.dat", "w")
-        pickle.dump(grid, save)
-        save.close()
     def getImages(self):
         return self.images
     def loadMap(self, filename):
         try:
-            save = open(os.getcwd()+'/MAP/LEVELS/'+filename, "r")
+            save = gzip.GzipFile(os.getcwd()+'/MAP/LEVELS/'+filename, "rb")
             ball = pickle.load(save)
             save.close()
             self.installBall(ball)

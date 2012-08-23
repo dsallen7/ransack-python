@@ -1,7 +1,7 @@
 # A dictionary assigning item ID numbers to functions which
 # carry out the effects of the spells
 
-from const import *
+from UTIL import const
 from SCRIPTS import spellScr
 
 class Spell():

@@ -1,7 +1,7 @@
 # Script for pre-loading all images used in Ransack
 
 from spritesheet import *
-from const import *
+from UTIL import const
 
 heroImages = range(8)
 mapImages = range(133)
@@ -27,7 +27,7 @@ def load():
 
     mapSpriteSheet = spritesheet('mastersheet.bmp')
     for i in range(128):
-        mapImages[i] = mapSpriteSheet.image_at( ( (i*blocksize)%240, (i/8)*blocksize, blocksize, blocksize), 1 )
+        mapImages[i] = mapSpriteSheet.image_at( ( (i*const.blocksize)%240, (i/8)*const.blocksize, const.blocksize, const.blocksize), 1 )
     mapImages[128] = load_image('house1.bmp', 1)
     mapImages[129] = load_image('mShop.bmp', 1)
     mapImages[130] = load_image('bSmith.bmp', 1)
@@ -36,15 +36,15 @@ def load():
     
     heroSpriteSheet = spritesheet('herosheet.bmp')
     for i in range(8):
-        heroImages[i] = heroSpriteSheet.image_at( (i*blocksize, 0, blocksize, blocksize), -1 )
+        heroImages[i] = heroSpriteSheet.image_at( (i*const.blocksize, 0, const.blocksize, const.blocksize), -1 )
     
     editorSpriteSheet = spritesheet('editorsheet.bmp')
     for i in range(7):
-        editorImages[i] = editorSpriteSheet.image_at((i*blocksize, 0, blocksize, blocksize), -1 )
+        editorImages[i] = editorSpriteSheet.image_at((i*const.blocksize, 0, const.blocksize, const.blocksize), -1 )
 
 def loadNPC(file):
     npcSS = spritesheet(file)
-    npcImages = range(8)
-    for i in range(8):
-        npcImages[i] = npcSS.image_at( (i*blocksize, 0, blocksize, blocksize), -1 )
+    npcImages = range(9)
+    for i in range(9):
+        npcImages[i] = npcSS.image_at( (i*const.blocksize, 0, const.blocksize, const.blocksize), -1 )
     return npcImages

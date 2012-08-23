@@ -9,6 +9,8 @@ Coming soon: Ransack for Android. I've gotten it to run on an Android emulator u
 
 Move with arrow keys. Monsters are found in the dungeon. Approach a monster and press Enter to commence battle, the monsters can also initiate battle
 
+Enter is the "action" button, which activates sundry items on the map, including conversing with people in the village or castle.
+
 'c' brings up spell menu and 'i' brings up item inventory. 'a'/'w' brings up armor/weapon menu. Select a weapon/armor from here and it will be automatically equipped. If it is currently equipped, it will not be listed in the weapon or armor menu.
 'm' brings up mini-map which displays current level. 's' shows character stats.
 't' takes a screenshot.
@@ -32,6 +34,12 @@ The level editor uses EzText courtest of pywiz32 - http://www.pygame.org/project
 The random generator algorithm is based on the description written here (the actual code is my own):
 http://breinygames.blogspot.com/2011/07/random-map-generation.html
 
-The fonts used ingame are Spinal Tap (http://www.rockbandfonts.com/), Chancery Gothic and Courier.
+The fonts used ingame are: 
+
+Spinal Tap (http://www.rockbandfonts.com/), 
+
+Devinne Swash, by Dieter Steffmann. http://www.fontspace.com/dieter-steffmann/devinne-swash
+
+Chancery Gothic and Courier.
 
 As a side note, this project is turning into more of an RPG with roguelike features. Rogue purists may sneer :-P but I look forward to seeing what happens with this thing and I hope you do too.

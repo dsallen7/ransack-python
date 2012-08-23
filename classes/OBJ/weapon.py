@@ -1,4 +1,4 @@
-from const import *
+from UTIL import const
 from SCRIPTS import weaponScr
 
 class Weapon():
@@ -6,7 +6,7 @@ class Weapon():
     def __init__(self, type, level):
         self.type = type
         self.level = level
-        self.imgNum = type + FRUIT1
+        self.imgNum = type + const.FRUIT1
         self.name = 'weapon'
         self.desc = weaponScr.descDict[self.type]
     

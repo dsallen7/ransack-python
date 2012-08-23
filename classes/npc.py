@@ -6,7 +6,7 @@ from IMG import images
 
 class npc(pygame.sprite.Sprite):
     
-    def __init__(self, x, y, name, imgFile):
+    def __init__(self, x, y, message, imgFile):
         self.X = x
         self.Y = y
         self.images = images.loadNPC(imgFile)
@@ -15,7 +15,7 @@ class npc(pygame.sprite.Sprite):
         self.image = self.images[self.imgIdx]
         self.dir = 'down'
         self.moving = False
-        self.name = name
+        self.message = message
         self.setRect(x*const.blocksize, y*const.blocksize, const.blocksize, const.blocksize)
     
     def setRect(self,x1,y1,x2,y2):
@@ -33,7 +33,7 @@ class npc(pygame.sprite.Sprite):
         self.image = self.images[self.imgIdx]
     
     def interact(self, hud):
-        hud.boxMessage('Hello, hero!')
+        hud.npcMessage(self.message, self.images[8])
     
     def move(self, dir, map, heroPos):
         (hX, hY) = heroPos
@@ -87,8 +87,15 @@ class Guard(npc):
     def __init__(self, x, y, name):
         npc.__init__(self, x, y, name, 'guard1.bmp')
     
-    def interact(self, hud):
-        hud.boxMessage('HalT There!')
+    def update(self, map, heropos):
+        i = random.randrange(1, 6)
+        if i == 5:
+            self.takeStep()
+
+class King(npc):
+    
+    def __init__(self, x, y, name):
+        npc.__init__(self, x, y, name, 'king.bmp')
     
     def update(self, map, heropos):
         pass
@@ -104,6 +111,7 @@ class Female(Citizen):
 class Enemy(npc):
     def __init__(self, x, y, name, filename):
         npc.__init__(self, x, y, name, filename)
+        self.name = name
     
     def move(self, dir, map, heroPos):
         (hX, hY) = heroPos

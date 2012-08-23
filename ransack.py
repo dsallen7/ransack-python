@@ -1,4 +1,4 @@
-import pygame, game, random, pickle
+import pygame, game, random, cPickle, gzip
 from UTIL import const, colors
 from load_image import *
 
@@ -12,7 +12,7 @@ if not pygame.font: print 'Warning, fonts disabled'
 pygame.display.set_caption("Ransack")
 
 pygame.init()
-pygame.key.set_repeat(100, 100)
+pygame.key.set_repeat(10, 100)
 clock = pygame.time.Clock()
 random.seed()
 
@@ -25,8 +25,8 @@ def getFile():
     desc = range(3)
     for i in range(3):
         if os.access("ransack"+str(i)+".sav", os.F_OK):
-            peekFile = open("ransack"+str(i)+".sav", 'r')
-            ball = pickle.load(peekFile)
+            peekFile = gzip.GzipFile("ransack"+str(i)+".sav", 'rb')
+            ball = cPickle.load(peekFile)
             peekFile.close()
             desc[i] = 'Saved game '+str(i)+' Level '+str(ball[0][11])+' '+str(ball[2].getDays())+' Days '+ \
                                                                             str(ball[2].getHours()%24)+':'+ \
@@ -107,8 +107,8 @@ def main():
                             loadFile = getFile()
                             if loadFile == None: pass
                             else:
-                                savFile = open(loadFile, 'r')
-                                ball = pickle.load(savFile)
+                                savFile = gzip.GzipFile(loadFile, 'rb')
+                                ball = cPickle.load(savFile)
                                 savFile.close()
                                 Game = game.game(screen, clock, loadHero=ball[0], loadDungeon=ball[1], loadTicker = ball[2], currentMap = ball[3])
                                 Game.mainLoop()

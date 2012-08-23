@@ -150,23 +150,64 @@ class hud( ):
         self.update()
     
    
-    def boxMessage(self, text):
-        for i in range(88):
-            borderBox = pygame.Surface( ( ((i*2)+5 ), 60) )
+    def npcMessage(self, message, img):
+        if pygame.font:
+            font = pygame.font.Font(os.getcwd()+"/FONTS/devinne.ttf", 18)
+            if len(message) < const.maxLineWidth:
+                msgText = pygame.Surface( (len(message)*18, 36 ) )
+                msgText.fill(colors.gold)
+                msgText.blit( font.render( message, 1, colors.white, colors.gold ), (0,0) )
+            else:
+                msgText = pygame.Surface( ( const.maxLineWidth*10, ((len(message)/const.maxLineWidth)+1)*36 ))
+                msgText.fill(colors.gold)
+                hPos = 0
+                words = message.split(' ')
+                while words:
+                    line = ''
+                    while words and len(line+' '+words[0]) < const.maxLineWidth:
+                        line = line + words[0] + ' '
+                        words = words[1:]
+                    lineText = font.render( line, 1, colors.white, colors.gold )
+                    msgText.blit( lineText, ((msgText.get_width()/2)-(lineText.get_width()/2), hPos) )
+                    hPos += 20
+        (px, py, px2, py2) = self.game.myHero.getRect()
+        for i in range(msgText.get_width()/2):
+            borderBox = pygame.Surface( ( ((i*2)+60 ), msgText.get_height()+20) )
             borderBox.fill( colors.grey )
-            msgBox = pygame.Surface( (i*2, 50 ) )
-            msgBox.fill( colors.gold )
-            borderBox.blit(msgBox, (5, 5) )
-            self.screen.blit(borderBox, (188-i, 200) )
+            borderBox.blit(img, (10,10) )
+            borderBox.blit(msgText, (40, 10) )
+            self.screen.blit(borderBox, ( const.gameBoardOffset + px + const.blocksize + (msgText.get_width()/2) - i, const.gameBoardOffset + py + const.blocksize ) )
+            #self.screen.blit(borderBox, ( (self.screen.get_width()/2)-i, (self.screen.get_height()/2)-(msgText.get_height()/2) ) )
             pygame.display.flip()
             
-        borderBox = pygame.Surface( ( 186, 60 ) )
-        borderBox.fill( colors.grey )
+        while (pygame.event.wait().type != pygame.KEYDOWN): pass
+    def boxMessage(self, message):
         if pygame.font:
-            font = pygame.font.Font(os.getcwd()+"/FONTS/SpinalTfanboy.ttf", 18)
-            msgText = font.render( text, 1, colors.white, colors.gold )
-            msgBox.blit(msgText, (10,10) )
-        borderBox.blit( msgBox, (5, 5) )
-        self.screen.blit(borderBox, (100, 200) )
-        pygame.display.flip()
+            font = pygame.font.Font(os.getcwd()+"/FONTS/devinne.ttf", 18)
+            if len(message) < const.maxLineWidth:
+                msgText = pygame.Surface( (len(message)*10, 36 ) )
+                msgText.fill(colors.gold)
+                msgText.blit( font.render( message, 1, colors.white, colors.gold ), (0,0) )
+            else:
+                msgText = pygame.Surface( ( const.maxLineWidth*10, ((len(message)+1)/const.maxLineWidth)*36 ))
+                msgText.fill(colors.gold)
+                hPos = 0
+                words = message.split(' ')
+                while words:
+                    line = ''
+                    while words and len(line+' '+words[0]) < const.maxLineWidth:
+                        line = line + words[0] + ' '
+                        words = words[1:]
+                    lineText = font.render( line, 1, colors.white, colors.gold )
+                    msgText.blit( lineText, ((msgText.get_width()/2)-(lineText.get_width()/2), hPos) )
+                    hPos += 20
+        (px, py, px2, py2) = self.game.myHero.getRect()
+        for i in range(msgText.get_width()/2):
+            borderBox = pygame.Surface( ( ((i*2)+20 ), msgText.get_height()+20) )
+            borderBox.fill( colors.grey )
+            borderBox.blit(msgText, (10, 10) )
+            self.screen.blit(borderBox, ( const.gameBoardOffset + px + const.blocksize + (msgText.get_width()/2) - i, const.gameBoardOffset + py + const.blocksize ) )
+            #self.screen.blit(borderBox, ( (self.screen.get_width()/2)-i, (self.screen.get_height()/2)-(msgText.get_height()/2) ) )
+            pygame.display.flip()
+            
         while (pygame.event.wait().type != pygame.KEYDOWN): pass

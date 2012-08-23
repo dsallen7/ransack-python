@@ -1,5 +1,4 @@
-from const import *
-
+from UTIL import const
 from SCRIPTS import armorScr
 
 class Armor():
@@ -7,7 +6,7 @@ class Armor():
     def __init__(self, type, level):
         self.type = type
         self.level = level
-        self.imgNum = type + FRUIT1
+        self.imgNum = type + const.FRUIT1
         self.name = 'armor'
         self.desc = armorScr.descDict[self.type]
     

@@ -1,13 +1,12 @@
-from pygame import *
 from types import *
-import pygame, os, pickle, random, eztext, const
+import pygame, os, cPickle, random, gzip
 from IMG import images
 
 from load_image import *
 
 from MAP import mapgen, map
 
-from UTIL import queue, const, colors
+from UTIL import queue, const, colors, eztext
 
 displayOpts = ['fore', 'back', 'both']
 
@@ -97,8 +96,8 @@ class Handler():
     def getInput(self, msg):
         #get file name
         input = None
-        txtbx = eztext.Input(maxlength=45, color=(255,0,0), prompt=msg)
-        inputWindow = pygame.Surface( (300,100) )
+        txtbx = eztext.Input(maxlength=300, color=(255,0,0), prompt=msg)
+        inputWindow = pygame.Surface( (1200,100) )
         while input == None:
             # make sure the program is running at 30 fps
             clock.tick(30)
@@ -110,7 +109,7 @@ class Handler():
                 # close it x button si pressed
                 if event.type == pygame.QUIT:
                         os.sys.exit()
-                if event.type == KEYDOWN:
+                if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:
                         input = txtbx.getValue()
 
@@ -164,8 +163,8 @@ class Handler():
         filename = self.getFilename()
         ball = myMap.getMapBall()
         try:
-            save = open(os.getcwd()+'/MAP/LEVELS/'+filename, "w")
-            pickle.dump(ball, save)
+            save = gzip.GzipFile(os.getcwd()+'/MAP/LEVELS/'+filename, 'wb')
+            cPickle.dump(ball, save)
             save.close()
         except IOError, message:
             print 'Cannot load map:', filename
@@ -174,8 +173,8 @@ class Handler():
     def loadMap(self):
         filename = self.getFilename()
         try:
-            save = open(os.getcwd()+'/MAP/LEVELS/'+filename, "r")
-            ball = pickle.load(save)
+            save = gzip.GzipFile(os.getcwd()+'/MAP/LEVELS/'+filename, 'rb')
+            ball = cPickle.load(save)
             save.close()
             myMap.installBall(ball)
         except IOError, message:
@@ -214,7 +213,7 @@ class Handler():
             self.switchTile()
         if event.key == pygame.K_SPACE:
             if self.placeNPC:
-                myMap.NPCs.append( ( (x/blocksize, y/blocksize), self.getInput('Enter NPC type: ') ) )
+                myMap.NPCs.append( ( (x/blocksize, y/blocksize), self.getInput('Enter NPC type: '), self.getInput('Enter message: ') ) )
             else:
                 if self.currentTile == const.CHEST:
                     myMap.addChest( (x/blocksize,y/blocksize), self.fillChest())
@@ -247,6 +246,13 @@ class Handler():
             self.offset += 32
             if self.offset == 128:
                 self.offset = 0
+        if event.key == pygame.K_x:
+            myMap.NPCs = []
+            print myMap.NPCs
+            print 'NPCs cleared'
+        if event.key == pygame.K_n:
+            print 'NPCs: '
+            print myMap.NPCs
         if self.drawMode:
             myMap.setEntry(x/blocksize,y/blocksize,self.currentTile)
         self.cursorPos = (x,y)
@@ -336,7 +342,7 @@ class Handler():
             if e.button == 1:
                 if self.mouseAction == 'draw':
                     if self.placeNPC:
-                        myMap.NPCs.append( ( (mx/blocksize, my/blocksize), self.getInput('Enter NPC type: ') ) )
+                        myMap.NPCs.append( ( (mx/blocksize, my/blocksize), self.getInput('Enter NPC type: '), self.getInput('Enter message: ') ) )
                     else:
                         if self.currentTile == const.CHEST:
                             myMap.addChest( (mx/blocksize,my/blocksize), self.fillChest())

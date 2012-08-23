@@ -83,8 +83,7 @@ class Display():
                     (sX, sY) = s
                     self.xGameBoard.blit( self.images[132], (sX*const.blocksize - const.blocksize, sY*const.blocksize - (3*const.blocksize)) )
     
-    # called immediately after player makes a move or arrives in a new level
-    # takes x,y of old myHero.rect location and finds new
+    # draws all pending sprite movements
     def drawSprites(self, hero, map, gameBoard, game=None, dir=None, animated=True):
         DIMEN = map.getDIM()
         # by default, the hero is in the upper left corner of the map
@@ -161,34 +160,3 @@ class Display():
             npc.setRect(nRX, nRY, const.blocksize, const.blocksize)
             npc.moving = False
         hero.setRect( newX, newY, const.blocksize, const.blocksize)
-        
-    def drawNPC(self, npc, map, game, animated=False):
-        dir = npc.dir
-        (cX, cY) = npc.getXY()
-        (tX, tY) = map.topMapCorner
-        (oRX, oRY, oRX2, oRY2) = npc.getRect()
-        nRX = cX*const.blocksize-(tX*const.blocksize)
-        nRY = cY*const.blocksize-(tY*const.blocksize)
-        '''
-        if npc.moving:
-            if oRX == nRX:
-                xAxis = [oRX]*const.blocksize
-            elif oRX < nRX:
-                xAxis = range(oRX, nRX)
-            else:
-                xAxis = range(oRX, nRX, -1)
-            if oRY == nRY:
-                yAxis = [oRY]*const.blocksize
-            elif oRY < nRY:
-                yAxis = range(oRY, nRY)
-            elif oRY > nRY:
-                yAxis = range(oRY, nRY, -1)
-            for (idx, (i, j)) in list( enumerate(zip(xAxis, yAxis), start=1) ):
-                game.clock.tick(120)
-                npc.shiftOnePixel(dir, -1)
-                if (idx % 2 == 0): npc.takeStep()
-                self.redrawMap(map, game.myHero.getXY(), game.myHero.getRect(), game.gameBoard)
-                game.displayGameBoard()
-        '''
-        npc.setRect(nRX, nRY, const.blocksize, const.blocksize)
-        npc.moving = False
