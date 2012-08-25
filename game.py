@@ -80,6 +80,8 @@ class game():
                 self.NPCs.append( npc.King(x, y, n[2]) )
             elif n[1] == 'skeleton':
                 self.NPCs.append( npc.Enemy(x, y, 'Skeleton', 'skeleton.bmp') )
+            elif n[1] == 'orc':
+                self.NPCs.append( npc.Enemy(x, y, 'Orc', 'orc.bmp') )
         self.allsprites = pygame.sprite.RenderPlain((self.myHero, self.NPCs))
         self.allsprites.clear(self.screen, self.gameBoard)
     def addShops(self, map):        

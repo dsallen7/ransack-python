@@ -1,6 +1,6 @@
 import pygame, random, math, os
 from load_image import *
-from UTIL import const
+from UTIL import const, misc
 
 from IMG import images
 
@@ -115,8 +115,6 @@ class Enemy(npc):
     
     def move(self, dir, map, heroPos):
         (hX, hY) = heroPos
-        hX = hX /const.blocksize
-        hY = hY /const.blocksize
         self.moving = True
         (sX, sY) = self.getXY()
         (mX, mY) = const.scrollingDict[dir]
@@ -135,11 +133,31 @@ class Enemy(npc):
         self.imgIdx = const.imgDict[dir]
         self.image = self.images[self.imgIdx]
         return True
+    def seek(self, map, heroPos):
+        (sX, sY) = self.getXY()
+        (hX, hY) = heroPos
+        if misc.DistanceX(self.getXY(), heroPos) > misc.DistanceY(self.getXY(), heroPos):
+            if hX > sX:
+                return self.move('right', map, heroPos)
+            else:
+                return self.move('left', map, heroPos)
+        else:
+            if hY > sY:
+                return self.move('down', map, heroPos)
+            else:
+                return self.move('up', map, heroPos)
     
     def interact(self, hud):
         hud.txtMessage('The battle is joined!')
         return 'battle'
     def update(self, map, heroPos):
-        i = random.randrange(1, 10)
-        if i == 5:
-            return self.move(random.choice(['up','down','left','right']), map, heroPos )
+        (hX, hY) = heroPos
+        hX = hX / const.blocksize
+        hY = hY / const.blocksize
+        heroPos = (hX, hY)
+        if misc.Distance( self.getXY(), heroPos ) < 3:
+            return self.seek(map, heroPos)
+        else:
+            i = random.randrange(1, 10)
+            if i == 5:
+                return self.move(random.choice(['up','down','left','right']), map, heroPos )

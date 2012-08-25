@@ -8,7 +8,8 @@ class miniMap():
     def __init__(self, grid):
         self.grid = grid
         self.mapColors = colors.mapColors
-                
+        self.DIM = len(self.grid)
+        
         self.colorDict = {-1:0, 0:10, 1:11, 3:3, 4:3, 5:4, 6:4, 7:4, 8:10, 9:6, 10:5, 11:5, 12:7, 13:7, 14:8, 15:8,
                           16:6, 18:-1, 19:11, 20:10, 21:10, 22:10, 23:10, 24:1, 25:1, 27:3, 28:3, 29:10, 
                           30:3, 31:3, 32:3, 33:3, 34:3, 35:3, 36:3, 37:3, 38:6, 40:3, 41:1, 42:5, 42:5, 
@@ -28,16 +29,9 @@ class miniMap():
         except KeyError:
             return False
     
-    def drawMiniMap(self,screen, topCorner, playerXY, visDict):
-        miniMapBoard = pygame.Surface( [300,300] )
+    def drawMiniMap(self,screen, tx, ty, playerXY, visDict):
+        miniMapBoard = pygame.Surface( [const.blocksize*const.HALFDIM,const.blocksize*const.HALFDIM] )
         miniMapBoard.fill(colors.black)
-        self.visDict = visDict
-        if len(self.grid) <= const.DIM:
-            topCorner = (0,0)
-        (tx, ty) = topCorner
-        (px, py) = playerXY
-        tx = px - const.HALFDIM
-        ty = py - const.HALFDIM
         for i in range(const.DIM):
             for j in range(const.DIM):
                 mapColorBlock = pygame.Surface( (const.miniblocksize,const.miniblocksize) )
@@ -47,12 +41,39 @@ class miniMap():
                 elif self.isMapped( (i+tx,j+ty) ):
                     mapColorBlock.fill( self.mapColors[self.colorDict[self.getEntry(i+tx,j+ty)]] )
                     miniMapBoard.blit( mapColorBlock, ( i*const.miniblocksize, j*const.miniblocksize) )
-        screen.blit(miniMapBoard, (75,75) )
+        screen.blit(miniMapBoard, (const.gameBoardOffset,const.gameBoardOffset) )
         pygame.display.flip()
-        while (pygame.event.wait().type != pygame.KEYDOWN): pass
+    
+    def callMiniMap(self,screen, playerXY, visDict):
+        self.visDict = visDict
+        (px, py) = playerXY
+        tx = px - const.HALFDIM
+        ty = py - const.HALFDIM
+        self.drawMiniMap(screen, tx, ty, playerXY, visDict)
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_UP:
+                        if ty > 0:
+                            ty = ty - 1
+                            self.drawMiniMap(screen, tx, ty, playerXY, visDict)
+                    elif event.key == pygame.K_DOWN:
+                        if ty < self.DIM-const.DIM:
+                            ty = ty + 1
+                            self.drawMiniMap(screen, tx, ty, playerXY, visDict)
+                    elif event.key == pygame.K_LEFT:
+                        if tx > 0:
+                            tx = tx - 1
+                            self.drawMiniMap(screen, tx, ty, playerXY, visDict)
+                    elif event.key == pygame.K_RIGHT:
+                        if tx < self.DIM-const.DIM:
+                            tx = tx + 1
+                            self.drawMiniMap(screen, tx, ty, playerXY, visDict)
+                    else: return
+                        
 
 class map():
-    def __init__(self, DIM=20, dFG=const.DFLOOR1):
+    def __init__(self, DIM=const.DIM, dFG=const.DFLOOR1):
         self.grid = []
         self.DIM = DIM
         self.chests = {}
@@ -179,7 +200,7 @@ class gameMap(map):
     def getType(self):
         return self.type
     def callDrawMiniMap(self, screen):
-        self.myMiniMap.drawMiniMap(screen, self.topMapCorner, self.playerXY, self.visDict)
+        self.myMiniMap.callMiniMap(screen, self.playerXY, self.visDict)
     # returns distance between two points
     def distanceFunc(self, pos1, pos2):
         (x1,y1) = pos1
