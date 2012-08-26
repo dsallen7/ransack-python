@@ -32,6 +32,12 @@ costDict = { const.HEAL: 4,
              const.TLPT: 5
             }
 
+timeDict = { const.HEAL: 60,
+             const.FRBL: 30,
+             const.ICBL: 30,
+             const.TLPT: 60
+            }
+
 castMsgs = { const.HEAL: 'You feel better.',
              const.FRBL: 'A ball of fire materializes before your fingertips!',
              const.ICBL: 'A grim and frostbitten ball of ice emerges!',

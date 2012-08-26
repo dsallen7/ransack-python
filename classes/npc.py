@@ -16,10 +16,10 @@ class npc(pygame.sprite.Sprite):
         self.dir = 'down'
         self.moving = False
         self.message = message
-        self.setRect(x*const.blocksize, y*const.blocksize, const.blocksize, const.blocksize)
+        self.setRect(x * const.blocksize, y * const.blocksize, const.blocksize, const.blocksize)
     
-    def setRect(self,x1,y1,x2,y2):
-        self.rect = (x1,y1,x2,y2)
+    def setRect(self, x1, y1, x2, y2):
+        self.rect = (x1, y1, x2, y2)
     def getRect(self):
         return self.rect
     def getXY(self):
@@ -29,7 +29,7 @@ class npc(pygame.sprite.Sprite):
         self.Y = y
     
     def takeStep(self):
-        self.imgIdx = ( 1 - (self.imgIdx % 2) ) + (2 * (self.imgIdx / 2))
+        self.imgIdx = (1 - (self.imgIdx % 2)) + (2 * (self.imgIdx / 2))
         self.image = self.images[self.imgIdx]
     
     def interact(self, hud):
@@ -37,50 +37,50 @@ class npc(pygame.sprite.Sprite):
     
     def move(self, dir, map, heroPos):
         (hX, hY) = heroPos
-        hX = hX /const.blocksize
-        hY = hY /const.blocksize
+        hX = hX / const.blocksize
+        hY = hY / const.blocksize
         self.moving = True
         (sX, sY) = self.getXY()
         self.dir = dir
         if dir == 'up':
             self.imgIdx = 0
-            if map.getEntry(sX, sY-1) in range(25) and (sX, sY-1) != (hX,hY):
-                self.setXY(sX, sY-1)
+            if map.getEntry(sX, sY - 1) in range(25) and (sX, sY - 1) != (hX, hY):
+                self.setXY(sX, sY - 1)
             else: self.moving = False
         elif dir == 'down':
             self.imgIdx = 2
-            if map.getEntry(sX, sY+1) in range(25) and (sX, sY+1) != (hX,hY):
-                self.setXY(sX, sY+1)
+            if map.getEntry(sX, sY + 1) in range(25) and (sX, sY + 1) != (hX, hY):
+                self.setXY(sX, sY + 1)
             else: self.moving = False
         elif dir == 'left':
             self.imgIdx = 4
-            if map.getEntry(sX-1, sY) in range(25) and (sX-1, sY) != (hX,hY):
-                self.setXY(sX-1, sY)
+            if map.getEntry(sX - 1, sY) in range(25) and (sX - 1, sY) != (hX, hY):
+                self.setXY(sX - 1, sY)
             else: self.moving = False
         elif dir == 'right':
             self.imgIdx = 6
-            if map.getEntry(sX+1, sY) in range(25) and (sX+1, sY) != (hX,hY):
-                self.setXY(sX+1, sY)
+            if map.getEntry(sX + 1, sY) in range(25) and (sX + 1, sY) != (hX, hY):
+                self.setXY(sX + 1, sY)
             else: self.moving = False
         self.image = self.images[self.imgIdx]
     
     def update(self, map, heroPos):
         i = random.randrange(1, 10)
         if i == 5:
-            self.move(random.choice(['up','down','left','right']), map, heroPos )
+            self.move(random.choice(['up', 'down', 'left', 'right']), map, heroPos)
             return True
         else: return False
     
     def shiftOnePixel(self, dir, sign):
         (x1, y1, x2, y2) = self.rect
         if dir == 'up':
-            self.setRect(x1, y1+sign, x2, y2)
+            self.setRect(x1, y1 + sign, x2, y2)
         if dir == 'down':
-            self.setRect(x1, y1-sign, x2, y2)
+            self.setRect(x1, y1 - sign, x2, y2)
         if dir == 'left':
-            self.setRect(x1+sign, y1, x2, y2)
+            self.setRect(x1 + sign, y1, x2, y2)
         if dir == 'right':
-            self.setRect(x1-sign, y1, x2, y2)
+            self.setRect(x1 - sign, y1, x2, y2)
 
 class Guard(npc):
     
@@ -112,6 +112,7 @@ class Enemy(npc):
     def __init__(self, x, y, name, filename):
         npc.__init__(self, x, y, name, filename)
         self.name = name
+        self.turn = False
     
     def move(self, dir, map, heroPos):
         (hX, hY) = heroPos
@@ -122,7 +123,7 @@ class Enemy(npc):
         sX += mX
         sY += mY
         if map.getEntry(sX, sY) in range(25):
-            if (sX, sY) != (hX,hY):
+            if (sX, sY) != (hX, hY):
                 self.setXY(sX, sY)
             else:
                 self.moving = False
@@ -155,9 +156,11 @@ class Enemy(npc):
         hX = hX / const.blocksize
         hY = hY / const.blocksize
         heroPos = (hX, hY)
-        if misc.Distance( self.getXY(), heroPos ) < 3:
-            return self.seek(map, heroPos)
+        if misc.Distance(self.getXY(), heroPos) < 3:
+            self.turn = not self.turn
+            if self.turn:
+                return self.seek(map, heroPos)
         else:
             i = random.randrange(1, 10)
             if i == 5:
-                return self.move(random.choice(['up','down','left','right']), map, heroPos )
+                return self.move(random.choice(['up', 'down', 'left', 'right']), map, heroPos)

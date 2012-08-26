@@ -14,4 +14,11 @@ armoriesByLevel = { 1: [(31,0),(32,0),(33,0),(31,1),(32,1),(33,1)]
 
 }
 
-magicShopsByLevel = { 1: [(100,0,2),(100,0,3)] }
+# 100: spellbook
+# 101: parchment
+# level, spellnum
+magicShopsByLevel = { 1: [(100,0,2),
+                          (100,0,3),
+                          (101,0,0),
+                          (101,0,1),
+                          (101,0,3)] }

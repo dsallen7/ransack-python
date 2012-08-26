@@ -25,4 +25,5 @@ class enemy():
         return self.name
     
     def takeDmg(self, dmg):
-        self.currHP -= dmg
+        if dmg:
+            self.currHP -= dmg

@@ -60,7 +60,7 @@ class game():
         self.addShops(self.myMap)
         self.addNPCs(self.myMap)
         
-        self.myBattle = battle.battle(self.screen,self.myHud, self.Ticker)
+        self.myBattle = battle.battle(self.screen)
         self.clock = clock
     
     #toggles switch to continue running game
@@ -158,34 +158,13 @@ class game():
                 pass
             elif event.key == pygame.K_c:
                 # cast spell
-                result = self.myHero.castSpell( self.myMenu.invMenu(self.myHero.getSpells(), "Spells:" ), self.myHud )
-                if result[0] == -1:
-                    # no spell selected
-                    pass
-                elif result[0] == -2:
-                    self.textMessage('That spell may only be cast in battle.')
-                elif result[0] == -3:
-                    # not enough MP
-                    self.textMessage( result[1] )
-                elif result[0] == 3:
-                    (x,y) = self.myMap.getRandomTile()
-                    self.myHero.setXY( x*const.blocksize, y*const.blocksize )
-                    self.myMap.playerXY = (x, y)
-                    self.Display.drawSprites(self.myHero,self.myMap,self.gameBoard,self,animated=False)
-                    self.myMap.revealMap()
-                    self.Display.redrawXMap(self.myMap)
-                    self.Display.redrawMap(self.myMap, self.myHero, self.gameBoard)
-                    self.displayGameBoard()
-                    self.textMessage( result[1] )
-                else:
-                    self.textMessage( result[1] )
-                    self.Ticker.tick(30)
+                self.myHero.castSpell( self.myMenu.invMenu(self.myHero.getSpells(), "Spells:" ), self )
             elif event.key == pygame.K_s:
                 # show stats
                 self.myMenu.displayHeroStats(self.myHero)
             elif event.key == pygame.K_i:
                 # use item
-                self.Ticker.tick( self.myHero.useItem( self.myMenu.invMenu(self.myHero.getItems(), "ITems:" ) ) )
+                self.Ticker.tick( self.myHero.useItem( self.myMenu.invMenu(self.myHero.getItems(), "ITems:" ), self ) )
             elif event.key == pygame.K_w:
                 # equip weapon
                 self.myHero.equipWeapon(self.myMenu.invMenu(self.myHero.getWeapons(), "Weapons:" ))
@@ -206,6 +185,15 @@ class game():
                 self.Ticker.tick(60)
             else:
                 return self.move(pygame.key.name(event.key))
+    
+    def mouseHandler(self, event):
+        (mx, my) = pygame.mouse.get_pos()
+        if (const.gameBoardOffset <= mx < const.gameBoardOffset+self.gameBoard.get_width() ) and (const.gameBoardOffset <= my < const.gameBoardOffset+self.gameBoard.get_height() ):
+            # map handler
+            pass
+        elif (const.gameBoardOffset+self.gameBoard.get_width()  < mx <= const.gameBoardOffset+self.gameBoard.get_width()+150) and (const.gameBoardOffset < my <= const.gameBoardOffset+300):
+            # hud handler
+            self.myHud.mouseHandler(event, mx-(const.gameBoardOffset+self.gameBoard.get_width()), my-const.gameBoardOffset)
     
     def actionCommand(self):
         (dX, dY) = const.scrollingDict[self.myHero.dir]
@@ -324,7 +312,7 @@ class game():
     def launchBattle(self, mName, lD):
         self.boxMessage("The baTTle is joined!")
         self.gameBoard.fill( colors.black )
-        g = self.myBattle.fightBattle(self.myHero, enemy.enemy(mName, lD))
+        g = self.myBattle.fightBattle(self, enemy.enemy(mName, lD))
         if g == True: # escaped from battle
             pass
         elif g == False: # died in battle
@@ -400,9 +388,11 @@ class game():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     os.sys.exit()
-                else:
+                elif event.type == pygame.KEYDOWN:
                     if not self.myHero.moving: 
                         heroMove = self.event_handler(event)
+                elif event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.MOUSEBUTTONUP:
+                    self.mouseHandler(event)
             self.gameBoard.fill(colors.black)
             self.Display.redrawMap(self.myMap, self.myHero, self.gameBoard)
             self.myHud.update()
@@ -411,6 +401,6 @@ class game():
                 self.Display.drawSprites(self.myHero, self.myMap, self.gameBoard, self, self.myHero.dir, animated=True)
             else: 
                 self.Display.drawSprites(self.myHero, self.myMap, self.gameBoard, self, None, animated=True)
-            self.myHero.showLocation(self.screen)
+            #self.myHero.showLocation(self.screen)
             self.displayGameBoard()
         return

@@ -33,6 +33,9 @@ class hud( ):
         
         self.On = True
         
+        self.popupWin = None
+        self.popupLoc = None
+        
         images.load()
     
     def writeText(self, surface, loc, text, fgc, bgc, size=14, font=os.getcwd()+"/FONTS/gothic.ttf"):
@@ -126,6 +129,9 @@ class hud( ):
         self.writeText(keyBox, (13,17), 'x'+str(kys), colors.white, colors.black,10)
         self.frameBox1.blit( keyBox, (90, 260) )
         
+        if self.popupWin is not None:
+            self.frameBox1.blit( self.popupWin, self.popupLoc )
+        
         self.screen.blit(self.frameBox1, (const.blocksize*10+75, 75) )
         self.screen.blit(self.frameBox2, (75, const.blocksize*10+75) )
         self.screen.blit(self.gameBoard, (75,75) )
@@ -149,16 +155,16 @@ class hud( ):
         self.screen.blit(self.gameBoard, (75,75) )
         self.update()
     
-   
-    def npcMessage(self, message, img):
+    def getMsgText(self, message, font, fontsize):
+        # returns a nicely formatted text box
         if pygame.font:
-            font = pygame.font.Font(os.getcwd()+"/FONTS/devinne.ttf", 18)
+            font = pygame.font.Font(font, fontsize)
             if len(message) < const.maxLineWidth:
-                msgText = pygame.Surface( (len(message)*18, 36 ) )
+                msgText = pygame.Surface( (len(message)*(fontsize/2), fontsize*2 ) )
                 msgText.fill(colors.gold)
                 msgText.blit( font.render( message, 1, colors.white, colors.gold ), (0,0) )
             else:
-                msgText = pygame.Surface( ( const.maxLineWidth*10, ((len(message)/const.maxLineWidth)+1)*36 ))
+                msgText = pygame.Surface( ( const.maxLineWidth*(fontsize/2), ((len(message)+1)/const.maxLineWidth)*fontsize*2 ))
                 msgText.fill(colors.gold)
                 hPos = 0
                 words = message.split(' ')
@@ -169,7 +175,11 @@ class hud( ):
                         words = words[1:]
                     lineText = font.render( line, 1, colors.white, colors.gold )
                     msgText.blit( lineText, ((msgText.get_width()/2)-(lineText.get_width()/2), hPos) )
-                    hPos += 20
+                    hPos += fontsize
+        return msgText
+   
+    def npcMessage(self, message, img):
+        msgText = self.getMsgText(message, os.getcwd()+"/FONTS/devinne.ttf", 18)
         (px, py, px2, py2) = self.game.myHero.getRect()
         for i in range(msgText.get_width()/2):
             borderBox = pygame.Surface( ( ((i*2)+60 ), msgText.get_height()+20) )
@@ -182,25 +192,7 @@ class hud( ):
             
         while (pygame.event.wait().type != pygame.KEYDOWN): pass
     def boxMessage(self, message):
-        if pygame.font:
-            font = pygame.font.Font(os.getcwd()+"/FONTS/devinne.ttf", 18)
-            if len(message) < const.maxLineWidth:
-                msgText = pygame.Surface( (len(message)*10, 36 ) )
-                msgText.fill(colors.gold)
-                msgText.blit( font.render( message, 1, colors.white, colors.gold ), (0,0) )
-            else:
-                msgText = pygame.Surface( ( const.maxLineWidth*10, ((len(message)+1)/const.maxLineWidth)*36 ))
-                msgText.fill(colors.gold)
-                hPos = 0
-                words = message.split(' ')
-                while words:
-                    line = ''
-                    while words and len(line+' '+words[0]) < const.maxLineWidth:
-                        line = line + words[0] + ' '
-                        words = words[1:]
-                    lineText = font.render( line, 1, colors.white, colors.gold )
-                    msgText.blit( lineText, ((msgText.get_width()/2)-(lineText.get_width()/2), hPos) )
-                    hPos += 20
+        msgText = self.getMsgText(message, os.getcwd()+"/FONTS/devinne.ttf", 18)
         (px, py, px2, py2) = self.game.myHero.getRect()
         for i in range(msgText.get_width()/2):
             borderBox = pygame.Surface( ( ((i*2)+20 ), msgText.get_height()+20) )
@@ -211,3 +203,46 @@ class hud( ):
             pygame.display.flip()
             
         while (pygame.event.wait().type != pygame.KEYDOWN): pass
+        
+    def addPopup(self, text, loc):
+        msgText = self.getMsgText(text, os.getcwd()+"/FONTS/gothic.ttf", 10)
+        popupWin = pygame.Surface( (msgText.get_width()+5, msgText.get_height()+5) )
+        popupWin.fill(colors.grey)
+        popupWin.blit(msgText, (5,5) )
+        self.popupWin = popupWin
+        self.popupLoc = loc
+    
+    def mouseHandler(self, event, mx, my):
+        if event.type == pygame.MOUSEBUTTONUP:
+            self.popupWin = None
+            self.popupLoc = None
+        else:
+            if (30 < mx <= 59) and (111 < my <= 140):
+                pass
+            elif (90 < mx <= 119) and (111 < my <= 140):
+                pass
+            # weapon
+            elif (30 < mx <= 59) and (180 < my <= 209):
+                if self.game.myHero.getWeaponEquipped() is not None:
+                    self.addPopup(self.game.myHero.getWeaponEquipped().getStats(), (59,209)  )
+                else: self.addPopup('None equipped', (59,209)  )
+            # armor
+            elif (90 < mx <= 119) and (180 < my <= 209):
+                if self.game.myHero.getArmorEquipped()[0] is not None:
+                    self.addPopup(self.game.myHero.getArmorEquipped()[0].getStats(), (119,209)  )
+                else: self.addPopup('None equipped', (119,209)  )
+            elif (30 < mx <= 59) and (220 < my <= 249):
+                if self.game.myHero.getArmorEquipped()[1] is not None:
+                    self.addPopup(self.game.myHero.getArmorEquipped()[1].getStats(), (59,249)  )
+                else: self.addPopup('None equipped', (59,249)  )
+            elif (90 < mx <= 119) and (220 < my <= 249):
+                if self.game.myHero.getArmorEquipped()[2] is not None:
+                    self.addPopup(self.game.myHero.getArmorEquipped()[2].getStats(), (119,249)  )
+                else: self.addPopup('None equipped', (119,249)  )
+                pass
+            # gold
+            elif (30 < mx <= 59) and (260 < my <= 289):
+                pass
+            # keys
+            elif (90 < mx <= 119) and (260 < my <= 289):
+                pass

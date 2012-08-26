@@ -57,12 +57,9 @@ class menu():
                 itemBox.blit( images.mapImages[item.getImg()], (0, 0) )
                 if pygame.font:
                     font = pygame.font.Font(os.getcwd()+"/FONTS/gothic.ttf", 10)
-                    if item.name == 'item': 
+                    if item.name in ['item', 'spellbook', 'parchment']: 
                         msgText = font.render( 'x'+str(item.qty), 1, colors.white, colors.black )
                         itemBox.blit(msgText, (17,17) )
-                    elif item.name == 'magicitem': pass
-                    elif item.name == 'spellbook': pass
-                    elif item.name == 'parchment': pass
                     else: 
                         msgText = font.render( 'L'+str(item.getLevel()), 1, colors.white, colors.black )
                         itemBox.blit(msgText, (17,17) )
@@ -251,7 +248,7 @@ class menu():
                     if event.key == pygame.K_RETURN:
                         if availableItems == []: return None
                         elif availableItems[selection].getName() == 'item': return availableItems[selection].getType()
-                        elif availableItems[selection].getName() == 'spellbook': return ( availableItems[selection].getType(), availableItems[selection].getLevel(),availableItems[selection].getSpellNum() )
+                        elif availableItems[selection].getName() == 'parchment' or availableItems[selection].getName() == 'spellbook': return ( availableItems[selection].getType(), availableItems[selection].getLevel(),availableItems[selection].getSpellNum() )
                         else: return (availableItems[selection].getType(), availableItems[selection].getLevel() )
             cursorPos = positions[selection]
             boxPoints = boxPointsFn(cursorPos)

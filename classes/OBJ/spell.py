@@ -14,6 +14,7 @@ class Spell():
         self.name = 'spell'
         self.desc = spellScr.descDict[self.type]
         self.castMsg = spellScr.castMsgs[self.type]
+        self.castTime = spellScr.timeDict[self.type]
     
     def getType(self):
         return self.type
@@ -27,6 +28,8 @@ class Spell():
         return self.desc
     def getCastMsg(self):
         return self.castMsg
+    def getCastTime(self):
+        return self.castTime
     
     def execute(self, hero, hud, battle):
         [cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX, psn] = hero.getPlayerStats()

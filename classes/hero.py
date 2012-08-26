@@ -19,6 +19,9 @@ class hero(pygame.sprite.Sprite):
         
         self.dir = 'down'
         
+        self.armorClass = 0
+        self.weaponClass = 0
+        
         if load == None:
             
             self.strength = random.randrange(5,10)
@@ -55,7 +58,7 @@ class hero(pygame.sprite.Sprite):
             self.learnSpell(0)
             self.learnSpell(1)
             
-            self.gold = 500
+            self.gold = 5000
             self.isPoisoned = False
         else: self.installLoadedHero(load)
         
@@ -181,9 +184,14 @@ class hero(pygame.sprite.Sprite):
         return availableItems
     def takeItem(self, type):
         self.items[type-const.FRUIT1] = self.items[type-const.FRUIT1][1:]
-    def useItem(self, item):
+    def useItem(self, item, game, battle=False):
         if item == None:
             return 0
+        if item.getName() == 'parchment':
+            mySpell = spell.Spell( item.spellNum )
+            self.castSpell(mySpell, game, battle)
+            self.takeItem(item.getType())
+            return mySpell.getCastTime()
         item.execute(self)
         self.takeItem(item.getType())
         return 60
@@ -202,8 +210,14 @@ class hero(pygame.sprite.Sprite):
     def equipWeapon(self, weapon):
         if weapon == None: return
         if self.weaponEquipped is not None:
+            self.strength = self.strength - weapon.plusStr
+            self.intell = self.intell - weapon.plusItl
+            self.dex = self.dex - weapon.plusDex
             self.weapons.append(self.getWeaponEquipped() )
         self.weaponEquipped = weapon
+        self.strength = self.strength + weapon.plusStr
+        self.intell = self.intell + weapon.plusItl
+        self.dex = self.dex + weapon.plusDex
         self.loseWeapon(weapon)
     
     def getArmor(self):
@@ -239,20 +253,46 @@ class hero(pygame.sprite.Sprite):
     
     def learnSpell(self, num):
         self.spells += [spell.Spell( num )]
-    def castSpell(self, spell, hud, battle=False):
+    def castSpell(self, spell, game, battle=False):
         if spell == None:
-            sType = -1
-            return (sType, None)
-        sType = spell.getType()
-        if (spell.getType() in [1,2] and battle==False) or (spell.getType() in [3] and battle == True):
-            sType = -2
-        elif spell.getType() in [1,2] and battle==True:
-            sType = spell.getType()
-        if spell.cost > self.currMP:
-            sType = -3
-            return (sType, "You don't have enough MP!")
-        spell.execute(self, hud, battle)
-        return (sType, spell.getCastMsg())
+            #game.textMessage('')
+            return
+        elif (spell.getType() in [1,2] and battle==False):
+            game.textMessage('That spell may only be cast in battle')
+            return 
+        elif (spell.getType() in [3] and battle == True):
+            game.textMessage('That spell may not be cast in battle')
+            return
+        elif spell.cost > self.currMP:
+            game.textMessage("You don't have enough MP!")
+            return
+        if spell.getType() == const.TLPT:
+            (x,y) = game.myMap.getRandomTile()
+            self.setXY( x*const.blocksize, y*const.blocksize )
+            game.myMap.playerXY = (x, y)
+            game.Display.drawSprites(self, game.myMap, game.gameBoard, game, animated=False)
+            game.myMap.revealMap()
+            game.Display.redrawXMap(game.myMap)
+            game.Display.redrawMap(game.myMap, self, game.gameBoard)
+            game.displayGameBoard()
+            game.textMessage( spell.getCastMsg() )
+        elif spell.getType() == const.FRBL:
+            spell.execute(self, game.myHud, battle)
+            game.textMessage(spell.getCastMsg())
+            game.Ticker.tick(spell.getCastTime() )
+            dmg = random.randrange(self.intell,2*self.intell)
+            game.textMessage('The fireball hits the monster for '+str(dmg)+' points!')
+            return dmg
+        elif spell.getType() == const.ICBL:
+            spell.execute(self, game.myHud, battle)
+            game.textMessage(spell.getCastMsg())
+            game.Ticker.tick(spell.getCastTime() )
+            dmg = random.randrange(self.intell,2*self.intell)
+            game.textMessage('The iceball hits the monster for '+str(dmg)+' points!')
+            return dmg
+        spell.execute(self, game.myHud, battle)
+        game.Ticker.tick(spell.getCastTime() )
+        game.textMessage(spell.getCastMsg())
     def getSpells(self):
         return self.spells
     
