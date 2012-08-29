@@ -32,6 +32,7 @@ class Spell():
         return self.castTime
     
     def execute(self, hero, hud, battle):
+        hero.currMP = hero.currMP - self.cost
         [cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX, psn] = hero.getPlayerStats()
         stats = [cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX, psn]
         fn = spellScr.spellDict[(self.getType(), battle)]

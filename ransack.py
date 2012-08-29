@@ -71,7 +71,7 @@ def main():
     titleImg, titleRect = load_image('titlescreen.bmp', -1)
     titleScreen.blit(titleImg, (50,50) )
     selection = 0
-    options = ['Begin New Game', 'Load Saved Game', 'Level EdiTor']
+    options = ['Begin New Game', 'Load Saved Game', 'ExiT']
     screen.blit(titleScreen, (0,0))
     menuBox = pygame.Surface( (200,80) )
     while True:
@@ -114,6 +114,8 @@ def main():
                                 Game.mainLoop()
                         except IOError, e:
                             print 'File I/O error', e
+                    elif options[selection] == 'ExiT':
+                        os.sys.exit()
         
         menuBox.blit( images[0], (0, selection*25) )
         titleScreen.blit(menuBox, (200, 375) )

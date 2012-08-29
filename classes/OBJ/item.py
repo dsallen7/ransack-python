@@ -8,6 +8,9 @@ class Item():
     
     def __init__(self, type, level=None, spellNum = None):
         self.type = type
+        if type == 99:
+            self.qty = level
+            self.name = 'gold'
         if self.type == 100:
             from SCRIPTS import spellScr
             self.name = 'spellbook'
@@ -27,7 +30,6 @@ class Item():
             self.name = 'item'
             self.descrip = itemScr.descDict[self.type]
         self.img = type
-        self.qty = 0
     
     def getType(self):
         return self.type

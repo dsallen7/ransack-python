@@ -25,4 +25,4 @@ class Weapon():
     def getDesc(self):
         return self.desc
     def getStats(self):
-        return self.desc+' '+'Level '+str(self.level)+' +'+str(self.plusStr)+' Strength +'+str(self.plusItl)+' Intel +'+str(self.plusDex)+'Dex'
+        return self.desc+' '+'Level '+str(self.level)+' +'+str(self.plusStr)+' Str +'+str(self.plusItl)+' Intel +'+str(self.plusDex)+'Dex'

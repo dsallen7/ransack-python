@@ -283,7 +283,7 @@ class Generator():
             (xpos, ypos) = room.getPos()
             (xdim, ydim) = room.getDimensions()
             self.map.setEntry( xpos + xdim/2, ypos + ydim/2, 110)
-            chestlist += [( ( xpos + xdim/2, ypos + ydim/2), [(randrange(31,34),0)] )]
+            chestlist += [( ( xpos + xdim/2, ypos + ydim/2), [(randrange(26,29),0)] )]
             
         self.map.chests = dict(chestlist)
         print len(rooms)

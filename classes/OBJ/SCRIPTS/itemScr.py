@@ -31,5 +31,6 @@ descDict = {
              const.SHP: 'Small Healing Potion',
              const.MHP: 'Medium Healing Potion',
              const.SMP: 'Small Magic Potion',
-             const.MMP: 'Medium Magic Potion'
+             const.MMP: 'Medium Magic Potion',
+             const.GOLD: 'Gold Pieces'
             }

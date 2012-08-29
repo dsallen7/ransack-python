@@ -24,41 +24,7 @@ class Shop():
         self.level = level
         self.ticker = ticker
         self.items = []
-        if type == 'blacksmith':
-            items = shopScr.blacksmithShopsByLevel[self.level]
-            self.images[1], r = load_image('blacksmith.bmp')
-            from OBJ import weapon
-            from prices import weaponPrices as prices
-            self.prices = prices
-            for i in items:
-                self.items.append( weapon.Weapon(i[0], i[1]) )
-        elif type == 'armory':
-            items = shopScr.armoriesByLevel[self.level]
-            self.images[1], r = load_image('armory.bmp')
-            from OBJ import armor
-            from prices import armorPrices as prices
-            self.prices = prices
-            for i in items:
-                self.items.append( armor.Armor(i[0], i[1]) )
-        elif type == 'itemshop':
-            from OBJ import item
-            self.images[1], r = load_image('itemshop.bmp')
-            from prices import itemPrices as prices
-            self.prices = prices
-            items = shopScr.itemShopsByLevel[self.level]
-            for i in items:
-                self.items.append( item.Item( i + 86 ) )
-        elif type == 'magicshop':
-            from OBJ import item
-            self.images[1], r = load_image('magicshop.bmp')
-            from prices import magicPrices as prices
-            self.prices = prices
-            items = shopScr.magicShopsByLevel[self.level]
-            for i in items:
-                self.items.append( item.Item( i[0], i[1], i[2] ) )
         self.storeScreen.fill( black )
-        self.storeScreen.blit( self.images[1], (0,0) )
-
     
     def drawStoreScreen(self):
         self.myHud.update()
@@ -137,4 +103,154 @@ class Shop():
                     elif self.type == 'itemshop':
                         hero.addGold( self.prices[ sale.getType() ]/2 )
                         hero.takeItem(sale.getType())
+            self.drawStoreScreen()
+            
+class Blacksmith(Shop):
+    
+    def __init__(self, screen, hud, level, type, ticker):
+        
+        Shop.__init__(self, screen, hud, level, type, ticker)
+        items = shopScr.blacksmithShopsByLevel[self.level]
+        self.images[1], r = load_image('blacksmith.bmp')
+        self.storeScreen.blit( self.images[1], (0,0) )
+        from OBJ import weapon
+        from prices import weaponPrices as prices
+        self.prices = prices
+        for i in items:
+            self.items.append( weapon.Weapon(i[0], i[1]) )
+        
+    def enterStore(self, hero):
+        self.drawStoreScreen()
+        while True:
+            action = self.getAction()
+            if action == 'ExiT':
+                return
+            elif action == 'Buy':
+                self.ticker.tick(60)
+                purchase = self.buy()
+                if purchase == None: pass
+                elif hero.takeGold( self.prices[purchase] ):
+                    hero.gainWeapon( purchase[0],purchase[1] )
+                else: self.myHud.txtMessage("You don'T have enough money!")
+            elif action == 'Sell':
+                self.ticker.tick(120)
+                sale = self.sell(hero.getWeapons())
+                if sale == None: pass
+                else: 
+                    hero.addGold( self.prices[ (sale.getType(),sale.getLevel()) ]/2 )
+                    hero.loseWeapon(sale)
+            self.drawStoreScreen()
+            
+class Armory(Shop):
+    
+    def __init__(self, screen, hud, level, type, ticker):
+        
+        Shop.__init__(self, screen, hud, level, type, ticker)
+        items = shopScr.armoriesByLevel[self.level]
+        self.images[1], r = load_image('armory.bmp')
+        self.storeScreen.blit( self.images[1], (0,0) )
+        from OBJ import armor
+        from prices import armorPrices as prices
+        self.prices = prices
+        for i in items:
+            self.items.append( armor.Armor(i[0], i[1]) )
+            
+        
+    def enterStore(self, hero):
+        self.drawStoreScreen()
+        while True:
+            action = self.getAction()
+            if action == 'ExiT':
+                return
+            elif action == 'Buy':
+                self.ticker.tick(60)
+                purchase = self.buy()
+                if purchase == None: pass
+                elif hero.takeGold( self.prices[purchase] ):
+                    hero.gainArmor( purchase[0],purchase[1] )
+                else: self.myHud.txtMessage("You don'T have enough money!")
+            elif action == 'Sell':
+                self.ticker.tick(120)
+                sale = self.sell(hero.getArmor())
+                if sale == None: pass
+                else:
+                    hero.addGold( self.prices[ (sale.getType(), sale.getLevel() )]/2)
+                    hero.loseArmor(sale)
+            self.drawStoreScreen()
+            
+class itemShop(Shop):
+    
+    def __init__(self, screen, hud, level, type, ticker):
+        
+        Shop.__init__(self, screen, hud, level, type, ticker)
+        from OBJ import item
+        self.images[1], r = load_image('itemshop.bmp')
+        self.storeScreen.blit( self.images[1], (0,0) )
+        from prices import itemPrices as prices
+        self.prices = prices
+        items = shopScr.itemShopsByLevel[self.level]
+        for i in items:
+            self.items.append( item.Item( i + 86 ) )
+        
+        
+    def enterStore(self, hero):
+        self.drawStoreScreen()
+        while True:
+            action = self.getAction()
+            if action == 'ExiT':
+                return
+            elif action == 'Buy':
+                self.ticker.tick(60)
+                purchase = self.buy()
+                if purchase == None: pass
+                elif hero.takeGold( self.prices[purchase] ):
+                    hero.getItem( (purchase-86,1) )
+                else: self.myHud.txtMessage("You don'T have enough money!")
+            elif action == 'Sell':
+                self.ticker.tick(120)
+                sale = self.sell(hero.getItems())
+                if sale == None: pass
+                else: 
+                    hero.addGold( self.prices[ sale.getType() ]/2 )
+                    hero.takeItem(sale.getType())
+            self.drawStoreScreen()
+            
+class magicShop(Shop):
+    
+    def __init__(self, screen, hud, level, type, ticker):
+        
+        Shop.__init__(self, screen, hud, level, type, ticker)
+        from OBJ import item
+        self.images[1], r = load_image('magicshop.bmp')
+        self.storeScreen.blit( self.images[1], (0,0) )
+        from prices import magicPrices as prices
+        self.prices = prices
+        items = shopScr.magicShopsByLevel[self.level]
+        for i in items:
+            self.items.append( item.Item( i[0], i[1], i[2] ) )
+            
+        
+    def enterStore(self, hero):
+        self.drawStoreScreen()
+        while True:
+            action = self.getAction()
+            if action == 'ExiT':
+                return
+            elif action == 'Buy':
+                self.ticker.tick(60)
+                purchase = self.buy()
+                if purchase == None: pass
+                elif hero.takeGold( self.prices[(purchase.getType(), purchase.getLevel(), purchase.getSpellNum() )] ):
+                    hero.getItem( purchase )
+                else: self.myHud.txtMessage("You don'T have enough money!")
+            elif action == 'Sell':
+                self.ticker.tick(120)
+                sale = self.sell(hero.getItems())
+                if sale == None: pass
+                else:
+                    try:
+                        hero.addGold( self.prices[ ( sale.getType(), sale.getLevel(), sale.getSpellNum() ) ]/2 )
+                        hero.takeItem(sale)
+                    except KeyError:
+                        self.myHud.txtMessage("We don't buy those...")
             self.drawStoreScreen()

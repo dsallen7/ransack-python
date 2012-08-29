@@ -27,7 +27,9 @@ class Handler():
         self.cursorPos = cPos
         self.currentTile = 0
         self.sideImg, sideRect = load_image('sidebar.bmp')
-        self.npcImg, npcR = load_image('npc.bmp')
+        self.npcImg = pygame.Surface( (30, 30 ))
+        self.npcImg.fill(colors.red)
+        #self.npcImg, npcR = load_image('npc.bmp')
         self.drawMode = False
         self.cursorColor = colors.white
         self.offset = 0
@@ -147,7 +149,7 @@ class Handler():
                         elif itemNum == const.GOLD:
                             chestItems.append( (itemNum-const.FRUIT1, int(self.getInput('Enter amount of gold: ')) ) )
                         elif itemNum == const.SPELLBOOK or itemNum == const.PARCHMENT:
-                            chestItems.append( (itemNum-const.FRUIT1, int(self.getInput('Enter spell number: ')) ) )
+                            chestItems.append( (itemNum-const.FRUIT1, int(self.getInput('Enter spell number: ') ) ) )
                         elif itemNum in [112,113,114,117,118]:
                             chestItems.append( (itemNum-const.FRUIT1, 0) )
                     print chestItems

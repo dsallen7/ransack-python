@@ -95,13 +95,13 @@ class game():
                 if map.shops[s][0] == 'tavern':
                     self.Tavern = tavern.Tavern(self.screen, self.myHud, self.Ticker) 
                 if map.shops[s][0] == 'itemshop':
-                    self.Itemshops[map.shops[s][1]] = shop.Shop(self.screen, self.myHud, map.shops[s][1], 'itemshop', self.Ticker)
+                    self.Itemshops[map.shops[s][1]] = shop.itemShop(self.screen, self.myHud, map.shops[s][1], 'itemshop', self.Ticker)
                 if map.shops[s][0] == 'magicshop':
-                    self.Magicshops[map.shops[s][1]] = shop.Shop(self.screen, self.myHud, map.shops[s][1], 'magicshop', self.Ticker)
+                    self.Magicshops[map.shops[s][1]] = shop.magicShop(self.screen, self.myHud, map.shops[s][1], 'magicshop', self.Ticker)
                 if map.shops[s][0] == 'blacksmith':
-                    self.Blacksmiths[map.shops[s][1]] = shop.Shop(self.screen, self.myHud, map.shops[s][1], 'blacksmith', self.Ticker)
+                    self.Blacksmiths[map.shops[s][1]] = shop.Blacksmith(self.screen, self.myHud, map.shops[s][1], 'blacksmith', self.Ticker)
                 if map.shops[s][0] == 'armory':
-                    self.Armories[map.shops[s][1]] = shop.Shop(self.screen, self.myHud, map.shops[s][1], 'armory', self.Ticker)
+                    self.Armories[map.shops[s][1]] = shop.Armory(self.screen, self.myHud, map.shops[s][1], 'armory', self.Ticker)
 
     
     def generateMap(self, dimension, level):

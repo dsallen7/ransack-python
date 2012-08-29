@@ -1,19 +1,16 @@
 from UTIL import const
 
-heal = lambda s: [s[0] + 5] + [s[1]] + [s[2] - 5] + s[3:]
-frbl = lambda s: s[:2] + [s[2] - 5] + s[3:]
-icbl = lambda s: s[:2] + [s[2] - 5] + s[3:]
-tlpt = lambda s: s[:2] + [s[2] - 5] + s[3:]
+heal = lambda s: [s[0] + 5] + s[1:]
 nothing = lambda s: s
 
 spellDict = { (const.HEAL, True): heal,
               (const.HEAL, False): heal,
-              (const.FRBL, True): frbl,
+              (const.FRBL, True): nothing,
               (const.FRBL, False): nothing,
-              (const.ICBL, True): frbl,
+              (const.ICBL, True): nothing,
               (const.ICBL, False): nothing,
               (const.TLPT, True): nothing,
-              (const.TLPT, False): tlpt,
+              (const.TLPT, False): nothing,
 
                 }
 

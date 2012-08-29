@@ -155,27 +155,27 @@ class hud( ):
         self.screen.blit(self.gameBoard, (75,75) )
         self.update()
     
-    def getMsgText(self, message, font, fontsize):
+    def getMsgText(self, message, font, fontsize, lineWidth = const.maxLineWidth):
         # returns a nicely formatted text box
         if pygame.font:
             font = pygame.font.Font(font, fontsize)
-            if len(message) < const.maxLineWidth:
+            if len(message) < lineWidth:
                 msgText = pygame.Surface( (len(message)*(fontsize/2), fontsize*2 ) )
                 msgText.fill(colors.gold)
                 msgText.blit( font.render( message, 1, colors.white, colors.gold ), (0,0) )
             else:
-                msgText = pygame.Surface( ( const.maxLineWidth*(fontsize/2), ((len(message)+1)/const.maxLineWidth)*fontsize*2 ))
+                msgText = pygame.Surface( ( lineWidth*(fontsize/2), ((len(message)/lineWidth)+1)*math.ceil(font.render( 'A', 1, colors.white, colors.gold ).get_height() * 1.5 ) ) )
                 msgText.fill(colors.gold)
                 hPos = 0
                 words = message.split(' ')
                 while words:
                     line = ''
-                    while words and len(line+' '+words[0]) < const.maxLineWidth:
+                    while words and len(line+' '+words[0]) < lineWidth:
                         line = line + words[0] + ' '
                         words = words[1:]
                     lineText = font.render( line, 1, colors.white, colors.gold )
                     msgText.blit( lineText, ((msgText.get_width()/2)-(lineText.get_width()/2), hPos) )
-                    hPos += fontsize
+                    hPos += math.ceil( fontsize * 1.5 )
         return msgText
    
     def npcMessage(self, message, img):
@@ -205,12 +205,16 @@ class hud( ):
         while (pygame.event.wait().type != pygame.KEYDOWN): pass
         
     def addPopup(self, text, loc):
-        msgText = self.getMsgText(text, os.getcwd()+"/FONTS/gothic.ttf", 10)
-        popupWin = pygame.Surface( (msgText.get_width()+5, msgText.get_height()+5) )
+        msgText = self.getMsgText(text, os.getcwd()+"/FONTS/gothic.ttf", 10, 10)
+        popupWin = pygame.Surface( (msgText.get_width()+10, msgText.get_height()+10) )
         popupWin.fill(colors.grey)
         popupWin.blit(msgText, (5,5) )
         self.popupWin = popupWin
-        self.popupLoc = loc
+        (lx, ly) = loc
+        lx = lx - popupWin.get_width()
+        ly = ly - popupWin.get_height()
+        self.popupLoc = (lx, ly)
+        pygame.display.flip()
     
     def mouseHandler(self, event, mx, my):
         if event.type == pygame.MOUSEBUTTONUP:
@@ -224,8 +228,10 @@ class hud( ):
             # weapon
             elif (30 < mx <= 59) and (180 < my <= 209):
                 if self.game.myHero.getWeaponEquipped() is not None:
-                    self.addPopup(self.game.myHero.getWeaponEquipped().getStats(), (59,209)  )
-                else: self.addPopup('None equipped', (59,209)  )
+                    self.addPopup(self.game.myHero.getWeaponEquipped().getStats(), (59, 209)  )
+                    
+                    print (mx, my)
+                else: self.addPopup('None equipped', (mx, my)  )
             # armor
             elif (90 < mx <= 119) and (180 < my <= 209):
                 if self.game.myHero.getArmorEquipped()[0] is not None:

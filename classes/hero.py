@@ -2,6 +2,8 @@ import pygame, random, math, os
 from load_image import *
 from const import *
 
+from types import *
+
 from IMG import images
 from OBJ import spell, item, weapon, armor
 from UTIL import const, colors
@@ -146,36 +148,45 @@ class hero(pygame.sprite.Sprite):
     def setItem(self, item, num=1):
         self.items[item] += num
     # Input: tile number denoting item
-    def getItem(self, itm, level=None, spellNum=None):
-        (itype, qty) = itm
-        print itype
-        if itype == KEY or itype+const.FRUIT1 == KEY:
+    def getItem(self, item):
+        if item.getType() == KEY or item.getType() == KEY:
             self.keys += 1
             return 'A dungeon key'
-        elif itype+const.FRUIT1 == GOLD:
-            self.addGold(qty)
-            return str(qty)+' gold pieces'
-        elif itype+const.FRUIT1 in [112,113,114]:
+        elif item.getType() == GOLD:
+            self.addGold( item.qty )
+            return str(item.qty)+' gold pieces'
+        elif item.getType() in [112,113,114]:
             level = qty
             return self.gainWeapon(itype, level)
-        elif itype+const.FRUIT1 in [117,118,119]:
-            level = qty
+        elif item.getType() in [117,118,119]:
             return self.gainArmor(itype, level)
-        elif itype == const.SPELLBOOK or itype == const.PARCHMENT:
-            newItem = item.Item( itype, level, spellNum )
-            itype = itype - const.FRUIT1
-            print itype
-        elif itype+const.FRUIT1 in range(86, 100): 
-            newItem = item.Item(itype+const.FRUIT1)
-        entry = self.items[itype]
+        elif item.getType() == const.SPELLBOOK or item.getType() == const.PARCHMENT:
+            pass
+        elif item.getType() in range(86, 100): 
+            pass
+        itype = item.getType()-const.FRUIT1
+        entry = self.items[ itype ]
         if hasattr(entry, "__iter__"):
-            self.items[itype].append( newItem )
+            self.items[itype].append( item )
         else:
-            self.items[itype] = [newItem]
-        return newItem.getDesc()
+            self.items[itype] = [item]
+        return item.getDesc()
     
     def getItems(self):
         availableItems = []
+        for it in self.items:
+            #print it
+            if type(it) is not IntType:
+                if hasattr(it, "__iter__"):
+                    if len(it) > 0:
+                        for i in it:
+                            i.qty = len(it)
+                        availableItems.append(it)
+                else: 
+                    it.qty = 1
+                    availableItems.append( it )
+        print availableItems
+        return availableItems
         for i in self.items:
             if hasattr(i, "__iter__"):
                 if len(i) > 0:
@@ -187,11 +198,15 @@ class hero(pygame.sprite.Sprite):
     def useItem(self, item, game, battle=False):
         if item == None:
             return 0
+        if hasattr(item, "__iter__"):
+            item = item[0]
         if item.getName() == 'parchment':
             mySpell = spell.Spell( item.spellNum )
-            self.castSpell(mySpell, game, battle)
-            self.takeItem(item.getType())
-            return mySpell.getCastTime()
+            if self.castSpell(mySpell, game, battle):
+                self.takeItem(item.getType())
+                self.currMP = self.currMP + mySpell.cost
+                return mySpell.getCastTime()
+            else: return 0
         item.execute(self)
         self.takeItem(item.getType())
         return 60
@@ -259,10 +274,10 @@ class hero(pygame.sprite.Sprite):
             return
         elif (spell.getType() in [1,2] and battle==False):
             game.textMessage('That spell may only be cast in battle')
-            return 
+            return False
         elif (spell.getType() in [3] and battle == True):
             game.textMessage('That spell may not be cast in battle')
-            return
+            return False
         elif spell.cost > self.currMP:
             game.textMessage("You don't have enough MP!")
             return
@@ -293,6 +308,7 @@ class hero(pygame.sprite.Sprite):
         spell.execute(self, game.myHud, battle)
         game.Ticker.tick(spell.getCastTime() )
         game.textMessage(spell.getCastMsg())
+        return True
     def getSpells(self):
         return self.spells
     
