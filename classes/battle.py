@@ -1,8 +1,8 @@
 import pygame
 import menu
 from load_image import *
-from const import *
 import random
+from UTIL import const, colors
 
 # this class will be used to draw the animation occuring in the battle.
 
@@ -10,7 +10,7 @@ class battle():
     
     def __init__(self, screen):
         self.battleField = pygame.Surface( (300,300) )
-        self.battleField.fill( black )
+        self.battleField.fill( colors.black )
         self.images = range(3)
         self.screen = screen
         
@@ -22,11 +22,10 @@ class battle():
         font = pygame.font.Font(os.getcwd()+"/FONTS/"+font, size)
         surface.blit( font.render(text, 1, fgc, bgc), loc )
         
-    def drawBattleScreen(self):
-        self.screen.blit( self.battleField, (75,75) )
-        
-        enemyHPBox = pygame.Surface( (100,50) )
-        #self.writeText( enemyHPBox, (0,0), 
+    def drawBattleScreen(self, enemy=None):
+        if enemy is not None:
+            self.battleField.blit( self.boxStat(enemy.getHP(), enemy.maxHP, colors.red, colors.green, (150,30) ), (150,30) )
+        self.screen.blit( self.battleField, (const.gameBoardOffset, const.gameBoardOffset) )
         pygame.display.flip()
     
     # displays battle menu and waits for player to select choice,
@@ -36,11 +35,11 @@ class battle():
         options = ['FighT', 'Magic', 'ITem', 'Flee']
         selection = 0
         while True:
-            menuBox.fill( gold )
+            menuBox.fill( colors.gold )
             if pygame.font:
                 font = pygame.font.Font(os.getcwd()+"/FONTS/SpinalTfanboy.ttf", 14)
                 for i in range(4):
-                    menuBox.blit( font.render(options[i], 1, white, gold), (25,i*25) )
+                    menuBox.blit( font.render(options[i], 1, colors.white, colors.gold), (25,i*25) )
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     os.sys.exit()
@@ -70,7 +69,19 @@ class battle():
             return True
         else:
             return False
-        
+    
+    def boxStat(self, stat, mStat, fgc, bgc, loc):
+        (x, y) = loc
+        maxBoxWidth = 90
+        maxBox = pygame.Surface( (90, 11) )
+        maxBox.fill(bgc)
+        currBoxWidth = int(90 * float(stat)/float(mStat))
+        if currBoxWidth > 0:
+            currBox = pygame.Surface( (currBoxWidth, 11) )
+            currBox.fill(fgc)
+            maxBox.blit(currBox, (0,0) )
+        return maxBox
+    
     # this controls all the logic of what goes on in an actual battle
     def fightBattle(self, game, enemy):
         hero = game.myHero
@@ -117,7 +128,7 @@ class battle():
             #enemy attacks
             if enemy.getHP() > 0:
                 if self.rollDie(0,2):
-                    dmg = random.randrange(enemy.getLevel(),enemy.getLevel()+5) - random.randrange(dex/4)
+                    dmg = random.randrange(enemy.getBaseAttack()-5,enemy.getBaseAttack()+5) - random.randrange(dex/4)
                     game.textMessage("The "+enemy.getName()+" hits you for "+str(dmg)+" points!")
                     #self.sounds[1].play()
                     if enemy.poison:
@@ -133,7 +144,7 @@ class battle():
                     #self.sounds[2].play()
             game.Ticker.tick(10)
             game.myHud.update()
-            self.drawBattleScreen()
+            self.drawBattleScreen(enemy)
         game.textMessage("The "+enemy.getName()+" is dead!")
         if hero.increaseExp(5):
             game.textMessage("Congratulations! You have gained a level.")

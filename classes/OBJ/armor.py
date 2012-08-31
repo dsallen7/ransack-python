@@ -23,4 +23,4 @@ class Armor():
     def getDesc(self):
         return self.desc
     def getStats(self):
-        return self.desc+' '+'Level '+str(self.level)+' Resistance: '+str(self.resist)
+        return self.desc+' '+'Level '+str(self.level)+' Resist: '+str(self.resist)

@@ -94,7 +94,7 @@ class Tavern():
         desc = range(3)
         for i in range(3):
             if os.access("ransack"+str(i)+".sav", os.F_OK):
-                peekFile = open("ransack"+str(i)+".sav", 'r')
+                peekFile = gzip.GzipFile("ransack"+str(i)+".sav", 'rb')
                 ball = cPickle.load(peekFile)
                 peekFile.close()
                 desc[i] = 'Saved game '+str(i)+' Level '+str(ball[0][11])+' '+str(ball[2].getDays())+' Days '+ \

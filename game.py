@@ -4,6 +4,7 @@ import random
 import pickle
 
 from classes import hero, hud, battle, menu, enemy, shop, tavern, npc
+from classes import OBJ
 from IMG import images
 from DISPLAY import display
 from load_image import *
@@ -67,11 +68,19 @@ class game():
     def gameOver(self):
         self.gameOn = False
     
+    def removeNPC(self, ID):
+        for n in self.NPCs:
+            if n.getID() == ID:
+                self.NPCs.remove(n)
+                self.myMap.NPCs.remove( n.getID() )
+                return
+    
     def addNPCs(self, map):
         self.NPCs = []
         visibleNPCs = []
         for n in map.NPCs:
             (x,y) = n[0]
+            mID = 0
             if n[1] == 'guard':
                 self.NPCs.append( npc.Guard(x, y, n[2]) )
             elif n[1] == 'female':
@@ -79,9 +88,12 @@ class game():
             elif n[1] == 'king':
                 self.NPCs.append( npc.King(x, y, n[2]) )
             elif n[1] == 'skeleton':
-                self.NPCs.append( npc.Enemy(x, y, 'Skeleton', 'skeleton.bmp') )
+                self.NPCs.append( npc.Enemy(x, y, 'Skeleton', 'skeleton.bmp', n) )
             elif n[1] == 'orc':
-                self.NPCs.append( npc.Enemy(x, y, 'Orc', 'orc.bmp') )
+                self.NPCs.append( npc.Enemy(x, y, 'Orc', 'orc.bmp', n) )
+            elif n[1] == 'skeletonking':
+                self.NPCs.append( npc.skeletonKing(x, y, 'Skeleton King', 'skeleton.bmp', n))
+            mID = mID + 1
         self.allsprites = pygame.sprite.RenderPlain((self.myHero, self.NPCs))
         self.allsprites.clear(self.screen, self.gameBoard)
     def addShops(self, map):        
@@ -203,8 +215,9 @@ class game():
         for n in self.NPCs:
             if ( x, y ) == n.getXY():
                 if n.interact(self.myHud) == 'battle':
-                    self.launchBattle(n.name, self.levelDepth)
-                    self.NPCs.remove(n)
+                    if self.launchBattle(n.name, self.levelDepth):
+                        self.removeNPC(n.getID())
+                    else: n.confuse(30)
                     return
                 else: return
         i = self.myMap.getEntry(x, y)
@@ -276,7 +289,7 @@ class game():
                 self.myMap.setEntry( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize,0)
         #item
         if i in range(86,109):
-            self.myHero.getItem((i,1))
+            self.myHero.getItem( OBJ.item.Item(i) )
             self.myMap.setEntry( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize, 0)
             self.myHud.boxMessage(const.itemMsgs[i])
         # Stairs down
@@ -314,12 +327,13 @@ class game():
         self.gameBoard.fill( colors.black )
         g = self.myBattle.fightBattle(self, enemy.enemy(mName, lD))
         if g == True: # escaped from battle
-            pass
+            return False
         elif g == False: # died in battle
             self.gameOver()
         else: # won battle
             self.textMessage('You find '+str(g)+' gold pieces!')
             self.myHero.addGold(g)
+            return True
     
     def rollDie(self, target, range):
         d = random.randrange(range)
@@ -356,6 +370,8 @@ class game():
     
     def displayGameBoard(self):
         self.updateSprites()
+        if self.myMap.type == 'dungeon':
+            pass#self.Display.drawShade(self.myMap, self.gameBoard)
         self.screen.blit( self.gameBoard, (const.gameBoardOffset, const.gameBoardOffset) )
         pygame.display.flip()
     
@@ -366,8 +382,9 @@ class game():
             if r == True:
                 redraw = True
             elif r == 'battle':
-                self.launchBattle(n.name, self.levelDepth)
-                self.NPCs.remove(n)
+                if self.launchBattle(n.name, self.levelDepth):
+                    self.removeNPC(n.getID())
+                else: n.confuse(30)
                 
         return redraw
         
@@ -384,7 +401,8 @@ class game():
         self.updateSprites()
         self.Display.redrawXMap(self.myMap)
         while self.gameOn:
-            self.clock.tick(30)
+            #self.clock.tick(30)
+            self.gameBoard.fill(colors.black)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     os.sys.exit()
@@ -393,14 +411,13 @@ class game():
                         heroMove = self.event_handler(event)
                 elif event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.MOUSEBUTTONUP:
                     self.mouseHandler(event)
-            self.gameBoard.fill(colors.black)
-            self.Display.redrawMap(self.myMap, self.myHero, self.gameBoard)
             self.myHud.update()
                 #self.Display.drawNPC(npc, self.myMap, self, animated=True)
+            #self.myHero.showLocation(self.screen)
             if self.updateNPCs() or self.myHero.moving:
                 self.Display.drawSprites(self.myHero, self.myMap, self.gameBoard, self, self.myHero.dir, animated=True)
             else: 
                 self.Display.drawSprites(self.myHero, self.myMap, self.gameBoard, self, None, animated=True)
-            #self.myHero.showLocation(self.screen)
+            self.Display.redrawMap(self.myMap, self.myHero, self.gameBoard)
             self.displayGameBoard()
         return

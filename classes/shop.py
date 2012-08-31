@@ -129,8 +129,8 @@ class Blacksmith(Shop):
                 self.ticker.tick(60)
                 purchase = self.buy()
                 if purchase == None: pass
-                elif hero.takeGold( self.prices[purchase] ):
-                    hero.gainWeapon( purchase[0],purchase[1] )
+                elif hero.takeGold( self.prices[ (purchase.getType(), purchase.getLevel()) ] ):
+                    hero.gainWeapon( purchase.getType(), purchase.getLevel() )
                 else: self.myHud.txtMessage("You don'T have enough money!")
             elif action == 'Sell':
                 self.ticker.tick(120)
@@ -166,8 +166,8 @@ class Armory(Shop):
                 self.ticker.tick(60)
                 purchase = self.buy()
                 if purchase == None: pass
-                elif hero.takeGold( self.prices[purchase] ):
-                    hero.gainArmor( purchase[0],purchase[1] )
+                elif hero.takeGold( self.prices[(purchase.getType(), purchase.getLevel())] ):
+                    hero.gainArmor( purchase.getType(), purchase.getLevel() )
                 else: self.myHud.txtMessage("You don'T have enough money!")
             elif action == 'Sell':
                 self.ticker.tick(120)
@@ -203,8 +203,8 @@ class itemShop(Shop):
                 self.ticker.tick(60)
                 purchase = self.buy()
                 if purchase == None: pass
-                elif hero.takeGold( self.prices[purchase] ):
-                    hero.getItem( (purchase-86,1) )
+                elif hero.takeGold( self.prices[purchase.getType()] ):
+                    hero.getItem( purchase )
                 else: self.myHud.txtMessage("You don'T have enough money!")
             elif action == 'Sell':
                 self.ticker.tick(120)

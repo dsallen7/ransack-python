@@ -60,7 +60,7 @@ class hero(pygame.sprite.Sprite):
             self.learnSpell(0)
             self.learnSpell(1)
             
-            self.gold = 5000
+            self.gold = 50
             self.isPoisoned = False
         else: self.installLoadedHero(load)
         
@@ -149,17 +149,16 @@ class hero(pygame.sprite.Sprite):
         self.items[item] += num
     # Input: tile number denoting item
     def getItem(self, item):
-        if item.getType() == KEY or item.getType() == KEY:
+        if item.getType() == KEY:
             self.keys += 1
             return 'A dungeon key'
         elif item.getType() == GOLD:
             self.addGold( item.qty )
             return str(item.qty)+' gold pieces'
-        elif item.getType() in [112,113,114]:
-            level = qty
-            return self.gainWeapon(itype, level)
-        elif item.getType() in [117,118,119]:
-            return self.gainArmor(itype, level)
+        elif item.getType() in [26,27,28]:
+            return self.gainWeapon(item.getType(), item.getLevel(), [item.plusStr, item.plusItl, item.plusDex] )
+        elif item.getType() in [31,32,33]:
+            return self.gainArmor(item.getType(), item.getLevel())
         elif item.getType() == const.SPELLBOOK or item.getType() == const.PARCHMENT:
             pass
         elif item.getType() in range(86, 100): 
@@ -175,7 +174,6 @@ class hero(pygame.sprite.Sprite):
     def getItems(self):
         availableItems = []
         for it in self.items:
-            #print it
             if type(it) is not IntType:
                 if hasattr(it, "__iter__"):
                     if len(it) > 0:
@@ -185,7 +183,6 @@ class hero(pygame.sprite.Sprite):
                 else: 
                     it.qty = 1
                     availableItems.append( it )
-        print availableItems
         return availableItems
         for i in self.items:
             if hasattr(i, "__iter__"):
@@ -216,8 +213,8 @@ class hero(pygame.sprite.Sprite):
     def getWeaponEquipped(self):
         return self.weaponEquipped
     # called when the player buys or finds a new weapon
-    def gainWeapon(self, type, level):
-        newW = weapon.Weapon(type, level)
+    def gainWeapon(self, type, level, mods=None):
+        newW = weapon.Weapon(type, level, mods)
         self.weapons.append(newW)
         return newW.getDesc()
     def loseWeapon(self, weapon):
@@ -225,9 +222,9 @@ class hero(pygame.sprite.Sprite):
     def equipWeapon(self, weapon):
         if weapon == None: return
         if self.weaponEquipped is not None:
-            self.strength = self.strength - weapon.plusStr
-            self.intell = self.intell - weapon.plusItl
-            self.dex = self.dex - weapon.plusDex
+            self.strength = self.strength - self.weaponEquipped.plusStr
+            self.intell = self.intell - self.weaponEquipped.plusItl
+            self.dex = self.dex - self.weaponEquipped.plusDex
             self.weapons.append(self.getWeaponEquipped() )
         self.weaponEquipped = weapon
         self.strength = self.strength + weapon.plusStr
@@ -239,19 +236,22 @@ class hero(pygame.sprite.Sprite):
         return self.armor
     def getArmorEquipped(self):
         return self.armorEquipped
-    def gainArmor(self, type, level):
+    def gainArmor(self, type, level, resist=None):
         newA = armor.Armor(type, level)
+        newA.resist = resist
         self.armor.append(newA)
         return newA.getDesc()
     def loseArmor(self, armor):
         self.armor.remove(armor)
     def equipArmor(self, armor):
         if armor == None: return
-        print armor.getType()
         if self.armorEquipped[armor.getType()-31] == None:
             self.armorEquipped[armor.getType()-31] = armor
-        else: 
-            self.armor.append(self.armorEquipped[armor.getType()])
+            self.armorClass += (armor.getLevel()+1)**2
+        else:
+            self.armorClass -= (self.armorEquipped[armor.getType()-31].getLevel()+1)**2
+            self.armorClass += (armor.getLevel()+1)**2
+            self.armor.append(self.armorEquipped[armor.getType()-31])
             self.armorEquipped[armor.getType()-31] = armor
         self.loseArmor(armor)
     

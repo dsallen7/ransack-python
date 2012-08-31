@@ -12,7 +12,8 @@ class enemy():
         if self.name in enemyScr.pEnemies:
             self.poison = True
         else: self.poison = False
-        self.maxHP = random.randrange(level+10,level+20)
+        self.maxHP = random.randrange( enemyScr.healthDict[self.name]-5, enemyScr.healthDict[self.name]+5 )
+        self.baseAttack = enemyScr.attackDict[self.name]
         self.currHP = self.maxHP
     
     def getLevel(self):
@@ -23,6 +24,8 @@ class enemy():
         return maxHP
     def getName(self):
         return self.name
+    def getBaseAttack(self):
+        return self.baseAttack
     
     def takeDmg(self, dmg):
         if dmg:

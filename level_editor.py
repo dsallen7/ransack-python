@@ -131,7 +131,6 @@ class Handler():
         menuBox = pygame.Surface( (150, 250) )
         itemsList = range(86, 102)+[112,113,114,117,117]
         for i in range( len( itemsList ) ):
-            print i
             menuBox.blit(mapImages[itemsList[i]], (15+((i)%4)*blocksize, 50+((i)/4)*blocksize))
         chestItems = []
         while True:
@@ -143,16 +142,22 @@ class Handler():
                     (mx, my) = event.pos
                     if 115 <= mx < 235 and 150 <= my < 330:
                         itemNum = itemsList[(mx-115)/blocksize + (my-150)/blocksize * 4]
-                        #print itemNum
                         if itemNum in range(86, 99):
                             chestItems.append( (itemNum-const.FRUIT1, 1) )
                         elif itemNum == const.GOLD:
                             chestItems.append( (itemNum-const.FRUIT1, int(self.getInput('Enter amount of gold: ')) ) )
                         elif itemNum == const.SPELLBOOK or itemNum == const.PARCHMENT:
                             chestItems.append( (itemNum-const.FRUIT1, int(self.getInput('Enter spell number: ') ) ) )
-                        elif itemNum in [112,113,114,117,118]:
-                            chestItems.append( (itemNum-const.FRUIT1, 0) )
-                    print chestItems
+                        elif itemNum in [112,113,114]:
+                            chestItems.append( (itemNum-const.FRUIT1, 
+                                                int(self.getInput("Enter weapon level: ")), 
+                                                [ int(self.getInput("Enter plus Str: ")),
+                                                  int(self.getInput("Enter plus Int: ")),
+                                                  int(self.getInput("Enter plus Dex "))   ] ) )
+                        elif itemNum in [const.SHIELD,const.BPLATE,const.HELMET]:
+                            chestItems.append( (itemNum-const.FRUIT1, 
+                                                int(self.getInput("Enter armor level: ")), 
+                                                int(self.getInput("Enter resist: ")) ) )
             for item in chestItems:
                 menuBox.blit(mapImages[item[0]+const.FRUIT1], (len(chestItems)*blocksize, 15) )
             screen.blit(menuBox, (100,100) )
@@ -250,7 +255,6 @@ class Handler():
                 self.offset = 0
         if event.key == pygame.K_x:
             myMap.NPCs = []
-            print myMap.NPCs
             print 'NPCs cleared'
         if event.key == pygame.K_n:
             print 'NPCs: '

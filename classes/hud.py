@@ -229,8 +229,6 @@ class hud( ):
             elif (30 < mx <= 59) and (180 < my <= 209):
                 if self.game.myHero.getWeaponEquipped() is not None:
                     self.addPopup(self.game.myHero.getWeaponEquipped().getStats(), (59, 209)  )
-                    
-                    print (mx, my)
                 else: self.addPopup('None equipped', (mx, my)  )
             # armor
             elif (90 < mx <= 119) and (180 < my <= 209):

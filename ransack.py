@@ -12,7 +12,7 @@ if not pygame.font: print 'Warning, fonts disabled'
 pygame.display.set_caption("Ransack")
 
 pygame.init()
-pygame.key.set_repeat(10, 100)
+pygame.key.set_repeat(100, 100)
 clock = pygame.time.Clock()
 random.seed()
 
@@ -120,5 +120,4 @@ def main():
         menuBox.blit( images[0], (0, selection*25) )
         titleScreen.blit(menuBox, (200, 375) )
         pygame.display.flip()
-    
 main()

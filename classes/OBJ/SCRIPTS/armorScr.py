@@ -1,5 +1,5 @@
 descDict = { 
              31: 'Shield',
-             32: 'Breastplate',
+             32: 'Plate',
              33: 'Helmet'
             }

@@ -219,6 +219,8 @@ class gameMap(map):
             x = random.randrange(0, self.DIM)
             y = random.randrange(0, self.DIM)
         return x, y
+    def setPlayerXY(self, x, y):
+        self.playerXY = (x,y)
             
     # calculate location of map window based on hero location and hero sprite rect
     def updateWindowCoordinates(self, hero):
@@ -277,24 +279,32 @@ class gameMap(map):
     #@tail_call_optimized
     def litBFS(self,start):
         (x,y) = start
-        if self.getEntry(x,y) in range(24,86):
+        if self.getEntry(x,y) in [18,19]:
+            return [ (x-1,y-1), (x,y-1), (x+1,y-1),
+                     (x-1,y), (x,y), (x+1,y),
+                     (x-1,y+1), (x,y+1), (x+1,y+1)]
+        if self.getEntry(x,y) in range(18,86):
             returnList = [(x,y)]
             for (Cx, Cy) in const.CARDINALS:
-                if self.getEntry(x+Cx,y+Cy) in range(24, 86):
+                if self.getEntry(x+Cx,y+Cy) in range(18, 86):
                     count = 0
                     for (Nx, Ny) in const.CARDINALS:
-                        if self.visDict[ (x+Cx+Nx, y+Cy+Ny) ]:
-                            count += 1
+                        try:
+                            if self.visDict[ (x+Cx+Nx, y+Cy+Ny) ]:
+                                count += 1
+                        except KeyError:
+                            pass
                     if count >= 2:
                         returnList.append((x+Cx,y+Cy))
             return returnList
         entryList = []
         for (Cx,Cy) in const.CARDINALS:
-            if (x+Cx,y+Cy) not in self.visited and ~self.BFSQueue.has( (x+Cy, y+Cy) ):
+            if (x+Cx,y+Cy) not in self.visited and ~self.BFSQueue.has( (x+Cy, y+Cy) and self.getEntry(x+Cx,y+Cy) in range(18) ):
+                #print self.getEntry(x+Cx,y+Cy)
                 self.BFSQueue.push( (x+Cx, y+Cy) )
                 entryList += [ (x+Cx,y+Cy) ]
                 self.visited += [ (x+Cx,y+Cy) ]
-        if len( entryList ) <= 1:
+        if len( entryList ) < 1:
             return (x,y)
         else:
             returnList = []

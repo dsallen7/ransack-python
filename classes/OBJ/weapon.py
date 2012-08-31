@@ -3,16 +3,21 @@ from SCRIPTS import weaponScr
 
 class Weapon():
     
-    def __init__(self, type, level, plusStr=0, plusItl=0, plusDex=0):
+    def __init__(self, type, level, mods=None):
         self.type = type
         self.level = level
         self.imgNum = type + const.FRUIT1
         self.name = 'weapon'
         self.desc = weaponScr.descDict[self.type]
         
-        self.plusStr = plusStr
-        self.plusItl = plusItl
-        self.plusDex = plusDex
+        if mods is not None:
+            self.plusStr = mods[0]
+            self.plusItl = mods[1]
+            self.plusDex = mods[2]
+        else:
+            self.plusStr = 0
+            self.plusItl = 0
+            self.plusDex = 0
     
     def getType(self):
         return self.type

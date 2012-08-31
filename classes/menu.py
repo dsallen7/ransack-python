@@ -2,7 +2,7 @@ import pygame, random, os
 from load_image import *
 from UTIL import const, colors
 
-from OBJ import item, spell
+from OBJ import item, spell, weapon, armor
 
 from IMG import images
 
@@ -50,7 +50,6 @@ class menu():
         availableItems = []
         for i in range( len(items) ):
             item = items[i]
-            #print item
             
             if item in availableItems:
                 pass
@@ -92,7 +91,9 @@ class menu():
         availableItems = []
         hPosList = [10]
         for i in chest:
-            (type, num) = i
+            if len(i) == 2:
+                (type, num) = i
+            else: (type, num, mods) = i
             itemBox = pygame.Surface( (const.blocksize, const.blocksize) )
             itemBox.fill( colors.black )
             itemBox.blit( images.mapImages[type+86], (0, 0) )
@@ -109,6 +110,10 @@ class menu():
                 availableItems += [ item.Item(type+const.FRUIT1, num) ]
             elif type in [14, 15]:
                 availableItems += [ item.Item(type+const.FRUIT1, None, num) ]
+            elif type in range(26,29):
+                availableItems += [ weapon.Weapon(type, num, mods ) ]
+            elif type in range(31,34):
+                availableItems += [ armor.Armor(type, num) ]
             w += const.blocksize
         hPos = 10 #horizontal position of selection box
         boxPointsFn = lambda x: ( (x,const.blocksize), (x,2*const.blocksize), (x+const.blocksize, 2*const.blocksize), (x+const.blocksize, const.blocksize) )
@@ -139,7 +144,7 @@ class menu():
     def displayHeroStats(self, hero):
         stats = hero.getPlayerStats()
         
-        statsBox = self.openWindow(200, 130)
+        statsBox = self.openWindow(200, 180)
         
         if pygame.font:
             font = pygame.font.Font(os.getcwd()+"/FONTS/SpinalTfanboy.ttf", 18)
@@ -154,23 +159,21 @@ class menu():
             font = pygame.font.Font(os.getcwd()+"/FONTS/gothic.ttf", 14)
         statsBox.blit( font.render('Level: '+str(hero.level), 1, colors.white, colors.black ), ( statsBox.get_width()/4 ,30) )
         statsBox.blit( font.render('Str: '+str(stats[4])+' Int: '+str(stats[6])+' Dex: '+str(stats[5]), 1, colors.white, colors.black ), ( statsBox.get_width()/4 ,60) )
+        statsBox.blit( font.render('Armor: '+str(hero.armorClass), 1, colors.white, colors.black ), ( statsBox.get_width()/4 ,90) )
         self.screen.blit(statsBox, ( (self.screen.get_width()/2)-(statsBox.get_width()/2), 100) )
         pygame.display.flip()
         while (pygame.event.wait().type != pygame.KEYDOWN): pass
     
     def invMenu(self, items, text):
-        #print items
         menuBox = self.openWindow(200, 130)
         
         if pygame.font:
-            #print os.getcwd()
             font = pygame.font.Font(os.getcwd()+"/FONTS/SpinalTfanboy.ttf", 18)
             msgText = font.render( text, 1, colors.white, colors.gold )
             menuBox.blit(msgText, ( (menuBox.get_width()/2)-(msgText.get_width()/2) ,10) )
         
         #draw available items in window
         itemsBox, availableItems = self.menuWin(items)
-        #print availableItems
         menuBox.blit( itemsBox, ((menuBox.get_width()/2)-(itemsBox.get_width()/2), 40) )
         selection = 0
         cursorPos = positions[0]

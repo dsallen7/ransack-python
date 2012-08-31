@@ -88,6 +88,7 @@ class Display():
         DIMEN = map.getDIM()
         # by default, the hero is in the upper left corner of the map
         (newX,newY) = hero.getXY()
+        map.setPlayerXY(newX/const.blocksize, newY/const.blocksize)
         (oldX, oldY, c, d) = hero.getRect()
         scrolling = False
         if DIMEN > const.HALFDIM:
@@ -160,3 +161,5 @@ class Display():
             npc.setRect(nRX, nRY, const.blocksize, const.blocksize)
             npc.moving = False
         hero.setRect( newX, newY, const.blocksize, const.blocksize)
+        self.redrawXMap(map)
+        self.redrawMap(map, hero, gameBoard)

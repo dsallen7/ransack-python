@@ -83,6 +83,7 @@ class Generator():
     def __init__(self, DIM, level=1):
         self.map = map.genMap(DIM, level)
         self.copyText = []
+        self.level = level
     
     def rollDie(self, target, range):
         d = randrange(range)
@@ -264,18 +265,14 @@ class Generator():
             (xpos, ypos) = choice4.getPos()
             (xdim, ydim) = choice4.getDimensions()
             chestItems = []
-            if self.rollDie(0,2) and self.rollDie(0,2):
-                #gold
-                chestItems = [(13,randrange(15,30))]
-            elif self.rollDie(0,2):
-                #chestItems = [(23,randrange(15,30))]
-                chestItems.append((0,1))
-            elif self.rollDie(0,2):
-                #chestItems = [(23,randrange(15,30))]
-                chestItems.append((1,1))
-            else:
-                #chestItems = [(23,randrange(15,30))]
-                chestItems.append((4,1))
+            if self.rollDie(0, 2):
+                chestItems.append( (randrange(26,29), self.level/4,
+                                                               [randrange(0,2),
+                                                                randrange(0,2),
+                                                                randrange(0,2)]   ) )
+            else: chestItems.append( (randrange(31,34), self.level/4, randrange(0, 3) ) )
+            if self.rollDie(0, 2):
+                chestItems.append( (13, choice( range(15, 50)+range(15,30) ) ))
             self.map.setEntry( xpos + xdim/2, ypos + ydim/2, 110)
             chestlist += [( ( xpos + xdim/2, ypos + ydim/2), chestItems )]
             rooms.remove(choice4)
@@ -283,7 +280,10 @@ class Generator():
             (xpos, ypos) = room.getPos()
             (xdim, ydim) = room.getDimensions()
             self.map.setEntry( xpos + xdim/2, ypos + ydim/2, 110)
-            chestlist += [( ( xpos + xdim/2, ypos + ydim/2), [(randrange(26,29),0)] )]
+            chestlist += [( ( xpos + xdim/2, ypos + ydim/2), [(randrange(26,29),0, 
+                                                               [randrange(0,2),
+                                                                randrange(0,2),
+                                                                randrange(0,2)]  )] )]
             
         self.map.chests = dict(chestlist)
         print len(rooms)
