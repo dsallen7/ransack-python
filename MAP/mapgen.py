@@ -286,7 +286,6 @@ class Generator():
                                                                 randrange(0,2)]  )] )]
             
         self.map.chests = dict(chestlist)
-        print len(rooms)
         # add enemies
         while len(rooms) > 0:
             room = choice(rooms)

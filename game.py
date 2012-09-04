@@ -91,6 +91,10 @@ class game():
                 self.NPCs.append( npc.Enemy(x, y, 'Skeleton', 'skeleton.bmp', n) )
             elif n[1] == 'orc':
                 self.NPCs.append( npc.Enemy(x, y, 'Orc', 'orc.bmp', n) )
+            elif n[1] == 'cobra':
+                self.NPCs.append( npc.Enemy(x, y, 'Cobra', 'cobra.bmp', n))
+            elif n[1] == 'zombie':
+                self.NPCs.append( npc.Enemy(x, y, 'Zombie', 'zombie.bmp', n))
             elif n[1] == 'skeletonking':
                 self.NPCs.append( npc.skeletonKing(x, y, 'Skeleton King', 'skeleton.bmp', n))
             mID = mID + 1
@@ -126,9 +130,12 @@ class game():
         self.currentMap += 1
         if self.currentMap == len(self.myDungeon):
             self.levelDepth += 1
-            if self.levelDepth == 2:
+            if self.levelDepth == 4:
                 self.myDungeon = self.myDungeon + self.fortressMaps
-            else: self.myDungeon.append(self.generateMap(40, self.levelDepth))
+                self.boxMessage('Now entering fortress')
+            else:
+                self.myDungeon.append(self.generateMap(40, self.levelDepth))
+                self.boxMessage('Now entering dungeon level '+str(self.levelDepth))
             self.myMap = self.myDungeon[self.currentMap]
             self.Display.redrawXMap(self.myMap)
         else:
@@ -137,6 +144,8 @@ class game():
             self.Display.redrawXMap(self.myMap)
             if self.myMap.getType() == 'dungeon':
                 self.levelDepth += 1
+                self.boxMessage('Now entering dungeon level '+str(self.levelDepth))
+            else: self.boxMessage('Now entering '+self.myMap.getType())
         self.DIM = self.myMap.getDIM()
         self.addNPCs(self.myMap)
         (x,y) = self.myMap.getPOE()
@@ -144,8 +153,14 @@ class game():
     
     def prevLevel(self):
         self.currentMap -= 1
+        if self.levelDepth > 0:
+            self.levelDepth -= 1
         self.myMap = self.myDungeon[self.currentMap]
-        self.addShops(self.myMap)
+        if self.myMap.getType() == 'dungeon':
+            self.boxMessage('Now entering dungeon level '+str(self.levelDepth))
+        else:
+            self.addShops(self.myMap)
+            self.boxMessage('Now entering village')
         self.addNPCs(self.myMap)
         self.Display.redrawXMap(self.myMap)
         self.DIM = self.myMap.getDIM()
@@ -286,11 +301,11 @@ class game():
             else:
                 self.boxMessage( "The door creaks open..." )
                 self.myHero.takeKey()
-                self.myMap.setEntry( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize,0)
+                self.myMap.setEntry( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize, self.myMap.defaultBkgd)
         #item
         if i in range(86,109):
             self.myHero.getItem( OBJ.item.Item(i) )
-            self.myMap.setEntry( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize, 0)
+            self.myMap.setEntry( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize, self.myMap.defaultBkgd)
             self.myHud.boxMessage(const.itemMsgs[i])
         # Stairs down
         if i == const.STAIRDN:

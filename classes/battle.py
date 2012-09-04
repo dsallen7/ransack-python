@@ -58,7 +58,7 @@ class battle():
                         pass
             menuBox.blit( self.images[0], (0, selection*25) )            
             self.battleField.blit( menuBox, (200,150) )
-            self.drawBattleScreen()
+            #self.drawBattleScreen()
     
     def commence(self, screen):
         while (pygame.event.wait().type != pygame.KEYDOWN): pass
@@ -106,10 +106,12 @@ class battle():
             if action == 'FighT':
                 #hero attacks
                 if self.rollDie(0,2):
-                    dmg = random.randrange(sth/2,sth) + 10*weapon.getLevel()
+                    dmg = random.randrange(sth/2,sth) + (weapon.getLevel()+1)**2
                     game.textMessage('You hit the '+enemy.getName() +' for '+str(dmg)+' points!')
                     #self.sounds[1].play()
-                    enemy.takeDmg(dmg)
+                    for i in range(enemy.getHP(), enemy.getHP()-dmg, -1):
+                        enemy.takeDmg(1)
+                        self.drawBattleScreen(enemy)
                 else:
                     game.textMessage("You missed The "+enemy.getName()+"!")
                     #self.sounds[2].play()
@@ -128,13 +130,15 @@ class battle():
             #enemy attacks
             if enemy.getHP() > 0:
                 if self.rollDie(0,2):
-                    dmg = random.randrange(enemy.getBaseAttack()-5,enemy.getBaseAttack()+5) - random.randrange(dex/4)
-                    game.textMessage("The "+enemy.getName()+" hits you for "+str(dmg)+" points!")
-                    #self.sounds[1].play()
+                    dmg = random.randrange(enemy.getBaseAttack()-5,enemy.getBaseAttack()+5) - hero.armorClass
+                    if dmg > 0:
+                        game.textMessage("The "+enemy.getName()+" hits you for "+str(dmg)+" points!")
+                        #self.sounds[1].play()
+                    else: game.textMessage("The "+enemy.getName()+" attack is ineffective.")
                     if enemy.poison:
-                        if self.rollDie(1,7):
+                        if self.rollDie(0,3):
                             hero.isPoisoned = True
-                            hero.poisonedAt = self.ticker.getTicks()
+                            hero.poisonedAt = game.Ticker.getTicks()
                             game.textMessage("You are poisoned!")
                     if hero.takeDmg(dmg) < 1:
                         game.textMessage("You have died!")

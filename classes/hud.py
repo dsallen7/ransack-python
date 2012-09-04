@@ -52,12 +52,12 @@ class hud( ):
         maxBoxWidth = 90
         maxBox = pygame.Surface( (90, 11) )
         maxBox.fill(bgc)
-        maxBox.set_alpha(128)
+        #maxBox.set_alpha(192)
         currBoxWidth = int(90 * float(stat)/float(mStat))
         if currBoxWidth > 0:
             currBox = pygame.Surface( (currBoxWidth, 11) )
             currBox.fill(fgc)
-            currBox.set_alpha(128)
+            #currBox.set_alpha(192)
             #self.frameBox1.blit( maxBox, loc )
             self.frameBox1.blit( currBox, loc )
         else: pass
