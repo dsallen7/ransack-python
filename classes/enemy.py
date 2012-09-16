@@ -12,6 +12,9 @@ class enemy():
         if self.name in enemyScr.pEnemies:
             self.poison = True
         else: self.poison = False
+        if self.name in enemyScr.dEnemies:
+            self.damned = True
+        else: self.damned = False
         self.maxHP = random.randrange( enemyScr.healthDict[self.name]-5, enemyScr.healthDict[self.name]+5 )
         self.baseAttack = enemyScr.attackDict[self.name]
         self.currHP = self.maxHP

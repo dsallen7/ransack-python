@@ -1,10 +1,13 @@
+from UTIL import const
+
 class Ticker():
     
     def __init__(self):
         self.count = 0
+        self.timeRate = const.timeRate
     
     def tick(self, ticks):
-        self.count = self.count + ticks
+        self.count = self.count + (self.timeRate * ticks)
     
     def getTicks(self):
         return self.count
@@ -20,3 +23,6 @@ class Ticker():
     
     def getDays(self):
         return self.count / 86400
+    
+    def setTimeRate(self, tr):
+        self.timeRate = tr

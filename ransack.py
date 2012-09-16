@@ -64,6 +64,19 @@ def getFile():
         saveBox.blit( images[0], (0, selection*25) )
         screen.blit( saveBox, (100,200) )
         pygame.display.flip()
+        
+def deathScreen(game):
+    dScreen = pygame.Surface( (300, 300) )
+    if pygame.font:
+        font = pygame.font.Font("./FONTS/SpinalTfanboy.ttf", 72)
+        dScreen.blit( font.render("You Died!", 1, colors.red, colors.black), (50,50) )
+        font = pygame.font.Font("./FONTS/gothic.ttf", 24)
+        dScreen.blit( font.render("Level reached: "+str(game.myHero.level), 1, colors.white, colors.black), (50,150) )
+        font = pygame.font.Font("./FONTS/gothic.ttf", 14)
+        dScreen.blit( font.render(str(game.Ticker.getDays())+"days, "+str(game.Ticker.getHours())+":"+str(game.Ticker.getMins())+"."+str(game.Ticker.getSecs()), 1, colors.white, colors.black), (50,250) )
+        screen.blit(dScreen, (const.gameBoardOffset, const.gameBoardOffset) )
+        pygame.display.flip()
+    while (pygame.event.wait().type != pygame.KEYDOWN): pass
 
 def main():    
     titleScreen = pygame.Surface(screenSize)
@@ -102,6 +115,7 @@ def main():
                     if options[selection] == 'Begin New Game':
                         newGame = game.game(screen, clock)
                         newGame.mainLoop()
+                        deathScreen(newGame)
                     elif options[selection] == 'Load Saved Game':
                         try:
                             loadFile = getFile()

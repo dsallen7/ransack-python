@@ -33,7 +33,7 @@ class hero(pygame.sprite.Sprite):
             self.X = const.blocksize
             self.Y = const.blocksize
             
-            self.currHP = 50
+            self.currHP = 10
             self.maxHP = 50
             
             self.currMP = 20
@@ -62,6 +62,7 @@ class hero(pygame.sprite.Sprite):
             
             self.gold = 50
             self.isPoisoned = False
+            self.isDamned = False
         else: self.installLoadedHero(load)
         
         self.step = False
@@ -311,6 +312,30 @@ class hero(pygame.sprite.Sprite):
         return True
     def getSpells(self):
         return self.spells
+    
+    def updateStatus(self, ticker, hud):
+        if self.isPoisoned:
+            ticker.tick(5)
+            if ticker.getTicks() - self.poisonedAt >= 120 * ticker.timeRate:
+                hud.txtMessage('The poison has left your system.')
+                self.isPoisoned = False
+            else:
+                hud.txtMessage('The poison hurts you...')
+                if self.takeDmg(1) < 1:
+                    hud.txtMessage("You have died!")
+                    return False
+        if self.isDamned:
+            ticker.tick(5)
+            if ticker.getTicks() - self.damnedAt >= 120 * ticker.timeRate:
+                hud.txtMessage('You are no longer damned.')
+                self.isDamned = False
+            else:
+                hud.txtMessage('The demon siphons your lifepower...')
+                if self.takeDmg(1) < 1:
+                    hud.txtMessage("You have died!")
+                    return False
+        return True
+        
     
     def getSaveBall(self):
         str = self.strength

@@ -1,4 +1,5 @@
 pEnemies = ['Cobra', 'Scorpion']
+dEnemies = ['Zombie','Skeleton']
 
 healthDict = { 
               'Skeleton': 12,

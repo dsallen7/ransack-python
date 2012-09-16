@@ -102,6 +102,8 @@ class hud( ):
         self.boxStat(cEX, nEX, colors.green, colors.dkgreen, (29,93) )
         if self.game.myHero.isPoisoned:
             self.frameBox1.blit(images.mapImages[122], (30,111))
+        elif self.game.myHero.isDamned:
+            self.frameBox1.blit(images.mapImages[123], (30,111))
         # ticker
         self.drawClock(106, 159)
         #show equipped armor and weapon

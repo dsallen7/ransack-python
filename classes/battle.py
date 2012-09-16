@@ -84,6 +84,8 @@ class battle():
     
     # this controls all the logic of what goes on in an actual battle
     def fightBattle(self, game, enemy):
+        game.myHud.update()
+        self.drawBattleScreen(enemy)
         hero = game.myHero
         (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX, psn) = hero.getPlayerStats()
         (armor, weapon) = ( hero.getArmorEquipped(), hero.getWeaponEquipped() )
@@ -91,16 +93,8 @@ class battle():
         time = 0
         while enemy.getHP() > 0:
             #clock.tick(15)
-            if hero.isPoisoned:
-                game.Ticker.tick(5)
-                if game.Ticker.getTicks() - hero.poisonedAt >= 120:
-                    game.textMessage('The poison has left your system.')
-                    hero.isPoisoned = False
-                else:
-                    game.textMessage('The poison hurts you...')
-                    if hero.takeDmg(1) < 1:
-                        game.textMessage("You have died!")
-                        return False
+            if not hero.updateStatus(game.Ticker, game.myHud):
+                return False
                 
             action = self.getAction()
             if action == 'FighT':
@@ -137,9 +131,18 @@ class battle():
                     else: game.textMessage("The "+enemy.getName()+" attack is ineffective.")
                     if enemy.poison:
                         if self.rollDie(0,3):
+                            if hero.isDamned:
+                                hero.isDamned = False
                             hero.isPoisoned = True
                             hero.poisonedAt = game.Ticker.getTicks()
                             game.textMessage("You are poisoned!")
+                    elif enemy.damned:
+                        if self.rollDie(0,3):
+                            if hero.isPoisoned:
+                                hero.isPoisoned = False
+                            hero.isDamned = True
+                            hero.damnedAt = game.Ticker.getTicks()
+                            game.textMessage("You are damned!")                        
                     if hero.takeDmg(dmg) < 1:
                         game.textMessage("You have died!")
                         return False

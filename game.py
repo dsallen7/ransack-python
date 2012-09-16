@@ -324,16 +324,10 @@ class game():
             Y += moveY
             self.myHero.setXY(X,Y)
         self.Display.redrawXMap(self.myMap)
-        if self.myHero.isPoisoned:
-            self.Ticker.tick(5)
-            if self.Ticker.getTicks() - self.myHero.poisonedAt >= 120:
-                self.textMessage('The poison has left your system.')
-                self.myHero.isPoisoned = False
-            else:
-                self.textMessage('The poison hurts you...')
-                if self.myHero.takeDmg(1) < 1:
-                    self.textMessage("You have died!")
-                    self.gameOn = False
+        
+        if not self.myHero.updateStatus(self.Ticker, self.myHud):
+            self.gameOver()
+        
         self.Ticker.tick(2)
         return True
     
