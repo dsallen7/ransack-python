@@ -89,7 +89,7 @@
     # --------ITEMS---------
     # 86: fruit 1
     # 87: cheese
-    # 88: meat 1
+    # 88: ring
     # 89: meat 2
     # 90: bread 1
     # 91: antidote

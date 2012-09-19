@@ -65,11 +65,11 @@ def getFile():
         screen.blit( saveBox, (100,200) )
         pygame.display.flip()
         
-def deathScreen(game):
+def endScreen(game, msg):
     dScreen = pygame.Surface( (300, 300) )
     if pygame.font:
         font = pygame.font.Font("./FONTS/SpinalTfanboy.ttf", 72)
-        dScreen.blit( font.render("You Died!", 1, colors.red, colors.black), (50,50) )
+        dScreen.blit( font.render(msg, 1, colors.red, colors.black), (50,50) )
         font = pygame.font.Font("./FONTS/gothic.ttf", 24)
         dScreen.blit( font.render("Level reached: "+str(game.myHero.level), 1, colors.white, colors.black), (50,150) )
         font = pygame.font.Font("./FONTS/gothic.ttf", 14)
@@ -114,8 +114,10 @@ def main():
                 if event.key == pygame.K_RETURN:
                     if options[selection] == 'Begin New Game':
                         newGame = game.game(screen, clock)
-                        newGame.mainLoop()
-                        deathScreen(newGame)
+                        if newGame.mainLoop():
+                            endScreen(newGame, "Game Over")
+                        else:
+                            endScreen(newGame, "You Win!")
                     elif options[selection] == 'Load Saved Game':
                         try:
                             loadFile = getFile()
@@ -125,7 +127,10 @@ def main():
                                 ball = cPickle.load(savFile)
                                 savFile.close()
                                 Game = game.game(screen, clock, loadHero=ball[0], loadDungeon=ball[1], loadTicker = ball[2], currentMap = ball[3])
-                                Game.mainLoop()
+                                if Game.mainLoop():
+                                    endScreen(Game, "Game Over")
+                                else:
+                                    endScreen(Game, "You Win!")
                         except IOError, e:
                             print 'File I/O error', e
                     elif options[selection] == 'ExiT':

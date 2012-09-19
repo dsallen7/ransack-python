@@ -33,7 +33,7 @@ class hero(pygame.sprite.Sprite):
             self.X = const.blocksize
             self.Y = const.blocksize
             
-            self.currHP = 10
+            self.currHP = 50
             self.maxHP = 50
             
             self.currMP = 20
@@ -367,11 +367,11 @@ class hero(pygame.sprite.Sprite):
         itm = self.items
         spl = self.spells
         gld = self.gold
-        psn = self.isPoisoned
-        return (str, itl, dex, X, Y, cHP, mHP, cMP, mMP, scr, kys, lvl, cXP, nXP, wpn, weq, arm, aeq, itm, spl, gld, psn)
+        sts = [self.isPoisoned, self.isDamned]
+        return (str, itl, dex, X, Y, cHP, mHP, cMP, mMP, scr, kys, lvl, cXP, nXP, wpn, weq, arm, aeq, itm, spl, gld, sts)
     
     def installLoadedHero(self, load):
-        (str, itl, dex, X, Y, cHP, mHP, cMP, mMP, scr, kys, lvl, cXP, nXP, wpn, weq, arm, aeq, itm, spl, gld, psn) = load
+        (str, itl, dex, X, Y, cHP, mHP, cMP, mMP, scr, kys, lvl, cXP, nXP, wpn, weq, arm, aeq, itm, spl, gld, sts) = load
         self.strength = str
         self.intell = itl
         self.dex = dex
@@ -403,7 +403,8 @@ class hero(pygame.sprite.Sprite):
         self.spells = spl
         
         self.gold = gld
-        self.isPoisoned = psn
+        self.isPoisoned = sts[0]
+        self.isDamned = sts[1]
         
     
     # for debugging purposes

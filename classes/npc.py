@@ -2,6 +2,8 @@ import pygame, random, math, os
 from load_image import *
 from UTIL import const, misc
 
+from SCRIPTS import npcScr
+
 from IMG import images
 
 class npc(pygame.sprite.Sprite):
@@ -34,6 +36,7 @@ class npc(pygame.sprite.Sprite):
     
     def interact(self, hud):
         hud.npcMessage(self.message, self.images[8])
+        return None
     
     def move(self, dir, map, heroPos):
         (hX, hY) = heroPos
@@ -94,11 +97,32 @@ class Guard(npc):
 
 class King(npc):
     
-    def __init__(self, x, y, name):
+    def __init__(self, x, y, name, game):
         npc.__init__(self, x, y, name, 'king.bmp')
+        self.game = game
+        
+        self.accepted = False
     
     def update(self, map, heropos):
         pass
+    
+    def interact(self, hud):
+        if not self.accepted:
+            if hud.npcDialog(self.message, self.images[8]):
+                hud.npcMessage("Excellent news! Here is the key you will need to access the Dungeon.", self.images[8])
+                self.accepted = True
+                return ('item', const.KEY)
+            else:
+                hud.npcMessage("I am most dismayed to hear this; please return if you have a change of heart!", self.images[8])
+                return None
+        else:
+            if self.game.won:
+                hud.npcMessage("You win the game!", self.images[8])
+                self.game.gameOn = False
+                return None
+            else:
+                hud.npcMessage("Haste, young hero. Time is of the essence!", self.images[8])
+                return None
 
 class Citizen(npc):
     def __init__(self, x, y, name, filename):
@@ -193,3 +217,19 @@ class skeletonKing(Enemy):
         i = random.randrange(1, 6)
         if i == 5:
             self.takeStep()
+
+def newNpc( n, game ):
+    (x,y) = n[0]
+    # civilians
+    if n[1] == 'guard':
+        return Guard(x, y, n[2])
+    elif n[1] == 'female':
+        return Female(x, y, n[2])
+    elif n[1] == 'king':
+        return King(x, y, n[2], game)
+    # enemies
+    elif n[1] == 'skeletonking':
+        return skeletonKing(x, y, 'Skeleton King', 'skeleton.bmp', n)
+    else:
+        i = npcScr.enemyDict[ n[1] ]
+        return Enemy(x, y, i[0], i[1], n)

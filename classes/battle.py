@@ -58,7 +58,7 @@ class battle():
                         pass
             menuBox.blit( self.images[0], (0, selection*25) )            
             self.battleField.blit( menuBox, (200,150) )
-            #self.drawBattleScreen()
+            self.drawBattleScreen()
     
     def commence(self, screen):
         while (pygame.event.wait().type != pygame.KEYDOWN): pass

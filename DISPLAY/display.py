@@ -33,7 +33,7 @@ class Display():
         ry = ry/const.blocksize
         (topX, topY), (oldTopX, oldTopY) = map.updateWindowCoordinates(hero)
         gameBoard.blit( self.getMapWindow( (topX, topY), map.WINDOWSIZE ), (map.WINDOWOFFSET,map.WINDOWOFFSET) )
-        if map.type == 'dungeon':
+        if map.type in ['dungeon', 'fortress']:
             self.drawShade(map, gameBoard)
             #self.drawDarkness(rx, ry, gameBoard)
     # takes map coordinates, returns map window

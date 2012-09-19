@@ -41,11 +41,6 @@ class hud( ):
     def writeText(self, surface, loc, text, fgc, bgc, size=14, font=os.getcwd()+"/FONTS/gothic.ttf"):
         font = pygame.font.Font(font, size)
         surface.blit( font.render(text, 1, fgc, bgc), loc )
-    # Draw an arc that is a portion of a circle.
-    # We pass in screen and color,
-    # followed by a tuple (x,y) that is the center of the circle, and the radius.
-    # Next comes the start and ending angle on the "unit circle" (0 to 360)
-    #  of the circle we want to draw, and finally the thickness in pixels
 
     def boxStat(self, stat, mStat, fgc, bgc, loc):
         (x, y) = loc
@@ -96,9 +91,6 @@ class hud( ):
         #draw stats
         self.boxStat(cHP, mHP, colors.dkred, colors.red, (29,53) )
         self.boxStat(cMP, mMP, colors.dkblue, colors.blue, (29,73) )
-        #self.circleStat(sth, dkred, red, (41,107), 12)
-        #self.circleStat(itl, grey, ltgrey, (74,107), 12)
-        #self.circleStat(dex, purple, violet, (107,107), 12)
         self.boxStat(cEX, nEX, colors.green, colors.dkgreen, (29,93) )
         if self.game.myHero.isPoisoned:
             self.frameBox1.blit(images.mapImages[122], (30,111))
@@ -146,7 +138,7 @@ class hud( ):
         self.scrollText[1] = self.scrollText[2]
         self.scrollText[2] = self.scrollText[3]
         self.scrollText[3] = self.scrollText[4]
-        self.scrollText[4] = str(self.game.Ticker.getMins())+'.'+str(self.game.Ticker.getSecs())+' - '+msg
+        self.scrollText[4] = str(self.game.Ticker.getHours()%24)+":"+str(self.game.Ticker.getMins()%60)+'.'+str(self.game.Ticker.getSecs())+' - '+msg
         if pygame.font:
             font = pygame.font.Font(os.getcwd()+"/FONTS/courier.ttf", 12)
             for i in range(5):
@@ -162,7 +154,7 @@ class hud( ):
         if pygame.font:
             font = pygame.font.Font(font, fontsize)
             if len(message) < lineWidth:
-                msgText = pygame.Surface( (len(message)*(fontsize/2), fontsize*2 ) )
+                msgText = pygame.Surface( (len(message)*(fontsize), fontsize*2 ) )
                 msgText.fill(colors.gold)
                 msgText.blit( font.render( message, 1, colors.white, colors.gold ), (0,0) )
             else:
@@ -189,10 +181,53 @@ class hud( ):
             borderBox.blit(img, (10,10) )
             borderBox.blit(msgText, (40, 10) )
             self.screen.blit(borderBox, ( const.gameBoardOffset + px + const.blocksize + (msgText.get_width()/2) - i, const.gameBoardOffset + py + const.blocksize ) )
-            #self.screen.blit(borderBox, ( (self.screen.get_width()/2)-i, (self.screen.get_height()/2)-(msgText.get_height()/2) ) )
             pygame.display.flip()
             
         while (pygame.event.wait().type != pygame.KEYDOWN): pass
+    
+    def npcDialog(self, message, img):
+        msgText = self.getMsgText(message, os.getcwd()+"/FONTS/devinne.ttf", 18)
+        ytext = self.getMsgText('Yes', os.getcwd()+"/FONTS/devinne.ttf", 18)
+        ntext = self.getMsgText('No', os.getcwd()+"/FONTS/devinne.ttf", 18)
+        (px, py, px2, py2) = self.game.myHero.getRect()
+        for i in range(msgText.get_width()/2):
+            borderBox = pygame.Surface( ( ((i*2)+60 ), (msgText.get_height()+ytext.get_height())+20) )
+            borderBox.fill( colors.grey )
+            borderBox.blit(img, (10,10) )
+            borderBox.blit(msgText, (40, 10) )
+            borderBox.blit(ytext, (40, 10 + msgText.get_height() ) )
+            borderBox.blit(ntext, (borderBox.get_width()-ntext.get_width()-20, 10 + msgText.get_height() ) )
+            self.screen.blit(borderBox, ( const.gameBoardOffset + px + const.blocksize + (msgText.get_width()/2) - i, const.gameBoardOffset + py + const.blocksize ) )
+            pygame.display.flip()
+        
+        positions = [(40, 10 + msgText.get_height() ), (borderBox.get_width()-ntext.get_width()-20, 10 + msgText.get_height() )]
+        
+        yesPoints = [(40, 10 + msgText.get_height() ), 
+                     (40, 10 + msgText.get_height() + ytext.get_height() ), 
+                     (40 + ytext.get_width(), 10 + msgText.get_height() + ytext.get_height() ), 
+                     (40 + ytext.get_width(), 10 + msgText.get_height() )]
+        noPoints = [(borderBox.get_width()-ntext.get_width()-20, 10 + msgText.get_height() ), 
+                    (borderBox.get_width()-ntext.get_width()-20, 10 + msgText.get_height() + ntext.get_height() ), 
+                    (ntext.get_width() + borderBox.get_width()-ntext.get_width()-20, 10 + msgText.get_height() + ntext.get_height() ), 
+                    (ntext.get_width() + borderBox.get_width()-ntext.get_width()-20, 10 + msgText.get_height() )]
+        pts = [yesPoints, noPoints]
+        selection = True
+        while True:
+            for e in pygame.event.get():
+                if e.type == pygame.KEYDOWN:
+                    if e.key == pygame.K_LEFT or e.key == pygame.K_RIGHT:
+                        if selection:
+                            pygame.draw.lines(borderBox, colors.gold, True, pts[0], 1)
+                            pygame.draw.lines(borderBox, colors.white, True, pts[1], 1)
+                        else:
+                            pygame.draw.lines(borderBox, colors.gold, True, pts[1], 1)
+                            pygame.draw.lines(borderBox, colors.white, True, pts[0], 1)
+                        selection = not selection
+                    elif e.key == pygame.K_RETURN:
+                        return selection
+            self.screen.blit(borderBox, ( const.gameBoardOffset + px + const.blocksize, const.gameBoardOffset + py + const.blocksize ) )
+            pygame.display.flip()
+        
     def boxMessage(self, message):
         msgText = self.getMsgText(message, os.getcwd()+"/FONTS/devinne.ttf", 18)
         (px, py, px2, py2) = self.game.myHero.getRect()

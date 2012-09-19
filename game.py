@@ -36,7 +36,7 @@ class game():
         
         self.fortressMaps = []
         for mapFileName in const.fMapList:
-            self.fortressMaps += [map.gameMap(mapFileName, type='dungeon')]
+            self.fortressMaps += [map.gameMap(mapFileName, type='fortress')]
         
         self.myMap = self.myDungeon[self.currentMap]
         self.NPCs = []
@@ -63,6 +63,8 @@ class game():
         
         self.myBattle = battle.battle(self.screen)
         self.clock = clock
+        
+        self.won = False
     
     #toggles switch to continue running game
     def gameOver(self):
@@ -79,27 +81,10 @@ class game():
         self.NPCs = []
         visibleNPCs = []
         for n in map.NPCs:
-            (x,y) = n[0]
-            mID = 0
-            if n[1] == 'guard':
-                self.NPCs.append( npc.Guard(x, y, n[2]) )
-            elif n[1] == 'female':
-                self.NPCs.append( npc.Female(x, y, n[2]) )
-            elif n[1] == 'king':
-                self.NPCs.append( npc.King(x, y, n[2]) )
-            elif n[1] == 'skeleton':
-                self.NPCs.append( npc.Enemy(x, y, 'Skeleton', 'skeleton.bmp', n) )
-            elif n[1] == 'orc':
-                self.NPCs.append( npc.Enemy(x, y, 'Orc', 'orc.bmp', n) )
-            elif n[1] == 'cobra':
-                self.NPCs.append( npc.Enemy(x, y, 'Cobra', 'cobra.bmp', n))
-            elif n[1] == 'zombie':
-                self.NPCs.append( npc.Enemy(x, y, 'Zombie', 'zombie.bmp', n))
-            elif n[1] == 'skeletonking':
-                self.NPCs.append( npc.skeletonKing(x, y, 'Skeleton King', 'skeleton.bmp', n))
-            mID = mID + 1
+            self.NPCs.append( npc.newNpc( n, self ) )
         self.allsprites = pygame.sprite.RenderPlain((self.myHero, self.NPCs))
         self.allsprites.clear(self.screen, self.gameBoard)
+    
     def addShops(self, map):        
         self.Blacksmiths = range(4)
         self.Armories = range(4)
@@ -160,7 +145,7 @@ class game():
             self.boxMessage('Now entering dungeon level '+str(self.levelDepth))
         else:
             self.addShops(self.myMap)
-            self.boxMessage('Now entering village')
+            self.boxMessage('Now entering '+self.myMap.getType())
         self.addNPCs(self.myMap)
         self.Display.redrawXMap(self.myMap)
         self.DIM = self.myMap.getDIM()
@@ -229,12 +214,16 @@ class game():
         y = (y / const.blocksize) + dY
         for n in self.NPCs:
             if ( x, y ) == n.getXY():
-                if n.interact(self.myHud) == 'battle':
+                r = n.interact(self.myHud)
+                if r == None: return
+                elif r == 'battle':
                     if self.launchBattle(n.name, self.levelDepth):
                         self.removeNPC(n.getID())
                     else: n.confuse(30)
                     return
-                else: return
+                elif r[0] == 'item':
+                    self.myHero.getItem( OBJ.item.Item( r[1] ) )
+                    return
         i = self.myMap.getEntry(x, y)
         # Chest
         if i == const.CHEST:
@@ -334,7 +323,7 @@ class game():
     def launchBattle(self, mName, lD):
         self.boxMessage("The baTTle is joined!")
         self.gameBoard.fill( colors.black )
-        g = self.myBattle.fightBattle(self, enemy.enemy(mName, lD))
+        g = self.myBattle.fightBattle(self, enemy.enemy(mName, lD) )
         if g == True: # escaped from battle
             return False
         elif g == False: # died in battle
@@ -342,6 +331,9 @@ class game():
         else: # won battle
             self.textMessage('You find '+str(g)+' gold pieces!')
             self.myHero.addGold(g)
+            # final boss
+            if mName == 'Skeleton King':
+                self.won = True
             return True
     
     def rollDie(self, target, range):
@@ -429,4 +421,4 @@ class game():
                 self.Display.drawSprites(self.myHero, self.myMap, self.gameBoard, self, None, animated=True)
             self.Display.redrawMap(self.myMap, self.myHero, self.gameBoard)
             self.displayGameBoard()
-        return
+        return self.won
