@@ -1,12 +1,11 @@
-import pygame
-import menu
+import pygame, menu, os
 from load_image import *
-from const import *
 from classes import menu
 from IMG import images
 import random
 from OBJ import item
 from SCRIPTS import shopScr
+from UTIL import const, colors
 
 
 class Shop():
@@ -24,7 +23,7 @@ class Shop():
         self.level = level
         self.ticker = ticker
         self.items = []
-        self.storeScreen.fill( black )
+        self.storeScreen.fill( colors.black )
     
     def drawStoreScreen(self):
         self.myHud.update()
@@ -38,11 +37,11 @@ class Shop():
         options = ['Buy', 'Sell', 'ExiT']
         selection = 0
         while True:
-            menuBox.fill( gold )
+            menuBox.fill( colors.gold )
             if pygame.font:
                 font = pygame.font.Font(os.getcwd()+"/FONTS/SpinalTfanboy.ttf", 18)
                 for i in range(3):
-                    menuBox.blit( font.render(options[i], 1, white, gold), (25,i*25) )
+                    menuBox.blit( font.render(options[i], 1, colors.white, colors.gold), (25,i*25) )
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     os.sys.exit()
@@ -111,7 +110,7 @@ class Blacksmith(Shop):
         
         Shop.__init__(self, screen, hud, level, type, ticker)
         items = shopScr.blacksmithShopsByLevel[self.level]
-        self.images[1], r = load_image('blacksmith.bmp')
+        self.images[1], r = load_image( os.path.join('INT', 'blacksmith.bmp') )
         self.storeScreen.blit( self.images[1], (0,0) )
         from OBJ import weapon
         from prices import weaponPrices as prices
@@ -147,7 +146,7 @@ class Armory(Shop):
         
         Shop.__init__(self, screen, hud, level, type, ticker)
         items = shopScr.armoriesByLevel[self.level]
-        self.images[1], r = load_image('armory.bmp')
+        self.images[1], r = load_image( os.path.join('INT', 'armory.bmp'))
         self.storeScreen.blit( self.images[1], (0,0) )
         from OBJ import armor
         from prices import armorPrices as prices
@@ -184,7 +183,7 @@ class itemShop(Shop):
         
         Shop.__init__(self, screen, hud, level, type, ticker)
         from OBJ import item
-        self.images[1], r = load_image('itemshop.bmp')
+        self.images[1], r = load_image( os.path.join('INT', 'itemshop.bmp'))
         self.storeScreen.blit( self.images[1], (0,0) )
         from prices import itemPrices as prices
         self.prices = prices
@@ -221,7 +220,7 @@ class magicShop(Shop):
         
         Shop.__init__(self, screen, hud, level, type, ticker)
         from OBJ import item
-        self.images[1], r = load_image('magicshop.bmp')
+        self.images[1], r = load_image( os.path.join('INT', 'magicshop.bmp'))
         self.storeScreen.blit( self.images[1], (0,0) )
         from prices import magicPrices as prices
         self.prices = prices

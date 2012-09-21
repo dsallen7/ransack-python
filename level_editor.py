@@ -2,9 +2,9 @@ from types import *
 import pygame, os, cPickle, random, gzip
 from IMG import images
 
-from load_image import *
+from UTIL import load_image
 
-from MAP import mapgen, map
+from MAP import mapgen, mazegen, map
 
 from UTIL import queue, const, colors, eztext
 
@@ -26,7 +26,7 @@ class Handler():
     def __init__(self, cPos):
         self.cursorPos = cPos
         self.currentTile = 0
-        self.sideImg, sideRect = load_image('sidebar.bmp')
+        self.sideImg, sideRect = load_image.load_image('sidebar.bmp')
         self.npcImg = pygame.Surface( (30, 30 ))
         self.npcImg.fill(colors.red)
         #self.npcImg, npcR = load_image('npc.bmp')
@@ -189,9 +189,14 @@ class Handler():
             return
     
     def generateMap(self, rooms):
-        MG = mapgen.Generator(myMap.DIM)
-        MG.generateMap(rooms)
-        myMap.installBall( MG.map.getMapBall() )
+        if rooms > 0:
+            MG = mapgen.Generator(myMap.DIM)
+            MG.generateMap(rooms)
+            myMap.installBall( MG.getMapBall() )
+        else:
+            MG = mazegen.Generator(myMap.DIM, 1)
+            MG.generateMap()
+            myMap.installBall( MG.getMapBall() )
 
     def event_handler(self, event):
         (x,y) = self.cursorPos
@@ -446,7 +451,7 @@ class Handler():
 
         boxPoints = ( (x,y), (x,y+blocksize), (x+blocksize,y+blocksize), (x+blocksize,y) )
         pygame.draw.lines( gridField, self.cursorColor, True, boxPoints, 1 )
-        self.sideImg, sideRect = load_image('sidebar.bmp')
+        self.sideImg, sideRect = load_image.load_image('sidebar.bmp')
         if self.placeNPC: self.sideImg.blit(self.npcImg,(50,50))
         else: self.sideImg.blit(mapImages[self.currentTile],(50,50))
         self.sideImg.blit(mapImages[myMap.defaultBkgd],(50,130))

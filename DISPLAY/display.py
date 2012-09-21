@@ -33,7 +33,7 @@ class Display():
         ry = ry/const.blocksize
         (topX, topY), (oldTopX, oldTopY) = map.updateWindowCoordinates(hero)
         gameBoard.blit( self.getMapWindow( (topX, topY), map.WINDOWSIZE ), (map.WINDOWOFFSET,map.WINDOWOFFSET) )
-        if map.type in ['dungeon', 'fortress']:
+        if map.type in ['dungeon', 'maze', 'fortress']:
             self.drawShade(map, gameBoard)
             #self.drawDarkness(rx, ry, gameBoard)
     # takes map coordinates, returns map window
@@ -52,7 +52,7 @@ class Display():
     # draws entire map to DIMxDIM Surface
     def redrawXMap(self, map):
         self.xGameBoard = pygame.Surface( (map.getDIM()*const.blocksize, map.getDIM()*const.blocksize) )
-        if map.type == 'dungeon':
+        if map.type in ['dungeon', 'maze']:
             map.revealMap()
         for x in range(map.getDIM()):
             for y in range(map.getDIM()):
@@ -97,13 +97,17 @@ class Display():
                 if dir in ['left','right'] and oldX == 5*const.blocksize:
                     scrolling = True
             if newX > (DIMEN-5)*const.blocksize:
-                newX = newX - const.blocksize - int( math.floor( float(DIMEN)/2.) )*const.blocksize
+                newX = newX - int( math.floor( float(DIMEN)/2.) )*const.blocksize
+                if newX > const.HALFDIM*const.blocksize:
+                    newX = newX - 300
             if (5*const.blocksize <= newY <= (DIMEN-5)*const.blocksize):
                 newY = 5 * const.blocksize
                 if dir in ['up','down'] and oldY == 5*const.blocksize:
                     scrolling = True
             if newY > (DIMEN-5)*const.blocksize:
-                newY = newY - const.blocksize - int( math.floor( float(DIMEN)/2.) )*const.blocksize
+                newY = newY - int( math.floor( float(DIMEN)/2.) )*const.blocksize
+                if newY > const.HALFDIM*const.blocksize:
+                    newY = newY - 300
         else:
             newX += (const.HALFDIM - DIMEN)/2*const.blocksize
             newY += (const.HALFDIM - DIMEN)/2*const.blocksize
@@ -143,7 +147,7 @@ class Display():
                     
                     gameBoard.blit( self.getScrollingMapWindow( ( (topX*const.blocksize)+(idx*scrollX)-(const.blocksize*scrollX), (topY*const.blocksize)+(idx*scrollY)-(const.blocksize*scrollY) ) ), (0,0) )
                     
-                    if map.type == 'dungeon':
+                    if map.type in ['dungeon', 'maze']:
                         self.drawShade( map, gameBoard )
                         #self.myMap.drawDarkness( newX/blocksize, newY/blocksize, self.gameBoard )
                 else: self.redrawMap(map, hero, gameBoard)

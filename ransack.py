@@ -1,6 +1,5 @@
-import pygame, game, random, cPickle, gzip
-from UTIL import const, colors
-from load_image import *
+import pygame, game, random, cPickle, gzip, os
+from UTIL import const, colors, load_image
 
 # Set the height and width of the screen
 screenSize=[600,600]
@@ -18,7 +17,7 @@ random.seed()
 
 
 images = range(3)
-images[0], r = load_image('cursor.bmp', -1)
+images[0], r = load_image.load_image('cursor.bmp', -1)
 
 def getFile():
     saveFiles = range(3)
@@ -80,22 +79,22 @@ def endScreen(game, msg):
 
 def main():    
     titleScreen = pygame.Surface(screenSize)
-    titleScreen.fill(colors.black)
-    titleImg, titleRect = load_image('titlescreen.bmp', -1)
-    titleScreen.blit(titleImg, (50,50) )
+    titleImg, titleRect = load_image.load_image('titlescreen.bmp', None)
+    titleScreen.blit(titleImg, (0,0) )
     selection = 0
     options = ['Begin New Game', 'Load Saved Game', 'ExiT']
     screen.blit(titleScreen, (0,0))
-    menuBox = pygame.Surface( (200,80) )
     while True:
-        menuBox.fill( colors.brown )
-        screen.blit(titleScreen, (0,0))
+        menuBox = pygame.Surface( (300,300) )
+        menuBox.fill( colors.black )
+        menuBox.set_colorkey(colors.black)
         clock.tick(20)
         
         if pygame.font:
-            font = pygame.font.Font("./FONTS/SpinalTfanboy.ttf", 28)
+            font = pygame.font.Font("./FONTS/SpinalTfanboy.ttf", 48)
             for i in range(len(options)):
-                menuBox.blit( font.render(options[i], 1, colors.gold, colors.brown), (30,(i*25)) )
+                line = font.render(options[i], 1, colors.white, colors.black)
+                menuBox.blit( line, (30,(i*line.get_height() )) )
     
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -136,7 +135,9 @@ def main():
                     elif options[selection] == 'ExiT':
                         os.sys.exit()
         
-        menuBox.blit( images[0], (0, selection*25) )
+        menuBox.blit( images[0], (0, selection*line.get_height()+(line.get_height()/2) ) )
+        titleScreen.blit(titleImg, (0,0) )
         titleScreen.blit(menuBox, (200, 375) )
+        screen.blit(titleScreen, (0,0))
         pygame.display.flip()
 main()

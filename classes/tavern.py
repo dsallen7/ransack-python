@@ -20,7 +20,7 @@ class Tavern():
         self.myMenu = menu.menu(screen)
         self.images = range(2)
         self.images[0], r = load_image('cursor.bmp')
-        self.images[1], r = load_image('inn.bmp')
+        self.images[1], r = load_image( os.path.join('INT', 'inn.bmp'))
         self.storeScreen.fill( black )
         self.storeScreen.blit( self.images[1], (0,0) )
     

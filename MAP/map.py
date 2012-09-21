@@ -1,6 +1,5 @@
-import pygame, random, pickle, ppov, gzip
-from load_image import *
-from UTIL import queue, const, colors
+import pygame, random, pickle, ppov, gzip, os
+from UTIL import queue, const, colors, load_image
 from types import *
 from MAP import tile
 
@@ -164,7 +163,7 @@ class gameMap(map):
         self.visDict = {}
         for i in range( self.DIM ):
             for j in range( self.DIM ):
-                if self.type == 'dungeon': 
+                if self.type in ['dungeon', 'maze', 'fortress']: 
                     self.visDict[ (i,j) ] = False
                     self.grid[i][j].visible = False
                 else:
@@ -259,7 +258,7 @@ class gameMap(map):
     
     # complete list of tiles is in tiles1.txt
     def revealMap(self):
-        if self.type == 'dungeon':
+        if self.type in ['dungeon', 'maze']:
             litTiles = self.getLitTiles()
             self.litTiles = litTiles
             if litTiles == None: return
@@ -277,7 +276,10 @@ class gameMap(map):
         return result
     
     #@tail_call_optimized
-    def litBFS(self,start):
+    def litBFS(self,start, d=0):
+        if self.type == 'maze':
+            if d > 2:
+                return start
         (x,y) = start
         if self.getEntry(x,y) in [18,19]:
             return [ (x-1,y-1), (x,y-1), (x+1,y-1),
@@ -309,7 +311,7 @@ class gameMap(map):
         else:
             returnList = []
             for i in range( len( entryList ) ): 
-                returnList += [ self.litBFS(self.BFSQueue.pop()) ]
+                returnList += [ self.litBFS(self.BFSQueue.pop(), d+1) ]
             return [ (x,y) ] + returnList
     
     def getLitTiles(self):

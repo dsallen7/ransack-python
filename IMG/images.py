@@ -3,6 +3,8 @@
 from spritesheet import *
 from UTIL import const
 
+import os
+
 heroImages = range(8)
 mapImages = range(133)
 editorImages = range(7)
@@ -28,13 +30,11 @@ def load():
     mapSpriteSheet = spritesheet('mastersheet.bmp')
     for i in range(128):
         mapImages[i] = mapSpriteSheet.image_at( ( (i*const.blocksize)%240, (i/8)*const.blocksize, const.blocksize, const.blocksize), 1 )
-    mapImages[128] = load_image('house1.bmp', 1)
-    mapImages[129] = load_image('mShop.bmp', 1)
-    mapImages[130] = load_image('bSmith.bmp', 1)
-    mapImages[131] = load_image('armry.bmp', 1)
-    mapImages[132] = load_image('tavrn.bmp', 1)
+    siteImgs = ['house1.bmp', 'mShop.bmp', 'bSmith.bmp', 'armry.bmp', 'tavrn.bmp']
+    for i in range(128, 133):
+        mapImages[i] = load_image( os.path.join('EXT', siteImgs[i-128]), 1 )
     
-    heroSpriteSheet = spritesheet('herosheet.bmp')
+    heroSpriteSheet = spritesheet( os.path.join('CHAR', 'herosheet.bmp'))
     for i in range(8):
         heroImages[i] = heroSpriteSheet.image_at( (i*const.blocksize, 0, const.blocksize, const.blocksize), -1 )
     
@@ -43,7 +43,7 @@ def load():
         editorImages[i] = editorSpriteSheet.image_at((i*const.blocksize, 0, const.blocksize, const.blocksize), -1 )
 
 def loadNPC(file):
-    npcSS = spritesheet(file)
+    npcSS = spritesheet( os.path.join('CHAR', file) )
     npcImages = range(9)
     for i in range(9):
         npcImages[i] = npcSS.image_at( (i*const.blocksize, 0, const.blocksize, const.blocksize), -1 )

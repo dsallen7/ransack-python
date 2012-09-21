@@ -4,7 +4,7 @@ from random import choice, randrange
 from MAP import map, tile
 from UTIL import const, colors
 
-from SCRIPTS import enemyScr
+from SCRIPTS import enemyScr, mapScr
 
 #from IMG import images
 
@@ -265,12 +265,15 @@ class Generator():
             (xpos, ypos) = choice4.getPos()
             (xdim, ydim) = choice4.getDimensions()
             chestItems = []
+            '''
             if self.rollDie(0, 2):
                 chestItems.append( (randrange(26,29), self.level/4,
-                                                               [randrange(0,2),
-                                                                randrange(0,2),
-                                                                randrange(0,2)]   ) )
+                                                               [randrange( (self.level/4)+1, (self.level/4)+3 ),
+                                                                randrange( (self.level/4)+1, (self.level/4)+3 ),
+                                                                randrange( (self.level/4)+1, (self.level/4)+3 )] ) )
             else: chestItems.append( (randrange(31,34), self.level/4, randrange(0, 3) ) )
+            '''
+            chestItems.append( (const.PARCHMENT-const.FRUIT1, choice(mapScr.parchByLevel[self.level]) ) )
             if self.rollDie(0, 2):
                 chestItems.append( (13, choice( range(15, 50)+range(15,30) ) ))
             self.map.setEntry( xpos + xdim/2, ypos + ydim/2, 110)
@@ -280,10 +283,10 @@ class Generator():
             (xpos, ypos) = room.getPos()
             (xdim, ydim) = room.getDimensions()
             self.map.setEntry( xpos + xdim/2, ypos + ydim/2, 110)
-            chestlist += [( ( xpos + xdim/2, ypos + ydim/2), [(randrange(26,29),0, 
-                                                               [randrange(0,2),
-                                                                randrange(0,2),
-                                                                randrange(0,2)]  )] )]
+            chestlist += [( ( xpos + xdim/2, ypos + ydim/2), [(randrange(26,29),self.level/4,
+                                                               [randrange( (self.level/4)+1, (self.level/4)+3 ),
+                                                                randrange( (self.level/4)+1, (self.level/4)+3 ),
+                                                                randrange( (self.level/4)+1, (self.level/4)+3 )] )] )]
             
         self.map.chests = dict(chestlist)
         # add enemies

@@ -1,16 +1,14 @@
-import pygame
-import os
-import random
-import pickle
+import pygame, os, random, pickle
 
-from classes import hero, hud, battle, menu, enemy, shop, tavern, npc
-from classes import OBJ
+from classes import battle, menu, enemy, shop, tavern
+import OBJ
 from IMG import images
-from DISPLAY import display
-from load_image import *
+from HERO import hero
+from NPC import npc
+from DISPLAY import display, hud
 
-from MAP import map, mapgen
-from UTIL import ticker, const, colors
+from MAP import map, mapgen, mazegen
+from UTIL import ticker, const, colors, load_image
 
 class game():
     
@@ -105,21 +103,29 @@ class game():
                     self.Armories[map.shops[s][1]] = shop.Armory(self.screen, self.myHud, map.shops[s][1], 'armory', self.Ticker)
 
     
-    def generateMap(self, dimension, level):
-        MG = mapgen.Generator(dimension, level)
-        MG.generateMap(20)
-        newMap = map.gameMap(None, MG.getMapBall(), level=self.levelDepth)
+    def generateMap(self, dimension, level, type):
+        if type == 'dungeon':
+            MG = mapgen.Generator(dimension, level)
+            MG.generateMap(20)
+            newMap = map.gameMap(None, MG.getMapBall(), level=self.levelDepth)
+        elif type == 'maze':
+            MG = mazegen.Generator(dimension, level)
+            MG.generateMap()
+            newMap = map.gameMap(None, MG.getMapBall(), level=self.levelDepth, type='maze')
         return newMap
         
     def nextLevel(self):
         self.currentMap += 1
         if self.currentMap == len(self.myDungeon):
             self.levelDepth += 1
-            if self.levelDepth == 4:
+            if self.levelDepth == 10:
                 self.myDungeon = self.myDungeon + self.fortressMaps
                 self.boxMessage('Now entering fortress')
             else:
-                self.myDungeon.append(self.generateMap(40, self.levelDepth))
+                if ( self.levelDepth % 5 ) == 0:
+                    self.myDungeon.append(self.generateMap(40, self.levelDepth, type = 'maze') )
+                else:
+                    self.myDungeon.append(self.generateMap(40, self.levelDepth, type = 'dungeon') )
                 self.boxMessage('Now entering dungeon level '+str(self.levelDepth))
             self.myMap = self.myDungeon[self.currentMap]
             self.Display.redrawXMap(self.myMap)
@@ -358,7 +364,7 @@ class game():
     
     def updateSprites(self):
         #self.allsprites.update()
-        if self.myMap.getType() == 'dungeon':
+        if self.myMap.type in ['dungeon', 'maze']:
             visibleNPCs = []
             for n in self.NPCs:
                 (x, y) = n.getXY()
@@ -391,7 +397,7 @@ class game():
         
 
     def mainLoop(self):
-        gameFrame, gameFrameRect = load_image('gamescreen600.bmp', None)
+        gameFrame, gameFrameRect = load_image.load_image('gamescreen600.bmp', None)
         self.screen.blit(gameFrame,(0,0))
         
         (pX, pY) = self.myMap.getPlayerXY()
