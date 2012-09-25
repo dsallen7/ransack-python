@@ -6,6 +6,7 @@ class Tile():
         self.fg = fg
         self.bg = bg
         self.lit = True
+        self.occupied = False
     
     def getXY(self):
         return (self.x, self.y)

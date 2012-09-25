@@ -19,7 +19,7 @@ class Tavern():
         images.load()
         self.myMenu = menu.menu(screen)
         self.images = range(2)
-        self.images[0], r = load_image('cursor.bmp')
+        self.images[0], r = load_image('cursor.bmp', -1)
         self.images[1], r = load_image( os.path.join('INT', 'inn.bmp'))
         self.storeScreen.fill( black )
         self.storeScreen.blit( self.images[1], (0,0) )
@@ -56,39 +56,7 @@ class Tavern():
             menuBox.blit( self.images[0], (0, selection*25) )            
             self.storeScreen.blit( menuBox, (165,190) )
             self.drawStoreScreen()
-    '''
-    def getFile(self):
-        saveFiles = range(3)
-        for i in range(3):
-            if os.access("ransack"+str(i)+".sav", os.F_OK):
-                saveFiles[i] = "ransack"+str(i)+".sav"
-            else: saveFiles[i] = 'No file'
-        
-        saveBox = pygame.Surface( (150,100) )
-        selection = 0
-        while True:
-            saveBox.fill( gold )
-            if pygame.font:
-                font = pygame.font.Font(os.getcwd()+"/FONTS/gothic.ttf", 18)
-                for i in range(3):
-                    saveBox.blit( font.render(saveFiles[i], 1, white, gold), (25,i*25) )
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    os.sys.exit()
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_UP:
-                        selection -= 1
-                        if selection == -1:
-                            selection = 2
-                    if event.key == pygame.K_DOWN:
-                        selection += 1
-                        if selection == 3:
-                            selection = 0
-                    if event.key == pygame.K_RETURN:
-                        return "ransack"+str(selection)+".sav"
-            saveBox.blit( self.images[0], (0, selection*25) )
-            self.storeScreen.blit( saveBox, (50,50) )
-            self.drawStoreScreen()'''
+    
     def getFile(self):
         saveFiles = range(3)
         desc = range(3)
@@ -97,10 +65,10 @@ class Tavern():
                 peekFile = gzip.GzipFile("ransack"+str(i)+".sav", 'rb')
                 ball = cPickle.load(peekFile)
                 peekFile.close()
-                desc[i] = 'Saved game '+str(i)+' Level '+str(ball[0][11])+' '+str(ball[2].getDays())+' Days '+ \
-                                                                                str(ball[2].getHours())+':'+str(ball[2].getHours())+':'+ \
-                                                                                str(ball[2].getMins())+'.'+ \
-                                                                                str(ball[2].getSecs())
+                desc[i] = 'Saved game '+str(i)+' Level '+str(ball[1][11])+' '+str(ball[0].getDays())+' Days '+ \
+                                                                                str(ball[0].getHours())+':'+str(ball[0].getHours())+':'+ \
+                                                                                str(ball[0].getMins())+'.'+ \
+                                                                                str(ball[0].getSecs())
                 saveFiles[i] = "ransack"+str(i)+".sav"
             else:
                 saveFiles[i] = 'No file'

@@ -19,7 +19,7 @@ The game begins in the 'village'. Currently the village has an item shop, magic 
 
 On venturing into the dungeon, new levels are automatically generated. Each dungeon has a key which unlocks the door to the next stairs down. Try to find the 'secret' dungeon rooms (hint: look at the minimap)
 
-Stairs lead hero to the next or previous level. If next level has not been visited yet, it will be generated automatically. The game culminates in a fortress level with a boss (which I haven't designed yet).
+Stairs lead hero to the next or previous level. If next level has not been visited yet, it will be generated automatically. The game culminates in a fortress section with a boss. The fortress begins at level 10.
 
 A basic level editor is included. Click the pencil for draw mode and the hand for select mode. In select mode, select a region and move it around the screen. In draw mode, Use 't' to select tiles or select with mouse, move with arrow keys and space bar or point and click to place tiles, and 'd' to toggle draw mode. If you place the door to a shop it will ask you for the level and then draw the entire shop at that location. 's' saves a map and 'l' loads. 'f' flood fills the map with currently selected tile beginning at the location of the cursor. 'g' generates a random map with specified number of rooms. Click the little naked guy to place non-player characters. The types currently implemented are 'guard', 'female' and 'skeleton'
 . There are cut/copy paste buttons but I haven't implemented them yet.

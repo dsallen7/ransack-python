@@ -6,7 +6,7 @@ miniblocksize = 15
 
 gameBoardOffset = 75
 
-timeRate = 10
+timeRate = 8
 
 maxLineWidth = 16
 

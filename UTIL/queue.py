@@ -7,7 +7,7 @@ class Queue():
         self.Q.append(e)
     
     def pop(self):
-        if self.Q == []:
+        if len(self.Q) == 0:
             return None
         else: return self.Q.pop(0)
     
@@ -16,3 +16,11 @@ class Queue():
     
     def reset(self):
         self.Q = []
+    
+    def isEmpty(self):
+        if len(self.Q) == 0:
+            return True
+        else: return False
+    
+    def size(self):
+        return len(self.Q)

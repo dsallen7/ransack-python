@@ -189,8 +189,8 @@ class hero(pygame.sprite.Sprite):
                     i[0].qty = len(i)
                     availableItems.append(i[0])
         return availableItems
-    def takeItem(self, type):
-        self.items[type-const.FRUIT1] = self.items[type-const.FRUIT1][1:]
+    def takeItem(self, item):
+        self.items[item.getType()-const.FRUIT1].remove(item)
     def useItem(self, item, game, battle=False):
         if item == None:
             return 0
@@ -198,13 +198,15 @@ class hero(pygame.sprite.Sprite):
             item = item[0]
         if item.getName() == 'parchment':
             mySpell = spell.Spell( item.spellNum )
-            if self.castSpell(mySpell, game, battle):
-                self.takeItem(item.getType())
+            d = self.castSpell(mySpell, game, battle, True)
+            if d > 0:
+                self.takeItem(item)
                 self.currMP = self.currMP + mySpell.cost
-                return mySpell.getCastTime()
+                game.Ticker.tick(mySpell.cost)
+                return d
             else: return 0
         item.execute(self)
-        self.takeItem(item.getType())
+        self.takeItem(item)
         return 60
     
     def getWeapons(self):
@@ -267,7 +269,7 @@ class hero(pygame.sprite.Sprite):
     
     def learnSpell(self, num):
         self.spells += [spell.Spell( num )]
-    def castSpell(self, spell, game, battle=False):
+    def castSpell(self, spell, game, battle=False, item=False):
         if spell == None:
             #game.textMessage('')
             return
@@ -278,8 +280,9 @@ class hero(pygame.sprite.Sprite):
             game.textMessage('That spell may not be cast in battle')
             return False
         elif spell.cost > self.currMP:
-            game.textMessage("You don't have enough MP!")
-            return
+            if item == False:
+                game.textMessage("You don't have enough MP!")
+                return
         if spell.getType() == const.TLPT:
             (x,y) = game.myMap.getRandomTile()
             self.setXY( x*const.blocksize, y*const.blocksize )
@@ -304,6 +307,10 @@ class hero(pygame.sprite.Sprite):
             dmg = random.randrange(self.intell,2*self.intell)
             game.textMessage('The iceball hits the monster for '+str(dmg)+' points!')
             return dmg
+        '''
+        if item == False:
+            self.takeMP(spell.cost)
+        '''
         spell.execute(self, game.myHud, battle)
         game.Ticker.tick(spell.getCastTime() )
         game.textMessage(spell.getCastMsg())
@@ -406,7 +413,7 @@ class hero(pygame.sprite.Sprite):
         
     
     # for debugging purposes
-    def showLocation(self, screen):
+    def showLocation(self):
         (x1,y1,x2,y2) = self.rect
         locBox = pygame.Surface( (350,50) )
         locBox.fill( colors.grey )
@@ -414,6 +421,5 @@ class hero(pygame.sprite.Sprite):
             font = pygame.font.SysFont("arial", 14)
             locText = font.render( "Self.X:"+str(self.X)+"Self.Y:"+str(self.Y)+"RectX:"+str(x1)+"RectY"+str(y1), 1, colors.red, colors.yellow )
             locBox.blit(locText, (10,10) )
-        screen.blit(locBox, (0, 0) )
-        pygame.display.flip()
+        return locBox
     

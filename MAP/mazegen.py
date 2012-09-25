@@ -77,17 +77,16 @@ class Generator():
         elif type == "closed":
             x = randrange(1, self.DIM-1)
             y = randrange(1, self.DIM-1)
-            while ( self.getMatrixEntry(x, y-1),
+            while not ( ( self.getMatrixEntry(x, y-1),
                     self.getMatrixEntry(x-1, y),
                     self.getMatrixEntry(x+1, y),
                     self.getMatrixEntry(x, y+1)
-                   ) not in list(itertools.permutations([True, True, True, False])):
+                   ) in list(itertools.permutations([True, True, True, False])) and not self.getMatrixEntry(x, y) ):
                 x = randrange(1, self.DIM-1)
                 y = randrange(1, self.DIM-1)
             return (x,y)
     
-    def generateMap(self):
-        self.Z = self.maze()
+    def matrixToMap(self, mat):
         for i in range(1, self.DIM-1):
             
             if self.getMatrixEntry(i, 1):
@@ -107,6 +106,15 @@ class Generator():
                 if self.getMatrixEntry(i, j):
                     self.map.setEntry(i, j, mapScr.wallDict[( self.getMatrixEntry(i, j-1), self.getMatrixEntry(i-1, j), self.getMatrixEntry(i+1, j), self.getMatrixEntry(i, j+1) )]   )
                 else: self.map.setEntry(i, j, 0)
+    
+    def generateMap(self):
+        self.Z = self.maze()
+        self.matrixToMap(self.Z)
+        
+        while not self.map.pathfinder( (1, self.DIM-2), (self.DIM-2, 1) ):
+            self.Z = self.maze()
+            self.matrixToMap(self.Z)
+        
         self.map.setEntry(0, 0, 40)
         self.map.setEntry( 1, self.DIM-2, const.STAIRDN)
         self.map.pointOfExit = ( 1, self.DIM-2 )

@@ -1,5 +1,5 @@
 import pygame, random, pickle, ppov, gzip, os
-from UTIL import queue, const, colors, load_image
+from UTIL import queue, const, colors, load_image, misc
 from types import *
 from MAP import tile
 
@@ -258,22 +258,13 @@ class gameMap(map):
     
     # complete list of tiles is in tiles1.txt
     def revealMap(self):
-        if self.type in ['dungeon', 'maze']:
+        if self.type in ['dungeon', 'maze', 'fortress']:
             litTiles = self.getLitTiles()
             self.litTiles = litTiles
             if litTiles == None: return
             for tile in litTiles:
                 self.visDict[ tile ] = True
         return
-    
-    def flatten(self, x):
-        result = []
-        for el in x:
-            if hasattr(el, "__iter__") and not isinstance(el, basestring) and type(el) is not TupleType and type(el) is not NoneType:
-                result.extend(self.flatten(el))
-            elif type(el) is TupleType:
-                result.append(el)
-        return result
     
     #@tail_call_optimized
     def litBFS(self,start, d=0):
@@ -318,7 +309,7 @@ class gameMap(map):
         (px, py) = self.playerXY
         self.BFSQueue.reset()
         self.visited = []
-        litTiles = self.flatten( self.litBFS( (px,py) ) )
+        litTiles = misc.flatten( self.litBFS( (px,py) ) )
         litTiles = list( set( litTiles) )
         self.litTiles = litTiles
         return litTiles
@@ -327,6 +318,9 @@ class gameMap(map):
         if (x, y) in self.litTiles:
             return True
         else: return False
+    
+    def isOccupied(self, x, y):
+        return self.grid[x][y].occupied
 
 # inherited map class to be used by map generator
 class edMap(map):
@@ -477,7 +471,36 @@ class genMap(map):
     def __init__(self, DIM, level ):
         map.__init__(self, DIM, const.VOID)
         self.level = level
+        self.BFSQueue = queue.Queue()
         for i in range(self.DIM):
             self.grid += [range(self.DIM)]
             for j in range(self.DIM):
                 self.grid[i][j] = tile.Tile(i, j, const.VOID, const.VOID)
+    
+    def pathfinderBFS(self, start):
+        (x,y) = start
+        entryList = []
+        self.visited += [ (x, y) ]
+        self.BFSQueue.push( (x, y) )
+        while not self.BFSQueue.isEmpty():
+            (x, y) = self.BFSQueue.pop()
+            print self.BFSQueue.size()
+            for (Cx,Cy) in const.CARDINALS:
+                if (x+Cx,y+Cy) not in self.visited and  not self.BFSQueue.has( (x+Cx, y+Cy) ) and self.getEntry(x+Cx,y+Cy) in range(24):
+                    self.BFSQueue.push( (x+Cx, y+Cy) )
+                    print 'push'
+                    print self.BFSQueue.size()
+                    self.visited += [ (x+Cx,y+Cy) ]
+        return self.visited
+        
+    def pathfinder(self, t1, t2):
+        self.visited = []
+        self.BFSQueue.reset()
+        tiles = self.pathfinderBFS( t1 )
+        print tiles
+        if t2 in tiles:
+            return True
+            print True
+        else:
+            return False
+            print False

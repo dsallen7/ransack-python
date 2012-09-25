@@ -44,27 +44,12 @@ class npc(pygame.sprite.Sprite):
         self.moving = True
         (sX, sY) = self.getXY()
         self.dir = dir
-        if dir == 'up':
-            self.imgIdx = 0
-            if map.getEntry(sX, sY - 1) in range(25) and (sX, sY - 1) != (hX, hY):
-                self.setXY(sX, sY - 1)
-            else: self.moving = False
-        elif dir == 'down':
-            self.imgIdx = 2
-            if map.getEntry(sX, sY + 1) in range(25) and (sX, sY + 1) != (hX, hY):
-                self.setXY(sX, sY + 1)
-            else: self.moving = False
-        elif dir == 'left':
-            self.imgIdx = 4
-            if map.getEntry(sX - 1, sY) in range(25) and (sX - 1, sY) != (hX, hY):
-                self.setXY(sX - 1, sY)
-            else: self.moving = False
-        elif dir == 'right':
-            self.imgIdx = 6
-            if map.getEntry(sX + 1, sY) in range(25) and (sX + 1, sY) != (hX, hY):
-                self.setXY(sX + 1, sY)
-            else: self.moving = False
+        (mX, mY) = const.scrollingDict[dir]
+        self.imgIdx = const.imgDict[dir]
         self.image = self.images[self.imgIdx]
+        if map.getEntry(sX + mX, sY + mY) in range(25) and (sX + mX, sY + mY) != (hX, hY) and not map.isOccupied(sX + mX, sY + mY):
+            self.setXY(sX + mX, sY + mY)
+        else: self.moving = False
     
     def update(self, map, heroPos):
         i = random.randrange(1, 10)
@@ -96,28 +81,25 @@ class Guard(npc):
 
 class King(npc):
     
-    def __init__(self, x, y, name, game):
+    def __init__(self, x, y, name, d):
         npc.__init__(self, x, y, name, 'king.bmp')
-        self.game = game
-        
-        self.accepted = False
+        self.Director = d
     
     def update(self, map, heropos):
         pass
     
     def interact(self, hud):
-        if not self.accepted:
+        if not self.Director.getEvent(0):
             if hud.npcDialog(self.message, self.images[8]):
                 hud.npcMessage("Excellent news! Here is the key you will need to access the Dungeon.", self.images[8])
-                self.accepted = True
+                self.Director.setEvent(0)
                 return ('item', const.KEY)
             else:
                 hud.npcMessage("I am most dismayed to hear this; please return if you have a change of heart!", self.images[8])
                 return None
         else:
-            if self.game.won:
+            if self.Director.getEvent(11):
                 hud.npcMessage("You win the game!", self.images[8])
-                self.game.gameOn = False
                 return None
             else:
                 hud.npcMessage("Haste, young hero. Time is of the essence!", self.images[8])
@@ -204,9 +186,10 @@ class Enemy(npc):
     
 class skeletonKing(Enemy):
     
-    def __init__(self, x, y, name, filename, mID):
+    def __init__(self, x, y, name, filename, mID, d):
         
         Enemy.__init__(self, x, y, name, filename, mID)
+        self.Director = d
         
     def interact(self, hud):
         hud.npcMessage('Welcome to your death!', self.images[2])
@@ -216,6 +199,8 @@ class skeletonKing(Enemy):
         i = random.randrange(1, 6)
         if i == 5:
             self.takeStep()
+    def die(self):
+        self.Director.setEvent(11)
 
 def newNpc( n, game ):
     (x,y) = n[0]
@@ -225,10 +210,10 @@ def newNpc( n, game ):
     elif n[1] == 'female':
         return Female(x, y, n[2])
     elif n[1] == 'king':
-        return King(x, y, n[2], game)
+        return King(x, y, n[2], game.Director)
     # enemies
     elif n[1] == 'skeletonking':
-        return skeletonKing(x, y, 'Skeleton King', 'skeleton.bmp', n)
+        return skeletonKing(x, y, 'Skeleton King', 'skeleton.bmp', n, game.Director)
     else:
         i = npcScr.enemyDict[ n[1] ]
         return Enemy(x, y, i[0], i[1], n)

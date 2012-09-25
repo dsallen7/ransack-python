@@ -1,6 +1,6 @@
 import pygame, os, random, pickle
 
-from classes import battle, menu, enemy, shop, tavern
+from classes import battle, menu, enemy, shop, tavern, director
 import OBJ
 from IMG import images
 from HERO import hero
@@ -12,14 +12,18 @@ from UTIL import ticker, const, colors, load_image
 
 class game():
     
-    def __init__(self, screen, clock, loadTicker=None, loadHero=None, loadDungeon=None, currentMap=2, levelDepth=0):
+    def __init__(self, screen, clock, FX, loadTicker=None, loadHero=None, loadDungeon=None, loadDirector=None, currentMap=2, levelDepth=0):
         self.Display = display.Display(screen)
+        self.FX = FX
         if loadTicker == None:
             self.Ticker = ticker.Ticker()
         else: self.Ticker = loadTicker
         if loadHero == None:
             self.myHero = hero.hero()
         else: self.myHero = hero.hero(load=loadHero)
+        if loadDirector == None:
+            self.Director = director.Director()
+        else: self.Director = loadDirector
         self.myMenu = menu.menu(screen)
         self.levelDepth = levelDepth
         self.currentMap = currentMap
@@ -328,7 +332,7 @@ class game():
     
     def launchBattle(self, mName, lD):
         self.boxMessage("The baTTle is joined!")
-        self.gameBoard.fill( colors.black )
+        #self.FX.fadeOut(const.gameBoardOffset)
         g = self.myBattle.fightBattle(self, enemy.enemy(mName, lD) )
         if g == True: # escaped from battle
             return False
@@ -358,20 +362,23 @@ class game():
         self.myHud.txtMessage(msg)
     
     def getSaveBall(self):
-        saveBall = (self.myHero.getSaveBall(), self.myDungeon, self.Ticker, self.currentMap)
+        saveBall = (self.Ticker, self.myHero.getSaveBall(), self.myDungeon, self.Director, self.currentMap, self.levelDepth)
         
         return saveBall
     
     def updateSprites(self):
         #self.allsprites.update()
-        if self.myMap.type in ['dungeon', 'maze']:
-            visibleNPCs = []
-            for n in self.NPCs:
-                (x, y) = n.getXY()
-                if self.myMap.isVisible(x, y):
-                    visibleNPCs.append(n)
+        visibleNPCs = []
+        for n in self.NPCs:
+            (x, y) = n.getXY()
+            self.myMap.grid[x][y].occupied = True
+            if self.myMap.isVisible(x, y):
+                visibleNPCs.append(n)
+                
+        if self.myMap.type in ['dungeon', 'maze', 'fortress']:
             self.allsprites = pygame.sprite.RenderPlain((self.myHero, visibleNPCs))
-            self.allsprites.clear(self.screen, self.gameBoard)
+        else: self.allsprites = pygame.sprite.RenderPlain((self.myHero, self.NPCs))
+        self.allsprites.clear(self.screen, self.gameBoard)
         rects = self.allsprites.draw(self.gameBoard)
         pygame.display.update(rects)
     
@@ -407,6 +414,7 @@ class game():
         self.Display.drawSprites(self.myHero, self.myMap, self.gameBoard, self, animated=False)
         self.updateSprites()
         self.Display.redrawXMap(self.myMap)
+        font = pygame.font.SysFont("arial", 14)
         while self.gameOn:
             #self.clock.tick(30)
             self.gameBoard.fill(colors.black)
@@ -420,7 +428,9 @@ class game():
                     self.mouseHandler(event)
             self.myHud.update()
                 #self.Display.drawNPC(npc, self.myMap, self, animated=True)
-            #self.myHero.showLocation(self.screen)
+            self.screen.blit( self.myHero.showLocation(), (0, 0) )
+            font = pygame.font.SysFont("arial", 14)
+            self.screen.blit( font.render( str(self.myMap.getDIM()) , 1, colors.red, colors.yellow ), (300,0) )
             if self.updateNPCs() or self.myHero.moving:
                 self.Display.drawSprites(self.myHero, self.myMap, self.gameBoard, self, self.myHero.dir, animated=True)
             else: 

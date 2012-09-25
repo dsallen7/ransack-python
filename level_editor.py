@@ -2,7 +2,7 @@ from types import *
 import pygame, os, cPickle, random, gzip
 from IMG import images
 
-from UTIL import load_image
+from UTIL import load_image, misc
 
 from MAP import mapgen, mazegen, map
 
@@ -56,15 +56,6 @@ class Handler():
         self.currentTile += 1
         self.currentTile = self.currentTile % self.numImages
     
-    def flatten(self, x):
-        result = []
-        for el in x:
-            if hasattr(el, "__iter__") and not isinstance(el, basestring) and type(el) is not TupleType and type(el) is not NoneType:
-                result.extend(self.flatten(el))
-            elif type(el) is TupleType:
-                result.append(el)
-        return result
-    
     #@tail_call_optimized
     def floodFillBFS(self,pieceLocation):
         if (pieceLocation == None):
@@ -89,7 +80,7 @@ class Handler():
         y = y / blocksize
         self.visited = [ (x,y) ]
         self.BFSQueue.reset()
-        floodArea = self.flatten( self.floodFillBFS( (x,y) ) )
+        floodArea = misc.flatten( self.floodFillBFS( (x,y) ) )
         floodArea = list( set(floodArea) )
         for entry in floodArea:
             (x,y) = entry
@@ -197,7 +188,31 @@ class Handler():
             MG = mazegen.Generator(myMap.DIM, 1)
             MG.generateMap()
             myMap.installBall( MG.getMapBall() )
-
+    
+    def place(self, x, y, tile):            
+        if self.placeNPC:
+            myMap.NPCs.append( ( (x, y), self.getInput('Enter NPC type: '), self.getInput('Enter message: ') ) )
+        else:
+            if self.currentTile == const.CHEST:
+                myMap.addChest( (x, y), self.fillChest())
+                level=None
+            elif self.currentTile == const.ITEMSDOOR:
+                level = int(self.getInput('Itemshop level: '))
+            elif self.currentTile == const.ARMRYDOOR:
+                level = int(self.getInput('Armory level: '))
+            elif self.currentTile == const.BLKSMDOOR:
+                level = int(self.getInput('Blacksmith level: '))
+            elif self.currentTile == const.MAGICDOOR:
+                level = int(self.getInput('Magicshop level: '))
+            else: level=None
+            myMap.setEntry(x, y, tile, level)
+        
+    def removeNPC(self, x, y):
+        for n in myMap.NPCs:
+            if n[0] == (x, y):
+                myMap.NPCs.remove(n)
+                return
+        
     def event_handler(self, event):
         (x,y) = self.cursorPos
         self.drawBox( (x,y), colors.black)
@@ -224,22 +239,7 @@ class Handler():
         if event.key == pygame.K_t:
             self.switchTile()
         if event.key == pygame.K_SPACE:
-            if self.placeNPC:
-                myMap.NPCs.append( ( (x/blocksize, y/blocksize), self.getInput('Enter NPC type: '), self.getInput('Enter message: ') ) )
-            else:
-                if self.currentTile == const.CHEST:
-                    myMap.addChest( (x/blocksize,y/blocksize), self.fillChest())
-                    level=None
-                elif self.currentTile == const.ITEMSDOOR:
-                    level = int(self.getInput('Itemshop level: '))
-                elif self.currentTile == const.ARMRYDOOR:
-                    level = int(self.getInput('Armory level: '))
-                elif self.currentTile == const.BLKSMDOOR:
-                    level = int(self.getInput('Blacksmith level: '))
-                elif self.currentTile == const.MAGICDOOR:
-                    level = int(self.getInput('Magicshop level: '))
-                else: level=None
-                myMap.setEntry(x/blocksize,y/blocksize,self.currentTile, level)
+            self.place(x/blocksize, y/blocksize, self.currentTile)
         if event.key == pygame.K_ESCAPE:
             os.sys.exit()
         if event.key == pygame.K_d:
@@ -259,8 +259,7 @@ class Handler():
             if self.offset == 128:
                 self.offset = 0
         if event.key == pygame.K_x:
-            myMap.NPCs = []
-            print 'NPCs cleared'
+            self.removeNPC( x/blocksize, y/blocksize )
         if event.key == pygame.K_n:
             print 'NPCs: '
             print myMap.NPCs

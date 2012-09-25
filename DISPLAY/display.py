@@ -52,7 +52,7 @@ class Display():
     # draws entire map to DIMxDIM Surface
     def redrawXMap(self, map):
         self.xGameBoard = pygame.Surface( (map.getDIM()*const.blocksize, map.getDIM()*const.blocksize) )
-        if map.type in ['dungeon', 'maze']:
+        if map.type in ['dungeon', 'maze', 'fortress']:
             map.revealMap()
         for x in range(map.getDIM()):
             for y in range(map.getDIM()):
@@ -91,13 +91,16 @@ class Display():
         map.setPlayerXY(newX/const.blocksize, newY/const.blocksize)
         (oldX, oldY, c, d) = hero.getRect()
         scrolling = False
+        delta = int( math.ceil( float(DIMEN)/2.) )
+        if map.getDIM() % 2 == 0:
+            delta = delta + 1
         if DIMEN > const.HALFDIM:
             if (5*const.blocksize <= newX <= (DIMEN-5)*const.blocksize):
                 newX = 5 * const.blocksize
                 if dir in ['left','right'] and oldX == 5*const.blocksize:
                     scrolling = True
             if newX > (DIMEN-5)*const.blocksize:
-                newX = newX - int( math.floor( float(DIMEN)/2.) )*const.blocksize
+                newX = newX - delta*const.blocksize
                 if newX > const.HALFDIM*const.blocksize:
                     newX = newX - 300
             if (5*const.blocksize <= newY <= (DIMEN-5)*const.blocksize):
@@ -105,7 +108,7 @@ class Display():
                 if dir in ['up','down'] and oldY == 5*const.blocksize:
                     scrolling = True
             if newY > (DIMEN-5)*const.blocksize:
-                newY = newY - int( math.floor( float(DIMEN)/2.) )*const.blocksize
+                newY = newY - delta*const.blocksize
                 if newY > const.HALFDIM*const.blocksize:
                     newY = newY - 300
         else:
@@ -147,7 +150,7 @@ class Display():
                     
                     gameBoard.blit( self.getScrollingMapWindow( ( (topX*const.blocksize)+(idx*scrollX)-(const.blocksize*scrollX), (topY*const.blocksize)+(idx*scrollY)-(const.blocksize*scrollY) ) ), (0,0) )
                     
-                    if map.type in ['dungeon', 'maze']:
+                    if map.type in ['dungeon', 'maze', 'fortress']:
                         self.drawShade( map, gameBoard )
                         #self.myMap.drawDarkness( newX/blocksize, newY/blocksize, self.gameBoard )
                 else: self.redrawMap(map, hero, gameBoard)

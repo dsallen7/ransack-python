@@ -85,6 +85,7 @@ class battle():
     # this controls all the logic of what goes on in an actual battle
     def fightBattle(self, game, enemy):
         game.myHud.update()
+        game.FX.scrollFromCenter(game.gameBoard, self.battleField)
         self.drawBattleScreen(enemy)
         hero = game.myHero
         (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX, psn) = hero.getPlayerStats()
@@ -113,10 +114,13 @@ class battle():
                 enemy.takeDmg( hero.castSpell( self.myMenu.invMenu(hero.getSpells(), "Spells:" ), game, True ) )
                     
             elif action == 'ITem':
-                hero.useItem(self.myMenu.invMenu(hero.getItems(), "ITems:" ), game, True )
+                d = hero.useItem(self.myMenu.invMenu(hero.getItems(), "ITems:" ), game, True )
+                if d > 0:
+                    enemy.takeDmg( d )
             elif action == 'Flee':
                 if self.rollDie(1,3):
                     game.textMessage("You escaped safely.")
+                    game.FX.scrollFromCenter(self.battleField, game.gameBoard)
                     return True
                 else:
                     game.textMessage("You can't escape!")
@@ -145,6 +149,7 @@ class battle():
                             game.textMessage("You are damned!")                        
                     if hero.takeDmg(dmg) < 1:
                         game.textMessage("You have died!")
+                        game.FX.scrollFromCenter(self.battleField, game.gameBoard)
                         return False
                 else:
                     game.textMessage("The "+enemy.getName()+" missed you!")
@@ -155,4 +160,5 @@ class battle():
         game.textMessage("The "+enemy.getName()+" is dead!")
         if hero.increaseExp(5):
             game.textMessage("Congratulations! You have gained a level.")
+        game.FX.scrollFromCenter(self.battleField, game.gameBoard)
         return random.randrange(enemy.getLevel()*2, enemy.getLevel()*4)
