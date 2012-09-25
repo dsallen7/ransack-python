@@ -1,12 +1,12 @@
 import pygame, cPickle, gzip
 from load_image import *
-from const import *
 from classes import menu
 from IMG import images
 import random, os
 from OBJ import item
 from SCRIPTS import shopScr
 
+from UTIL import const, colors
 
 class Tavern():
     
@@ -21,7 +21,7 @@ class Tavern():
         self.images = range(2)
         self.images[0], r = load_image('cursor.bmp', -1)
         self.images[1], r = load_image( os.path.join('INT', 'inn.bmp'))
-        self.storeScreen.fill( black )
+        self.storeScreen.fill( colors.black )
         self.storeScreen.blit( self.images[1], (0,0) )
     
     def drawStoreScreen(self):
