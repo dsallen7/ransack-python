@@ -6,6 +6,7 @@ from IMG import images
 from HERO import hero
 from NPC import npc
 from DISPLAY import display, hud, menu
+from SND import sfx
 
 from MAP import map, mapgen, mazegen
 from UTIL import ticker, const, colors, load_image
@@ -48,21 +49,15 @@ class game():
         self.DIM = const.DIM
 
         images.load()
-        
-        # 0 : camera
-        # 1 : sword
-        # 2 : miss
-        self.sounds = range(3)
-        self.sounds[0] = pygame.mixer.Sound(os.path.join('SND', 'camera.wav' ))
-        self.sounds[1] = pygame.mixer.Sound(os.path.join('SND', 'sword1.wav' ))
-        self.sounds[2] = pygame.mixer.Sound(os.path.join('SND', 'miss.wav' ))
-        
+                
         self.myHud = hud.hud(self.screen, self)
         self.addShops(self.myMap)
         self.addNPCs(self.myMap)
         
         self.myBattle = battle.battle(self.screen)
         self.clock = clock
+        
+        self.SFX = sfx.sfx()
         
         self.won = False
     
@@ -170,7 +165,7 @@ class game():
         flash.fill(colors.white)
         self.screen.blit(flash,(75,75))
         self.clock.tick(100)
-        self.sounds[0].play()
+        self.SFX.play(0)
     
     def event_handler(self, event):
         if event.type == pygame.KEYDOWN:
@@ -358,6 +353,7 @@ class game():
     # calls hud.txtMessage
     def textMessage(self, msg):
         self.myHud.txtMessage(msg)
+        pygame.display.flip()
     
     def getSaveBall(self):
         saveBall = (self.Ticker, self.myHero.getSaveBall(), self.myDungeon, self.Director, self.currentMap, self.levelDepth)
@@ -426,9 +422,9 @@ class game():
                     self.mouseHandler(event)
             self.myHud.update()
                 #self.Display.drawNPC(npc, self.myMap, self, animated=True)
-            self.screen.blit( self.myHero.showLocation(), (0, 0) )
-            font = pygame.font.SysFont("arial", 14)
-            self.screen.blit( font.render( str(self.myMap.getDIM()) , 1, colors.red, colors.yellow ), (300,0) )
+            #self.screen.blit( self.myHero.showLocation(), (0, 0) )
+            #font = pygame.font.SysFont("arial", 14)
+            #self.screen.blit( font.render( str(self.myMap.getDIM()) , 1, colors.red, colors.yellow ), (300,0) )
             if self.updateNPCs() or self.myHero.moving:
                 self.Display.drawSprites(self.myHero, self.myMap, self.gameBoard, self, self.myHero.dir, animated=True)
             else: 

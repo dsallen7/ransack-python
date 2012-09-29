@@ -16,7 +16,7 @@ class battle():
         
         self.myMenu = menu.menu(screen)
         
-        self.images[0], r = load_image('cursor.bmp')
+        self.images[0], r = load_image('cursor.bmp', -1)
         
     def writeText(self, surface, loc, text, fgc, bgc, size=18, font="SpinalTfanboy.ttf"):
         font = pygame.font.Font(os.getcwd()+"/FONTS/"+font, size)
@@ -103,13 +103,13 @@ class battle():
                 if self.rollDie(0,2):
                     dmg = random.randrange(sth/2,sth) + (weapon.getLevel()+1)**2
                     game.textMessage('You hit the '+enemy.getName() +' for '+str(dmg)+' points!')
-                    #self.sounds[1].play()
+                    game.SFX.play(1)
                     for i in range(enemy.getHP(), enemy.getHP()-dmg, -1):
                         enemy.takeDmg(1)
                         self.drawBattleScreen(enemy)
                 else:
                     game.textMessage("You missed The "+enemy.getName()+"!")
-                    #self.sounds[2].play()
+                    game.SFX.play(2)
             elif action == 'Magic':
                 enemy.takeDmg( hero.castSpell( self.myMenu.invMenu(hero.getSpells(), "Spells:" ), game, True ) )
                     
@@ -124,14 +124,15 @@ class battle():
                     return True
                 else:
                     game.textMessage("You can't escape!")
-            game.Ticker.tick(15)
+            game.Ticker.tick(10)
+            pygame.time.wait(1000)
             #enemy attacks
             if enemy.getHP() > 0:
                 if self.rollDie(0,2):
                     dmg = random.randrange(enemy.getBaseAttack()-5,enemy.getBaseAttack()+5) - hero.armorClass
                     if dmg > 0:
                         game.textMessage("The "+enemy.getName()+" hits you for "+str(dmg)+" points!")
-                        #self.sounds[1].play()
+                        game.SFX.play(1)
                     else: game.textMessage("The "+enemy.getName()+" attack is ineffective.")
                     if enemy.poison:
                         if self.rollDie(0,3):
@@ -153,8 +154,9 @@ class battle():
                         return False
                 else:
                     game.textMessage("The "+enemy.getName()+" missed you!")
-                    #self.sounds[2].play()
+                    game.SFX.play(2)
             game.Ticker.tick(10)
+            pygame.time.wait(1000)
             game.myHud.update()
             self.drawBattleScreen(enemy)
         game.textMessage("The "+enemy.getName()+" is dead!")

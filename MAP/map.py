@@ -225,7 +225,6 @@ class gameMap(map):
         entryList = []
         for (Cx,Cy) in const.CARDINALS:
             if (x+Cx,y+Cy) not in self.visited and ~self.BFSQueue.has( (x+Cy, y+Cy) and self.getEntry(x+Cx,y+Cy) in range(18) ):
-                #print self.getEntry(x+Cx,y+Cy)
                 self.BFSQueue.push( (x+Cx, y+Cy) )
                 entryList += [ (x+Cx,y+Cy) ]
                 self.visited += [ (x+Cx,y+Cy) ]
@@ -416,12 +415,9 @@ class genMap(map):
         self.BFSQueue.push( (x, y) )
         while not self.BFSQueue.isEmpty():
             (x, y) = self.BFSQueue.pop()
-            print self.BFSQueue.size()
             for (Cx,Cy) in const.CARDINALS:
                 if (x+Cx,y+Cy) not in self.visited and  not self.BFSQueue.has( (x+Cx, y+Cy) ) and self.getEntry(x+Cx,y+Cy) in range(24):
                     self.BFSQueue.push( (x+Cx, y+Cy) )
-                    print 'push'
-                    print self.BFSQueue.size()
                     self.visited += [ (x+Cx,y+Cy) ]
         return self.visited
         
@@ -429,10 +425,7 @@ class genMap(map):
         self.visited = []
         self.BFSQueue.reset()
         tiles = self.pathfinderBFS( t1 )
-        print tiles
         if t2 in tiles:
             return True
-            print True
         else:
             return False
-            print False

@@ -1,6 +1,5 @@
 import numpy as np
 from numpy.random import random_integers as rnd
-import matplotlib.pyplot as plt
 
 from random import choice, randrange
 
@@ -149,10 +148,3 @@ class Generator():
 
     def getMapBall(self):
         return self.map.getMapBall()
-
-#plt.figure(figsize=(10,10))
-#M = maze(40,40)
-#print M
-#plt.imshow(M,cmap=plt.cm.binary,interpolation='nearest')
-#plt.xticks([]),plt.yticks([])
-#plt.show()
