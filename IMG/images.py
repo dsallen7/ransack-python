@@ -25,7 +25,7 @@ def load_image(name, colorkey=None):
         image.set_colorkey(colorkey, pygame.RLEACCEL)
     return image
 
-def load():
+def load(path=''):
 
     mapSpriteSheet = spritesheet('mastersheet.bmp')
     for i in range(128):

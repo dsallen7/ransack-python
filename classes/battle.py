@@ -1,5 +1,5 @@
 import pygame
-import menu
+from DISPLAY import menu
 from load_image import *
 import random
 from UTIL import const, colors

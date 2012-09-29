@@ -1,7 +1,7 @@
 import pygame, game, random, cPickle, gzip, os
 from UTIL import const, colors, load_image
 from DISPLAY import effects
-
+from HERO import creator
 from OBJ import weapon
 
 # Set the height and width of the screen
@@ -19,6 +19,8 @@ clock = pygame.time.Clock()
 random.seed()
 
 FX = effects.effects(clock, screen)
+
+C = creator.Creator()
 
 images = range(3)
 images[0], r = load_image.load_image('cursor.bmp', -1)
@@ -121,7 +123,7 @@ def main():
                         selection = 0
                 if event.key == pygame.K_RETURN:
                     if options[selection] == 'Begin New Game':
-                        newGame = game.game(screen, clock, FX)
+                        newGame = game.game(screen, clock, FX, loadHero=C.mainLoop(screen))
                         FX.fadeOut(0)
                         if newGame.mainLoop():
                             endScreen(newGame, "You Win!")

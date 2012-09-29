@@ -1,5 +1,5 @@
-import pygame, menu, os
-from classes import menu
+import pygame, os
+from DISPLAY import menu
 from IMG import images
 import random
 from OBJ import item

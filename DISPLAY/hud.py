@@ -4,8 +4,8 @@ from pygame.locals import *
 import random
 
 from IMG import images
-
 from UTIL import const, colors, load_image
+from DISPLAY import text
 
 #import threading
 import Queue
@@ -149,31 +149,9 @@ class hud( ):
         self.screen.blit(self.gameBoard, (75,75) )
         self.update()
     
-    def getMsgText(self, message, font, fontsize, lineWidth = const.maxLineWidth):
-        # returns a nicely formatted text box
-        if pygame.font:
-            font = pygame.font.Font(font, fontsize)
-            if len(message) < lineWidth:
-                msgText = pygame.Surface( (len(message)*math.ceil(0.75*fontsize), fontsize*2 ) )
-                msgText.fill(colors.gold)
-                msgText.blit( font.render( message, 1, colors.white, colors.gold ), (0,0) )
-            else:
-                msgText = pygame.Surface( ( lineWidth*(fontsize/2), ((len(message)/lineWidth)+1)*math.ceil(font.render( 'A', 1, colors.white, colors.gold ).get_height() * 1.5 ) ) )
-                msgText.fill(colors.gold)
-                hPos = 0
-                words = message.split(' ')
-                while words:
-                    line = ''
-                    while words and len(line+' '+words[0]) < lineWidth:
-                        line = line + words[0] + ' '
-                        words = words[1:]
-                    lineText = font.render( line, 1, colors.white, colors.gold )
-                    msgText.blit( lineText, ((msgText.get_width()/2)-(lineText.get_width()/2), hPos) )
-                    hPos += math.ceil( fontsize * 1.5 )
-        return msgText
-   
+    # displays message along with image of face
     def npcMessage(self, message, img):
-        msgText = self.getMsgText(message, os.getcwd()+"/FONTS/devinne.ttf", 18)
+        msgText = text.Text(message, os.getcwd()+"/FONTS/devinne.ttf", 18)
         (px, py, px2, py2) = self.game.myHero.getRect()
         for i in range(msgText.get_width()/2):
             borderBox = pygame.Surface( ( ((i*2)+60 ), msgText.get_height()+20) )
@@ -185,10 +163,11 @@ class hud( ):
             
         while (pygame.event.wait().type != pygame.KEYDOWN): pass
     
+    # same as npcMessage but returns yes/no input
     def npcDialog(self, message, img):
-        msgText = self.getMsgText(message, os.getcwd()+"/FONTS/devinne.ttf", 18)
-        ytext = self.getMsgText('Yes', os.getcwd()+"/FONTS/devinne.ttf", 18)
-        ntext = self.getMsgText('No', os.getcwd()+"/FONTS/devinne.ttf", 18)
+        msgText = text.Text(message, os.getcwd()+"/FONTS/devinne.ttf", 18)
+        ytext = text.Text('Yes', os.getcwd()+"/FONTS/devinne.ttf", 18)
+        ntext = text.Text('No', os.getcwd()+"/FONTS/devinne.ttf", 18)
         (px, py, px2, py2) = self.game.myHero.getRect()
         for i in range(msgText.get_width()/2):
             borderBox = pygame.Surface( ( ((i*2)+60 ), (msgText.get_height()+ytext.get_height())+20) )
@@ -229,7 +208,7 @@ class hud( ):
             pygame.display.flip()
         
     def boxMessage(self, message):
-        msgText = self.getMsgText(message, os.getcwd()+"/FONTS/devinne.ttf", 18)
+        msgText = text.Text(message, os.getcwd()+"/FONTS/devinne.ttf", 18)
         (px, py, px2, py2) = self.game.myHero.getRect()
         for i in range(msgText.get_width()/2):
             borderBox = pygame.Surface( ( ((i*2)+20 ), msgText.get_height()+20) )
@@ -242,7 +221,7 @@ class hud( ):
         while (pygame.event.wait().type != pygame.KEYDOWN): pass
         
     def addPopup(self, text, loc):
-        msgText = self.getMsgText(text, os.getcwd()+"/FONTS/gothic.ttf", 10, 10)
+        msgText = text.Text(text, os.getcwd()+"/FONTS/gothic.ttf", 10, 10)
         popupWin = pygame.Surface( (msgText.get_width()+10, msgText.get_height()+10) )
         popupWin.fill(colors.grey)
         popupWin.blit(msgText, (5,5) )

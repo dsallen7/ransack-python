@@ -1,11 +1,11 @@
 import pygame, os, random, pickle
 
-from classes import battle, menu, enemy, shop, tavern, director
+from classes import battle, enemy, shop, tavern, director
 import OBJ
 from IMG import images
 from HERO import hero
 from NPC import npc
-from DISPLAY import display, hud
+from DISPLAY import display, hud, menu
 
 from MAP import map, mapgen, mazegen
 from UTIL import ticker, const, colors, load_image
@@ -18,9 +18,7 @@ class game():
         if loadTicker == None:
             self.Ticker = ticker.Ticker()
         else: self.Ticker = loadTicker
-        if loadHero == None:
-            self.myHero = hero.hero()
-        else: self.myHero = hero.hero(load=loadHero)
+        self.myHero = hero.hero(loadHero)
         if loadDirector == None:
             self.Director = director.Director()
         else: self.Director = loadDirector
@@ -186,7 +184,7 @@ class game():
                 self.myMenu.displayHeroStats(self.myHero)
             elif event.key == pygame.K_i:
                 # use item
-                self.Ticker.tick( self.myHero.useItem( self.myMenu.invMenu(self.myHero.getItems(), "ITems:" ), self ) )
+                self.myHero.useItem( self.myMenu.invMenu(self.myHero.getItems(), "ITems:" ), self )
             elif event.key == pygame.K_w:
                 # equip weapon
                 self.myHero.equipWeapon(self.myMenu.invMenu(self.myHero.getWeapons(), "Weapons:" ))

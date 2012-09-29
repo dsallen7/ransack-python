@@ -1,26 +1,15 @@
 from types import *
 import pygame, os, cPickle, random, gzip
-from IMG import images
-
-from UTIL import load_image, misc
 
 from MAP import mapgen, mazegen, map
 
-from UTIL import queue, const, colors, eztext
+from UTIL import queue, const, colors, eztext, load_image, misc
+from IMG import images
+
 
 displayOpts = ['fore', 'back', 'both']
 
 # Eztext courtesy of http://www.pygame.org/project-EzText-920-.html
-
-class subMap():
-    def __init__(self):
-        self.DIMX = 4
-        self.DIMY = 5
-        self.maptext = []
-        self.portal = (0,0)
-        for i in range(DIMX):
-            self.maptext += [0]*DIMY
-
 class Handler():
     
     def __init__(self, cPos):

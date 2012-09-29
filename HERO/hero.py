@@ -22,46 +22,13 @@ class hero(pygame.sprite.Sprite):
         self.armorClass = 0
         self.weaponClass = 0
         
-        if load == None:
-            
-            self.strength = random.randrange(5,10)
-            self.intell = random.randrange(5,10)
-            self.dex = random.randrange(5,10)
-            
-            self.X = const.blocksize
-            self.Y = const.blocksize
-            
-            self.currHP = 50
-            self.maxHP = 50
-            
-            self.currMP = 20
-            self.maxMP = 20
-            
-            self.score = 0
-            self.keys = 0
-            
-            self.level = 1
-            self.currExp = 0
-            self.nextExp = 20
-            
-            self.weapons = []
-            self.weaponEquipped = None
+        self.installLoadedHero(load)
+        
+        if self.weapons == []:
             self.gainWeapon(26,0)
             self.equipWeapon(self.weapons[0])
-            
-            self.armor = []
-            self.armorEquipped = [None,None,None]
-            
-            self.items = range(20)
-            
-            self.spells = []
+        if self.spells == []:
             self.learnSpell(0)
-            self.learnSpell(1)
-            
-            self.gold = 50
-            self.isPoisoned = False
-            self.isDamned = False
-        else: self.installLoadedHero(load)
         
         self.step = False
         self.moving = False
@@ -207,7 +174,7 @@ class hero(pygame.sprite.Sprite):
             else: return 0
         item.execute(self)
         self.takeItem(item)
-        return 60
+        game.Ticker.tick(60)
     
     def getWeapons(self):
         return self.weapons

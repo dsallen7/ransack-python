@@ -1,6 +1,6 @@
 import pygame, cPickle, gzip
 from load_image import *
-from classes import menu
+from DISPLAY import menu
 from IMG import images
 import random, os
 from OBJ import item
@@ -34,11 +34,11 @@ class Tavern():
         options = ['Save', 'Sleep', 'ReTurn To Game', 'ExiT To Main Menu']
         selection = 0
         while True:
-            menuBox.fill( gold )
+            menuBox.fill( colors.gold )
             if pygame.font:
                 font = pygame.font.Font(os.getcwd()+"/FONTS/SpinalTfanboy.ttf", 18)
                 for i in range(len(options)):
-                    menuBox.blit( font.render(options[i], 1, white, gold), (25,i*25) )
+                    menuBox.blit( font.render(options[i], 1, colors.white, colors.gold), (25,i*25) )
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     os.sys.exit()
@@ -77,11 +77,11 @@ class Tavern():
         saveBox = pygame.Surface( (300,100) )
         selection = 0
         while True:
-            saveBox.fill( gold )
+            saveBox.fill( colors.gold )
             if pygame.font:
                 font = pygame.font.Font("./FONTS/gothic.ttf", 14)
                 for i in range(3):
-                    saveBox.blit( font.render(desc[i], 1, white, gold), (25,i*25) )
+                    saveBox.blit( font.render(desc[i], 1, colors.white, colors.gold), (25,i*25) )
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     os.sys.exit()

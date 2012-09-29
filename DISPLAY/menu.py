@@ -1,5 +1,4 @@
 import pygame, random, os
-from load_image import *
 from UTIL import const, colors
 
 from OBJ import item, spell, weapon, armor
@@ -152,14 +151,16 @@ class menu():
             statsBox.blit(msgText, ( (statsBox.get_width()/2)-(msgText.get_width()/2) ,10) )
         
         statsBox.blit( hero.images[2], (25, 30)  )
-        textBox = pygame.Surface( (125, 75) )
+        textBox = pygame.Surface( (125, 140) )
         textBox.fill(colors.black)
         statsBox.blit(textBox, ( statsBox.get_width()/4 ,30) )
         if pygame.font:
             font = pygame.font.Font(os.getcwd()+"/FONTS/gothic.ttf", 14)
-        statsBox.blit( font.render('Level: '+str(hero.level), 1, colors.white, colors.black ), ( statsBox.get_width()/4 ,30) )
-        statsBox.blit( font.render('Str: '+str(stats[4])+' Int: '+str(stats[6])+' Dex: '+str(stats[5]), 1, colors.white, colors.black ), ( statsBox.get_width()/4 ,60) )
-        statsBox.blit( font.render('Armor: '+str(hero.armorClass), 1, colors.white, colors.black ), ( statsBox.get_width()/4 ,90) )
+        statsBox.blit( font.render('HP: '+str(hero.currHP)+'/'+str(hero.maxHP), 1, colors.white, colors.black ), ( (statsBox.get_width()/4), 30) )
+        statsBox.blit( font.render('MP: '+str(hero.currMP)+'/'+str(hero.maxMP), 1, colors.white, colors.black ), ( (statsBox.get_width()/4), 50) )
+        statsBox.blit( font.render('Str: '+str(stats[4])+' Int: '+str(stats[6])+' Dex: '+str(stats[5]), 1, colors.white, colors.black ), ( statsBox.get_width()/4 ,70) )
+        statsBox.blit( font.render('Armor: '+str(hero.armorClass), 1, colors.white, colors.black ), ( statsBox.get_width()/4 , 90) )
+        statsBox.blit( font.render('Level: '+str(hero.level), 1, colors.white, colors.black ), ( statsBox.get_width()/4 ,110) )
         self.screen.blit(statsBox, ( (self.screen.get_width()/2)-(statsBox.get_width()/2), 100) )
         pygame.display.flip()
         while (pygame.event.wait().type != pygame.KEYDOWN): pass
