@@ -143,24 +143,25 @@ class menu():
     def displayHeroStats(self, hero):
         stats = hero.getPlayerStats()
         
-        statsBox = self.openWindow(200, 180)
+        statsBox = self.openWindow(350, 300)
         
         if pygame.font:
             font = pygame.font.Font(os.getcwd()+"/FONTS/SpinalTfanboy.ttf", 18)
             msgText = font.render( 'Hero STaTs', 1, colors.white, colors.gold )
             statsBox.blit(msgText, ( (statsBox.get_width()/2)-(msgText.get_width()/2) ,10) )
         
-        statsBox.blit( hero.images[2], (25, 30)  )
-        textBox = pygame.Surface( (125, 140) )
+        statsBox.blit( hero.images[8], (25, 30)  )
+        textBox = pygame.Surface( (200, 200) )
         textBox.fill(colors.black)
         statsBox.blit(textBox, ( statsBox.get_width()/4 ,30) )
         if pygame.font:
             font = pygame.font.Font(os.getcwd()+"/FONTS/gothic.ttf", 14)
         statsBox.blit( font.render('HP: '+str(hero.currHP)+'/'+str(hero.maxHP), 1, colors.white, colors.black ), ( (statsBox.get_width()/4), 30) )
-        statsBox.blit( font.render('MP: '+str(hero.currMP)+'/'+str(hero.maxMP), 1, colors.white, colors.black ), ( (statsBox.get_width()/4), 50) )
+        statsBox.blit( font.render('MP: '+str(hero.currMP)+'/'+str(hero.maxMP), 1, colors.white, colors.black ), ( (statsBox.get_width()/2), 30) )
         statsBox.blit( font.render('Str: '+str(stats[4])+' Int: '+str(stats[6])+' Dex: '+str(stats[5]), 1, colors.white, colors.black ), ( statsBox.get_width()/4 ,70) )
         statsBox.blit( font.render('Armor: '+str(hero.armorClass), 1, colors.white, colors.black ), ( statsBox.get_width()/4 , 90) )
         statsBox.blit( font.render('Level: '+str(hero.level), 1, colors.white, colors.black ), ( statsBox.get_width()/4 ,110) )
+        statsBox.blit( font.render('Monsters slain: '+str(hero.slain), 1, colors.white, colors.black ), ( statsBox.get_width()/4 ,150) )
         self.screen.blit(statsBox, ( (self.screen.get_width()/2)-(statsBox.get_width()/2), 100) )
         pygame.display.flip()
         while (pygame.event.wait().type != pygame.KEYDOWN): pass

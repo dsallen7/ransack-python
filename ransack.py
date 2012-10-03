@@ -16,7 +16,7 @@ pygame.display.set_caption("Ransack")
 pygame.init()
 pygame.key.set_repeat(100, 100)
 clock = pygame.time.Clock()
-random.seed()
+random.seed( os.urandom(1) )
 
 FX = effects.effects(clock, screen)
 

@@ -12,10 +12,6 @@ class hero(pygame.sprite.Sprite):
     
     def __init__(self, load=None):
         pygame.sprite.Sprite.__init__(self) #call Sprite intializer
-        self.images = images.loadNPC('herosheet.bmp')
-        self.imgIdx = 2
-        self.image = self.images[self.imgIdx]
-        self.rect = (const.blocksize, const.blocksize, const.blocksize, const.blocksize)
         
         self.dir = 'down'
         
@@ -23,6 +19,12 @@ class hero(pygame.sprite.Sprite):
         self.weaponClass = 0
         
         self.installLoadedHero(load)
+        if self.gender == 'Male':
+            self.images = images.loadNPC('mherosheet.bmp')
+        else: self.images = images.loadNPC('fherosheet.bmp')
+        self.imgIdx = 2
+        self.image = self.images[self.imgIdx]
+        self.rect = (const.blocksize, const.blocksize, const.blocksize, const.blocksize)
         
         if self.weapons == []:
             self.gainWeapon(26,0)
@@ -285,6 +287,9 @@ class hero(pygame.sprite.Sprite):
     def getSpells(self):
         return self.spells
     
+    def notchKill(self):
+        self.slain += 1
+    
     def updateStatus(self, ticker, hud):
         if self.isPoisoned:
             ticker.tick(5)
@@ -310,6 +315,7 @@ class hero(pygame.sprite.Sprite):
         
     
     def getSaveBall(self):
+        gnd = self.gender
         str = self.strength
         itl = self.intell
         dex = self.dex
@@ -340,10 +346,12 @@ class hero(pygame.sprite.Sprite):
         spl = self.spells
         gld = self.gold
         sts = [self.isPoisoned, self.isDamned]
-        return (str, itl, dex, X, Y, cHP, mHP, cMP, mMP, scr, kys, lvl, cXP, nXP, wpn, weq, arm, aeq, itm, spl, gld, sts)
+        sln = self.slain
+        return (gnd, str, itl, dex, X, Y, cHP, mHP, cMP, mMP, scr, kys, lvl, cXP, nXP, wpn, weq, arm, aeq, itm, spl, gld, sts, sln)
     
     def installLoadedHero(self, load):
-        (str, itl, dex, X, Y, cHP, mHP, cMP, mMP, scr, kys, lvl, cXP, nXP, wpn, weq, arm, aeq, itm, spl, gld, sts) = load
+        (gnd, str, itl, dex, X, Y, cHP, mHP, cMP, mMP, scr, kys, lvl, cXP, nXP, wpn, weq, arm, aeq, itm, spl, gld, sts, sln) = load
+        self.gender = gnd
         self.strength = str
         self.intell = itl
         self.dex = dex
@@ -377,6 +385,7 @@ class hero(pygame.sprite.Sprite):
         self.gold = gld
         self.isPoisoned = sts[0]
         self.isDamned = sts[1]
+        self.slain = sln
         
     
     # for debugging purposes

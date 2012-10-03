@@ -5,7 +5,8 @@ from UTIL import const
 
 import os
 
-heroImages = range(8)
+mHeroImages = range(9)
+fHeroImages = range(9)
 mapImages = range(133)
 editorImages = range(7)
 
@@ -34,9 +35,13 @@ def load(path=''):
     for i in range(128, 133):
         mapImages[i] = load_image( os.path.join('EXT', siteImgs[i-128]), 1 )
     
-    heroSpriteSheet = spritesheet( os.path.join('CHAR', 'herosheet.bmp'))
-    for i in range(8):
-        heroImages[i] = heroSpriteSheet.image_at( (i*const.blocksize, 0, const.blocksize, const.blocksize), -1 )
+    mHeroSpriteSheet = spritesheet( os.path.join('CHAR', 'mherosheet.bmp'))
+    for i in range(9):
+        mHeroImages[i] = mHeroSpriteSheet.image_at( (i*const.blocksize, 0, const.blocksize, const.blocksize), -1 )
+        
+    fHeroSpriteSheet = spritesheet( os.path.join('CHAR', 'fherosheet.bmp'))
+    for i in range(9):
+        fHeroImages[i] = fHeroSpriteSheet.image_at( (i*const.blocksize, 0, const.blocksize, const.blocksize), -1 )
     
     editorSpriteSheet = spritesheet('editorsheet.bmp')
     for i in range(7):

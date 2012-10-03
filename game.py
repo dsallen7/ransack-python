@@ -334,6 +334,7 @@ class game():
         else: # won battle
             self.textMessage('You find '+str(g)+' gold pieces!')
             self.myHero.addGold(g)
+            self.myHero.notchKill()
             # final boss
             if mName == 'Skeleton King':
                 self.won = True

@@ -4,7 +4,7 @@ from random import choice, randrange
 from MAP import map, tile, room
 from UTIL import const, colors
 
-from SCRIPTS import enemyScr, mapScr
+from SCRIPTS import mEnemyScr, mapScr
 
 #from IMG import images
 
@@ -229,7 +229,7 @@ class Generator():
             room = choice(rooms)
             (xpos, ypos) = room.getPos()
             (xdim, ydim) = room.getDimensions()
-            self.map.NPCs.append( (( xpos + xdim/2, ypos + ydim/2), choice(enemyScr.enemiesByLevel[self.map.level] ) ) )
+            self.map.NPCs.append( (( xpos + xdim/2, ypos + ydim/2), choice(mEnemyScr.enemiesByLevel[self.map.level] ) ) )
             rooms.remove(room)
                
     def addRoom(self, map, room, pos):
