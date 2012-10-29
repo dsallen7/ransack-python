@@ -42,10 +42,6 @@ def load(path=''):
     fHeroSpriteSheet = spritesheet( os.path.join('CHAR', 'fherosheet.bmp'))
     for i in range(9):
         fHeroImages[i] = fHeroSpriteSheet.image_at( (i*const.blocksize, 0, const.blocksize, const.blocksize), -1 )
-    
-    editorSpriteSheet = spritesheet('editorsheet.bmp')
-    for i in range(7):
-        editorImages[i] = editorSpriteSheet.image_at((i*const.blocksize, 0, const.blocksize, const.blocksize), -1 )
 
 def loadNPC(file):
     npcSS = spritesheet( os.path.join('CHAR', file) )

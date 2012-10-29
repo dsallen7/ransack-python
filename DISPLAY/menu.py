@@ -1,5 +1,5 @@
 import pygame, random, os
-from UTIL import const, colors
+from UTIL import const, colors, load_image
 
 from OBJ import item, spell, weapon, armor
 
@@ -14,6 +14,8 @@ class menu():
     
     def __init__(self, screen):
         self.images = images.mapImages
+        self.statsBox, r = load_image.load_image("statsBox.bmp")
+        self.iMenuBox, r = load_image.load_image("invMenu.bmp")
         self.screen = screen
         self.title = ''
         self.cursorPos = (0,0)
@@ -144,39 +146,41 @@ class menu():
         stats = hero.getPlayerStats()
         
         statsBox = self.openWindow(350, 300)
-        
+        statsBox = self.statsBox.copy()
         if pygame.font:
             font = pygame.font.Font(os.getcwd()+"/FONTS/SpinalTfanboy.ttf", 18)
             msgText = font.render( 'Hero STaTs', 1, colors.white, colors.gold )
-            statsBox.blit(msgText, ( (statsBox.get_width()/2)-(msgText.get_width()/2) ,10) )
+            statsBox.blit(msgText, ( (statsBox.get_width()/2)-(msgText.get_width()/2) ,20) )
         
         statsBox.blit( hero.images[8], (25, 30)  )
         textBox = pygame.Surface( (200, 200) )
         textBox.fill(colors.black)
-        statsBox.blit(textBox, ( statsBox.get_width()/4 ,30) )
+        statsBox.blit(textBox, ( statsBox.get_width()/4 ,40) )
         if pygame.font:
             font = pygame.font.Font(os.getcwd()+"/FONTS/gothic.ttf", 14)
-        statsBox.blit( font.render('HP: '+str(hero.currHP)+'/'+str(hero.maxHP), 1, colors.white, colors.black ), ( (statsBox.get_width()/4), 30) )
-        statsBox.blit( font.render('MP: '+str(hero.currMP)+'/'+str(hero.maxMP), 1, colors.white, colors.black ), ( (statsBox.get_width()/2), 30) )
+        statsBox.blit( font.render('HP: '+str(hero.currHP)+'/'+str(hero.maxHP), 1, colors.white, colors.black ), ( (statsBox.get_width()/4), 40) )
+        statsBox.blit( font.render('MP: '+str(hero.currMP)+'/'+str(hero.maxMP), 1, colors.white, colors.black ), ( (statsBox.get_width()/2), 40) )
         statsBox.blit( font.render('Str: '+str(stats[4])+' Int: '+str(stats[6])+' Dex: '+str(stats[5]), 1, colors.white, colors.black ), ( statsBox.get_width()/4 ,70) )
-        statsBox.blit( font.render('Armor: '+str(hero.armorClass), 1, colors.white, colors.black ), ( statsBox.get_width()/4 , 90) )
-        statsBox.blit( font.render('Level: '+str(hero.level), 1, colors.white, colors.black ), ( statsBox.get_width()/4 ,110) )
-        statsBox.blit( font.render('Monsters slain: '+str(hero.slain), 1, colors.white, colors.black ), ( statsBox.get_width()/4 ,150) )
+        statsBox.blit( font.render('Armor: '+str(hero.armorClass), 1, colors.white, colors.black ), ( statsBox.get_width()/4 , 100) )
+        statsBox.blit( font.render('Level: '+str(hero.level), 1, colors.white, colors.black ), ( statsBox.get_width()/4 ,120) )
+        statsBox.blit( font.render('Monsters slain: '+str(hero.slain), 1, colors.white, colors.black ), ( statsBox.get_width()/4 ,160) )
         self.screen.blit(statsBox, ( (self.screen.get_width()/2)-(statsBox.get_width()/2), 100) )
         pygame.display.flip()
         while (pygame.event.wait().type != pygame.KEYDOWN): pass
     
     def invMenu(self, items, text):
-        menuBox = self.openWindow(200, 130)
+        menuBox = self.openWindow(200, 200)
+        
+        menuBox = self.iMenuBox.copy()
         
         if pygame.font:
             font = pygame.font.Font(os.getcwd()+"/FONTS/SpinalTfanboy.ttf", 18)
             msgText = font.render( text, 1, colors.white, colors.gold )
-            menuBox.blit(msgText, ( (menuBox.get_width()/2)-(msgText.get_width()/2) ,10) )
+            menuBox.blit(msgText, ( (menuBox.get_width()/2)-(msgText.get_width()/2) ,20) )
         
         #draw available items in window
         itemsBox, availableItems = self.menuWin(items)
-        menuBox.blit( itemsBox, ((menuBox.get_width()/2)-(itemsBox.get_width()/2), 40) )
+        menuBox.blit( itemsBox, ((menuBox.get_width()/2)-(itemsBox.get_width()/2), 60) )
         selection = 0
         cursorPos = positions[0]
         boxPoints = boxPointsFn(cursorPos)
@@ -192,7 +196,7 @@ class menu():
                 if hasattr(availableItems[selection], "__iter__"):
                     descBox = font.render( availableItems[selection][0].getDesc(), 1, colors.white, colors.gold )
                 else: descBox = font.render( availableItems[selection].getDesc(), 1, colors.white, colors.gold )
-                menuBox.blit( descBox, ((menuBox.get_width()/2)-(descBox.get_width()/2),30) )
+                menuBox.blit( descBox, ((menuBox.get_width()/2)-(descBox.get_width()/2),40) )
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     pygame.draw.lines( itemsBox, colors.black, True, boxPoints, 1 )
@@ -211,21 +215,23 @@ class menu():
                         else:
                             selection -= 1
                     if event.key == pygame.K_DOWN:
-                        if hasattr( items[selection], "__iter__" ):
-                            items[selection] = items[selection][1:]+[items[selection][0]]
-                            itemsBox, availableItems = self.menuWin(items)
-                            menuBox.blit( itemsBox, ((menuBox.get_width()/2)-(itemsBox.get_width()/2), 40) )
-                            pygame.draw.lines( itemsBox, colors.white, True, boxPoints, 1 )
-                            copyBox = menuBox
+                        if numItems >= 1:
+                            if hasattr( items[selection], "__iter__" ):
+                                items[selection] = items[selection][1:]+[items[selection][0]]
+                                itemsBox, availableItems = self.menuWin(items)
+                                menuBox.blit( itemsBox, ((menuBox.get_width()/2)-(itemsBox.get_width()/2), 50) )
+                                pygame.draw.lines( itemsBox, colors.white, True, boxPoints, 1 )
+                                copyBox = menuBox
                         else:
                             pass
                     if event.key == pygame.K_UP:
-                        if hasattr( items[selection], "__iter__" ):
-                            items[selection] = [ items[selection][ len(items[selection])-1 ] ] + items[selection][ : len(items[selection])-1 ]
-                            itemsBox, availableItems = self.menuWin(items)
-                            menuBox.blit( itemsBox, ((menuBox.get_width()/2)-(itemsBox.get_width()/2), 40) )
-                            pygame.draw.lines( itemsBox, colors.white, True, boxPoints, 1 )
-                            copyBox = menuBox
+                        if numItems >= 1:
+                            if hasattr( items[selection], "__iter__" ):
+                                items[selection] = [ items[selection][ len(items[selection])-1 ] ] + items[selection][ : len(items[selection])-1 ]
+                                itemsBox, availableItems = self.menuWin(items)
+                                menuBox.blit( itemsBox, ((menuBox.get_width()/2)-(itemsBox.get_width()/2), 50) )
+                                pygame.draw.lines( itemsBox, colors.white, True, boxPoints, 1 )
+                                copyBox = menuBox
                         else:
                             pass
                     if event.key == pygame.K_ESCAPE:
@@ -236,7 +242,7 @@ class menu():
             cursorPos = positions[selection]
             boxPoints = boxPointsFn(cursorPos)
             pygame.draw.lines( itemsBox, colors.white, True, boxPoints, 1 )
-            menuBox.blit( itemsBox, ((menuBox.get_width()/2)-(itemsBox.get_width()/2), 40) )
+            menuBox.blit( itemsBox, ((menuBox.get_width()/2)-(itemsBox.get_width()/2), 60) )
             self.screen.blit(menuBox, ( (self.screen.get_size()[0]/2)-(200/2), 100) )  
             pygame.display.flip()
         #while (pygame.event.wait().type != pygame.KEYDOWN): pass

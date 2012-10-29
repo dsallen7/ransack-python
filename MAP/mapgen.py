@@ -1,4 +1,4 @@
-import os, pygame, pickle
+import os, pygame, cPickle
 
 from random import choice, randrange
 from MAP import map, tile, room

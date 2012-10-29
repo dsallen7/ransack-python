@@ -4,10 +4,15 @@ from DISPLAY import effects
 from HERO import creator
 from OBJ import weapon
 
+try:
+    import android
+except:
+    print "No android"
+
 # Set the height and width of the screen
-screenSize=[600,600]
+screenSize=[720,1280]
 screen=pygame.display.set_mode(screenSize)
-pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=4096)
+#pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=4096)
 
 if not pygame.font: print 'Warning, fonts disabled'
 
@@ -17,6 +22,10 @@ pygame.init()
 pygame.key.set_repeat(100, 100)
 clock = pygame.time.Clock()
 random.seed( os.urandom(1) )
+
+if android:
+    android.init()
+    android.map_key(android.KEYCODE_BACK, pygame.K_ESCAPE)
 
 FX = effects.effects(clock, screen)
 
@@ -88,10 +97,50 @@ def endScreen(game, msg):
         pygame.display.flip()
     while (pygame.event.wait().type != pygame.KEYDOWN): pass
 
-def main():    
+def launchNewGame():
+    newGame = game.game(screen, clock, FX, loadHero=C.mainLoop(screen))
+    FX.fadeOut(0)
+    if newGame.mainLoop():
+        endScreen(newGame, "You Win!")
+    else:
+        endScreen(newGame, "Game Over.")
+    FX.fadeOut(const.gameBoardOffset)
+
+def loadSavedGame():
+    if android:
+         android.hide_keyboard()
+    try:
+        loadFile = getFile()
+        if loadFile == None: pass
+        else:
+            savFile = gzip.GzipFile(loadFile, 'rb')
+            ball = cPickle.load(savFile)
+            savFile.close()
+            Game = game.game(screen, clock, FX, loadTicker=ball[0], loadHero=ball[1], loadDungeon=ball[2], loadDirector=ball[3], currentMap=ball[4], levelDepth=ball[5])
+            FX.fadeOut(0)
+            if Game.mainLoop():
+                endScreen(Game, "You Win!")
+            else:
+                endScreen(Game, "Game Over.")
+            FX.fadeOut(const.gameBoardOffset)
+    except IOError, e:
+        print 'File I/O error', e
+    
+
+def mouseHandler(m):
+    (mx, my) = pygame.mouse.get_pos()
+    if (230 <= mx < 480) and (375 <= my < 430):
+        launchNewGame()
+    elif (230 <= mx < 480) and (430 <= my < 485):
+        loadSavedGame()
+    elif (230 <= mx < 300) and (485 <= my < 540):
+        os.sys.exit()
+    
+
+def main():
     titleScreen = pygame.Surface(screenSize)
     titleImg, titleRect = load_image.load_image('titlescreen.bmp', None)
-    titleScreen.blit(titleImg, (0,0) )
+    titleScreen.blit(pygame.transform.scale(titleImg, (720, 720) ), (0,0) )
     selection = 0
     options = ['Begin New Game', 'Load Saved Game', 'ExiT']
     screen.blit(titleScreen, (0,0))
@@ -123,36 +172,28 @@ def main():
                         selection = 0
                 if event.key == pygame.K_RETURN:
                     if options[selection] == 'Begin New Game':
-                        newGame = game.game(screen, clock, FX, loadHero=C.mainLoop(screen))
-                        FX.fadeOut(0)
-                        if newGame.mainLoop():
-                            endScreen(newGame, "You Win!")
-                        else:
-                            endScreen(newGame, "Game Over.")
-                        FX.fadeOut(const.gameBoardOffset)
+                        launchNewGame()
                     elif options[selection] == 'Load Saved Game':
-                        try:
-                            loadFile = getFile()
-                            if loadFile == None: pass
-                            else:
-                                savFile = gzip.GzipFile(loadFile, 'rb')
-                                ball = cPickle.load(savFile)
-                                savFile.close()
-                                Game = game.game(screen, clock, FX, loadTicker=ball[0], loadHero=ball[1], loadDungeon=ball[2], loadDirector=ball[3], currentMap=ball[4], levelDepth=ball[5])
-                                FX.fadeOut(0)
-                                if Game.mainLoop():
-                                    endScreen(Game, "You Win!")
-                                else:
-                                    endScreen(Game, "Game Over.")
-                                FX.fadeOut(const.gameBoardOffset)
-                        except IOError, e:
-                            print 'File I/O error', e
+                        loadSavedGame()
                     elif options[selection] == 'ExiT':
                         FX.fadeOut(0)
                         os.sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                titleScreen.fill(colors.white)
+                '''
+                if pygame.font:
+                    font = pygame.font.Font("./FONTS/gothic.ttf", 48)
+                    line = font.render(str(mx)+', '+str(my), 1, colors.white, colors.black)
+                    titleScreen.blit( line, (0,800) )
+                    pygame.display.flip()
+                '''
+                mouseHandler(event)
+            
+            elif event.type == pygame.MOUSEBUTTONUP:
+                titleScreen.fill(colors.black)
         
         menuBox.blit( images[0], (0, selection*line.get_height()+(line.get_height()/2) ) )
-        titleScreen.blit(titleImg, (0,0) )
+        titleScreen.blit(pygame.transform.scale(titleImg, (720, 720) ), (0,0) )
         titleScreen.blit(menuBox, (200, 375) )
         screen.blit(titleScreen, (0,0))
         pygame.display.flip()

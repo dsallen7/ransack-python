@@ -1,4 +1,4 @@
-import pygame, os, random, pickle
+import pygame, os, random, cPickle
 
 from classes import battle, enemy, shop, tavern, director
 import OBJ
@@ -6,9 +6,9 @@ from IMG import images
 from HERO import hero
 from NPC import npc
 from DISPLAY import display, hud, menu
-from SND import sfx
+#from SND import sfx
 
-from MAP import map, mapgen, mazegen
+from MAP import map, mapgen#, mazegen
 from UTIL import ticker, const, colors, load_image
 
 class game():
@@ -57,7 +57,7 @@ class game():
         self.myBattle = battle.battle(self.screen)
         self.clock = clock
         
-        self.SFX = sfx.sfx()
+        #self.SFX = sfx.sfx()
         
         self.won = False
     
@@ -120,7 +120,7 @@ class game():
                 self.boxMessage('Now entering fortress')
             else:
                 if ( self.levelDepth % 5 ) == 0:
-                    self.myDungeon.append(self.generateMap(40, self.levelDepth, type = 'maze') )
+                    self.myDungeon.append(self.generateMap(40, self.levelDepth, type = 'dungeon') )
                 else:
                     self.myDungeon.append(self.generateMap(40, self.levelDepth, type = 'dungeon') )
                 self.boxMessage('Now entering dungeon level '+str(self.levelDepth))
@@ -165,44 +165,79 @@ class game():
         flash.fill(colors.white)
         self.screen.blit(flash,(75,75))
         self.clock.tick(100)
-        self.SFX.play(0)
+        #self.SFX.play(0)
     
     def event_handler(self, event):
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                pass
-            elif event.key == pygame.K_c:
-                # cast spell
-                self.myHero.castSpell( self.myMenu.invMenu(self.myHero.getSpells(), "Spells:" ), self )
-            elif event.key == pygame.K_s:
-                # show stats
-                self.myMenu.displayHeroStats(self.myHero)
-            elif event.key == pygame.K_i:
-                # use item
-                self.myHero.useItem( self.myMenu.invMenu(self.myHero.getItems(), "ITems:" ), self )
-            elif event.key == pygame.K_w:
-                # equip weapon
-                self.myHero.equipWeapon(self.myMenu.invMenu(self.myHero.getWeapons(), "Weapons:" ))
-            elif event.key == pygame.K_a:
-                # equip armor
-                self.myHero.equipArmor(self.myMenu.invMenu(self.myHero.getArmor(), "Armor:" ))
-            elif event.key == pygame.K_t:
-                # take screenshot
-                self.screenShot()
-            elif event.key == pygame.K_m:
-                # show minimap
-                self.myMap.callDrawMiniMap(self.screen)
-            elif event.key == pygame.K_RETURN:
-                # action command
-                self.actionCommand()
-            elif event.key == pygame.K_r:
-                # do nothing - advance clock by 1 min
-                self.Ticker.tick(60)
-            else:
-                return self.move(pygame.key.name(event.key))
+        if event == pygame.K_SPACE:
+            pass
+        elif event == pygame.K_c:
+            # cast spell
+            self.myHero.castSpell( self.myMenu.invMenu(self.myHero.getSpells(), "Spells:" ), self )
+        elif event == pygame.K_s:
+            # show stats
+            self.myMenu.displayHeroStats(self.myHero)
+        elif event == pygame.K_i:
+            # use item
+            self.myHero.useItem( self.myMenu.invMenu(self.myHero.getItems(), "ITems:" ), self )
+        elif event == pygame.K_w:
+            # equip weapon
+            self.myHero.equipWeapon(self.myMenu.invMenu(self.myHero.getWeapons(), "Weapons:" ))
+        elif event == pygame.K_a:
+            # equip armor
+            self.myHero.equipArmor(self.myMenu.invMenu(self.myHero.getArmor(), "Armor:" ))
+        elif event == pygame.K_t:
+            # take screenshot
+            self.screenShot()
+        elif event == pygame.K_m:
+            # show minimap
+            self.myMap.callDrawMiniMap(self.screen)
+        elif event == pygame.K_RETURN:
+            # action command
+            self.actionCommand()
+        elif event == pygame.K_r:
+            # do nothing - advance clock by 1 min
+            self.Ticker.tick(60)
+        else:
+            return self.move(pygame.key.name(event))
     
     def mouseHandler(self, event):
         (mx, my) = pygame.mouse.get_pos()
+        if 415 <= mx < 480 and 974 <= my < 1039:
+            # upper left
+            if not self.myHero.moving: 
+                heroMove = self.event_handler(pygame.K_c)
+        elif 415 <= mx < 480 and 1063 <= my < 1128:
+            # left
+            if not self.myHero.moving: 
+                heroMove = self.event_handler(pygame.K_LEFT)
+        elif 415 <= mx < 480 and 1152 <= my < 1217:
+            # lower left
+            if not self.myHero.moving: 
+                heroMove = self.event_handler(pygame.K_i)
+        elif 504 <= mx < 569 and 974 <= my < 1039:
+            # upper center
+            if not self.myHero.moving: 
+                heroMove = self.event_handler(pygame.K_UP)
+        elif 504 <= mx < 569 and 1063 <= my < 1128:
+            # center
+            if not self.myHero.moving: 
+                heroMove = self.event_handler(pygame.K_RETURN)
+        elif 504 <= mx < 569 and 1152 <= my < 1217:
+            # lower center
+            if not self.myHero.moving: 
+                heroMove = self.event_handler(pygame.K_DOWN)
+        elif 593 <= mx < 658 and 974 <= my < 1039:
+            # upper right
+            if not self.myHero.moving: 
+                heroMove = self.event_handler(pygame.K_m)
+        elif 593 <= mx < 658 and 1063 <= my < 1128:
+            # right
+            if not self.myHero.moving: 
+                heroMove = self.event_handler(pygame.K_RIGHT)
+        elif 593 <= mx < 658 and 1152 <= my < 1217:
+            # lower right
+            if not self.myHero.moving: 
+                heroMove = self.event_handler(pygame.K_s)
         if (const.gameBoardOffset <= mx < const.gameBoardOffset+self.gameBoard.get_width() ) and (const.gameBoardOffset <= my < const.gameBoardOffset+self.gameBoard.get_height() ):
             # map handler
             pass
@@ -381,7 +416,8 @@ class game():
         self.updateSprites()
         if self.myMap.type == 'dungeon':
             pass#self.Display.drawShade(self.myMap, self.gameBoard)
-        self.screen.blit( self.gameBoard, (const.gameBoardOffset, const.gameBoardOffset) )
+        #self.screen.blit( self.gameBoard, (const.gameBoardOffset, const.gameBoardOffset) )
+        self.screen.blit( pygame.transform.scale(self.gameBoard, (720, 720) ), (0,0) )
         pygame.display.flip()
     
     def updateNPCs(self):
@@ -400,8 +436,7 @@ class game():
 
     def mainLoop(self):
         gameFrame, gameFrameRect = load_image.load_image('gamescreen600.bmp', None)
-        self.screen.blit(gameFrame,(0,0))
-        
+        #self.screen.blit(gameFrame,(0,0))
         (pX, pY) = self.myMap.getPlayerXY()
         self.myHero.setXY(pX*const.blocksize, pY*const.blocksize)
         
@@ -409,7 +444,7 @@ class game():
         self.Display.drawSprites(self.myHero, self.myMap, self.gameBoard, self, animated=False)
         self.updateSprites()
         self.Display.redrawXMap(self.myMap)
-        font = pygame.font.SysFont("arial", 14)
+        #font = pygame.font.SysFont("arial", 14)
         while self.gameOn:
             #self.clock.tick(30)
             self.gameBoard.fill(colors.black)
@@ -419,8 +454,10 @@ class game():
                 elif event.type == pygame.KEYDOWN:
                     if not self.myHero.moving: 
                         heroMove = self.event_handler(event)
-                elif event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.MOUSEBUTTONUP:
+                elif event.type == pygame.MOUSEBUTTONDOWN:# or event.type == pygame.MOUSEBUTTONUP:
                     self.mouseHandler(event)
+            if pygame.mouse.get_focused():
+                self.mouseHandler(event)
             self.myHud.update()
                 #self.Display.drawNPC(npc, self.myMap, self, animated=True)
             #self.screen.blit( self.myHero.showLocation(), (0, 0) )

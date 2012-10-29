@@ -1,5 +1,6 @@
 *.py~
 *.pyc
+*.pyo
 *~
 *.jpeg
 *.sav

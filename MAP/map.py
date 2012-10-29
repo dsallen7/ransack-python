@@ -1,4 +1,4 @@
-import pygame, random, pickle, ppov, gzip, os
+import pygame, random, cPickle, ppov, gzip, os
 from UTIL import queue, const, colors, load_image, misc
 from types import *
 from MAP import tile, minimap, submap
@@ -113,7 +113,7 @@ class gameMap(map):
     def loadMap(self, filename):
         try:
             save = gzip.GzipFile(os.getcwd()+'/MAP/LEVELS/'+filename, "rb")
-            ball = pickle.load(save)
+            ball = cPickle.load(save)
             save.close()
             self.installBall(ball)
         except pygame.error, message:

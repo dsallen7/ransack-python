@@ -64,7 +64,7 @@ class Creator():
         else:
             self.gender = 'Female'
             self.displayField.blit(images.fHeroImages[8], (40 , 59) )
-        screen.blit(self.displayField, (150,150) )
+        screen.blit(pygame.transform.scale(self.displayField, (500, 500) ), (60, 60) )
         pygame.display.flip()
     
     def mainLoop(self, screen):
@@ -76,7 +76,7 @@ class Creator():
                         if 153 + s.getXLoc() <= mX < 171 + s.getXLoc() and 145+s.getYLoc()+(s.getValue()*10) <= mY < 161+s.getYLoc()+(s.getValue()*10):
                             self.slide(s, screen)
                     # done
-                    if 291 <= mX < 340 and 387 <= mY < 416:
+                    if 410 <= mX < 641 and 504 <= mY < 686:
                         return (self.gender,
                                 self.str, 
                                 self.itl, 
@@ -94,5 +94,22 @@ class Creator():
                                 50, [False, False], 0 ) #gold, stats, slain
                 elif event.type == pygame.QUIT:
                     os.sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        return (self.gender,
+                                self.str, 
+                                self.itl, 
+                                self.dex, 
+                                const.blocksize, 
+                                const.blocksize,
+                                self.HP, self.HP, # max, current
+                                self.MP, self.MP,
+                                0, 0,             # score, keys
+                                1, 0, 20,         # level, current XP, XP for next lev
+                                [], None,         # weapons, eq. weapons
+                                [], [None,None,None], #armor, eq. armor
+                                range(20),        # items
+                                [],               # spells
+                                50, [False, False], 0 ) #gold, stats, slain
             self.updateDisplay(screen)
         while (pygame.event.wait().type != pygame.KEYDOWN): pass
