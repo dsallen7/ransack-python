@@ -1,12 +1,15 @@
 import pygame, game, random, cPickle, gzip, os
-from UTIL import const, colors, load_image
-from DISPLAY import effects
+from UTIL import const, colors, load_image, inputHandler, button
+from DISPLAY import interface, effects
 from HERO import creator
 from OBJ import weapon
+
+from math import ceil
 
 try:
     import android
 except:
+    android = False
     print "No android"
 
 # Set the height and width of the screen
@@ -31,10 +34,15 @@ FX = effects.effects(clock, screen)
 
 C = creator.Creator()
 
+iH = inputHandler.inputHandler(FX)
+
+iFace = interface.Interface(screen, iH)
+
 images = range(3)
 images[0], r = load_image.load_image('cursor.bmp', -1)
 
-def getFile():
+def getFile(titleScreen):
+    FX.displayLoadingMessage(titleScreen, 'Loading saved game list...')
     saveFiles = range(3)
     desc = range(3)
     for i in range(3):
@@ -51,32 +59,32 @@ def getFile():
             saveFiles[i] = 'No file'
             desc[i] = 'No file'
     
-    saveBox = pygame.Surface( (300,100) )
+    saveBox = pygame.Surface( (600,200) )
     selection = 0
     while True:
         saveBox.fill( colors.gold )
         if pygame.font:
-            font = pygame.font.Font("./FONTS/gothic.ttf", 14)
+            font = pygame.font.Font("./FONTS/gothic.ttf", 32)
             for i in range(3):
-                saveBox.blit( font.render(desc[i], 1, colors.white, colors.gold), (25,i*25) )
+                saveBox.blit( font.render(desc[i], 1, colors.white, colors.gold), (25, (33-16)+(i*66) ) )
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            event_ = iH.getCmd(event)
+            if event_ == pygame.QUIT:
                 os.sys.exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
-                    selection -= 1
-                    if selection == -1:
-                        selection = 2
-                if event.key == pygame.K_DOWN:
-                    selection += 1
-                    if selection == 3:
-                        selection = 0
-                if event.key == pygame.K_RETURN:
-                    return "ransack"+str(selection)+".sav"
-                if event.key == pygame.K_ESCAPE:
-                    return None
-        saveBox.blit( images[0], (0, selection*25) )
-        screen.blit( saveBox, (100,200) )
+            if event_ == pygame.K_UP:
+                selection -= 1
+                if selection == -1:
+                    selection = 2
+            if event_ == pygame.K_DOWN:
+                selection += 1
+                if selection == 3:
+                    selection = 0
+            if event_ == pygame.K_RETURN:
+                return "ransack"+str(selection)+".sav"
+            if event_ == pygame.K_ESCAPE:
+                return None
+        saveBox.blit( images[0], (0, (33-12)+(selection*66)) )
+        screen.blit( saveBox, (50,200) )
         pygame.display.flip()
         
 def endScreen(game, msg):
@@ -93,36 +101,43 @@ def endScreen(game, msg):
         dScreen.blit( font.render("Level reached: "+str(game.myHero.level), 1, colors.white, colors.black), (50,225) )
         font = pygame.font.Font("./FONTS/gothic.ttf", 14)
         dScreen.blit( font.render(str(game.Ticker.getDays())+"days, "+str(game.Ticker.getHours()%24)+":"+str(game.Ticker.getMins()%60)+"."+str(game.Ticker.getSecs()), 1, colors.white, colors.black), (50,250) )
-        screen.blit(dScreen, (const.gameBoardOffset, const.gameBoardOffset) )
+        screen.blit(pygame.transform.scale(dScreen, (int(ceil(300 * 2.4)), 
+                                                     int(ceil(300 * 2.4)) ) ), 
+                                                     (0, 0) )
         pygame.display.flip()
-    while (pygame.event.wait().type != pygame.KEYDOWN): pass
+    while (pygame.event.wait().type != pygame.MOUSEBUTTONDOWN): pass
 
-def launchNewGame():
-    newGame = game.game(screen, clock, FX, loadHero=C.mainLoop(screen))
+def launchNewGame(titleScreen):
+    newGame = game.game(screen, clock, iFace, FX, iH, titleScreen, loadHero=C.mainLoop(screen))
     FX.fadeOut(0)
+    iFace.state = 'game'
     if newGame.mainLoop():
         endScreen(newGame, "You Win!")
     else:
         endScreen(newGame, "Game Over.")
-    FX.fadeOut(const.gameBoardOffset)
+    FX.fadeOut(0)
 
-def loadSavedGame():
+def loadSavedGame(titleScreen):
     if android:
          android.hide_keyboard()
     try:
-        loadFile = getFile()
+        '''
+        loadFile = getFile(titleScreen)
         if loadFile == None: pass
         else:
-            savFile = gzip.GzipFile(loadFile, 'rb')
-            ball = cPickle.load(savFile)
-            savFile.close()
-            Game = game.game(screen, clock, FX, loadTicker=ball[0], loadHero=ball[1], loadDungeon=ball[2], loadDirector=ball[3], currentMap=ball[4], levelDepth=ball[5])
-            FX.fadeOut(0)
-            if Game.mainLoop():
-                endScreen(Game, "You Win!")
-            else:
-                endScreen(Game, "Game Over.")
-            FX.fadeOut(const.gameBoardOffset)
+        '''
+        FX.displayLoadingMessage(titleScreen, 'Loading saved game...')
+        savFile = gzip.GzipFile('ransack0.sav', 'rb')
+        ball = cPickle.load(savFile)
+        savFile.close()
+        Game = game.game(screen, clock, iFace, FX, iH, titleScreen, ball[0], ball[1], ball[2], ball[3])
+        FX.fadeOut(0)
+        iFace.state = 'game'
+        if Game.mainLoop():
+            endScreen(Game, "You Win!")
+        else:
+            endScreen(Game, "Game Over.")
+        FX.fadeOut(0)
     except IOError, e:
         print 'File I/O error', e
     
@@ -138,63 +153,61 @@ def mouseHandler(m):
     
 
 def main():
-    titleScreen = pygame.Surface(screenSize)
+    titleScreen = pygame.Surface((screenSize[0],screenSize[0]))
     titleImg, titleRect = load_image.load_image('titlescreen.bmp', None)
-    titleScreen.blit(pygame.transform.scale(titleImg, (720, 720) ), (0,0) )
+    ifaceImg, r = load_image.load_image('interface_m.bmp', None)
+    titleScreen.blit( pygame.transform.scale(titleImg, (int(ceil(300 * 2.4)), 
+                                                        int(ceil(300 * 2.4)) ) ), (0,0) )
+    screen.blit( pygame.transform.scale(ifaceImg, (int(ceil(300 * 2.4)), 
+                                                   int(ceil(233 * 2.4)) ) ), (0, int(ceil(300 * 2.4))) )
     selection = 0
     options = ['Begin New Game', 'Load Saved Game', 'ExiT']
     screen.blit(titleScreen, (0,0))
+    buttons = [button.Button( (200, 375), 'Begin New Game'),
+               button.Button( (200, 425), 'Load Saved Game'),
+               button.Button( (200, 475), 'Credits'),
+               button.Button( (200, 525), 'Exit')
+               
+               ]
     while True:
-        menuBox = pygame.Surface( (300,300) )
+        menuBox = pygame.Surface( (450,450) )
         menuBox.fill( colors.black )
         menuBox.set_colorkey(colors.black)
-        clock.tick(20)
         
         if pygame.font:
-            font = pygame.font.Font("./FONTS/SpinalTfanboy.ttf", 48)
+            font = pygame.font.Font("./FONTS/SpinalTfanboy.ttf", 64)
             for i in range(len(options)):
                 line = font.render(options[i], 1, colors.white, colors.black)
-                menuBox.blit( line, (30,(i*line.get_height() )) )
+                menuBox.blit( line, (50,(i*line.get_height() )) )
     
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                os.sys.exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                selection = None
+                (mX, mY) = pygame.mouse.get_pos()
+                for b in buttons:
+                    if b.hit(mX, mY):
+                        selection = b.msg
+                if selection == 'Begin New Game':
+                    launchNewGame(titleScreen)
+                elif selection == 'Load Saved Game':
+                    loadSavedGame(titleScreen)
+                elif selection == 'Exit':
+                    FX.fadeOut(0)
                     os.sys.exit()
-                if event.key == pygame.K_UP:
-                    selection -= 1
-                    if selection == -1:
-                        selection = len(options)-1
-                if event.key == pygame.K_DOWN:
-                    selection += 1
-                    if selection == len(options):
-                        selection = 0
-                if event.key == pygame.K_RETURN:
-                    if options[selection] == 'Begin New Game':
-                        launchNewGame()
-                    elif options[selection] == 'Load Saved Game':
-                        loadSavedGame()
-                    elif options[selection] == 'ExiT':
-                        FX.fadeOut(0)
-                        os.sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                titleScreen.fill(colors.white)
-                '''
-                if pygame.font:
-                    font = pygame.font.Font("./FONTS/gothic.ttf", 48)
-                    line = font.render(str(mx)+', '+str(my), 1, colors.white, colors.black)
-                    titleScreen.blit( line, (0,800) )
-                    pygame.display.flip()
-                '''
-                mouseHandler(event)
-            
-            elif event.type == pygame.MOUSEBUTTONUP:
-                titleScreen.fill(colors.black)
-        
+                elif selection == None:
+                    pass
+        '''
         menuBox.blit( images[0], (0, selection*line.get_height()+(line.get_height()/2) ) )
-        titleScreen.blit(pygame.transform.scale(titleImg, (720, 720) ), (0,0) )
+        titleScreen.blit(pygame.transform.scale(titleImg, (int(ceil(300 * 2.4)), 
+                                                           int(ceil(300 * 2.4)) ) ), (0,0) )
         titleScreen.blit(menuBox, (200, 375) )
+        '''
         screen.blit(titleScreen, (0,0))
+        for b in buttons:
+            screen.blit(b.img, ( (b.locX + b.sizeX) - (b.sizeX) , b.locY ) )
+        iFace.update()
+        font = pygame.font.Font(os.getcwd()+"/FONTS/courier.ttf", 28)
+        if android:
+            screen.blit( font.render( str( android.get_dpi() ), 1, colors.white, colors.black ), (0,0) )
         pygame.display.flip()
 main()

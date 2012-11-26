@@ -1,64 +1,97 @@
-import pygame
+import pygame, os
 from DISPLAY import menu
-from load_image import *
 import random
-from UTIL import const, colors
+from UTIL import const, colors, load_image, button
+from math import floor, ceil
+from SCRIPTS import enemyScr
+
+try:
+    import android
+except:
+    android = False
+    print "No android"
 
 # this class will be used to draw the animation occuring in the battle.
 
 class battle():
     
-    def __init__(self, screen):
-        self.battleField = pygame.Surface( (300,300) )
-        self.battleField.fill( colors.black )
+    def __init__(self, screen, iH, menu):
+        self.battleField, r = load_image.load_image('battlefield.bmp', None)
         self.images = range(3)
         self.screen = screen
         
-        self.myMenu = menu.menu(screen)
+        self.myMenu = menu
         
-        self.images[0], r = load_image('cursor.bmp', -1)
+        self.images[0], r = load_image.load_image('cursor.bmp', -1)
+        
+        self.enemyImgs = range(2)
+        
+        self.enemyImg = None
+        
+        self.heroImgs = range(2)
+        
+        self.heroImg = None
+        
+        self.inputHandler = iH
+        
+        self.buttons = [button.Button( (200, 150), 'Fight',os.getcwd()+"/FONTS/Squealer.ttf", 12),
+                        button.Button( (200, 183), 'Magic',os.getcwd()+"/FONTS/Squealer.ttf", 12),
+                        button.Button( (200, 216), 'Item',os.getcwd()+"/FONTS/Squealer.ttf", 12),
+                        button.Button( (200, 249), 'Flee',os.getcwd()+"/FONTS/Squealer.ttf", 12)
+                        
+                        ]
         
     def writeText(self, surface, loc, text, fgc, bgc, size=18, font="SpinalTfanboy.ttf"):
         font = pygame.font.Font(os.getcwd()+"/FONTS/"+font, size)
         surface.blit( font.render(text, 1, fgc, bgc), loc )
-        
-    def drawBattleScreen(self, enemy=None):
+    
+    # can be called with or without enemy argument
+    # if enemy is specified, battlefield will be drawn fresh
+    def drawBattleScreen(self, game, enemy=None):
         if enemy is not None:
-            self.battleField.blit( self.boxStat(enemy.getHP(), enemy.maxHP, colors.red, colors.green, (150,30) ), (150,30) )
-        self.screen.blit( self.battleField, (const.gameBoardOffset, const.gameBoardOffset) )
+            self.battleField, r = load_image.load_image('battlefield.bmp', None)
+            self.battleField.set_colorkey([255,0,0])
+            if game.myMap.type == 'wilds':
+                self.background, r = load_image.load_image('forestField.bmp', None)
+            else: self.background, r = load_image.load_image('dungeonField.bmp', None)
+            self.battleField.blit( self.boxStat(enemy.getHP(), enemy.maxHP, colors.red, colors.black, (150, 30) ), (204, 97) )
+            self.battleField.blit( self.enemyImg, (125, 50)  )
+            self.battleField.blit( self.heroImg, (0, 75)  )
+            self.background.blit(self.battleField, (0,0) )
+        #self.screen.blit( pygame.transform.scale(self.battleField, (720, 720) ), (0, 0) )
+        game.Display.displayOneFrame(game.myInterface, game.FX, self.background, game)
         pygame.display.flip()
     
     # displays battle menu and waits for player to select choice,
     # returns choice to fightBattle()
-    def getAction(self):
-        menuBox = pygame.Surface( (60,100) )
+    def getAction(self, game):
         options = ['FighT', 'Magic', 'ITem', 'Flee']
         selection = 0
         while True:
+            menuBox = pygame.Surface( (60,100) )
+            menuBox.set_colorkey(colors.gold)
             menuBox.fill( colors.gold )
-            if pygame.font:
-                font = pygame.font.Font(os.getcwd()+"/FONTS/SpinalTfanboy.ttf", 14)
-                for i in range(4):
-                    menuBox.blit( font.render(options[i], 1, colors.white, colors.gold), (25,i*25) )
+            for b in self.buttons:
+                self.background.blit(b.img, (b.locX, b.locY) )
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    (x, y) = pygame.mouse.get_pos()
+                    print x, y
+                    for b in self.buttons:
+                        print b.locX, b.locY
+                        if b.hit(int(ceil(x/2.4)), 
+                                 int(ceil(y/2.4)) ):
+                            return b.msg
+                event_ = self.inputHandler.getCmd(event)
+                if event_ == pygame.K_t:
+                    game.screenShot()
+                if event_ == pygame.QUIT:
                     os.sys.exit()
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_UP:
-                        selection -= 1
-                        if selection == -1:
-                            selection = 3
-                    elif event.key == pygame.K_DOWN:
-                        selection += 1
-                        if selection == 4:
-                            selection = 0
-                    elif event.key == pygame.K_RETURN:
-                        return options[selection]
-                    elif event.key == pygame.K_ESCAPE:
-                        pass
-            menuBox.blit( self.images[0], (0, selection*25) )            
-            self.battleField.blit( menuBox, (200,150) )
-            self.drawBattleScreen()
+                elif event_ == pygame.K_ESCAPE:
+                    pass
+            #menuBox.blit( self.images[0], (0, selection*25) )            
+            #self.background.blit( menuBox, (200,150) )
+            self.drawBattleScreen(game)
     
     def commence(self, screen):
         while (pygame.event.wait().type != pygame.KEYDOWN): pass
@@ -82,57 +115,85 @@ class battle():
             maxBox.blit(currBox, (0,0) )
         return maxBox
     
+    def loadEnemyImg(self, hero, enemy):
+        if hero.gender == 'Male':
+            self.heroImgs[0], r = load_image.load_image( os.path.join('ANIMATION', 'hero_m1.bmp'), -1 )
+            self.heroImgs[1], r = load_image.load_image( os.path.join('ANIMATION', 'hero_m2.bmp'), -1 )
+        else:
+            self.heroImgs[0], r = load_image.load_image( os.path.join('ANIMATION', 'hero_f1.bmp'), -1 )
+            self.heroImgs[1], r = load_image.load_image( os.path.join('ANIMATION', 'hero_f2.bmp'), -1 )
+        self.heroImg = self.heroImgs[0]
+        enemyImgFilenames = enemyScr.imgFileDict[enemy.getName()]
+        for i in range(len(enemyImgFilenames)):
+             self.enemyImgs[i], r = load_image.load_image( os.path.join('ANIMATION', enemyImgFilenames[i]), -1 )
+        self.enemyImg = self.enemyImgs[0]
+    
     # this controls all the logic of what goes on in an actual battle
-    def fightBattle(self, game, enemy):
-        game.myHud.update()
-        game.FX.scrollFromCenter(game.gameBoard, self.battleField)
-        self.drawBattleScreen(enemy)
+    def fightBattle(self, game, enemy, board_):
+        self.loadEnemyImg(game.myHero, enemy)
+        self.drawBattleScreen(game, enemy)
+        game.FX.scrollFromCenter(board_, self.battleField)
+        #game.myInterface.update()
         hero = game.myHero
         (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX, psn) = hero.getPlayerStats()
         (armor, weapon) = ( hero.getArmorEquipped(), hero.getWeaponEquipped() )
-        game.textMessage( 'You are facing a level '+str(enemy.getLevel())+' '+enemy.getName()+'!' )
+        if enemy.getLevel() > 0:
+            game.textMessage( 'You are facing a level '+str(enemy.getLevel())+' '+enemy.getName()+'!' )
+        else:
+            game.textMessage( 'You are facing the '+enemy.getName()+'!' )
         time = 0
         while enemy.getHP() > 0:
             #clock.tick(15)
-            if not hero.updateStatus(game.Ticker, game.myHud):
+            self.enemyImg = self.enemyImgs[0]
+            self.drawBattleScreen(game, enemy)
+            if not hero.updateStatus(game):
                 return False
                 
-            action = self.getAction()
-            if action == 'FighT':
+            action = self.getAction(game)
+            if action == 'Fight':
                 #hero attacks
-                if self.rollDie(0,2):
+                self.heroImg = self.heroImgs[1]
+                a = random.randrange(0, dex+5)
+                if not (a > dex):
                     dmg = random.randrange(sth/2,sth) + (weapon.getLevel()+1)**2
                     game.textMessage('You hit the '+enemy.getName() +' for '+str(dmg)+' points!')
                     #game.SFX.play(1)
                     for i in range(enemy.getHP(), enemy.getHP()-dmg, -1):
                         enemy.takeDmg(1)
-                        self.drawBattleScreen(enemy)
+                        self.drawBattleScreen(game, enemy)
                 else:
                     game.textMessage("You missed The "+enemy.getName()+"!")
                     #game.SFX.play(2)
             elif action == 'Magic':
                 enemy.takeDmg( hero.castSpell( self.myMenu.invMenu(hero.getSpells(), "Spells:" ), game, True ) )
                     
-            elif action == 'ITem':
+            elif action == 'Item':
                 d = hero.useItem(self.myMenu.invMenu(hero.getItems(), "ITems:" ), game, True )
                 if d > 0:
                     enemy.takeDmg( d )
             elif action == 'Flee':
                 if self.rollDie(1,3):
                     game.textMessage("You escaped safely.")
-                    game.FX.scrollFromCenter(self.battleField, game.gameBoard)
+                    game.FX.scrollFromCenter(self.battleField, board_)
                     return True
                 else:
                     game.textMessage("You can't escape!")
-            game.Ticker.tick(10)
+            self.heroImg = self.heroImgs[0]
             pygame.time.wait(1000)
+            game.myInterface.update(game)
+            self.drawBattleScreen(game, enemy)
+            
+            game.Ticker.tick(10)
             #enemy attacks
             if enemy.getHP() > 0:
                 if self.rollDie(0,2):
-                    dmg = random.randrange(enemy.getBaseAttack()-5,enemy.getBaseAttack()+5) - hero.armorClass
+                    dmg = random.randrange(enemy.getBaseAttack()-5,enemy.getBaseAttack()+5) - ( hero.armorClass + 1 )
                     if dmg > 0:
                         game.textMessage("The "+enemy.getName()+" hits you for "+str(dmg)+" points!")
                         #game.SFX.play(1)
+                        self.enemyImg = self.enemyImgs[1]
+                        if android:
+                            android.vibrate(0.1)
                     else: game.textMessage("The "+enemy.getName()+" attack is ineffective.")
                     if enemy.poison:
                         if self.rollDie(0,3):
@@ -150,17 +211,19 @@ class battle():
                             game.textMessage("You are damned!")                        
                     if hero.takeDmg(dmg) < 1:
                         game.textMessage("You have died!")
-                        game.FX.scrollFromCenter(self.battleField, game.gameBoard)
+                        game.FX.scrollFromCenter(self.battleField, board_)
                         return False
                 else:
                     game.textMessage("The "+enemy.getName()+" missed you!")
                     #game.SFX.play(2)
             game.Ticker.tick(10)
+            game.myInterface.update(game)
+            self.drawBattleScreen(game, enemy)
             pygame.time.wait(1000)
-            game.myHud.update()
-            self.drawBattleScreen(enemy)
         game.textMessage("The "+enemy.getName()+" is dead!")
-        if hero.increaseExp(5):
+        if hero.increaseExp( 5 + random.randrange(enemy.level, 2*enemy.level)  ):
             game.textMessage("Congratulations! You have gained a level.")
-        game.FX.scrollFromCenter(self.battleField, game.gameBoard)
-        return random.randrange(enemy.getLevel()*2, enemy.getLevel()*4)
+        game.FX.scrollFromCenter(self.background, board_)
+        if enemy.getLevel() > 0:
+            return random.randrange(enemy.getLevel()*2, enemy.getLevel()*4)
+        else: return 1

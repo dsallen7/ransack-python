@@ -16,7 +16,8 @@ DEFAULTBKGD = 0
 class Generator():
     
     def __init__(self, DIM, level=1):
-        self.map = map.genMap(DIM, level)
+        self.map = map.genMap(DIM, level, 'Dungeon Level '+str(level) )
+        self.map.type = 'dungeon'
         self.copyText = []
         self.level = level
     
@@ -159,7 +160,7 @@ class Generator():
         choice2 = choice(rooms)
         # find room with only 1 entrance
         # WARNING: this algorithm not guaranteed to stop.
-        while len(choice2.entrances) > 1 or choice2.secret:
+        while len(choice2.entrances) > 1 or choice2.secret or choice2.neighbors[0].secret:
             choice2 = choice(rooms)
         (xpos, ypos) = choice2.getPos()
         (xdim, ydim) = choice2.getDimensions()

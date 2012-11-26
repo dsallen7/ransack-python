@@ -7,12 +7,14 @@
  
 import pygame, os
 
+from UTIL import load_image
+
 pygame.init()
  
 class spritesheet(object):
     def __init__(self, filename):
         try:
-            self.sheet = pygame.image.load(os.path.join('IMG', filename)).convert()
+            self.sheet, r = load_image.load_image(filename, 1)
         except pygame.error, message:
             print 'Unable to load spritesheet image:', filename
             raise SystemExit, message
@@ -26,7 +28,7 @@ class spritesheet(object):
             if colorkey is -1:
                 colorkey = image.get_at((0,0))
             if colorkey is 1:
-                colorkey = [1,1,1]
+                colorkey = [255,0,255]
             image.set_colorkey(colorkey, pygame.RLEACCEL)
         return image
     # Load a whole bunch of images and return them as a list

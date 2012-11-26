@@ -26,7 +26,7 @@
     # --------BLOCKING TILES---------
     # 24: brick 1
     # 25: brick 2
-    # 26: 
+    # 26: wooden left corner
     # 27: upper right wall
     # 28: stone 1
     # 29: stone 2
@@ -41,20 +41,20 @@
     # 38: E/W door
     # 39: E/W window
     # 40: upper left wall
-    # 41: blacksmith window
-    # 42: house 1 lower left
+    # 41: house door
+    # 42: townhall door
     # 43: item shop door
-    # 44: house 1 lower right
-    # 45: house 1 upper left
+    # 44: wooden wall E/W
+    # 45: wooden wall N/S
     # 46: E/W fake wall
     # 47: N/S fake wall
     # 48: house 1 roof 1
     # 49: 
     # 50: 
     # 51: lower left wall
-    # 52: tree 1
-    # 53: tree 2
-    # 54: tree 3
+    # 52: pine
+    # 53: oak
+    # 54: sign
     # 55: wellspring
     # 56: transparent block
     # 57: magic shop door
@@ -72,12 +72,12 @@
     # 69: lake 5
     # 70: lake 6
     # 71: lava
-    # 72: house 2 upper left
-    # 73: house 2 upper right
-    # 74: magicshop sign
+    # 72: shop counter
+    # 73: fence E/W
+    # 74: fence
     # 75: lower right wall
-    # 76: rampart 1
-    # 77: rampart 2
+    # 76: column
+    # 77: chair
     # 78: lava river 1
     # 79: lava river 2
     # 80: N/S window

@@ -18,3 +18,11 @@ class Tile():
         return self.fg
     def setFG(self, fg):
         self.fg = fg
+    
+    def getMsgText(self):
+        return self.msgText
+    def setMsgText(self, txt):
+        self.msgText = txt
+    
+    def getShopID(self):
+        return self.shopID

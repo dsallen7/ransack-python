@@ -10,7 +10,7 @@ import Queue
 
 class hero(pygame.sprite.Sprite):
     
-    def __init__(self, load=None):
+    def __init__(self, load=None, pos=None):
         pygame.sprite.Sprite.__init__(self) #call Sprite intializer
         
         self.dir = 'down'
@@ -19,6 +19,8 @@ class hero(pygame.sprite.Sprite):
         self.weaponClass = 0
         
         self.installLoadedHero(load)
+        if pos is not None:
+            (self.X, self.Y) = pos
         if self.gender == 'Male':
             self.images = images.loadNPC('mherosheet.bmp')
         else: self.images = images.loadNPC('fherosheet.bmp')
@@ -159,7 +161,27 @@ class hero(pygame.sprite.Sprite):
                     availableItems.append(i[0])
         return availableItems
     def takeItem(self, item):
-        self.items[item.getType()-const.FRUIT1].remove(item)
+        try:
+            if type(item) is IntType:
+                self.items[item-const.FRUIT1].remove(item)
+                if self.items[item-const.FRUIT1] == []:
+                    self.items[item-const.FRUIT1] = 0
+                return True
+            else:
+                self.items[item.getType()-const.FRUIT1].remove(item)
+                if self.items[item.getType()-const.FRUIT1] == []:
+                    self.items[item.getType()-const.FRUIT1] = 0
+                return True
+        except ValueError:
+            return False
+    
+    def hasItem(self, item, qty = 1):
+        if hasattr( self.items[item-const.FRUIT1], "__iter__" ):
+            if len(self.items[item-const.FRUIT1]) == qty:
+                return True
+            else: return False
+        else: return False
+    
     def useItem(self, item, game, battle=False):
         if item == None:
             return 0
@@ -260,17 +282,17 @@ class hero(pygame.sprite.Sprite):
             game.myMap.revealMap()
             game.Display.redrawXMap(game.myMap)
             game.Display.redrawMap(game.myMap, self, game.gameBoard)
-            game.displayGameBoard()
+            game.displayOneFrame()
             game.textMessage( spell.getCastMsg() )
         elif spell.getType() == const.FRBL:
-            spell.execute(self, game.myHud, battle)
+            spell.execute(self, battle)
             game.textMessage(spell.getCastMsg())
             game.Ticker.tick(spell.getCastTime() )
             dmg = random.randrange(self.intell,2*self.intell)
             game.textMessage('The fireball hits the monster for '+str(dmg)+' points!')
             return dmg
         elif spell.getType() == const.ICBL:
-            spell.execute(self, game.myHud, battle)
+            spell.execute(self, battle)
             game.textMessage(spell.getCastMsg())
             game.Ticker.tick(spell.getCastTime() )
             dmg = random.randrange(self.intell,2*self.intell)
@@ -280,7 +302,7 @@ class hero(pygame.sprite.Sprite):
         if item == False:
             self.takeMP(spell.cost)
         '''
-        spell.execute(self, game.myHud, battle)
+        spell.execute(self, battle)
         game.Ticker.tick(spell.getCastTime() )
         game.textMessage(spell.getCastMsg())
         return True
@@ -290,26 +312,26 @@ class hero(pygame.sprite.Sprite):
     def notchKill(self):
         self.slain += 1
     
-    def updateStatus(self, ticker, hud):
+    def updateStatus(self, game):
         if self.isPoisoned:
-            ticker.tick(5)
-            if ticker.getTicks() - self.poisonedAt >= 120 * ticker.timeRate:
-                hud.txtMessage('The poison has left your system.')
+            game.Ticker.tick(5)
+            if game.Ticker.getTicks() - self.poisonedAt >= 120 * game.Ticker.timeRate:
+                game.textMessage('The poison has left your system.')
                 self.isPoisoned = False
             else:
-                hud.txtMessage('The poison hurts you...')
+                game.textMessage('The poison hurts you...')
                 if self.takeDmg(1) < 1:
-                    hud.txtMessage("You have died!")
+                    game.txtMessage("You have died!")
                     return False
         if self.isDamned:
-            ticker.tick(5)
-            if ticker.getTicks() - self.damnedAt >= 120 * ticker.timeRate:
-                hud.txtMessage('You are no longer damned.')
+            game.Ticker.tick(5)
+            if game.Ticker.getTicks() - self.damnedAt >= 120 * game.Ticker.timeRate:
+                game.textMessage('You are no longer damned.')
                 self.isDamned = False
             else:
-                hud.txtMessage('The demon siphons your lifepower...')
+                game.textMessage('The damnation siphons your lifepower...')
                 if self.takeDmg(1) < 1:
-                    hud.txtMessage("You have died!")
+                    game.textMessage("You have died!")
                     return False
         return True
         
@@ -347,10 +369,11 @@ class hero(pygame.sprite.Sprite):
         gld = self.gold
         sts = [self.isPoisoned, self.isDamned]
         sln = self.slain
-        return (gnd, str, itl, dex, X, Y, cHP, mHP, cMP, mMP, scr, kys, lvl, cXP, nXP, wpn, weq, arm, aeq, itm, spl, gld, sts, sln)
+        nm = self.name
+        return (gnd, str, itl, dex, X, Y, cHP, mHP, cMP, mMP, scr, kys, lvl, cXP, nXP, wpn, weq, arm, aeq, itm, spl, gld, sts, sln, nm)
     
     def installLoadedHero(self, load):
-        (gnd, str, itl, dex, X, Y, cHP, mHP, cMP, mMP, scr, kys, lvl, cXP, nXP, wpn, weq, arm, aeq, itm, spl, gld, sts, sln) = load
+        (gnd, str, itl, dex, X, Y, cHP, mHP, cMP, mMP, scr, kys, lvl, cXP, nXP, wpn, weq, arm, aeq, itm, spl, gld, sts, sln, nm) = load
         self.gender = gnd
         self.strength = str
         self.intell = itl
@@ -386,6 +409,7 @@ class hero(pygame.sprite.Sprite):
         self.isPoisoned = sts[0]
         self.isDamned = sts[1]
         self.slain = sln
+        self.name = nm
         
     
     # for debugging purposes
@@ -398,4 +422,3 @@ class hero(pygame.sprite.Sprite):
             locText = font.render( "Self.X:"+str(self.X)+"Self.Y:"+str(self.Y)+"RectX:"+str(x1)+"RectY"+str(y1), 1, colors.red, colors.yellow )
             locBox.blit(locText, (10,10) )
         return locBox
-    

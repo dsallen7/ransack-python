@@ -1,39 +1,23 @@
 # Script for pre-loading all images used in Ransack
 
 from spritesheet import *
-from UTIL import const
+from UTIL import const, load_image
 
 import os
 
 mHeroImages = range(9)
 fHeroImages = range(9)
-mapImages = range(133)
+mapImages = range(135)
 editorImages = range(7)
-
-def load_image(name, colorkey=None):
-    fullname = os.path.join('IMG', name)
-    try:
-        image = pygame.image.load(fullname)
-    except pygame.error, message:
-        print 'Cannot load image:', name
-        raise SystemExit, message
-    image = image.convert()
-    if colorkey is not None:
-        if colorkey is -1:
-            colorkey = image.get_at((0,0))
-        if colorkey is 1:
-            colorkey = [1,1,1]
-        image.set_colorkey(colorkey, pygame.RLEACCEL)
-    return image
 
 def load(path=''):
 
     mapSpriteSheet = spritesheet('mastersheet.bmp')
     for i in range(128):
         mapImages[i] = mapSpriteSheet.image_at( ( (i*const.blocksize)%240, (i/8)*const.blocksize, const.blocksize, const.blocksize), 1 )
-    siteImgs = ['house1.bmp', 'mShop.bmp', 'bSmith.bmp', 'armry.bmp', 'tavrn.bmp']
-    for i in range(128, 133):
-        mapImages[i] = load_image( os.path.join('EXT', siteImgs[i-128]), 1 )
+    siteImgs = ['itemSh.bmp', 'mShop.bmp', 'bSmith.bmp', 'armry.bmp', 'tavrn.bmp','townhall.bmp','house1.bmp']
+    for i in range(128, 135):
+        mapImages[i], r = load_image.load_image( os.path.join('EXT', siteImgs[i-128]), 1 )
     
     mHeroSpriteSheet = spritesheet( os.path.join('CHAR', 'mherosheet.bmp'))
     for i in range(9):
@@ -43,9 +27,20 @@ def load(path=''):
     for i in range(9):
         fHeroImages[i] = fHeroSpriteSheet.image_at( (i*const.blocksize, 0, const.blocksize, const.blocksize), -1 )
 
+
 def loadNPC(file):
     npcSS = spritesheet( os.path.join('CHAR', file) )
     npcImages = range(9)
     for i in range(9):
-        npcImages[i] = npcSS.image_at( (i*const.blocksize, 0, const.blocksize, const.blocksize), -1 )
+        npcImages[i] = npcSS.image_at( (i*const.blocksize, 0, const.blocksize, const.blocksize), 1 )
     return npcImages
+
+siteImgDict = { 
+               'itemshop'  : (128,2),
+               'magicshop' : (129,2),
+               'blacksmith': (130,2),
+               'armory'    : (131,2),
+               'tavern'    : (132,3),
+               'townhall'  : (133,3),
+               'house1'    : (134,2)
+               }

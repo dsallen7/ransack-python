@@ -1,6 +1,8 @@
 from UTIL import const
 
-heal = lambda s: [s[0] + 5] + s[1:]
+from random import randrange
+
+heal = lambda s: [s[0] + randrange(5, 15) ] + s[1:]
 nothing = lambda s: s
 
 spellDict = { (const.HEAL, True): heal,

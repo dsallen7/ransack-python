@@ -31,7 +31,7 @@ class Spell():
     def getCastTime(self):
         return self.castTime
     
-    def execute(self, hero, hud, battle):
+    def execute(self, hero, battle):
         hero.currMP = hero.currMP - self.cost
         [cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX, psn] = hero.getPlayerStats()
         stats = [cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX, psn]

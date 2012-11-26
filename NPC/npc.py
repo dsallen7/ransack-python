@@ -5,6 +5,8 @@ from SCRIPTS import npcScr
 
 from IMG import images
 
+from random import choice
+
 class npc(pygame.sprite.Sprite):
     
     def __init__(self, x, y, message, imgFile):
@@ -33,8 +35,8 @@ class npc(pygame.sprite.Sprite):
         self.imgIdx = (1 - (self.imgIdx % 2)) + (2 * (self.imgIdx / 2))
         self.image = self.images[self.imgIdx]
     
-    def interact(self, hud):
-        hud.npcMessage(self.message, self.images[8])
+    def interact(self, interface, game):
+        interface.npcMessage(self.message, self.images[8])
         return None
     
     def move(self, dir, map, heroPos):
@@ -52,7 +54,7 @@ class npc(pygame.sprite.Sprite):
         else: self.moving = False
     
     def update(self, map, heroPos):
-        i = random.randrange(1, 10)
+        i = random.randrange(1, 20)
         if i == 5:
             self.move(random.choice(['up', 'down', 'left', 'right']), map, heroPos)
             return True
@@ -69,50 +71,123 @@ class npc(pygame.sprite.Sprite):
         if dir == 'right':
             self.setRect(x1 - sign, y1, x2, y2)
 
-class Guard(npc):
+class Citizen(npc):
+    def __init__(self, x, y, name, filename):
+        npc.__init__(self, x, y, name, filename)
+
+class Female(Citizen):
+    def __init__(self, x, y, name, gender, level):
+        npc.__init__(self, x, y, name, choice(['female.bmp','female2.bmp','female3.bmp']) )
+        if gender == 'Male':
+            self.message = choice( npcScr.femaleToMaleLinesByLevel[level] )
+        else: self.message = choice( npcScr.femaleToFemaleLinesByLevel[level] )
+
+class Housewife(Citizen):
+    def __init__(self, x, y, name, d):
+        npc.__init__(self, x, y, name, 'female2.bmp' )
+        self.message = "Would you like to complete a task for me?"
+        self.Director = d
+    
+    def interact(self, interface, game):
+        if game.Director.quests[0] == 0:
+            if interface.npcDialog(self.message, self.images[8]) == 'Yes':
+                game.displayOneFrame()
+                interface.npcMessage("Okay. I need a loaf of bread and two wedges of cheese", self.images[8])
+                game.displayOneFrame()
+                interface.npcMessage("Here's the money.", self.images[8])
+                game.Director.advanceQuest(0)
+                return ( 'item', const.GOLD, 26)
+            else:
+                game.displayOneFrame()
+                interface.npcMessage("That's too bad!", self.images[8])
+            return None
+        elif game.Director.quests[0] == 1:
+            if interface.npcDialog('Did you get those things yet?', self.images[8]) == 'Yes':
+                if game.myHero.hasItem(const.CHEESE, 2) and game.myHero.hasItem(const.BREAD1, 1):
+                    game.myHero.takeItem(const.CHEESE)
+                    game.myHero.takeItem(const.CHEESE)
+                    game.myHero.takeItem(const.BREAD1)
+                    game.displayOneFrame()
+                    interface.npcMessage("Thanks so much!", self.images[8])
+                    game.Director.advanceQuest(0)
+                else:
+                    game.displayOneFrame()
+                    interface.npcMessage("No, you didn't! Now get going.", self.images[8])
+                return None
+            else:
+                game.displayOneFrame()
+                interface.npcMessage("Well what are you waiting for?", self.images[8])
+                return None
+        elif game.Director.quests[0] == 2:
+            interface.npcMessage("Lovely day, isn't it?", self.images[8])
+            return None
+
+class Tramp(Citizen):
+    def __init__(self, x, y, name):
+        npc.__init__(self, x, y, name, 'tramp.bmp')
+    def interact(self, interface, game):
+        if interface.npcDialog(self.message, self.images[8]) == 'Yes':
+            game.displayOneFrame()
+            interface.npcMessage('Great!', self.images[8])
+        else:
+            game.displayOneFrame()
+            interface.npcMessage("That's too bad!", self.images[8])
+        return None
+        
+class Guard(Citizen):
     
     def __init__(self, x, y, name):
-        npc.__init__(self, x, y, name, 'guard1.bmp')
+        Citizen.__init__(self, x, y, name, 'guard.bmp')
+        #self.type
     
     def update(self, map, heropos):
         i = random.randrange(1, 6)
         if i == 5:
             self.takeStep()
 
-class King(npc):
+class King(Citizen):
     
     def __init__(self, x, y, name, d):
-        npc.__init__(self, x, y, name, 'king.bmp')
+        Citizen.__init__(self, x, y, name, 'king.bmp')
         self.Director = d
+        self.message = "Times are rough, we could really use a hero! You wanna take on the Skeleton King for us?"
     
     def update(self, map, heropos):
         pass
     
-    def interact(self, hud):
+    def interact(self, interface, game):
         if not self.Director.getEvent(0):
-            if hud.npcDialog(self.message, self.images[8]):
-                hud.npcMessage("Excellent news! Here is the key you will need to access the Dungeon.", self.images[8])
+            if interface.npcDialog(self.message, self.images[8]) == 'Yes':
+                game.displayOneFrame()
+                interface.npcMessage("Awesome, man! Here is the key you will need to access the Dungeon.", self.images[8])
                 self.Director.setEvent(0)
                 return ('item', const.KEY)
             else:
-                hud.npcMessage("I am most dismayed to hear this; please return if you have a change of heart!", self.images[8])
+                game.displayOneFrame()
+                interface.npcMessage("Hey, that's a shame buddy; please return if you have a change of heart!", self.images[8])
                 return None
         else:
             if self.Director.getEvent(11):
-                hud.npcMessage("You win the game!", self.images[8])
-                return None
+                interface.npcMessage("You win the game!", self.images[8])
+                return 'win'
             else:
-                hud.npcMessage("Haste, young hero. Time is of the essence!", self.images[8])
+                interface.npcMessage("Let's get going! Skeleton King ain't gonna slay himself!", self.images[8])
                 return None
-
-class Citizen(npc):
+class Inanimate(npc):
     def __init__(self, x, y, name, filename):
         npc.__init__(self, x, y, name, filename)
 
-class Female(Citizen):
+class Firepit(Inanimate):
     def __init__(self, x, y, name):
-        npc.__init__(self, x, y, name, 'female1.bmp')
-
+        Inanimate.__init__(self, x, y, name, 'firepit.bmp')
+        self.message = 'The fire glows brightly.'
+    
+    def update(self, map, hero):
+        i = random.randrange(1, 6)
+        if i == 5:
+            self.imgIdx = ( self.imgIdx + 1 ) % 8
+            self.image = self.images[self.imgIdx]
+        
 class Enemy(npc):
     def __init__(self, x, y, name, filename, mID):
         npc.__init__(self, x, y, name, filename)
@@ -155,8 +230,8 @@ class Enemy(npc):
             else:
                 return self.move('up', map, heroPos)
     
-    def interact(self, hud):
-        hud.txtMessage('The battle is joined!')
+    def interact(self, interface, game):
+        interface.boxMessage('The battle is joined!')
         return 'battle'
     def update(self, map, heroPos):
         if self.confused > 0:
@@ -191,8 +266,8 @@ class skeletonKing(Enemy):
         Enemy.__init__(self, x, y, name, filename, mID)
         self.Director = d
         
-    def interact(self, hud):
-        hud.npcMessage('Welcome to your death!', self.images[2])
+    def interact(self, interface, game):
+        interface.npcMessage('Welcome to your death!', self.images[2])
         return 'battle'
     
     def update(self, map, heropos):
@@ -204,13 +279,18 @@ class skeletonKing(Enemy):
 
 def newNpc( n, game ):
     (x,y) = n[0]
-    # civilians
     if n[1] == 'guard':
         return Guard(x, y, n[2])
     elif n[1] == 'female':
-        return Female(x, y, n[2])
+        return Female(x, y, n[2], game.myHero.gender, game.myHero.level )
+    elif n[1] == 'firepit':
+        return Firepit(x, y, n[2])
+    elif n[1] == 'tramp':
+        return Tramp(x, y, n[2])
     elif n[1] == 'king':
         return King(x, y, n[2], game.Director)
+    elif n[1] == 'housewife':
+        return Housewife(x, y, n[2], game.Director)
     # enemies
     elif n[1] == 'skeletonking':
         return skeletonKing(x, y, 'Skeleton King', 'skeleton.bmp', n, game.Director)

@@ -8,16 +8,16 @@ class Item():
     
     def __init__(self, type, level=None, spellNum = None):
         self.type = type
-        if type == 99:
+        if type == const.GOLD:
             self.qty = level
             self.name = 'gold'
-        if self.type == 100:
+        if self.type == const.SPELLBOOK:
             from SCRIPTS import spellScr
             self.name = 'spellbook'
             self.spellNum = spellNum
             self.level = level
             self.descrip = itemScr.descDict[self.type] + ': ' + spellScr.descDict[spellNum]
-        elif self.type == 101:
+        elif self.type == const.PARCHMENT:
             from SCRIPTS import spellScr
             self.name = 'parchment'
             self.spellNum = spellNum

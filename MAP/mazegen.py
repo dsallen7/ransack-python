@@ -13,9 +13,9 @@ from UTIL import load_image, const
 
 
 class Generator():
-    def __init__(self, DIM, level):
+    def __init__(self, DIM, rooms, level):
         self.DIM = DIM
-        self.map = map.genMap(self.DIM, 1)
+        self.map = map.genMap(self.DIM, level)
         self.level = level
 
     def maze(self, width=40, height=40, complexity=.75, density =.75):

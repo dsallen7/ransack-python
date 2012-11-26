@@ -7,6 +7,8 @@ from random import choice
 class enemy():
     def __init__(self, name, level):
         self.level = random.randrange(level, level+2)
+        if self.level < 1:
+            self.level = 1
         self.name = name
         if self.name in enemyScr.pEnemies:
             self.poison = True

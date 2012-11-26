@@ -11,29 +11,65 @@ class map():
         self.defaultBkgd = 0
         self.shops = []
         self.NPCs = []
+        self.neighbors = [ 
+                            '', # North
+                            '', # South
+                            '', # East
+                            ''  # West
+        ]
+        self.up = ('',)
+        self.down = ('',)
+        self.type = ''
     
     def getDIM(self):
         return self.DIM
     def setEntry(self, x, y, fg):
     #Updates one map Entry to type at map coordinates x,y
-        #self.grid[y] = self.grid[y][:x]+[type]+self.grid[y][x+1:]
         self.grid[x][y].setFG(fg)
     def getEntry(self,x,y):
         if 0 <= x < self.DIM and 0 <= y < self.DIM:
-            return self.grid[x][y].getFG()
+            if self.grid[x][y] is not None:
+                return self.grid[x][y].getFG()
+            else: return const.VOID
         else: return const.VOID
     def getTileFG(self, x, y):
         return self.grid[x][y].getFG()
     def setTileFG(self, x, y, fg):
         self.grid[x][y].setFG(fg)
     
+    def getName(self):
+        return self.name[0]
+    def setName(self, name):
+        self.name = (name,)
+    
     def getGrid(self):
         return self.grid
     def getMapBall(self):
-        return (self.grid, self.defaultBkgd, self.pointOfEntry, self.pointOfExit, self.heroStart, self.shops, self.chests, self.NPCs)
+        for x in range( self.getDIM() ):
+            for y in range( self.getDIM() ):
+                if self.getEntry(x, y) == const.VOID:
+                    if y + 1 == self.getDIM():
+                        self.grid[x] = self.grid[x][:y] + [ None ]
+                    else: self.grid[x] = self.grid[x][:y] + [ None ] + self.grid[x][y+1:]
+                        
+        
+        return (self.grid,
+                self.defaultBkgd,
+                self.pointOfEntry,
+                self.pointOfExit,
+                self.heroStart,
+                self.shops,
+                self.chests,
+                self.NPCs,
+                self.neighbors,
+                self.up,
+                self.down,
+                self.name,
+                self.type,
+                self.level)
 
     def installBall(self, ball):
-        (grid, DBGD, poe, poex, hs, shops, chests, npcs) = ball
+        (grid, DBGD, poe, poex, hs, shops, chests, npcs, nbrs, up, dn, nm, tp, lv) = ball
         self.grid = grid
         self.DIM = len(grid)
         self.heroStart = hs
@@ -43,6 +79,12 @@ class map():
         self.shops = shops
         self.defaultBkgd = DBGD
         self.NPCs = npcs
+        self.neighbors = nbrs
+        self.up = up
+        self.down = dn
+        self.name = nm
+        self.type = tp
+        self.level = lv
             
     def mapCut(self, pos1, pos2):
         (x1, y1) = pos1
@@ -76,31 +118,30 @@ class map():
 
 class gameMap(map):
     
-    def __init__(self, filename=None, mapball = None, level=0, type='dungeon'):
+    def __init__(self, mapball = None, level=0):
         map.__init__(self)
         
         self.level = level
         self.lineOfVision = 0
-        if filename != None:
-            self.loadMap(filename)
         self.BFSQueue = queue.Queue()
         
         if mapball != None:
             self.installBall(mapball)
-        
-        self.playerXY = self.heroStart
-        self.type = type
+        if self.heroStart is not None:
+            self.playerXY = self.heroStart
+        else: self.playerXY = self.getPOE()
                 
         self.topMapCorner = (0,0)
         self.visDict = {}
         for i in range( self.DIM ):
             for j in range( self.DIM ):
-                if self.type in ['dungeon', 'maze', 'fortress']: 
-                    self.visDict[ (i,j) ] = False
-                    self.grid[i][j].visible = False
-                else:
-                    self.visDict[ (i,j) ] = True
-                    self.grid[i][j].visible = True
+                if self.grid[i][j] is not None:
+                    if self.type in ['dungeon', 'maze', 'fortress']: 
+                        self.visDict[ (i,j) ] = False
+                        self.grid[i][j].visible = False
+                    else:
+                        self.visDict[ (i,j) ] = True
+                        self.grid[i][j].visible = True
         self.myMiniMap = minimap.miniMap(self.grid)
         
         self.litTiles = []
@@ -130,8 +171,8 @@ class gameMap(map):
         return self.pointOfExit
     def getType(self):
         return self.type
-    def callDrawMiniMap(self, screen):
-        self.myMiniMap.callMiniMap(screen, self.playerXY, self.visDict)
+    def callDrawMiniMap(self, screen, iH):
+        self.myMiniMap.callMiniMap(screen, self.playerXY, self.visDict, iH)
     # returns distance between two points
     def distanceFunc(self, pos1, pos2):
         (x1,y1) = pos1
@@ -156,7 +197,9 @@ class gameMap(map):
     # calculate location of map window based on hero location and hero sprite rect
     def updateWindowCoordinates(self, hero):
         DIMEN = self.getDIM()
-        oldX, oldY = self.playerXY
+        oldX, oldY = self.getPlayerXY()#hero.getXY()
+        #oldX = oldX / const.blocksize
+        #oldY = oldY / const.blocksize
         # Compute top map corner
         (px,py) = hero.getXY()
         px = px/const.blocksize
@@ -203,6 +246,8 @@ class gameMap(map):
         if self.type == 'maze':
             if d > 2:
                 return start
+        elif d > 5:
+            return start
         (x,y) = start
         if self.getEntry(x,y) in [18,19]:
             return [ (x-1,y-1), (x,y-1), (x+1,y-1),
@@ -253,107 +298,88 @@ class gameMap(map):
     def isOccupied(self, x, y):
         return self.grid[x][y].occupied
 
-# inherited map class to be used by map generator
+# inherited map class to be used by level editor
 class edMap(map):
-    def __init__(self):
+    def __init__(self, mBall=None, name=None):
         map.__init__(self, 2*const.DIM)
-        self.defaultBkgd = const.DFLOOR1
-        for i in range(self.DIM):
-            self.grid += [range(self.DIM)]
-            for j in range(self.DIM):
-                self.grid[i][j] = tile.Tile(i, j, const.DFLOOR1, self.defaultBkgd)
-        self.heroStart = None
-        self.pointOfEntry = None
-        self.pointOfExit = None
-        
+        if mBall is not None:
+            self.installBall(mBall)
+        else:
+            self.defaultBkgd = const.DFLOOR1
+            for i in range(self.DIM):
+                self.grid += [range(self.DIM)]
+                for j in range(self.DIM):
+                    self.grid[i][j] = tile.Tile(i, j, const.DFLOOR1, self.defaultBkgd)
+            self.heroStart = None
+            self.pointOfEntry = None
+            self.pointOfExit = None
+                        
+            self.portals = []
+            # location : (type, level)
+            self.shops = {}
+            self.setName('Untitled')
+            self.level = 0
         self.itemShop = None
         self.magicShop = None
         self.Armory = None
         self.Blacksmith = None
         self.Tavern = None
-        
-        self.portals = []
-        # location : (type, level)
-        self.shops = {}
+        self.Townhall = None
+        for s in self.shops:
+            if self.shops[s][0] == 'armory':
+                self.Armory = s
+            elif self.shops[s][0] == 'blacksmith':
+                self.Blacksmith = s
+            elif self.shops[s][0] == 'magicshop':
+                self.magicShop = s
+            elif self.shops[s][0] == 'itemshop':
+                self.itemShop = s
+            elif self.shops[s][0] == 'tavern':
+                self.Tavern = s
+            elif self.shops[s][0] == 'townhall':
+                self.Townhall = s
     
     def addChest(self, loc, chest):
         self.chests[loc] = chest
     
+    def changeEntry(self, x, y, entry, shop=False):
+        if entry is not None:
+            (px,py) = entry
+            #self.setEntry(px,py,self.defaultBkgd)
+        return (x,y)
+    
     # overridden from parent class
-    def setEntry(self, x, y, e, level=None):
+    def setEntry(self, x, y, e, param=None):
+        if self.shops != []:
+            try:
+                self.shops.pop( (x, y) )
+            except KeyError:
+                pass
         if e == const.HEROSTART:
-            if self.heroStart == None:
-                self.heroStart = (x,y)
-            else:
-                (px,py) = self.heroStart
-                self.setEntry(px,py,self.defaultBkgd)
-                self.heroStart = (x,y)
-                return
-        if e == const.STAIRUP:
-            if self.pointOfEntry == None:
-                self.pointOfEntry = (x,y)
-            else:
-                (px,py) = self.pointOfEntry
-                self.setEntry(px,py,self.defaultBkgd)
-                self.pointOfEntry = (x,y)
-        if e == const.STAIRDN:
-            if self.pointOfExit == None:
-                self.pointOfExit = (x,y)
-            else:
-                (px,py) = self.pointOfExit
-                self.setEntry(px,py,self.defaultBkgd)
-                self.pointOfExit = (x,y)
-        if e == const.ITEMSDOOR:
-            if self.itemShop == None:
-                self.itemShop = (x, y)
-                self.shops[(x,y)] = ('itemshop', level )
-            else:
-                (px, py) = self.itemShop
-                self.setEntry(px, py, self.defaultBkgd)
-                self.shops.pop((px,py))
-                self.shops[(x,y)] = ('itemshop', level )
-                self.itemShop = (x, y)
-        if e == const.ARMRYDOOR:
-            if self.Armory == None:
-                self.Armory = (x, y)
-                self.shops[(x,y)] = ( 'armory', level )
-            else:
-                (px, py) = self.Armory
-                self.setEntry(px, py, self.defaultBkgd)
-                self.shops.pop((px,py))
-                self.shops[(x,y)] = ('armory', level )
-                self.Armory = (x, y)
-        if e == const.BLKSMDOOR:
-            if self.Blacksmith == None:
-                self.Blacksmith = (x, y)
-                self.shops[(x,y)] = ( 'blacksmith', level )
-            else:
-                (px, py) = self.Blacksmith
-                self.setEntry(px, py, self.defaultBkgd)
-                self.shops.pop((px,py))
-                self.shops[(x,y)] = ( 'blacksmith', level )
-                self.Blacksmith = (x, y)
-        if e == const.MAGICDOOR:
-            if self.magicShop == None:
-                self.magicShop = (x, y)
-                self.shops[(x,y)] = ( 'magicshop', level )
-            else:
-                (px, py) = self.magicShop
-                self.setEntry(px, py, self.defaultBkgd)
-                self.shops.pop((px,py))
-                self.shops[(x,y)] = ( 'magicshop', level )
-                self.magicShop = (x, y)
-        if e == const.TAVRNDOOR:
-            if self.Tavern == None:
-                self.Tavern = (x, y)
-                self.shops[(x,y)] = ( 'tavern', level )
-            else:
-                (px, py) = self.Tavern
-                self.setEntry(px, py, self.defaultBkgd)
-                self.shops.pop((px,py))
-                self.shops[(x,y)] = ( 'tavern', level )
-                self.Tavern = (x, y)
+            self.heroStart = self.changeEntry(x, y, self.heroStart)
+            return
+        elif e == const.STAIRUP:
+            self.pointOfEntry = self.changeEntry(x, y, self.pointOfEntry)
+        elif e == const.STAIRDN:
+            self.pointOfExit = self.changeEntry(x, y, self.pointOfExit)
+        elif e == const.ITEMSDOOR:
+            self.shops[ self.changeEntry(x, y, self.itemShop, True) ] = ('itemshop', param )
+        elif e == const.ARMRYDOOR:
+            self.shops[ self.changeEntry(x, y, self.Armory, True) ] = ('armory', param )
+        elif e == const.BLKSMDOOR:
+            self.shops[ self.changeEntry(x, y, self.Blacksmith, True) ] = ('blacksmith', param )
+        elif e == const.MAGICDOOR:
+            self.shops[ self.changeEntry(x, y, self.magicShop, True) ] = ('magicshop', param )
+        elif e == const.TAVRNDOOR:
+            self.shops[ self.changeEntry(x, y, self.Tavern, True) ] = ('tavern', param )
+        elif e == const.TOWNHALLDOOR:
+            self.shops[ self.changeEntry(x, y, self.Townhall, True) ] = ('townhall', param )
+        elif e == const.HOUSEDOOR1:
+            self.shops[ (x, y) ] = ('house1', param )
+        elif e == const.SIGN:
+            self.grid[x][y].setMsgText(param)
         self.grid[x][y].setFG(e)
+    
     def changeDimensions(self, nDim):
         newGrid = [[0 for i in range(nDim)] for j in range(nDim)]
         # expanding
@@ -399,7 +425,7 @@ class edMap(map):
 # inherited map class to be used by map generator
 class genMap(map):
     
-    def __init__(self, DIM, level ):
+    def __init__(self, DIM, level, name):
         map.__init__(self, DIM, const.VOID)
         self.level = level
         self.BFSQueue = queue.Queue()
@@ -407,6 +433,7 @@ class genMap(map):
             self.grid += [range(self.DIM)]
             for j in range(self.DIM):
                 self.grid[i][j] = tile.Tile(i, j, const.VOID, const.VOID)
+        self.setName(name)
     
     def pathfinderBFS(self, start):
         (x,y) = start
