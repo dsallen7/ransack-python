@@ -29,7 +29,10 @@ class miniMap():
                     mapColorBlock.fill( self.mapColors[5] )
                     miniMapBoard.blit( mapColorBlock, ( i*const.miniblocksize, j*const.miniblocksize) )
                 elif self.isMapped( (i+tx,j+ty) ):
-                    mapColorBlock.fill( self.mapColors[self.colorDict[self.getEntry(i+tx,j+ty)]] )
+                    try:
+                        mapColorBlock.fill( self.mapColors[self.colorDict[self.getEntry(i+tx,j+ty)]] )
+                    except KeyError:
+                        mapColorBlock.fill( colors.ltgrey )
                     miniMapBoard.blit( mapColorBlock, ( i*const.miniblocksize, j*const.miniblocksize) )
         screen.blit(pygame.transform.scale(miniMapBoard, (720, 720) ), (0, 0) )
         pygame.display.flip()

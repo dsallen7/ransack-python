@@ -74,17 +74,40 @@ class npc(pygame.sprite.Sprite):
 class Citizen(npc):
     def __init__(self, x, y, name, filename):
         npc.__init__(self, x, y, name, filename)
+        self.home = (x,y)
+        
+    def move(self, dir, map, heroPos):
+        (hX, hY) = heroPos
+        hX = hX / const.blocksize
+        hY = hY / const.blocksize
+        self.moving = True
+        (sX, sY) = self.getXY()
+        self.dir = dir
+        (mX, mY) = const.scrollingDict[dir]
+        self.imgIdx = const.imgDict[dir]
+        self.image = self.images[self.imgIdx]
+        if misc.Distance( self.home, (sX + mX, sY + mY)  ) <= 5:
+            if map.getEntry(sX + mX, sY + mY) in range(25) and (sX + mX, sY + mY) != (hX, hY) and not map.isOccupied(sX + mX, sY + mY):
+                self.setXY(sX + mX, sY + mY)
+            else: self.moving = False
+        else: self.moving = False
+
+class Woodsman(Citizen):
+    def __init__(self, x, y, msg, d):
+        Citizen.__init__(self, x, y, msg, choice(['woodsman.bmp','woodsman2.bmp']) )
+        #self.message = msg
+        self.Director = d
 
 class Female(Citizen):
     def __init__(self, x, y, name, gender, level):
-        npc.__init__(self, x, y, name, choice(['female.bmp','female2.bmp','female3.bmp']) )
+        Citizen.__init__(self, x, y, name, choice(['female.bmp','female2.bmp','female3.bmp']) )
         if gender == 'Male':
             self.message = choice( npcScr.femaleToMaleLinesByLevel[level] )
         else: self.message = choice( npcScr.femaleToFemaleLinesByLevel[level] )
 
 class Housewife(Citizen):
     def __init__(self, x, y, name, d):
-        npc.__init__(self, x, y, name, 'female2.bmp' )
+        Citizen.__init__(self, x, y, name, 'female2.bmp' )
         self.message = "Would you like to complete a task for me?"
         self.Director = d
     
@@ -103,10 +126,10 @@ class Housewife(Citizen):
             return None
         elif game.Director.quests[0] == 1:
             if interface.npcDialog('Did you get those things yet?', self.images[8]) == 'Yes':
-                if game.myHero.hasItem(const.CHEESE, 2) and game.myHero.hasItem(const.BREAD1, 1):
+                if game.myHero.hasItem(const.CHEESE, 2) and game.myHero.hasItem(const.BREAD, 1):
                     game.myHero.takeItem(const.CHEESE)
                     game.myHero.takeItem(const.CHEESE)
-                    game.myHero.takeItem(const.BREAD1)
+                    game.myHero.takeItem(const.BREAD)
                     game.displayOneFrame()
                     interface.npcMessage("Thanks so much!", self.images[8])
                     game.Director.advanceQuest(0)
@@ -122,9 +145,13 @@ class Housewife(Citizen):
             interface.npcMessage("Lovely day, isn't it?", self.images[8])
             return None
 
+class Magician(Citizen):
+    def __init__(self, x, y, name):
+        Citizen.__init__(self, x, y, name, 'magician.bmp')
+
 class Tramp(Citizen):
     def __init__(self, x, y, name):
-        npc.__init__(self, x, y, name, 'tramp.bmp')
+        Citizen.__init__(self, x, y, name, 'tramp.bmp')
     def interact(self, interface, game):
         if interface.npcDialog(self.message, self.images[8]) == 'Yes':
             game.displayOneFrame()
@@ -177,16 +204,17 @@ class Inanimate(npc):
     def __init__(self, x, y, name, filename):
         npc.__init__(self, x, y, name, filename)
 
-class Firepit(Inanimate):
+class Fireplace(Inanimate):
     def __init__(self, x, y, name):
-        Inanimate.__init__(self, x, y, name, 'firepit.bmp')
+        Inanimate.__init__(self, x, y, name, 'fireplace.bmp')
         self.message = 'The fire glows brightly.'
+        self.flicker = 0
     
     def update(self, map, hero):
-        i = random.randrange(1, 6)
-        if i == 5:
+        if self.flicker == 4:
             self.imgIdx = ( self.imgIdx + 1 ) % 8
             self.image = self.images[self.imgIdx]
+        self.flicker = ( self.flicker + 1 ) % 5
         
 class Enemy(npc):
     def __init__(self, x, y, name, filename, mID):
@@ -283,14 +311,18 @@ def newNpc( n, game ):
         return Guard(x, y, n[2])
     elif n[1] == 'female':
         return Female(x, y, n[2], game.myHero.gender, game.myHero.level )
-    elif n[1] == 'firepit':
-        return Firepit(x, y, n[2])
+    elif n[1] == 'fireplace':
+        return Fireplace(x, y, n[2])
     elif n[1] == 'tramp':
         return Tramp(x, y, n[2])
     elif n[1] == 'king':
         return King(x, y, n[2], game.Director)
     elif n[1] == 'housewife':
         return Housewife(x, y, n[2], game.Director)
+    elif n[1] == 'magician':
+        return Magician(x, y, n[2])
+    elif n[1] == 'woodsman':
+        return Woodsman(x, y, n[2], game.Director)
     # enemies
     elif n[1] == 'skeletonking':
         return skeletonKing(x, y, 'Skeleton King', 'skeleton.bmp', n, game.Director)

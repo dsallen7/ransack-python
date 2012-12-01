@@ -1,17 +1,24 @@
 import pygame, os
 from DISPLAY import text
-from UTIL import colors
+from UTIL import const, colors
+from math import floor, ceil
 
 class Button:
     
-    def __init__(self, loc, msg, font = os.getcwd()+"/FONTS/devinne.ttf", size=18 ):
+    def __init__(self, loc, msg, font = os.getcwd()+"/FONTS/devinne.ttf", size=18, invisible = False ):
         (x, y) = loc
         self.msg = msg
         self.locX = x
         self.locY = y
-        self.img = text.Text(msg, font, size, colors.white, colors.gold, True)
-        self.sizeX = self.img.get_width()
-        self.sizeY = self.img.get_height()
+        #self.img = text.Text(msg, font, size, colors.white, colors.gold, True)
+        if invisible:
+            self.img = text.Text(msg, font, size, colors.white, colors.white, True)
+            self.sizeX = int(ceil(2.4*const.blocksize))
+            self.sizeY = int(ceil(2.4*const.blocksize))
+        else: 
+            self.img = text.Text(msg, font, size, colors.white, colors.gold, True)
+            self.sizeX = self.img.get_width()
+            self.sizeY = self.img.get_height()
         self.type = 'button'
         
         '''

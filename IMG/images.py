@@ -7,17 +7,29 @@ import os
 
 mHeroImages = range(9)
 fHeroImages = range(9)
-mapImages = range(135)
+mapImages = range(263)
 editorImages = range(7)
 
 def load(path=''):
 
     mapSpriteSheet = spritesheet('mastersheet.bmp')
     for i in range(128):
-        mapImages[i] = mapSpriteSheet.image_at( ( (i*const.blocksize)%240, (i/8)*const.blocksize, const.blocksize, const.blocksize), 1 )
+        mapImages[i] = mapSpriteSheet.image_at( ( (i*const.blocksize)%240, 
+                                                  (i/8)*const.blocksize, 
+                                                  const.blocksize, 
+                                                  const.blocksize), 
+                                               1 )
+        
+    for i in range(128, 256):
+        #print (i*const.blocksize)%240 + 240
+        mapImages[i] = mapSpriteSheet.image_at( ( (i*const.blocksize)%240 + 240, 
+                                                  ( (i-128) /8)*const.blocksize, 
+                                                  const.blocksize, 
+                                                  const.blocksize), 
+                                               1 )
     siteImgs = ['itemSh.bmp', 'mShop.bmp', 'bSmith.bmp', 'armry.bmp', 'tavrn.bmp','townhall.bmp','house1.bmp']
-    for i in range(128, 135):
-        mapImages[i], r = load_image.load_image( os.path.join('EXT', siteImgs[i-128]), 1 )
+    for i in range(256, 263):
+        mapImages[i], r = load_image.load_image( os.path.join('EXT', siteImgs[i-256]), 1 )
     
     mHeroSpriteSheet = spritesheet( os.path.join('CHAR', 'mherosheet.bmp'))
     for i in range(9):
@@ -36,11 +48,11 @@ def loadNPC(file):
     return npcImages
 
 siteImgDict = { 
-               'itemshop'  : (128,2),
-               'magicshop' : (129,2),
-               'blacksmith': (130,2),
-               'armory'    : (131,2),
-               'tavern'    : (132,3),
-               'townhall'  : (133,3),
-               'house1'    : (134,2)
+               'itemshop'  : (256,2),
+               'magicshop' : (257,2),
+               'blacksmith': (258,2),
+               'armory'    : (259,2),
+               'tavern'    : (260,3),
+               'townhall'  : (261,3),
+               'house1'    : (262,2)
                }

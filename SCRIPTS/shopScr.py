@@ -1,3 +1,5 @@
+from UTIL import const
+
 itemShopsByLevel = { 
                     1: [0,1,4],
                     2: [5,6,7,9,10]
@@ -23,13 +25,13 @@ armoriesByLevel = {
 # 101: parchment
 # level, spellnum
 magicShopsByLevel = { 
-                     1: [(100,0,1),
-                          (101,0,0),
-                          (101,0,1)],
-                     2: [(100,0,2),
-                          (100,0,3),
-                          (101,0,0),
-                          (101,0,1),
-                          (101,0,3)]
+                     1: [(const.SPELLBOOK,0,1),
+                          (const.PARCHMENT,0,0),
+                          (const.PARCHMENT,0,1)],
+                     2: [(const.SPELLBOOK,0,2),
+                          (const.SPELLBOOK,0,3),
+                          (const.PARCHMENT,0,0),
+                          (const.PARCHMENT,0,1),
+                          (const.PARCHMENT,0,3)]
                       
                       }

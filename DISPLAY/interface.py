@@ -89,29 +89,15 @@ class Interface( ):
         self.boxStat(cHP, mHP, colors.red, colors.black, (23, 163) )
         self.boxStat(cMP, mMP, colors.blue, colors.black, (23, 181) )
         self.boxStat(cEX, nEX, colors.green, colors.black, (23, 199) )
-        '''
+        
         if game.myHero.isPoisoned:
-            self.mainImg.blit(images.mapImages[122], (30,111))
+            self.mainImg.blit(images.mapImages[const.POISON], (134, 142))
         elif game.myHero.isDamned:
-            self.mainImg.blit(images.mapImages[123], (30,111))
-        '''
+            self.mainImg.blit(images.mapImages[const.DAMNATION], (134, 142))
+        
         # ticker
         self.drawClock(35, 142, game.Ticker)
-        #show equipped armor and weapon
-        weaponCopy = pygame.Surface( (30,30) )
-        weaponCopy.blit( images.mapImages[ weapon.getImg() ], (0,0) )
-        self.writeText(weaponCopy, (17,17), 'L'+str(weapon.getLevel()), colors.white, colors.black, 10)
-        self.mainImg.blit(weaponCopy, (134, 179))
-        '''
-        armorLocList = [(90,180), (30,220), (90,220)]
-        for A in range( len(armor) ):
-            if armor[A] == None:
-                pass
-            else:
-                armorCopy = images.mapImages[ armor[A].getImg() ]
-                self.writeText(armorCopy, (20,20), 'L'+str(armor[A].getLevel()), colors.white, colors.black,10)
-                self.mainImg.blit(armorCopy, armorLocList[A])
-        '''
+
         # gold
         goldBox = pygame.Surface( (30,30) )
         goldBox.blit( images.mapImages[const.GOLD], (0,0) )
@@ -159,7 +145,7 @@ class Interface( ):
     
     # displays message along with image of face
     def npcMessage(self, message, img):
-        msgText = text.Text(message, os.getcwd()+"/FONTS/devinne.ttf", 18, colors.white, colors.gold, True)
+        msgText = text.Text(message, os.getcwd()+"/FONTS/devinne.ttf", 14, colors.white, colors.gold, True, 16)
         for i in range( 0, 255, 8 ):
             borderBox = pygame.Surface( ( msgText.get_width()+ int(ceil(img.get_width()*2.4))+ int(ceil(20*2.4)), 
                                           msgText.get_height()+ int(ceil(img.get_width()*2.4)) ) )

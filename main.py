@@ -164,9 +164,9 @@ def main():
     options = ['Begin New Game', 'Load Saved Game', 'ExiT']
     screen.blit(titleScreen, (0,0))
     buttons = [button.Button( (200, 375), 'Begin New Game'),
-               button.Button( (200, 425), 'Load Saved Game'),
-               button.Button( (200, 475), 'Credits'),
-               button.Button( (200, 525), 'Exit')
+               button.Button( (200, 445), 'Load Saved Game'),
+               button.Button( (200, 515), 'Credits'),
+               button.Button( (200, 585), 'Exit')
                
                ]
     while True:

@@ -1,12 +1,13 @@
 from UTIL import const
+from math import floor, ceil
 
 class menuBox:
     
     def __init__(self, x, y, item):
         self.locX = x
         self.locY = y
-        self.sizeX = const.blocksize
-        self.sizeY = const.blocksize
+        self.sizeX = int(ceil(const.blocksize*2.4))
+        self.sizeY = int(ceil(const.blocksize*2.4))
         self.type = 'menuBox'
         self.item = item
     

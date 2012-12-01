@@ -34,70 +34,80 @@ GRASS1  = 12
 
 BRICK1  = 24
 
-PINE    = 52
+
+HOUSEDOOR1 = 41
+TOWNHALLDOOR = 42
+ITEMSDOOR = 43
+MAGICDOOR = 44
+ARMRYDOOR = 45
+BLKSMDOOR = 46
+TAVRNDOOR = 47
+
+PINE1    = 52
+PINE2    = 53
+PINE3    = 54
+PINE4    = 55
 
 OAK     = 53
-
-WELLSP  = 55
-
-EWDOOR  = 38
-NSDOOR  = 81
 
 EWDOORO = 19
 NSDOORO = 18
 
-EWWALL_W  = 52
-NSWALL_W  = 53
-URWALL_W  = 58
-LRWALL_W  = 26
-ULWALL_W  = 56
-LLWALL_W  = 57
 
-EWWALL  = 30
-NSWALL  = 31
-URWALL  = 27
-LRWALL  = 75
-ULWALL  = 40
-LLWALL  = 51
+EWWALL_W  = 128
+NSWALL_W  = 129
+LRWALL_W  = 130
+LLWALL_W  = 131
 
-EWFAKE  = 46
-NSFAKE  = 47
+COUNTER_EW = 133
+COUNTER_NS = 135
+
+EWWALL  = 136
+NSWALL  = 137
+ULWALL  = 138
+URWALL  = 139
+LLWALL  = 140
+LRWALL  = 141
+
+EWFAKE  = 142
+NSFAKE  = 143
+
+EWDOOR  = 144
+NSDOOR  = 147
 
 
+SIGN    = 75
 
-SIGN    = 54
-
-HOUSEDOOR1 = 41
-
-TOWNHALLDOOR = 42
-ITEMSDOOR = 43
-MAGICDOOR = 57
-ARMRYDOOR = 58
-BLKSMDOOR = 59
-TAVRNDOOR = 60
+WELLSP  = 76
 
 BLOCK = 56
 
 doorsList = [ITEMSDOOR, MAGICDOOR, ARMRYDOOR, BLKSMDOOR, TAVRNDOOR, TOWNHALLDOOR, HOUSEDOOR1, BLOCK]
 
-COUNTER = 72
+COLUMN = 76
+CHAIR1 = 208
 
-FRUIT1    = 86
-CHEESE    = 87
-RING     = 88
-MEAT2     = 89
-BREAD1    = 90
-ANT       = 91
-SHP       = 92
-MHP       = 93
-LHP       = 94
-SMP       = 95
-MMP       = 96
-LMP       = 97
-KEY       = 98
-GOLD      = 99
-SPELLBOOK = 100
-PARCHMENT = 101
+CHAIR2 = 209
+
+TABLE1 = 210
+TABLE2 = 211
+
+FRUIT1    = 216
+CHEESE    = 217
+RING      = 218
+MEAT2     = 219
+BREAD     = 220
+ANTIDOTE  = 221
+SHP       = 222
+MHP       = 223
+LHP       = 224
+SMP       = 225
+MMP       = 226
+LMP       = 227
+KEY       = 228
+GOLD      = 229
+SPELLBOOK = 230
+PARCHMENT = 231
 CHEST     = 110
 OCHEST    = 111
 SWORD     = 112
@@ -107,10 +117,14 @@ DOOR      = 116
 SHIELD    = 117
 BPLATE    = 118
 HELMET    = 119
-STAIRUP   = 120
-STAIRDN   = 121
-VOID      = 126
-HEROSTART = 127
+
+POISON = 250
+DAMNATION = 251
+
+STAIRUP   = 248
+STAIRDN   = 249
+VOID      = 254
+HEROSTART = 255
 
 # Spells
 HEAL = 0
@@ -134,7 +148,6 @@ LHP_I       = 94
 SMP_I       = 95
 MMP_I       = 96
 LMP_I       = 97
-KEY       = 98
 
 
 # List of maps in dungeon
@@ -143,13 +156,13 @@ mapList = ['castle2.dat','castle1.dat','village1.dat','village2.dat']#,'map.dat'
 fMapList = ['fortress1.dat', 'fortress2.dat']
 
 # Messages to display for item found
-itemMsgs = { 86: 'You found a piece of fruit.',
-             92: 'You found a healing potion.',
-             95: 'You found a magic potion',
-             98: 'You found a key!',
-             100: 'You found a spellbook.' }
+itemMsgs = { FRUIT1: 'You found a piece of fruit.',
+             SHP: 'You found a healing potion.',
+             SMP: 'You found a magic potion',
+             KEY: 'You found a key!',
+             SPELLBOOK: 'You found a spellbook.' }
 
-scrollingDict = { 'up': (0, -1), 'down': (0, 1), 'left': (-1, 0), 'right': (1, 0) }
+scrollingDict = { 'up': (0, -1), 'down': (0, 1), 'left': (-1, 0), 'right': (1, 0), None : (0,0) }
 imgDict       = { 'up': 0, 'down': 2, 'left': 4, 'right': 6 }
 
 # Define the colors we will use in RGB format

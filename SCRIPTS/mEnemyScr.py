@@ -6,5 +6,6 @@ enemiesByLevel = {  1: ['skeleton', 'orc', 'cobra'],
                     6: ['skeleton', 'orc', 'cobra', 'zombie', 'wolf', 'vampire'],
                     7: ['cobra', 'zombie', 'wolf', 'vampire'],
                     8: ['cobra', 'zombie', 'wolf', 'vampire'],
-                    9: ['cobra', 'zombie', 'wolf', 'vampire']
+                    9: ['cobra', 'zombie', 'wolf', 'vampire'],
+                   10: ['cobra', 'zombie', 'wolf', 'vampire']
 }

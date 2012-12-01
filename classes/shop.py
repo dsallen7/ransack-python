@@ -79,7 +79,7 @@ class Shop():
                     elif self.type == 'armory':
                         hero.gainArmor( purchase[0],purchase[1] )
                     elif self.type == 'itemshop':
-                        hero.getItem( (purchase-86,1) )
+                        hero.getItem( (purchase-const.FRUIT1,1) )
                     elif self.type == 'magicshop':
                         hero.getItem( (purchase[0],1), purchase[1], purchase[2] )
                 else: game.textMessage("You don't have enough money!")
@@ -190,7 +190,7 @@ class itemShop(Shop):
         itemsList = shopScr.itemShopsByLevel[ level ]
         items = []
         for i in itemsList:
-            items.append( item.Item( i + 86 ) )
+            items.append( item.Item( i + const.FRUIT1 ) )
         
         self.drawStoreScreen()
         while True:
@@ -250,8 +250,12 @@ class magicShop(Shop):
                 if sale == None: pass
                 else:
                     try:
-                        hero.addGold( self.prices[ ( sale.getType(), sale.getLevel(), sale.getSpellNum() ) ]/2 )
-                        hero.takeItem(sale)
+                        if hasattr(sale, "__iter__"):
+                            hero.addGold( self.prices[ ( sale[0].getType(), sale[0].getLevel(), sale[0].getSpellNum() ) ]/2 )
+                            hero.takeItem(sale[0])
+                        else:
+                            hero.addGold( self.prices[ ( sale.getType(), sale.getLevel(), sale.getSpellNum() ) ]/2 )
+                            hero.takeItem(sale)
                     except KeyError:
                         self.myInterface.txtMessage("We don't buy those...", None)
             self.drawStoreScreen()

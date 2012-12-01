@@ -1,13 +1,15 @@
-itemPrices = { 86: 5,
-               87: 8,
-               90: 10,
-               91: 30,
-               92: 25,
-               93: 50,
-               94: 75,
-               95: 25,
-               96: 50,
-               97: 75 }
+from UTIL import const
+
+itemPrices = { const.FRUIT1: 5,
+               const.CHEESE: 8,
+               const.BREAD: 10,
+               const.ANTIDOTE: 30,
+               const.SHP : 25,
+               const.MHP : 50,
+               const.LHP: 75,
+               const.SMP: 25,
+               const.MMP: 50,
+               const.LMP: 75 }
             
 
 weaponPrices = { (26,0): 100,
@@ -33,12 +35,12 @@ armorPrices = { (31,0): 100,
                 }
 
 
-magicPrices = { (100,0,0): 500,
-                (101,0,0): 50,
-                (100,0,1): 500,
-                (101,0,1): 50,
-                (100,0,2): 500,
-                (101,0,2): 50,
-                (100,0,3): 500,
-                (101,0,3): 50
+magicPrices = { (const.SPELLBOOK,0,0): 500,
+                (const.PARCHMENT,0,0): 50,
+                (const.SPELLBOOK,0,1): 500,
+                (const.PARCHMENT,0,1): 50,
+                (const.SPELLBOOK,0,2): 500,
+                (const.PARCHMENT,0,2): 50,
+                (const.SPELLBOOK,0,3): 500,
+                (const.PARCHMENT,0,3): 50
                 }

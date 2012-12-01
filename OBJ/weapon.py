@@ -6,7 +6,7 @@ class Weapon():
     def __init__(self, type, level, mods=None):
         self.type = type
         self.level = level
-        self.imgNum = type + const.FRUIT1
+        self.imgNum = type + 86
         self.name = 'weapon'
         self.desc = weaponScr.descDict[self.type]
         

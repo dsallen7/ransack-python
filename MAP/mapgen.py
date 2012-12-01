@@ -157,36 +157,36 @@ class Generator():
         rooms.remove(choice1)
         '''
         # down
-        choice2 = choice(rooms)
+        choice1 = choice(rooms)
         # find room with only 1 entrance
         # WARNING: this algorithm not guaranteed to stop.
-        while len(choice2.entrances) > 1 or choice2.secret or choice2.neighbors[0].secret:
-            choice2 = choice(rooms)
-        (xpos, ypos) = choice2.getPos()
-        (xdim, ydim) = choice2.getDimensions()
-        (doorX, doorY) = choice2.entrances[0]
-        self.map.setEntry( xpos + xdim/2, ypos + ydim/2, 121)
+        while len(choice1.entrances) > 1 or choice1.secret or choice1.neighbors[0].secret:
+            choice1 = choice(rooms)
+        (xpos, ypos) = choice1.getPos()
+        (xdim, ydim) = choice1.getDimensions()
+        (doorX, doorY) = choice1.entrances[0]
+        self.map.setEntry( xpos + xdim/2, ypos + ydim/2, const.STAIRDN)
         self.map.setEntry( doorX, doorY, 116)
         self.map.pointOfExit = ( xpos + xdim/2, ypos + ydim/2 )
         
         # up
-        choice1 = choice2.neighbors[0]
-        (xpos, ypos) = choice1.getPos()
-        (xdim, ydim) = choice1.getDimensions()
-        self.map.setEntry( xpos + xdim/2, ypos + ydim/2, 120)
+        choice2 = choice1.neighbors[0]
+        (xpos, ypos) = choice2.getPos()
+        (xdim, ydim) = choice2.getDimensions()
+        self.map.setEntry( xpos + xdim/2, ypos + ydim/2, const.STAIRUP)
         self.map.pointOfEntry = ( xpos + xdim/2, ypos + ydim/2 )
         self.map.heroStart = ( xpos + xdim/2, ypos + ydim/2 )
         rooms.remove(choice1)
         
         rooms.remove(choice2)
-        
+        #print rooms
         # add key for door
         keyRoom = choice(rooms)
         (xpos, ypos) = keyRoom.getPos()
         (xdim, ydim) = keyRoom.getDimensions()
-        self.map.setEntry( xpos + xdim/2, ypos + ydim/2, 98)
+        self.map.setEntry( xpos + xdim/2, ypos + ydim/2, const.KEY)
         rooms.remove(keyRoom)
-        
+        #print rooms
         # set hero starting location - optional
         choice3 = choice(rooms)
         (xpos, ypos) = choice3.getPos()
@@ -212,6 +212,10 @@ class Generator():
             chestItems.append( (const.PARCHMENT-const.FRUIT1, choice(mapScr.parchByLevel[self.level]) ) )
             if self.rollDie(0, 2):
                 chestItems.append( (13, choice( range(15, 50)+range(15,30) ) ))
+            #if self.map.getEntry( xpos + xdim/2, 
+            #                      ypos + ydim/2 ) == const.DFLOOR1:
+            #print 'Chest'
+            #print self.map.getEntry( xpos + xdim/2, ypos + ydim/2 )
             self.map.setEntry( xpos + xdim/2, ypos + ydim/2, 110)
             chestlist += [( ( xpos + xdim/2, ypos + ydim/2), chestItems )]
             rooms.remove(choice4)
@@ -230,7 +234,13 @@ class Generator():
             room = choice(rooms)
             (xpos, ypos) = room.getPos()
             (xdim, ydim) = room.getDimensions()
-            self.map.NPCs.append( (( xpos + xdim/2, ypos + ydim/2), choice(mEnemyScr.enemiesByLevel[self.map.level] ) ) )
+            #if self.map.getEntry( xpos + xdim/2, 
+            #                      ypos + ydim/2 ) == const.DFLOOR1:
+            #print 'Enemy'
+            #print self.map.getEntry( xpos + xdim/2, ypos + ydim/2 )
+            self.map.NPCs.append( (( xpos + xdim/2, 
+                                     ypos + ydim/2), 
+                                   choice(mEnemyScr.enemiesByLevel[self.map.level] ) ) )
             rooms.remove(room)
                
     def addRoom(self, map, room, pos):

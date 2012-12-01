@@ -14,9 +14,11 @@ enemyDict = { 'skeleton'  : ('Skeleton', 'skeleton.bmp'),
 
 npcList = ['female',
            'firepit',
+           'fireplace',
            'guard',
            'housewife',
            'king',
+           'magician',
            'tramp',
            'cobra',
            'orc',
@@ -25,22 +27,35 @@ npcList = ['female',
            'dskeleton',
            'skeletonking',
            'vampire',
+           'woodsman',
            'wolf',
            'zombie'
            ]
 
-femaleToFemaleLinesByLevel = { 1 : ["What are you staring at?",
+femaleToFemaleLines = [["What are you staring at?",
                                    "Look what the cat dragged in!"],
-                               2 : ["This town sucks, I can't wait to move out! ",
+                       ["This town sucks, I can't wait to move out! ",
                                     "God, I'm so bored!" ]
+                       ]
+
+femaleToFemaleLinesByLevel = { 1 : femaleToFemaleLines[0],
+                               2 : femaleToFemaleLines[0],
+                               3 : femaleToFemaleLines[1],
+                               4 : femaleToFemaleLines[1]
                }
 
-femaleToMaleLinesByLevel = { 1 : ["Get away from me, creep!",
-                                  "Not if you were the last dude on earth.",
-                                  "Whatever..."],
-                            2 : ["So how you doin?",
-                                  "Nice sword..."],
-                            3 : ["So you work for the government?"] }
+femaleToMaleLines = [["Get away from me, creep!",
+                      "Not if you were the last dude on earth.",
+                      "Whatever..."],
+                     ["So how you doin?",
+                      "Nice sword..."],
+                     ["So you work for the government?"]
+                     ]
+
+femaleToMaleLinesByLevel = { 1 : femaleToMaleLines[0],
+                             2 : femaleToMaleLines[0],
+                             3 : femaleToMaleLines[1],
+                             4 : femaleToMaleLines[1] }
 ''' 
 
 ----all NPC types

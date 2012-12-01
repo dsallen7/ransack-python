@@ -111,7 +111,6 @@ class game():
         
     def transition(self, loc):
         gameBoard_old = self.gameBoard.copy()
-        
         #transition
         oldType = self.myMap.type
         self.myMap = self.myWorld.currentMap
@@ -178,6 +177,10 @@ class game():
         elif event == pygame.K_h:
             # do nothing - advance clock by 1 min
             self.myMenu.displayHelp()
+        elif event == pygame.K_e:
+            print 'e'
+            #equipment menu
+            self.myMenu.equipmentMenu(self)
         elif event == pygame.K_ESCAPE:
             os.sys.exit()
         else:
@@ -235,7 +238,7 @@ class game():
             return
         elif i == const.SIGN:
             self.boxMessage( self.myMap.grid[x][y].getMsgText() )
-        elif i == const.COUNTER:
+        elif i == const.COUNTER_EW or i == const.COUNTER_NS:
             shopID = self.myMap.grid[x][y].getShopID()
             if shopID[0] == 'blacksmith':
                 self.Blacksmith.enterStore(self.myHero, self, shopID[1])
@@ -279,31 +282,7 @@ class game():
                 return
         i = self.myMap.getEntry( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize)
         # detect blocking tiles first, otherwise they will be ignored
-        # stores
-        '''
-        if i == const.BLKSMDOOR:
-            self.Blacksmiths[self.myMap.shops[( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize)][1]].enterStore(self.myHero, self)
-            pygame.time.wait(500)
-            return
-        elif i == const.TOWNHALLDOOR:
-            pygame.time.wait(500)
-            return self.Townhall.enterStore(self.myHero, self, self.FX)
-        elif i == const.ARMRYDOOR:
-            self.Armories[self.myMap.shops[( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize)][1]].enterStore(self.myHero, self)
-            pygame.time.wait(500)
-            return
-        elif i == const.ITEMSDOOR:
-            self.Itemshops[self.myMap.shops[( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize)][1]].enterStore(self.myHero, self)
-            pygame.time.wait(500)
-            return
-        elif i == const.MAGICDOOR:
-            self.Magicshops[self.myMap.shops[( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize)][1]].enterStore(self.myHero, self)
-            pygame.time.wait(500)
-            return
-        elif i == const.TAVRNDOOR:
-            pygame.time.wait(500)
-            return self.Tavern.enterStore(self.myHero, self, self.FX)
-        '''
+        # portals
         if i in const.doorsList:
             try:
                 newMap = self.myWorld.getMapByName( self.myMap.grid[x][y].portal[0] )
@@ -311,7 +290,8 @@ class game():
                 self.transition( ( self.myMap.grid[x][y].portal[1], 
                                    self.myMap.grid[x][y].portal[2] ) )
                 self.Display.drawSprites(self.myHero,self.myMap,self.gameBoard,self,animated=False)
-            except AttributeError:
+            except AttributeError as e:
+                print 'AttributeError: ', e
                 pass
             return
         elif i == const.EWDOOR:
@@ -322,7 +302,7 @@ class game():
             self.myMap.setEntry( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize,const.NSDOORO)
             self.Display.redrawXMap(self.myMap)
             return
-        elif i == -1 or i in range(24,86)+[110]+[111]:
+        elif i == -1 or i in range(24,86)+[const.CHEST]+[const.OCHEST]+range(128, 216):
             return
         # dungeon door
         elif i == const.DOOR:
@@ -335,9 +315,10 @@ class game():
                 self.myMap.setEntry( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize, self.myMap.defaultBkgd)
                 return
         #item
-        if i in range(86,109):
+        if i in range(const.FRUIT1, const.KEY + 1):
             self.myHero.getItem( OBJ.item.Item(i) )
             self.myMap.setEntry( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize, self.myMap.defaultBkgd)
+            self.Display.redrawXMap(self.myMap)
             self.myInterface.boxMessage(const.itemMsgs[i])
             return
         # Stairs down
@@ -426,26 +407,25 @@ class game():
         return saveBall
     
     def updateSprites(self):
-        #self.allsprites.update()
-        visibleNPCs = []
-        for n in self.NPCs:
-            (x, y) = n.getXY()
-            self.myMap.grid[x][y].occupied = True
-            if self.myMap.isVisible(x, y):
-                visibleNPCs.append(n)
                 
         if self.myMap.type in ['dungeon', 'maze', 'fortress']:
-            self.allsprites = pygame.sprite.RenderPlain((self.myHero, visibleNPCs))
+            self.allsprites = pygame.sprite.RenderPlain((self.myHero, self.visibleNPCs))
         else: self.allsprites = pygame.sprite.RenderPlain((self.myHero, self.NPCs))
         self.allsprites.clear(self.screen, self.gameBoard)
         rects = self.allsprites.draw(self.gameBoard)
         pygame.display.update(rects)
     
     def updateNPCs(self):
+        #self.allsprites.update()
+        self.visibleNPCs = []
         redraw = False
         for n in self.NPCs:
+            (x, y) = n.getXY()
+            self.myMap.grid[x][y].occupied = True
+            if self.myMap.isVisible(x, y):
+                self.visibleNPCs.append(n)
             r = n.update(self.myMap, self.myHero.getXY() )
-            if r == True:
+            if r == True and n in self.visibleNPCs:
                 redraw = True
             elif r == 'battle':
                 if self.launchBattle(n.name, self.myWorld.currentMap.level):
@@ -476,10 +456,7 @@ class game():
             self.gameBoard.fill(colors.black)
             for event in pygame.event.get():
                 event_ = self.inputHandler.getCmd(event)
-                if event_ == pygame.QUIT:
-                    os.sys.exit()
-                else:
-                    self.event_handler(event_)
+                self.event_handler(event_)
             if pygame.mouse.get_pressed()[0]:
                 event_ = self.inputHandler.getCmd(None)
                 # don't want rapid repeats of action commands
@@ -490,9 +467,8 @@ class game():
                     self.event_handler(event_)
             
             if self.updateNPCs() or self.myHero.moving:
-                self.Display.drawSprites(self.myHero, self.myMap, self.gameBoard, self, self.myHero.dir, animated=True)
-            else: 
-                pass#self.Display.drawSprites(self.myHero, self.myMap, self.gameBoard, self, None, animated=True)
+                    self.Display.drawSprites(self.myHero, self.myMap, self.gameBoard, self, self.myHero.dir, animated=True)
+                    #self.Display.drawSprites(self.myHero, self.myMap, self.gameBoard, self, None, animated=True)
             self.displayOneFrame()
             
             #self.clock.tick(240)

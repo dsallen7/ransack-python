@@ -6,7 +6,7 @@ class Armor():
     def __init__(self, type, level, resist=None):
         self.type = type
         self.level = level
-        self.imgNum = type + const.FRUIT1
+        self.imgNum = type + 86
         self.name = 'armor'
         self.desc = armorScr.descDict[self.type]
         

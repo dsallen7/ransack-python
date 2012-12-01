@@ -35,15 +35,15 @@ class Room():
             self.xdim = 9
             self.ydim = 9
             self.grid = [range(self.xdim) for _ in range(self.ydim)]
-            layout = [ [const.VOID,const.VOID,const.ULWALL,const.EWWALL,const.EWWALL,const.EWWALL,const.URWALL,const.VOID,const.VOID],
-                           [const.VOID,const.ULWALL,const.LRWALL,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.LLWALL,const.URWALL,const.VOID],
-                           [const.ULWALL,const.LRWALL,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.LLWALL,const.URWALL],
-                           [const.NSWALL,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.NSWALL],
-                           [const.NSWALL,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.NSWALL],
-                           [const.NSWALL,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.NSWALL],
-                           [const.LLWALL,const.URWALL,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.ULWALL,const.LRWALL],
-                           [const.VOID,const.LLWALL,const.URWALL,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.ULWALL,const.LRWALL,const.VOID],
-                           [const.VOID,const.VOID,const.LLWALL,const.EWWALL,const.EWWALL,const.EWWALL,const.LRWALL,const.VOID,const.VOID]
+            layout = [ [const.VOID,  const.VOID,   const.ULWALL, const.EWWALL, const.EWWALL, const.EWWALL, const.URWALL, const.VOID,   const.VOID],
+                       [const.VOID,  const.ULWALL, const.LRWALL, const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.LLWALL, const.URWALL, const.VOID],
+                       [const.ULWALL,const.LRWALL, const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.LLWALL, const.URWALL],
+                       [const.NSWALL,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.NSWALL],
+                       [const.NSWALL,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.NSWALL],
+                       [const.NSWALL,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.NSWALL],
+                       [const.LLWALL,const.URWALL, const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.ULWALL, const.LRWALL],
+                       [const.VOID,  const.LLWALL, const.URWALL, const.DFLOOR1,const.DFLOOR1,const.DFLOOR1,const.ULWALL, const.LRWALL, const.VOID],
+                       [const.VOID,  const.VOID,   const.LLWALL, const.EWWALL, const.EWWALL, const.EWWALL, const.LRWALL, const.VOID,   const.VOID]
                         ]
             for i in range(self.xdim):
                 for j in range(self.ydim):

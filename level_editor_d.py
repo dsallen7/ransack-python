@@ -6,8 +6,9 @@ from MAP import world, mapgen, mazegen, map, wilds
 from UTIL import queue, const, colors, eztext, load_image, misc
 from IMG import images, spritesheet
 
-from SCRIPTS import npcScr
+from SCRIPTS import npcScr, mapScr
 
+from random import choice
 
 displayOpts = ['fore', 'back', 'both']
 
@@ -130,7 +131,7 @@ class Handler():
             pygame.display.flip()
     
     def switchMap(self):
-        mapWin = pygame.Surface((200,420))
+        mapWin = pygame.Surface((200,510))
         mapWin.fill(colors.black)
         mapList = myWorld.getMapList()
         mapList.sort()
@@ -144,8 +145,8 @@ class Handler():
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     (mX, mY) = pygame.mouse.get_pos()
-                    if 200 <= mX < 300 and 200 <= mY < 620:
-                        mapIndex = (mY-200)/30
+                    if 200 <= mX < 300 and 0 <= mY < 510:
+                        mapIndex = mY/30
                         if mapIndex+1 <= len(mapList):
                             myWorld.currentMap = myWorld.getMapByName( mapList[mapIndex] )#myWorld.worldArray[mapIndex]
                             self.myMap = myWorld.currentMap
@@ -156,7 +157,7 @@ class Handler():
                 if event.type == pygame.QUIT:
                     os.sys.exit()
                         
-            screen.blit(mapWin, (200, 200) )
+            screen.blit(mapWin, (200, 0) )
             pygame.display.flip()
     
     def getMapInfo(self):
@@ -168,8 +169,9 @@ class Handler():
                 font = pygame.font.SysFont("arial",20)
                 infoWin.blit( font.render('Name: '+self.myMap.getName(), 1, colors.white, colors.black), (0,0) )
                 infoWin.blit( font.render('Up: '+self.myMap.up[0], 1, colors.white, colors.black), (0,30) )
-                infoWin.blit( font.render('Down: '+self.myMap.down[0], 1, colors.white, colors.black), (0,60) )
-                infoWin.blit( font.render('North: '+self.myMap.neighbors[0], 1, colors.white, colors.black), (0,90) )
+                if self.myMap.down[0] == 'dungeon':
+                    infoWin.blit( font.render('Down: '+self.myMap.down[0]+' '+str(self.myMap.down[1]), 1, colors.white, colors.black), (0,60) )
+                else: infoWin.blit( font.render('North: '+self.myMap.neighbors[0], 1, colors.white, colors.black), (0,90) )
                 infoWin.blit( font.render('South: '+self.myMap.neighbors[1], 1, colors.white, colors.black), (0,120) )
                 infoWin.blit( font.render('East: '+self.myMap.neighbors[2], 1, colors.white, colors.black), (0,150) )
                 infoWin.blit( font.render('West: '+self.myMap.neighbors[3], 1, colors.white, colors.black), (0,180) )
@@ -289,7 +291,7 @@ class Handler():
     
     def fillChest(self):
         menuBox = pygame.Surface( (150, 250) )
-        itemsList = range(86, 102)+[112,113,114,117,117]
+        itemsList = range(216, 232)+[112,113,114,117,118,119]
         for i in range( len( itemsList ) ):
             menuBox.blit(mapImages[itemsList[i]], (15+((i)%4)*blocksize, 50+((i)/4)*blocksize))
         chestItems = []
@@ -374,12 +376,12 @@ class Handler():
     def generateMap(self, type):
         level = int( self.getInput('Enter level: ') )
         if type == 'dungeon':
-            rooms = self.getInput('Enter # of rooms (max 20): ')
-            MG = mapgen.Generator(self.myMap.getDIM(), rooms, level)
+            rooms = int( self.getInput('Enter # of rooms (max 20): ') )
+            MG = mapgen.Generator(self.myMap.getDIM(), level)
             MG.generateMap(rooms)
             self.myMap.installBall( MG.getMapBall() )
         elif type == 'maze':
-            MG = mazegen.Generator(self.myMap.getDIM(), rooms, level)
+            MG = mazegen.Generator(self.myMap.getDIM(), level)
             MG.generateMap()
             self.myMap.installBall( MG.getMapBall() )
         elif type == 'wilds':
@@ -482,7 +484,7 @@ class Handler():
             self.generateMap( self.getInput('Enter type: ') )
         elif event.key == pygame.K_e:
             self.offset += 32
-            if self.offset == 128:
+            if self.offset == 256:
                 self.offset = 0
         elif event.key == pygame.K_x:
             self.removeNPC( x/blocksize, y/blocksize )
@@ -503,6 +505,10 @@ class Handler():
             self.currentTile += 1
         elif event.key == pygame.K_MINUS:
             self.currentTile -= 1
+        
+        # special
+        elif event.key == pygame.K_q:
+            self.randomTrees()
     
     def select(self, start):
         startX, startY = start
@@ -581,7 +587,11 @@ class Handler():
                         pygame.draw.lines( gridField, colors.red, True, self.selectBoxPoints, 1 )
                         screen.blit(gridField, (0,0) )
                         pygame.display.flip()
-        
+    def randomTrees(self):
+        for i in range(self.myMap.getDIM() ):
+            for j in range(self.myMap.getDIM() ):
+                if self.myMap.getEntry(i, j) in mapScr.pines:
+                    self.myMap.setEntry(i, j, choice(mapScr.pines) )
 
     def mouseHandler(self, e):
         (mx, my) = e.pos
@@ -623,10 +633,10 @@ class Handler():
         elif gridField.get_width()+65 <= mx < gridField.get_width()+95 and 500 <= my < 530:
             self.offset -= 32
             if self.offset < 0:
-                self.offset = 96
+                self.offset = 224
         elif gridField.get_width()+95 <= mx < gridField.get_width()+125 and 500 <= my < 530:
             self.offset += 32
-            if self.offset == 128:
+            if self.offset == 256:
                 self.offset = 0
         elif gridField.get_width()+50 <= mx < gridField.get_width()+80 and 530 <= my < 560:
             self.myMap.mapCut()
@@ -700,7 +710,7 @@ class Handler():
         entryBox = pygame.Surface((150,30))
         entryBox.fill(colors.black)
         if pygame.font:
-            font = pygame.font.SysFont("arial",14)
+            font = pygame.font.SysFont("arial",12)
             entry = font.render(str(self.myMap.getEntry( (x+self.topX)/blocksize, (y+self.topY)/blocksize))+' '+'x:'+str(x)+'('+str(x/blocksize)+')'+' y:'+str(y)+'('+str(y/blocksize)+')',1, colors.white, colors.black )
             entryBox.blit(entry,(0,0))
             self.sideImg.blit(entryBox,(50,450))
@@ -722,6 +732,8 @@ screen=pygame.display.set_mode(size)
 
 images.load()
 mapImages = images.mapImages
+
+
 pygame.init()
 pygame.key.set_repeat(50, 100)
 clock = pygame.time.Clock()

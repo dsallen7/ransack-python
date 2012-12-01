@@ -5,16 +5,22 @@ from OBJ import item, spell, weapon, armor
 
 from IMG import images
 
-from math import ceil
+from math import ceil, floor
+
+menuBoxPositions = [ ( int(ceil(80*2.4)), int(ceil(80*2.4)) ), 
+                     ( int(ceil(115*2.4)), int(ceil(80*2.4)) ), 
+                     ( int(ceil(150*2.4)), int(ceil(80*2.4)) ), 
+                     ( int(ceil(185*2.4)), int(ceil(80*2.4)) ),
+                     ( int(ceil(80*2.4)), int(ceil(115*2.4)) ), 
+                     ( int(ceil(115*2.4)), int(ceil(115*2.4)) ), 
+                     ( int(ceil(150*2.4)), int(ceil(115*2.4)) ), 
+                     ( int(ceil(185*2.4)), int(ceil(115*2.4)) ) ]
 '''
-menuBoxPositions = [ ( int(ceil(150*2.4)), int(ceil(70*2.4)) ), ( int(ceil(185*2.4)), int(ceil(70*2.4)) ), ( int(ceil(220*2.4)), int(ceil(70*2.4)) ), ( int(ceil(255*2.4)), int(ceil(70*2.4)) ),
-                     ( int(ceil(150*2.4)), int(ceil(105*2.4)) ), ( int(ceil(185*2.4)), int(ceil(105*2.4)) ), ( int(ceil(220*2.4)), int(ceil(105*2.4)) ), ( int(ceil(255*2.4)), int(ceil(105*2.4)) ) ]
 menuBoxPositions = [ ( 0, 0 ), ( 35, 0 ), ( 70, 0 ), ( 105, 0 ),
                      ( 0, 35 ), ( 35, 35), ( 70, 35 ), ( 105, 35 ) ]
-'''
 menuBoxPositions = [ ( 150, 70 ), ( 185, 70 ), ( 220, 70 ), ( 255, 70 ),
                      ( 150, 105 ), ( 185, 105), ( 220, 105 ), ( 255, 105 ) ]
-
+'''
 boxPointsFn = lambda x: ( (x[0],x[1]), 
                           (x[0],x[1] + int(ceil(const.blocksize*2.4)) ), 
                           (x[0] + int(ceil(const.blocksize*2.4)), x[1]+int(ceil(const.blocksize*2.4)) ), 
@@ -28,6 +34,7 @@ class menu():
         self.iMenuBox, r = load_image.load_image("invMenu.bmp")
         self.helpBox, r = load_image.load_image("helpBox.bmp")
         self.storyBox, r = load_image.load_image("storyBox.bmp")
+        self.equipBox, r = load_image.load_image("equipBox.bmp")
         self.screen = screen
         self.title = ''
         self.cursorPos = (0,0)
@@ -103,7 +110,7 @@ class menu():
                             itemBox.img.blit(msgText, (17,17) )
                 menu.append( itemBox )
                 (x, y) = menuBoxPositions[i]
-                menuWin.blit(itemBox.img, (x%150, y%70) )
+                menuWin.blit(itemBox.img, ( int(floor(x/2.4))%150, int(floor(y/2.4))%70) )
         return menuWin, menu
     
     def displayChest(self, chest):
@@ -131,12 +138,16 @@ class menu():
                 availableItems += [ weapon.Weapon(type, num, mods ) ]
             elif type in range(31,34):
                 availableItems += [ armor.Armor(type, num) ]
-        itemsBox, availableItems = self.itemsWin(availableItems)
-        menuBox.blit(itemsBox, ( (menuBox.get_width()/2)-(itemsBox.get_width()/2), 60 ) )
+        itemsBox, menu = self.itemsWin(availableItems)
+        #menuBox.blit(itemsBox, ( (menuBox.get_width()/2)-(itemsBox.get_width()/2), 60 ) )
         menuBox = pygame.transform.scale( menuBox, 
                                                  (int(ceil(menuBox.get_width() *2.4)),
                                                   int(ceil(menuBox.get_height()*2.4) ) ) )
         self.screen.blit(menuBox, ( ((self.screen.get_width()/2)-(menuBox.get_width()/2), 41) ) )
+        for b in menu:
+            self.screen.blit( pygame.transform.scale(b.img, (int(ceil(b.img.get_width()*2.4)),
+                                                                     int(ceil(b.img.get_height()*2.4)) )), 
+                                         (b.locX, b.locY) )
         self.Display.displayOneFrame(self.interface, self.FX)
         numItems = len(availableItems)
         while (pygame.event.wait().type != pygame.MOUSEBUTTONDOWN): pass
@@ -226,6 +237,63 @@ class menu():
         self.Display.displayOneFrame(self.interface, self.FX)
         while (pygame.event.wait().type != pygame.MOUSEBUTTONDOWN): pass
     
+    def drawEquipmentMenu(self, game):
+        menu = []
+        equipBox = self.equipBox.copy()
+        #show equipped armor and weapon
+        (armor, weapon) = ( game.myHero.getArmorEquipped(), game.myHero.getWeaponEquipped() )
+        weaponCopy = pygame.Surface( (30,30) )
+        weaponCopy.blit( images.mapImages[ weapon.getImg() ], (0,0) )
+        weaponCopy.blit( text.Text( 'L'+str(weapon.getLevel() ), os.getcwd()+"/FONTS/gothic.ttf", 4, colors.white, colors.black, True ), (17,17) )
+        equipBox.blit(weaponCopy, (26, 30))
+        menu.append( button.Button( (26,30), 'weapon', invisible=True ) )
+        
+        armorLocList = [( 240, 28 ), 
+                        ( 31, 202 ), 
+                        ( 244, 201 )]
+        for A in range( len(armor) ):
+            (x, y) = armorLocList[A]
+            if armor[A] == None:
+                menu.append( button.Button( ( int(ceil(x*2.4)), int(ceil(y*2.4)) ), 'armor', invisible=True ) )
+            else:
+                menu.append( button.Button( (int(ceil(x*2.4)), int(ceil(y*2.4))), 'armor', invisible=True ) )
+                armorCopy = images.mapImages[ armor[A].getImg() ]
+                armorCopy.blit( text.Text( 'L'+str(armor[A].getLevel() ), os.getcwd()+"/FONTS/gothic.ttf", 4, colors.white, colors.black, True ), (17,17) )
+                #self.writeText(armorCopy, (20,20), 'L'+str(armor[A].getLevel()), colors.white, colors.black,10)
+                equipBox.blit(armorCopy, armorLocList[A])
+        return equipBox, menu
+    def equipmentMenu(self, game):
+        equipBox = self.openWindow(350, 300)
+        equipBox, menu = self.drawEquipmentMenu(game) 
+        self.screen.blit(pygame.transform.scale(equipBox, 
+                                                ( int(ceil(equipBox.get_width()*2.4) ), 
+                                                  int(ceil(equipBox.get_height()*2.4) )) ), 
+                                                ( 0, 0) )
+        self.Display.displayOneFrame(self.interface, self.FX)
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    for b in menu:
+                        (x, y) = pygame.mouse.get_pos()
+                        #x = int(ceil(2.4*x))
+                        #y = int(ceil(2.4*y))
+                        if b.hit(x, y):
+                            if b.msg == 'weapon':
+                                game.myHero.equipWeapon(self.invMenu(game.myHero.getWeapons(), "Weapons:" ))
+                            elif b.msg == 'armor':
+                                game.myHero.equipArmor(self.invMenu(game.myHero.getArmor(), "Armor:" ))
+                event_ = self.inputHandler.getCmd(event)
+                if event_ == pygame.K_ESCAPE:
+                    return
+                if event_ == pygame.K_RETURN:
+                    return
+            equipBox, menu = self.drawEquipmentMenu(game)
+            self.screen.blit(pygame.transform.scale(equipBox, 
+                                                ( int(ceil(equipBox.get_width()*2.4) ), 
+                                                  int(ceil(equipBox.get_height()*2.4) )) ), 
+                                                ( 0, 0) )
+            self.Display.displayOneFrame(self.interface, self.FX)
+    
     def invMenu(self, items, text):
         menuWin = self.openWindow(200, 200)
         
@@ -239,8 +307,8 @@ class menu():
         #draw available items in window
         itemsBox, menu = self.itemsWin(items)
         #menuWin.blit( itemsBox, ((menuWin.get_width()/2)-(itemsBox.get_width()/2), 60) )
-        menu = menu + [button.Button( (240, 330), 'Use',os.getcwd()+"/FONTS/gothic.ttf", 14),
-                       button.Button( (300, 330), 'Return',os.getcwd()+"/FONTS/gothic.ttf", 14)
+        menu = menu + [button.Button( (240, 350), 'Use',os.getcwd()+"/FONTS/gothic.ttf", 14),
+                       button.Button( (380, 350), 'Return',os.getcwd()+"/FONTS/gothic.ttf", 14)
                        ]
         if menu is not []:
             selection = menu[0]
@@ -265,9 +333,10 @@ class menu():
                                     elif b.msg == 'Return':
                                         return None
                                 elif b.type == 'menuBox':
-                                    print 'MenuBox'
-                                    boxPoints = boxPointsFn( (b.locX, b.locY) )
-                                    selection = b.item
+                                    selection = b
+                                    boxPoints = boxPointsFn( (selection.locX, selection.locY) )
+                event_ = self.inputHandler.getCmd(event)
+                    
                 event_ = self.inputHandler.getCmd(event)
                 pygame.draw.lines( itemsBox, colors.black, True, boxPoints, 1 )
                 if event_ == pygame.K_ESCAPE:
@@ -276,58 +345,67 @@ class menu():
                     if selection.type == 'button':
                         return None
                     else: return selection.item
-            #cursorPos = positions[selection]  
-            if menu is not []:
-                selection = menu[0]
-                for b in menu:
-                    self.screen.blit(b.img, (b.locX, b.locY) )
-            pygame.draw.lines( itemsBox, colors.white, True, boxPoints, 1 )
-            menuWin.blit( itemsBox, ((menuWin.get_width()/2)-(itemsBox.get_width()/2), 60) )
+            
+            #boxPoints = boxPointsFn(cursorPos)
+            #menuWin.blit( itemsBox, ((menuWin.get_width()/2)-(itemsBox.get_width()/2), 60) )
             menuWin = pygame.transform.scale( menuWin, 
-                                            ( int(ceil(menuWin.get_width()*2.4) ), 
-                                              int(ceil(menuWin.get_height()*2.4) )) )
-            self.screen.blit(menuWin, ( self.screen.get_width()/2-menuWin.get_width()/2 , 41) )
+                                                 (int(ceil(menuWin.get_width() *2.4)),
+                                                  int(ceil(menuWin.get_height()*2.4) ) ) )
+            #pygame.draw.lines( self.screen, colors.white, True, boxPoints, 1 )
+            self.screen.blit( menuWin, ( (self.screen.get_width()/2)-(menuWin.get_width()/2), 41) )
+            if selection.type == 'menuBox':
+                pygame.draw.lines( self.screen, colors.white, True, boxPoints, 1 )
+            
+            if menu is not []:
+                for b in menu:
+                    if b.type == 'menuBox':
+                        self.screen.blit( pygame.transform.scale(b.img, (int(ceil(b.img.get_width()*2.4)),
+                                                                     int(ceil(b.img.get_height()*2.4)) )), 
+                                         (b.locX, b.locY) )
+            for b in menu:
+                if b.type == 'button':
+                    self.screen.blit(b.img, (b.locX, b.locY) )
             self.Display.displayOneFrame(self.interface, self.FX)
     
-    def storeMenu(self, items, text, prices):
+    def storeMenu(self, items, msg, prices):
         menuWin = self.openWindow(200, 200)
         
         menuWin = self.iMenuBox.copy()
         
-        if pygame.font:
-            font = pygame.font.Font(os.getcwd()+"/FONTS/gothic.ttf", 14)
-            msgText = font.render( text, 1, colors.white, colors.gold )
-            menuWin.blit(msgText, ( (menuWin.get_width()/2)-(msgText.get_width()/2) , 20) )
+            #menuWin.blit(msgText, ( (menuWin.get_width()/2)-(msgText.get_width()/2) , 20) )
         
         # wait for selection
         
         itemsBox, menu = self.itemsWin(items)
+        itemsBox.fill(colors.black)
         menuWin.blit( itemsBox, ((menuWin.get_width()/2)-(itemsBox.get_width()/2), 60) )
-        menu = menu + [button.Button( (240, 330), 'Buy',os.getcwd()+"/FONTS/gothic.ttf", 14),
-                       button.Button( (300, 330), 'Return',os.getcwd()+"/FONTS/gothic.ttf", 14)
+        menu = menu + [button.Button( (240, 350), 'Buy',os.getcwd()+"/FONTS/gothic.ttf", 14),
+                       button.Button( (380, 350), 'Return',os.getcwd()+"/FONTS/gothic.ttf", 14)
                        ]
         if menu is not []:
             selection = menu[0]
             for b in menu:
-                self.screen.blit(b.img, (b.locX, b.locY) )
+                pass#menuWin.blit(b.img, (b.locX, b.locY) )
             boxPoints = boxPointsFn( (menu[0].locX, menu[0].locY) )
         copyBox = menuWin
         
+        font = os.getcwd()+"/FONTS/gothic.ttf"
+        size = 8
         
         while True:
             menuWin = copyBox.copy()
-            descText = font.render( selection.item.getDesc(), 1, colors.white, colors.gold  )
-            menuWin.blit(descText, ( (menuWin.get_width()/2)-(descText.get_width()/2) , 135) )
+            descText = selection.item.getDesc()
+            #descText = text.Text( selection.item.getDesc(), font, size, colors.white, colors.gold  )
+            #menuWin.blit(descText, ( (menuWin.get_width()/2)-(descText.get_width()/2) , 155) )
             
             if selection.item.getName() == 'item':
-                priceText = font.render( 'Cost: $'+str( prices[selection.item.getType()] ), 1, colors.white, colors.gold )
+                priceText = text.Text( descText+' Cost: $'+str( prices[selection.item.getType()] ), font, size, colors.white, colors.gold )
             elif selection.item.getName() == 'spellbook' or selection.item.getName() == 'parchment':
-                priceText = font.render( 'Cost: $'+str( prices[(selection.item.getType(), selection.item.getLevel(), selection.item.getSpellNum() )] ), 1, colors.white, colors.gold )
+                priceText = text.Text( descText+' Cost: $'+str( prices[(selection.item.getType(), selection.item.getLevel(), selection.item.getSpellNum() )] ), font, size, colors.white, colors.gold )
             elif selection.item.getName() == 'armor':
-                priceText = font.render( 'Cost $'+str( prices[(selection.item.getType(), selection.item.getLevel() )] ), 1, colors.white, colors.gold )
+                priceText = text.Text( descText+' Cost $'+str( prices[(selection.item.getType(), selection.item.getLevel() )] ), font, size, colors.white, colors.gold )
             elif selection.item.getName() == 'weapon':
-                priceText = font.render( 'Cost $'+str( prices[(selection.item.getType(), selection.item.getLevel() )] ), 1, colors.white, colors.gold )
-            menuWin.blit(priceText, ( (menuWin.get_width()/2)-(priceText.get_width()/2) , 155) )
+                priceText = text.Text( descText+' Cost $'+str( prices[(selection.item.getType(), selection.item.getLevel() )] ), font, size, colors.white, colors.gold )
             
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -354,9 +432,26 @@ class menu():
             menuWin = pygame.transform.scale( menuWin, 
                                                  (int(ceil(menuWin.get_width() *2.4)),
                                                   int(ceil(menuWin.get_height()*2.4) ) ) )
-            
-            pygame.draw.lines( menuWin, colors.white, True, boxPoints, 1 )
+            #pygame.draw.lines( self.screen, colors.white, True, boxPoints, 1 )
             self.screen.blit( menuWin, ( (self.screen.get_width()/2)-(menuWin.get_width()/2), 41) )
+            #self.screen.blit(priceText, ( int( ceil( ( (menuWin.get_width()/2)-(priceText.get_width() /2 ) *2.4 ) )), 
+            #                          int(ceil(155*2.4)) ) )
+            #int( ceil( ( (menuWin.get_width()/2)-(priceText.get_width() /2 ) *2.4 ) ))
+            
+            if pygame.font:
+                msgText = text.Text( msg, font, 14, colors.white, colors.gold )
+                self.screen.blit(msgText, ( int(ceil(80*2.4)), 
+                                       int(ceil(50*2.4)) ) )
+            self.screen.blit(priceText, ( int(ceil(80*2.4)), 
+                                          int(ceil(165*2.4)) ) )
+            pygame.draw.lines( self.screen, colors.white, True, boxPoints, 1 )
+            
+            if menu is not []:
+                for b in menu:
+                    if b.type == 'menuBox':
+                        self.screen.blit( pygame.transform.scale(b.img, (int(ceil(b.img.get_width()*2.4)),
+                                                                     int(ceil(b.img.get_height()*2.4)) )), 
+                                         (b.locX, b.locY) )
             for b in menu:
                 if b.type == 'button':
                     self.screen.blit(b.img, (b.locX, b.locY) )

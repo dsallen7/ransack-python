@@ -28,8 +28,8 @@ class inputHandler():
                         (int(ceil(247*2.4)), 
                          1 + int(ceil(180*2.4))+int(ceil(300*2.4)))  : pygame.K_s,      # lower right  (3) hero stats *
                            
-                        (int(floor(135*2.4)), int(ceil(143*2.4))+int(ceil(300*2.4))) : pygame.K_a,      # armor
-                        (int(floor(135*2.4)), int(ceil(180*2.4))+int(ceil(300*2.4))+1) : pygame.K_w,      # weapons
+                        (int(floor(135*2.4)), int(ceil(143*2.4))+int(ceil(300*2.4))) : pygame.K_e,      # armor
+                        (int(floor(135*2.4)), int(ceil(180*2.4))+int(ceil(300*2.4))+1) : pygame.K_e,      # weapons
                            
                         (int(floor(78*2.4)), int(ceil(143*2.4))+int(ceil(300*2.4))) : pygame.K_h        # help
                            
@@ -44,6 +44,7 @@ class inputHandler():
             mY_ = int(ceil(106*2.4))+int(ceil(300*2.4)) + ( ( (mY - (int(ceil(106*2.4))+int(ceil(300*2.4)))) / 89 ) * 89 )
         elif int(floor(135*2.4)) <= mX < int(floor(163*2.4)) and int(ceil(143*2.4))+int(ceil(300*2.4)) <= mY < int(ceil(208*2.4))+int(ceil(300*2.4)):
             # armor/weapons
+            return pygame.K_e
             mX_ = int(floor(135*2.4)) + ( ( (mX - int(floor(135*2.4))) / 89 ) * 89 )
             mY_ = int(ceil(143*2.4))+int(ceil(300*2.4)) + ( ( (mY - (int(ceil(143*2.4))+int(ceil(300*2.4)) )) / 89 ) * 89 )
         elif int(floor(78*2.4)) <= mX < int(floor(125*2.4)) and int(floor(143*2.4))+int(ceil(300*2.4)) <= mY < int(floor(154*2.4))+int(ceil(300*2.4)):
@@ -54,6 +55,7 @@ class inputHandler():
         else: return None
         try:
             self.FX.drawKeyFlash( self.keyDict[(mX_, mY_)] )
+            print self.keyDict[(mX_, mY_)]
             return self.keyDict[(mX_, mY_)]
         except KeyError:
             return None

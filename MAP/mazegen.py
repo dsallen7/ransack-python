@@ -2,20 +2,16 @@ import numpy as np
 from numpy.random import random_integers as rnd
 
 from random import choice, randrange
-
 from MAP import map, tile
-
-from SCRIPTS import mapScr, enemyScr
-
+from SCRIPTS import mapScr, enemyScr, mEnemyScr
 import itertools
-
 from UTIL import load_image, const
 
 
 class Generator():
-    def __init__(self, DIM, rooms, level):
+    def __init__(self, DIM, level):
         self.DIM = DIM
-        self.map = map.genMap(self.DIM, level)
+        self.map = map.genMap(self.DIM, level, 'maze')
         self.level = level
 
     def maze(self, width=40, height=40, complexity=.75, density =.75):
@@ -89,17 +85,17 @@ class Generator():
         for i in range(1, self.DIM-1):
             
             if self.getMatrixEntry(i, 1):
-                self.map.setEntry(i, 0, 27)
+                self.map.setEntry(i, 0, const.URWALL)
             else:
-                self.map.setEntry(i, 0, 30)
-            self.map.setEntry(i, self.DIM-1, 30)
+                self.map.setEntry(i, 0, const.EWWALL)
+            self.map.setEntry(i, self.DIM-1, const.EWWALL)
             
             
             if self.getMatrixEntry(self.DIM-2, i):
-                self.map.setEntry(self.DIM-1, i, 27)
+                self.map.setEntry(self.DIM-1, i, const.URWALL)
             else:
-                self.map.setEntry(self.DIM-1, i, 31)
-            self.map.setEntry(0, i, 31)
+                self.map.setEntry(self.DIM-1, i, const.NSWALL)
+            self.map.setEntry(0, i, const.NSWALL)
             
             for j in range(1, self.DIM-1):
                 if self.getMatrixEntry(i, j):
@@ -127,7 +123,7 @@ class Generator():
             if tile == None:
                 pass
             else:
-                self.map.NPCs.append( ( tile, choice(enemyScr.enemiesByLevel[self.map.level] ) ) )
+                self.map.NPCs.append( ( tile, choice(mEnemyScr.enemiesByLevel[self.map.level] ) ) )
                 i += 1
         i = 0
         chestList = []

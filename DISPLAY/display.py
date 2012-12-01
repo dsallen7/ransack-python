@@ -12,7 +12,8 @@ class Display():
         images.load()
         self.images = images.mapImages
         self.fog = pygame.Surface( (30,30) )
-        self.fog.fill( colors.offblack )
+        self.fog.fill( colors.black )
+        self.fog.set_alpha( 192 )
     
     def displayOneFrame(self, iFace, FX, board=None, game=None, dark=False):
         if game is not None:
@@ -24,6 +25,7 @@ class Display():
             if dark:
                 self.drawDarkness(game.myMap, board)
                 #board.blit( self.SS_, (0, 0) )
+                #pygame.time.delay(50)
             self.screen.blit( pygame.transform.scale(board, 
                                                      (int(ceil(300 * 2.4)), 
                                                       int(ceil(300 * 2.4)) ) ), (0,0) )
@@ -31,19 +33,20 @@ class Display():
     
     # Takes first two coordinates of hero rect, gameBoard and
     # draws darkness
-    def drawDarkness(self, map, gameBoard):
-        (topX, topY) = map.topMapCorner
+    def drawDarkness(self, map, gameBoard, offset=None):
+        if offset is not None:
+            (oX, oY) = offset
+        else: (oX, oY) = (0, 0)
+        (topX, topY) = map.oldTopMapCorner
         (px, py) = map.playerXY
         tiles = map.litTiles
-        for x in range( map.WINDOWSIZE ):
-            for y in range( map.WINDOWSIZE ):
-                if (x+topX, y+topY) in tiles:
-                    self.fog.set_alpha( 0 )
-                else:
-                    self.fog.set_alpha( 192 )
-                gameBoard.blit(self.fog, 
-                               ( (x)*const.blocksize, (y)*const.blocksize), 
-                               area=(0,0,const.blocksize,const.blocksize) )
+        for x in range( -1, map.WINDOWSIZE+1 ):
+            for y in range( -1, map.WINDOWSIZE+1 ):
+                if (x+topX, y+topY) not in tiles:
+                    gameBoard.blit(self.fog, 
+                                   ( (x)*const.blocksize - oX, 
+                                     (y)*const.blocksize - oY), 
+                                   area=(0,0,const.blocksize,const.blocksize) )
     
     # Redraw map onto gameboard without redrawing tiles
     def redrawMap(self, map, hero, gameBoard):
@@ -141,7 +144,9 @@ class Display():
         if animated:
             if not hero.moving:
                 scrolling = False
-            else: scrollX , scrollY = const.scrollingDict[dir]
+            if scrolling:
+                scrollX , scrollY = const.scrollingDict[dir]
+            else: (scrollX , scrollY) = (0, 0)
             (px,py) = hero.getXY()
             pos, oldPos = map.updateWindowCoordinates( hero )
             (topX, topY) = pos
@@ -162,18 +167,26 @@ class Display():
                 for npc in game.NPCs:
                     if npc.moving:
                         npc.shiftOnePixel(npc.dir, -1)
-                        npc.takeStep()
+                        if (idx % 6) == 0:
+                            npc.takeStep()
+                # compensate for scrolling
                 if scrolling:
                     for npc in game.NPCs:
                         npc.shiftOnePixel(dir, 1)
-                    
-                    gameBoard.blit( self.getScrollingMapWindow( ( (topX*const.blocksize)+(idx*scrollX)-(const.blocksize*scrollX), (topY*const.blocksize)+(idx*scrollY)-(const.blocksize*scrollY) ) ), (0,0) )
+                    gameBoard.blit( self.getScrollingMapWindow( ( (topX*const.blocksize)+(idx*scrollX)-(const.blocksize*scrollX), 
+                                                                  (topY*const.blocksize)+(idx*scrollY)-(const.blocksize*scrollY) ) ), 
+                                   (0,0) )
                     
                 else:
                     self.redrawMap(map, hero, gameBoard)
-                if hero.moving: hero.takeStep()
-                if (idx % 5) == 0:
-                    self.displayOneFrame(game.myInterface, game.FX, game.gameBoard, game, map.type in ['dungeon', 'maze', 'fortress'])
+                if (idx % 3) == 0:
+                    if hero.moving:
+                        if (idx % 6) == 0:
+                            hero.takeStep()
+                    if map.type in ['dungeon', 'maze', 'fortress']:
+                        self.drawDarkness(map, gameBoard, (idx*scrollX, 
+                                                           idx*scrollY) )
+                    self.displayOneFrame(game.myInterface, game.FX, game.gameBoard, game, False)
             hero.moving = False
         
         for npc in game.NPCs:

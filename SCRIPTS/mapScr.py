@@ -27,20 +27,27 @@ parchByLevel = { 1 : [0, 1],
                  6 : [0, 1, 2],
                  7 : [0, 1, 2, 3],
                  8 : [0, 1, 2, 3],
-                 9 : [0, 1, 2, 3]
+                 9 : [0, 1, 2, 3],
+                10 : [0, 1, 2, 3]
                 }
 wildsTilesList = [ (8, const.GRASS1),
-                   (3, const.PINE) ]
+                   (3, const.PINE1) ]
 fruitList = [const.FRUIT1,
              const.CHEESE,
-             const.BREAD1]
+             const.BREAD]
+
+pines = [const.PINE1, const.PINE2, const.PINE3, const.PINE4]
 
 descriptions = {
-                52 : "They don't call it the Pine Barrens for nothing!",
-                55 : "A village wellspring",
-                76 : "A tall marble column.",
-                77 : "A sturdy hand-carved wooden chair.",
-                111 : "The chest is empty."
+                const.PINE1   : "They don't call it the Pine Barrens for nothing!",
+                const.PINE2   : "They don't call it the Pine Barrens for nothing!",
+                const.PINE3   : "They don't call it the Pine Barrens for nothing!",
+                const.PINE4   : "They don't call it the Pine Barrens for nothing!",
+                const.WELLSP : "A village wellspring",
+                const.COLUMN : "A tall marble column.",
+                const.CHAIR1  : "A sturdy hand-carved wooden chair.",
+                const.CHAIR2  : "A sturdy hand-carved wooden chair.",
+                const.OCHEST : "The chest is empty."
                 
                 
                 }

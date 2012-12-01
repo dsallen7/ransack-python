@@ -227,8 +227,9 @@ class gameMap(map):
                 topY = DIMEN - 10
             self.WINDOWSIZE = const.HALFDIM
             self.WINDOWOFFSET = 0
-        oldTopX, oldTopY = self.topMapCorner
-        self.topMapCorner = (topX, topY)
+        self.oldTopMapCorner = self.topMapCorner
+        oldTopX, oldTopY = self.topMapCorner # old top map corner
+        self.topMapCorner = (topX, topY)     # new top map corner
         return (topX, topY), (oldTopX, oldTopY)
     
     # complete list of tiles is in tiles1.txt
@@ -249,14 +250,14 @@ class gameMap(map):
         elif d > 5:
             return start
         (x,y) = start
-        if self.getEntry(x,y) in [18,19]:
+        if self.getEntry(x,y) in [const.EWDOORO, const.NSDOORO]:
             return [ (x-1,y-1), (x,y-1), (x+1,y-1),
                      (x-1,y), (x,y), (x+1,y),
                      (x-1,y+1), (x,y+1), (x+1,y+1)]
-        if self.getEntry(x,y) in range(18,86):
+        if self.getEntry(x,y) in range(128, 192): # dungeon solids
             returnList = [(x,y)]
             for (Cx, Cy) in const.CARDINALS:
-                if self.getEntry(x+Cx,y+Cy) in range(18, 86):
+                if self.getEntry(x+Cx,y+Cy) in range(128, 192):
                     count = 0
                     for (Nx, Ny) in const.CARDINALS:
                         try:
@@ -291,6 +292,8 @@ class gameMap(map):
         return litTiles
     
     def isVisible(self, x, y):
+        if self.type not in ['dungeon', 'maze', 'fortress']:
+            return True
         if (x, y) in self.litTiles:
             return True
         else: return False
@@ -345,7 +348,7 @@ class edMap(map):
     def changeEntry(self, x, y, entry, shop=False):
         if entry is not None:
             (px,py) = entry
-            #self.setEntry(px,py,self.defaultBkgd)
+            self.setEntry(px,py,self.defaultBkgd)
         return (x,y)
     
     # overridden from parent class
@@ -378,7 +381,10 @@ class edMap(map):
             self.shops[ (x, y) ] = ('house1', param )
         elif e == const.SIGN:
             self.grid[x][y].setMsgText(param)
-        self.grid[x][y].setFG(e)
+        try:
+            self.grid[x][y].setFG(e)
+        except AttributeError:
+            pass
     
     def changeDimensions(self, nDim):
         newGrid = [[0 for i in range(nDim)] for j in range(nDim)]
