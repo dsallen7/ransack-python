@@ -13,8 +13,8 @@ class Button:
         #self.img = text.Text(msg, font, size, colors.white, colors.gold, True)
         if invisible:
             self.img = text.Text(msg, font, size, colors.white, colors.white, True)
-            self.sizeX = int(ceil(2.4*const.blocksize))
-            self.sizeY = int(ceil(2.4*const.blocksize))
+            self.sizeX = int(ceil(3.6*const.blocksize))
+            self.sizeY = int(ceil(3.6*const.blocksize))
         else: 
             self.img = text.Text(msg, font, size, colors.white, colors.gold, True)
             self.sizeX = self.img.get_width()

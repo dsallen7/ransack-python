@@ -122,7 +122,6 @@ class gameMap(map):
         map.__init__(self)
         
         self.level = level
-        self.lineOfVision = 0
         self.BFSQueue = queue.Queue()
         
         if mapball != None:
@@ -145,9 +144,6 @@ class gameMap(map):
         self.myMiniMap = minimap.miniMap(self.grid)
         
         self.litTiles = []
-    
-    def setLOV(self, num):
-        self.lineOfVision = num
     
     def getImages(self):
         return self.images
@@ -440,6 +436,28 @@ class genMap(map):
             for j in range(self.DIM):
                 self.grid[i][j] = tile.Tile(i, j, const.VOID, const.VOID)
         self.setName(name)
+    
+    def setEntry(self, x, y, fg, roomN):
+    #Updates one map Entry to type at map coordinates x,y
+    # Overridden for gen class with room SN
+        self.grid[x][y].setFG(fg)
+        self.grid[x][y].roomN = roomN
+        #print roomN
+        
+    def mapPaste(self, pos, roomN):
+        (sX, sY) = pos
+        copyText = self.copyText
+        for i in range( len(copyText[0]) ):
+            for j in range( len(copyText) ):
+                self.setEntry(i+sX, j+sY, copyText[j][i].getFG(), roomN)
+                self.grid[i+sX][j+sY].setXY(i+sX, j+sY)
+    
+    def getRoomN(self, x, y):
+        try:
+            return self.grid[x][y].roomN
+        except AttributeError:
+            print None
+            return None
     
     def pathfinderBFS(self, start):
         (x,y) = start

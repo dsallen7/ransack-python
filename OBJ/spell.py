@@ -30,6 +30,8 @@ class Spell():
         return self.castMsg
     def getCastTime(self):
         return self.castTime
+    def getName(self):
+        return self.name
     
     def execute(self, hero, battle):
         hero.currMP = hero.currMP - self.cost

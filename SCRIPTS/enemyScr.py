@@ -3,36 +3,36 @@ dEnemies = ['Zombie','Skeleton', 'Vampire']
 
 healthDict = { 
               # Undead
-              'Skeleton'     : 20,
-              'Dark Skeleton': 50,
-              'Skeleton King': 80,
-              'Zombie'       : 30,
-              'Vampire'      : 30,
+              'Skeleton'     : 30,
+              'Dark Skeleton': 80,
+              'Skeleton King': 250,
+              'Zombie'       : 50,
+              'Vampire'      : 75,
               
               # Humanoid
               'Orc'          : 25,
-              'Orc Sergeant' : 50,
+              'Orc Sergeant' : 75,
               
               # Animal
-              'Cobra'        : 20,
-              'Wolf'         : 30
+              'Cobra'        : 30,
+              'Wolf'         : 40
               }
 
 attackDict = { 
               # Undead
-              'Skeleton'     : 8,
-              'Dark Skeleton': 15,
-              'Skeleton King': 18,
-              'Zombie'       : 9,
-              'Vampire'      : 11,
+              'Skeleton'     : 10,
+              'Dark Skeleton': 17,
+              'Skeleton King': 25,
+              'Zombie'       : 13,
+              'Vampire'      : 15,
               
               # Humanoid
-              'Orc'          : 8,
-              'Orc Sergeant' : 15,
+              'Orc'          : 10,
+              'Orc Sergeant' : 18,
               
               # Animal
               'Cobra'        : 7,
-              'Wolf'         : 12
+              'Wolf'         : 15
               }
 
 imgFileDict = { 

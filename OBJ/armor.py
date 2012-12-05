@@ -3,13 +3,13 @@ from SCRIPTS import armorScr
 
 class Armor():
     
-    def __init__(self, type, level, resist=None):
+    def __init__(self, type, resist=None):
         self.type = type
-        self.level = level
-        self.imgNum = type + 86
+        self.level = armorScr.aLevels[type]
+        self.imgNum = type
         self.name = 'armor'
         self.desc = armorScr.descDict[self.type]
-        
+        self.category = armorScr.categories[type]
         self.resist = resist
     
     def getType(self):

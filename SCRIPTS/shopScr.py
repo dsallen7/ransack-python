@@ -9,14 +9,14 @@ itemShopsByLevel = {
 }
 
 blacksmithShopsByLevel = {
-                            1: [ (26,0),(27,0),(28,0) ],
-                            2: [ (26,0),(27,0),(28,0),(26,1),(27,1),(28,1) ]
+                            1: [ const.WSWORD, const.SSWORD ],
+                            2: [ const.SSWORD, const.AXE ]
 
 }
 
 armoriesByLevel = { 
-                   1: [ (31,0),(32,0),(33,0)],
-                   2: [ (31,0),(32,0),(33,0),(31,1),(32,1),(33,1)]
+                   1: [ const.LSHIRT, const.LMAIL, const.WSHIELD ],
+                   2: [ const.LMAIL, const.CMAIL ]
 
 
 }

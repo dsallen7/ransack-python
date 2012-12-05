@@ -12,26 +12,23 @@ itemPrices = { const.FRUIT1: 5,
                const.LMP: 75 }
             
 
-weaponPrices = { (26,0): 100,
-                  (27,0): 100,
-                  (28,0): 100,
-                  (26,1): 500,
-                  (27,1): 500,
-                  (28,1): 500,
-                  (26,2): 1000,
-                  (27,2): 1000,
-                  (28,2): 1000,
+weaponPrices = { const.WSWORD: 50,
+                 const.SSWORD: 100,
+                 const.AXE: 150,
+                 const.LSWORD: 250,
+                 const.TSWORD: 500,
+                 const.VAXE: 1000,
+                 const.GSWORD: 2000
                 }
 
-armorPrices = { (31,0): 100,
-                  (32,0): 100,
-                  (33,0): 100,
-                  (31,1): 500,
-                  (32,1): 500,
-                  (33,1): 500,
-                  (31,2): 1000,
-                  (32,2): 1000,
-                  (33,2): 1000
+armorPrices = { const.LSHIRT: 50,
+                const.LMAIL: 100,
+                const.CMAIL: 200,
+                const.SPLATE: 500,
+                const.TPLATE: 1000,
+                const.WSHIELD: 75,
+                const.ISHIELD: 250,
+                const.SSHIELD: 500
                 }
 
 

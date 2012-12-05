@@ -8,6 +8,8 @@ from UTIL import const, colors
 
 import Queue
 
+
+
 class hero(pygame.sprite.Sprite):
     
     def __init__(self, load=None, pos=None):
@@ -22,24 +24,29 @@ class hero(pygame.sprite.Sprite):
         if pos is not None:
             (self.X, self.Y) = pos
         if self.gender == 'Male':
-            self.images = images.loadNPC('mherosheet.bmp')
-        else: self.images = images.loadNPC('fherosheet.bmp')
+            self.images = images.mHeroImages
+        else: self.images = images.fHeroImages
         self.imgIdx = 2
         self.image = self.images[self.imgIdx]
+        #print self.images
         self.rect = (const.blocksize, const.blocksize, const.blocksize, const.blocksize)
         
         if self.weapons == []:
-            self.gainWeapon(26,0)
+            self.gainWeapon(const.WSWORD)
             self.equipWeapon(self.weapons[0])
         if self.spells == []:
             self.learnSpell(0)
         
         self.step = False
         self.moving = False
-        self.stepIdx = 1
+        self.stepIdx = 0
 
     def takeStep(self):
-        self.imgIdx = ( 1 - (self.imgIdx % 2) ) + (2 * (self.imgIdx / 2))
+        #self.imgIdx = const.imgDict[self.dir] + const.walkingList[self.stepIdx]
+        self.imgIdx = self.imgIdx + const.walkingList[self.stepIdx]
+        self.stepIdx = ( self.stepIdx + 1 ) % 4
+        #self.imgIdx = ( 1 - (self.imgIdx % 2) ) + (2 * (self.imgIdx / 2))
+        print self.imgIdx
         self.image = self.images[self.imgIdx]
 
     def getXY(self):
@@ -100,7 +107,7 @@ class hero(pygame.sprite.Sprite):
         return self.maxHP
     def refillPts(self):
         self.currHP = self.maxHP
-        self.currMP = self.maxMP
+        #self.currMP = self.maxMP
     
     # increases level, next exp for lev up, max HP and MP and refills both
     def gainLevel(self):
@@ -125,14 +132,10 @@ class hero(pygame.sprite.Sprite):
         elif item.getType() == const.GOLD:
             self.addGold( item.qty )
             return str(item.qty)+' gold pieces'
-        elif item.getType() in [26,27,28]:
-            return self.gainWeapon(item.getType(), item.getLevel(), [item.plusStr, item.plusItl, item.plusDex] )
-        elif item.getType() in [31,32,33]:
-            return self.gainArmor(item.getType(), item.getLevel())
-        elif item.getType() == const.SPELLBOOK or item.getType() == const.PARCHMENT:
-            pass
-        elif item.getType() in range(86, 100): 
-            pass
+        elif item.getType() in range(const.WSWORD, const.HELMET):
+            return self.gainWeapon(item.getType(), [item.plusStr, item.plusItl, item.plusDex] )
+        elif item.getType() in range(const.HELMET, const.SSHIELD+1):
+            return self.gainArmor(item.getType() )
         itype = item.getType()-const.FRUIT1
         entry = self.items[ itype ]
         if hasattr(entry, "__iter__"):
@@ -205,8 +208,8 @@ class hero(pygame.sprite.Sprite):
     def getWeaponEquipped(self):
         return self.weaponEquipped
     # called when the player buys or finds a new weapon
-    def gainWeapon(self, type, level, mods=None):
-        newW = weapon.Weapon(type, level, mods)
+    def gainWeapon(self, type, mods=None):
+        newW = weapon.Weapon(type, mods)
         self.weapons.append(newW)
         return newW.getDesc()
     def loseWeapon(self, weapon):
@@ -228,8 +231,8 @@ class hero(pygame.sprite.Sprite):
         return self.armor
     def getArmorEquipped(self):
         return self.armorEquipped
-    def gainArmor(self, type, level, resist=None):
-        newA = armor.Armor(type, level)
+    def gainArmor(self, type, resist=None):
+        newA = armor.Armor(type)
         newA.resist = resist
         self.armor.append(newA)
         return newA.getDesc()
@@ -237,14 +240,14 @@ class hero(pygame.sprite.Sprite):
         self.armor.remove(armor)
     def equipArmor(self, armor):
         if armor == None: return
-        if self.armorEquipped[armor.getType()-31] == None:
-            self.armorEquipped[armor.getType()-31] = armor
+        if self.armorEquipped[armor.category] == None:
+            self.armorEquipped[armor.category] = armor
             self.armorClass += (armor.getLevel()+1)**2
         else:
-            self.armorClass -= (self.armorEquipped[armor.getType()-31].getLevel()+1)**2
+            self.armorClass -= (self.armorEquipped[armor.category].getLevel()+1)**2
             self.armorClass += (armor.getLevel()+1)**2
-            self.armor.append(self.armorEquipped[armor.getType()-31])
-            self.armorEquipped[armor.getType()-31] = armor
+            self.armor.append(self.armorEquipped[armor.category])
+            self.armorEquipped[armor.category] = armor
         self.loseArmor(armor)
     
     def addGold(self, amt):

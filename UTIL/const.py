@@ -110,13 +110,28 @@ SPELLBOOK = 230
 PARCHMENT = 231
 CHEST     = 110
 OCHEST    = 111
-SWORD     = 112
-AXE       = 113
-SPEAR     = 114
-DOOR      = 116
-SHIELD    = 117
-BPLATE    = 118
-HELMET    = 119
+
+WSWORD = 112
+SSWORD = 113
+AXE    = 114
+LSWORD = 115
+TSWORD = 116
+VAXE   = 117
+GSWORD = 118
+
+HELMET = 119
+
+LSHIRT = 120
+LMAIL  = 121
+CMAIL  = 122
+SPLATE = 123
+TPLATE = 124
+
+WSHIELD = 125
+ISHIELD = 126
+SSHIELD = 127
+
+DOOR      = 240
 
 POISON = 250
 DAMNATION = 251
@@ -164,6 +179,7 @@ itemMsgs = { FRUIT1: 'You found a piece of fruit.',
 
 scrollingDict = { 'up': (0, -1), 'down': (0, 1), 'left': (-1, 0), 'right': (1, 0), None : (0,0) }
 imgDict       = { 'up': 0, 'down': 2, 'left': 4, 'right': 6 }
+walkingList = [ 1, 9, -1, -9 ]
 
 # Define the colors we will use in RGB format
 black = [  0,  0,  0]

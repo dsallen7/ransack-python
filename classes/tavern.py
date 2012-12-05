@@ -1,12 +1,11 @@
 import pygame, cPickle, gzip
-from load_image import *
 from DISPLAY import menu, text
 from IMG import images
 import random, os
 from OBJ import item
 from SCRIPTS import shopScr
 
-from UTIL import const, colors
+from UTIL import const, colors, load_image
 
 from math import floor, ceil
 
@@ -21,8 +20,8 @@ class Tavern():
         images.load()
         self.myMenu = menu
         self.images = range(2)
-        self.images[0], r = load_image('cursor.bmp', -1)
-        self.images[1], r = load_image( os.path.join('INT', 'inn.bmp'))
+        self.images[0], r = load_image.load_image( os.path.join('MENU', "cursor.png" ), -1)
+        self.images[1], r = load_image.load_image( os.path.join('INT', 'inn.bmp'))
         self.storeScreen.fill( colors.black )
         self.storeScreen.blit( self.images[1], (0,0) )
         self.inputHandler = iH

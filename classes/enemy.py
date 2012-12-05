@@ -1,5 +1,4 @@
 import pygame
-from load_image import *
 import random
 from SCRIPTS import enemyScr
 from random import choice

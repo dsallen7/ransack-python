@@ -5,8 +5,8 @@ from UTIL import const, load_image
 
 import os
 
-mHeroImages = range(9)
-fHeroImages = range(9)
+mHeroImages = range(18)
+fHeroImages = range(18)
 mapImages = range(263)
 editorImages = range(7)
 
@@ -32,13 +32,17 @@ def load(path=''):
         mapImages[i], r = load_image.load_image( os.path.join('EXT', siteImgs[i-256]), 1 )
     
     mHeroSpriteSheet = spritesheet( os.path.join('CHAR', 'mherosheet.bmp'))
-    for i in range(9):
-        mHeroImages[i] = mHeroSpriteSheet.image_at( (i*const.blocksize, 0, const.blocksize, const.blocksize), -1 )
-        
+    for i in range(18):
+        mHeroImages[i] = mHeroSpriteSheet.image_at( ((i*const.blocksize)%270, 
+                                                     (i/9)*const.blocksize, 
+                                                     const.blocksize, 
+                                                     const.blocksize), -1 )
     fHeroSpriteSheet = spritesheet( os.path.join('CHAR', 'fherosheet.bmp'))
-    for i in range(9):
-        fHeroImages[i] = fHeroSpriteSheet.image_at( (i*const.blocksize, 0, const.blocksize, const.blocksize), -1 )
-
+    for i in range(18):
+        fHeroImages[i] = fHeroSpriteSheet.image_at( ((i*const.blocksize)%270, 
+                                                     (i/9)*const.blocksize, 
+                                                     const.blocksize, 
+                                                     const.blocksize), -1 )
 
 def loadNPC(file):
     npcSS = spritesheet( os.path.join('CHAR', file) )
@@ -46,6 +50,9 @@ def loadNPC(file):
     for i in range(9):
         npcImages[i] = npcSS.image_at( (i*const.blocksize, 0, const.blocksize, const.blocksize), 1 )
     return npcImages
+
+def getMHero():
+    return
 
 siteImgDict = { 
                'itemshop'  : (256,2),

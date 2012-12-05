@@ -10,7 +10,7 @@ try:
     import android
 except:
     android = False
-    print "No android"
+    print "No Android in main"
 
 # Set the height and width of the screen
 screenSize=[720,1280]
@@ -39,7 +39,6 @@ iH = inputHandler.inputHandler(FX)
 iFace = interface.Interface(screen, iH)
 
 images = range(3)
-images[0], r = load_image.load_image('cursor.bmp', -1)
 
 def getFile(titleScreen):
     FX.displayLoadingMessage(titleScreen, 'Loading saved game list...')
@@ -93,14 +92,17 @@ def endScreen(game, msg):
         font = pygame.font.Font("./FONTS/SpinalTfanboy.ttf", 72)
         dScreen.blit( font.render(msg, 1, colors.red, colors.black), (50,50) )
         font = pygame.font.Font("./FONTS/devinne.ttf", 18)
-        if game.myHero.level < 5:
+        if game.myHero.level < 4:
             dScreen.blit( font.render("Nice Try, loser!", 1, colors.white, colors.black), (50,125) )
-        elif game.myHero.level >= 5 and game.myHero.level < 10:
+        elif game.myHero.level >= 4 and game.myHero.level < 10:
             dScreen.blit( font.render("Not bad... for a beginner!", 1, colors.white, colors.black), (50,125) )
         font = pygame.font.Font("./FONTS/gothic.ttf", 18)
         dScreen.blit( font.render("Level reached: "+str(game.myHero.level), 1, colors.white, colors.black), (50,225) )
         font = pygame.font.Font("./FONTS/gothic.ttf", 14)
-        dScreen.blit( font.render(str(game.Ticker.getDays())+"days, "+str(game.Ticker.getHours()%24)+":"+str(game.Ticker.getMins()%60)+"."+str(game.Ticker.getSecs()), 1, colors.white, colors.black), (50,250) )
+        dScreen.blit( font.render(str(game.Ticker.getDays())+"days, "+str(game.Ticker.getHours()%24)+":"+str(game.Ticker.getMins()%60)+"."+str(game.Ticker.getSecs()), 
+                                  1, 
+                                  colors.white, colors.black), 
+                     (50,250) )
         screen.blit(pygame.transform.scale(dScreen, (int(ceil(300 * 2.4)), 
                                                      int(ceil(300 * 2.4)) ) ), 
                                                      (0, 0) )
@@ -126,8 +128,9 @@ def loadSavedGame(titleScreen):
         if loadFile == None: pass
         else:
         '''
-        FX.displayLoadingMessage(titleScreen, 'Loading saved game...')
+        FX.displayLoadingMessage(titleScreen, 'Loading game file...')
         savFile = gzip.GzipFile('ransack0.sav', 'rb')
+        FX.displayLoadingMessage(titleScreen, 'Loading saved game...')
         ball = cPickle.load(savFile)
         savFile.close()
         Game = game.game(screen, clock, iFace, FX, iH, titleScreen, ball[0], ball[1], ball[2], ball[3])
@@ -154,32 +157,27 @@ def mouseHandler(m):
 
 def main():
     titleScreen = pygame.Surface((screenSize[0],screenSize[0]))
-    titleImg, titleRect = load_image.load_image('titlescreen.bmp', None)
-    ifaceImg, r = load_image.load_image('interface_m.bmp', None)
-    titleScreen.blit( pygame.transform.scale(titleImg, (int(ceil(300 * 2.4)), 
-                                                        int(ceil(300 * 2.4)) ) ), (0,0) )
+    ifaceImg, r = load_image.load_image( os.path.join('MENU', 'interface_m.png'), None)
     screen.blit( pygame.transform.scale(ifaceImg, (int(ceil(300 * 2.4)), 
                                                    int(ceil(233 * 2.4)) ) ), (0, int(ceil(300 * 2.4))) )
     selection = 0
-    options = ['Begin New Game', 'Load Saved Game', 'ExiT']
+    options = ['Begin New Game', 'Load Saved Game', 'Exit']
     screen.blit(titleScreen, (0,0))
-    buttons = [button.Button( (200, 375), 'Begin New Game'),
-               button.Button( (200, 445), 'Load Saved Game'),
-               button.Button( (200, 515), 'Credits'),
-               button.Button( (200, 585), 'Exit')
-               
-               ]
+    buttons = []
+    
+    if pygame.font:
+        font = pygame.font.Font("./FONTS/chancery.ttf", 60)
+    y = 350
+    for o in options:
+        line = font.render(o, 1, colors.white, colors.black)
+        buttons.append( button.Button( ( (screen.get_width()/2)-(line.get_width()/2), y), o ) )
+        y = y + 75
+    
     while True:
         menuBox = pygame.Surface( (450,450) )
         menuBox.fill( colors.black )
         menuBox.set_colorkey(colors.black)
-        
-        if pygame.font:
-            font = pygame.font.Font("./FONTS/SpinalTfanboy.ttf", 64)
-            for i in range(len(options)):
-                line = font.render(options[i], 1, colors.white, colors.black)
-                menuBox.blit( line, (50,(i*line.get_height() )) )
-    
+            
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 selection = None
@@ -204,7 +202,8 @@ def main():
         '''
         screen.blit(titleScreen, (0,0))
         for b in buttons:
-            screen.blit(b.img, ( (b.locX + b.sizeX) - (b.sizeX) , b.locY ) )
+            #screen.blit(b.img, ( (b.locX + b.sizeX) - (b.sizeX) , b.locY ) )
+            screen.blit(b.img, ( b.locX, b.locY ) )
         iFace.update()
         font = pygame.font.Font(os.getcwd()+"/FONTS/courier.ttf", 28)
         if android:

@@ -25,7 +25,7 @@ class Display():
             if dark:
                 self.drawDarkness(game.myMap, board)
                 #board.blit( self.SS_, (0, 0) )
-                #pygame.time.delay(50)
+            #pygame.time.delay(500)
             self.screen.blit( pygame.transform.scale(board, 
                                                      (int(ceil(300 * 2.4)), 
                                                       int(ceil(300 * 2.4)) ) ), (0,0) )
@@ -179,9 +179,12 @@ class Display():
                     
                 else:
                     self.redrawMap(map, hero, gameBoard)
+                
                 if (idx % 3) == 0:
+                    
                     if hero.moving:
-                        if (idx % 6) == 0:
+                        if idx in [6,12,21,27]:
+                            #print idx
                             hero.takeStep()
                     if map.type in ['dungeon', 'maze', 'fortress']:
                         self.drawDarkness(map, gameBoard, (idx*scrollX, 

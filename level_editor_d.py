@@ -289,12 +289,11 @@ class Handler():
             pygame.display.flip()
         return input
     
-    def fillChest(self):
-        menuBox = pygame.Surface( (150, 250) )
-        itemsList = range(216, 232)+[112,113,114,117,118,119]
+    def fillChest(self, chestItems):
+        menuBox = pygame.Surface( (150, 350) )
+        itemsList = range(216, 232)+range(const.WSWORD, const.SSHIELD+1)
         for i in range( len( itemsList ) ):
             menuBox.blit(mapImages[itemsList[i]], (15+((i)%4)*blocksize, 50+((i)/4)*blocksize))
-        chestItems = []
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
@@ -310,18 +309,17 @@ class Handler():
                             chestItems.append( (itemNum-const.FRUIT1, int(self.getInput('Enter amount of gold: ')) ) )
                         elif itemNum == const.SPELLBOOK or itemNum == const.PARCHMENT:
                             chestItems.append( (itemNum-const.FRUIT1, int(self.getInput('Enter spell number: ') ) ) )
-                        elif itemNum in [112,113,114]:
-                            chestItems.append( (itemNum-const.FRUIT1, 
-                                                int(self.getInput("Enter weapon level: ")), 
+                        elif itemNum in range(const.WSWORD, const.HELMET): #weapon
+                            chestItems.append( (itemNum,
                                                 [ int(self.getInput("Enter plus Str: ")),
                                                   int(self.getInput("Enter plus Int: ")),
                                                   int(self.getInput("Enter plus Dex "))   ] ) )
-                        elif itemNum in [const.SHIELD,const.BPLATE,const.HELMET]:
+                        elif itemNum in range(const.HELMET, const.SSHIELD+1):
                             chestItems.append( (itemNum-const.FRUIT1, 
                                                 int(self.getInput("Enter armor level: ")), 
                                                 int(self.getInput("Enter resist: ")) ) )
             for item in chestItems:
-                menuBox.blit(mapImages[item[0]+const.FRUIT1], (len(chestItems)*blocksize, 15) )
+                menuBox.blit(mapImages[ item[0] ], (len(chestItems)*blocksize, 15) )
             screen.blit(menuBox, (100,100) )
             pygame.display.flip()
     
@@ -394,7 +392,7 @@ class Handler():
             self.myMap.NPCs.append( ( (x, y), self.getInput('Enter NPC type: '), self.getInput('Enter message: ') ) )
         else:
             if self.currentTile == const.CHEST:
-                self.myMap.addChest( (x, y), self.fillChest())
+                self.myMap.addChest( (x, y), self.fillChest( [] ))
                 param=None
             elif self.currentTile == const.SIGN:
                 param = self.getInput('Sign text: ')
@@ -500,7 +498,10 @@ class Handler():
         elif event.key == pygame.K_p:
             self.importMap( self.getInput('Enter filename of map: ') )
         elif event.key == pygame.K_RETURN:
-            self.tileProperties( (x/blocksize, y/blocksize) )
+            if self.myMap.getEntry(x/blocksize, y/blocksize) == const.CHEST:
+                self.fillChest( self.myMap.chests[ (x/blocksize, 
+                                                    y/blocksize) ] )
+            else: self.tileProperties( (x/blocksize, y/blocksize) )
         elif event.key == pygame.K_PLUS:
             self.currentTile += 1
         elif event.key == pygame.K_MINUS:
@@ -602,7 +603,7 @@ class Handler():
                         self.myMap.NPCs.append( ( (mx/blocksize, my/blocksize), self.getInput('Enter NPC type: '), self.getInput('Enter message: ') ) )
                     else:
                         if self.currentTile == const.CHEST:
-                            self.myMap.addChest( (mx/blocksize,my/blocksize), self.fillChest())
+                            self.myMap.addChest( (mx/blocksize,my/blocksize), self.fillChest( [] ))
                             level=None
                         elif self.currentTile == const.ITEMSDOOR:
                             level = int(self.getInput('Itemshop level: '))

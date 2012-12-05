@@ -46,13 +46,6 @@ class game():
             self.myMap = self.myWorld.currentMap
             self.myHero = hero.hero(loadHero)
         
-        
-        
-        '''
-        self.fortressMaps = []
-        for mapFileName in const.fMapList:
-            self.fortressMaps += [map.gameMap(iH, mapFileName, type='fortress')]
-        '''
         self.NPCs = []
         self.screen = screen
         self.gameBoard = pygame.Surface( [300,300] )
@@ -149,7 +142,7 @@ class game():
             return
         elif event == pygame.K_c:
             # cast spell
-            self.myHero.castSpell( self.myMenu.invMenu(self.myHero.getSpells(), "Spells:" ), self )
+            self.myHero.castSpell( self.myMenu.invMenu(self.myHero.getSpells(), "Spells:", ['Cast', 'Return'] ), self )
         elif event == pygame.K_p:
             # print map
             print self.myMap.grid
@@ -158,13 +151,13 @@ class game():
             self.myMenu.displayHeroStats(self.myHero)
         elif event == pygame.K_i:
             # use item
-            self.myHero.useItem( self.myMenu.invMenu(self.myHero.getItems(), "ITems:" ), self )
+            self.myHero.useItem( self.myMenu.invMenu(self.myHero.getItems(), "Items:", ['Use', 'Return'] ), self )
         elif event == pygame.K_w:
             # equip weapon
-            self.myHero.equipWeapon(self.myMenu.invMenu(self.myHero.getWeapons(), "Weapons:" ))
+            self.myHero.equipWeapon(self.myMenu.invMenu(self.myHero.getWeapons(), "Weapons:", ['Equip', 'Return'] ))
         elif event == pygame.K_a:
             # equip armor
-            self.myHero.equipArmor(self.myMenu.invMenu(self.myHero.getArmor(), "Armor:" ))
+            self.myHero.equipArmor(self.myMenu.invMenu(self.myHero.getArmor(), "Armor:", ['Equip', 'Return'] ))
         elif event == pygame.K_t:
             # take screenshot
             self.screenShot()

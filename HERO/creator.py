@@ -19,7 +19,7 @@ except:
 class Creator():
     
     def __init__(self):
-        self.displayField, r = load_image.load_image("createBox.bmp")
+        self.displayField, r = load_image.load_image( os.path.join('MENU', "createBox.png") )
         self.baseHP = randrange(25, 35)
         self.baseMP = randrange(15, 25)
         self.bStr = randrange(6, 10)
@@ -31,8 +31,8 @@ class Creator():
                         ]
         self.gender = 'male'
         self.images = range(3)
-        self.images[0], r = load_image.load_image("cursor.bmp", -1)
-        self.images[1], r = load_image.load_image('cursor_l.bmp', -1)
+        self.images[0], r = load_image.load_image( os.path.join('MENU', "cursor.png" ), -1)
+        self.images[1], r = load_image.load_image( os.path.join('MENU', 'cursor_l.png'), -1)
         
         images.load()
     def getInput(self, screen, msg):
@@ -105,7 +105,7 @@ class Creator():
     
     def updateDisplay(self, screen, step):
         if step == 'stats':
-            self.displayField, r = load_image.load_image("createBox.bmp")
+            self.displayField, r = load_image.load_image(os.path.join('MENU', "createBox.png") )
             self.calculateStats()
             self.displayField, self.displayField.copy
             self.displayStat( str(self.HP), (146,65) )
@@ -126,7 +126,7 @@ class Creator():
             screen.blit(pygame.transform.scale(self.displayField, (720, 720) ), (0, 0) )
             pygame.display.flip()
         elif step == 'name':
-            self.displayField, r = load_image.load_image("createBox2.bmp")
+            self.displayField, r = load_image.load_image(os.path.join('MENU', "createBox2.png" ) )
             screen.blit(pygame.transform.scale(self.displayField, (720, 720) ), (0, 0) )
             pygame.display.flip()
             
@@ -144,8 +144,8 @@ class Creator():
                 0, 0,             # score, keys
                 1, 0, 50,         # level, current XP, XP for next lev
                 [], None,         # weapons, eq. weapons
-                [], [None,None,None], #armor, eq. armor
-                range(20),        # items
+                [], [None,None,None], #armor, eq. armor (helmet, plate, shield)
+                range(24),        # items
                 [],               # spells
                 100, [False, False], 0, #gold, stats, slain
                 self.name )
@@ -159,7 +159,7 @@ class Creator():
                             self.slide(s, screen)
                     # done
                     if int(floor(33*2.4)) <= mX < int(ceil(82*2.4)) and int(floor(237*2.4)) <= mY < int(ceil(266*2.4)):
-                        self.displayField, r = load_image.load_image("createBox2.bmp")
+                        self.displayField, r = load_image.load_image(os.path.join('MENU', "createBox2.png") )
                         self.updateDisplay(screen, 'name')
                         if android:
                             android.show_keyboard()
@@ -169,7 +169,7 @@ class Creator():
                     os.sys.exit()
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:
-                        self.displayField, r = load_image.load_image("createBox2.bmp")
+                        self.displayField, r = load_image.load_image(os.path.join('MENU', "createBox2.png"))
                         self.updateDisplay(screen, 'name')
                         if android:
                             android.show_keyboard()

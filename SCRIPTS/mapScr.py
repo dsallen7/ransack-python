@@ -19,6 +19,28 @@ wallDict = { (False, False, False, False) : 28, # center
             
             }
 
+dWallDict = {
+             
+             ()
+             
+             
+             
+             }
+
+# 'special' items behind secret doors
+specialByLevel = { 1: [const.WSWORD, const.LSHIRT],
+                   2: [const.WSWORD, const.LSHIRT],
+                   3: [const.WSWORD, const.LSHIRT],
+                   4: [const.WSWORD, const.LSHIRT],
+                   5: [const.WSWORD, const.LMAIL],
+                   6: [const.WSWORD, const.LMAIL],
+                   7: [const.WSWORD, const.LMAIL, const.WSHIELD],
+                   8: [const.SSWORD, const.LMAIL, const.WSHIELD],
+                   9: [const.SSWORD, const.LMAIL, const.WSHIELD],
+                  10: [const.SSWORD, const.LMAIL, const.WSHIELD]
+                  
+                  }
+
 parchByLevel = { 1 : [0, 1],
                  2 : [0, 1],
                  3 : [0, 1],
@@ -39,10 +61,10 @@ fruitList = [const.FRUIT1,
 pines = [const.PINE1, const.PINE2, const.PINE3, const.PINE4]
 
 descriptions = {
-                const.PINE1   : "They don't call it the Pine Barrens for nothing!",
-                const.PINE2   : "They don't call it the Pine Barrens for nothing!",
-                const.PINE3   : "They don't call it the Pine Barrens for nothing!",
-                const.PINE4   : "They don't call it the Pine Barrens for nothing!",
+                const.PINE1   : "They don't call it the Pinelands for nothing!",
+                const.PINE2   : "They don't call it the Pinelands for nothing!",
+                const.PINE3   : "They don't call it the Pinelands for nothing!",
+                const.PINE4   : "They don't call it the Pinelands for nothing!",
                 const.WELLSP : "A village wellspring",
                 const.COLUMN : "A tall marble column.",
                 const.CHAIR1  : "A sturdy hand-carved wooden chair.",

@@ -9,20 +9,25 @@ try:
     import android
 except:
     android = False
-    print "No android"
+    print "No Android in battle"
 
 # this class will be used to draw the animation occuring in the battle.
 
 class battle():
     
     def __init__(self, screen, iH, menu):
-        self.battleField, r = load_image.load_image('battlefield.bmp', None)
+        self.battleField, r = load_image.load_image( os.path.join('ANIMATION', 'battlefield.bmp'), None)
+        self.battleField.set_colorkey([255,0,0])
+        self.forestField, r = load_image.load_image( os.path.join('ANIMATION', 'forestField.bmp'), None)
+        self.dungeonField, r = load_image.load_image( os.path.join('ANIMATION', 'dungeonField.bmp'), None)
         self.images = range(3)
         self.screen = screen
         
+        self.background = pygame.Surface((300, 300))
+        
         self.myMenu = menu
         
-        self.images[0], r = load_image.load_image('cursor.bmp', -1)
+        #self.images[0], r = load_image.load_image('cursor.bmp', -1)
         
         self.enemyImgs = range(2)
         
@@ -49,11 +54,10 @@ class battle():
     # if enemy is specified, battlefield will be drawn fresh
     def drawBattleScreen(self, game, enemy=None):
         if enemy is not None:
-            self.battleField, r = load_image.load_image('battlefield.bmp', None)
-            self.battleField.set_colorkey([255,0,0])
+            self.battleField, r = load_image.load_image(os.path.join('ANIMATION', 'battlefield.bmp'), -1)
             if game.myMap.type == 'wilds':
-                self.background, r = load_image.load_image('forestField.bmp', None)
-            else: self.background, r = load_image.load_image('dungeonField.bmp', None)
+                self.background.blit(self.forestField, (0,0) )
+            else: self.background.blit(self.dungeonField, (0,0) )
             self.battleField.blit( self.boxStat(enemy.getHP(), enemy.maxHP, colors.red, colors.black, (150, 30) ), (204, 97) )
             self.battleField.blit( self.enemyImg, (125, 50)  )
             self.battleField.blit( self.heroImg, (0, 75)  )
@@ -117,11 +121,11 @@ class battle():
     
     def loadEnemyImg(self, hero, enemy):
         if hero.gender == 'Male':
-            self.heroImgs[0], r = load_image.load_image( os.path.join('ANIMATION', 'hero_m1.bmp'), -1 )
-            self.heroImgs[1], r = load_image.load_image( os.path.join('ANIMATION', 'hero_m2.bmp'), -1 )
+            self.heroImgs[0], r = load_image.load_image( os.path.join('ANIMATION', 'hero_m1.bmp'), 2 )
+            self.heroImgs[1], r = load_image.load_image( os.path.join('ANIMATION', 'hero_m2.bmp'), 2 )
         else:
-            self.heroImgs[0], r = load_image.load_image( os.path.join('ANIMATION', 'hero_f1.bmp'), -1 )
-            self.heroImgs[1], r = load_image.load_image( os.path.join('ANIMATION', 'hero_f2.bmp'), -1 )
+            self.heroImgs[0], r = load_image.load_image( os.path.join('ANIMATION', 'hero_f1.bmp'), 2 )
+            self.heroImgs[1], r = load_image.load_image( os.path.join('ANIMATION', 'hero_f2.bmp'), 2 )
         self.heroImg = self.heroImgs[0]
         enemyImgFilenames = enemyScr.imgFileDict[enemy.getName()]
         for i in range(len(enemyImgFilenames)):
@@ -155,7 +159,7 @@ class battle():
                 self.heroImg = self.heroImgs[1]
                 a = random.randrange(0, dex+5)
                 if not (a > dex):
-                    dmg = random.randrange(sth/2,sth) + (weapon.getLevel()+1)**2
+                    dmg = random.randrange(sth/2,sth) + weapon.getLevel()**2
                     game.textMessage('You hit the '+enemy.getName() +' for '+str(dmg)+' points!')
                     #game.SFX.play(1)
                     for i in range(enemy.getHP(), enemy.getHP()-dmg, -1):
@@ -165,10 +169,10 @@ class battle():
                     game.textMessage("You missed The "+enemy.getName()+"!")
                     #game.SFX.play(2)
             elif action == 'Magic':
-                enemy.takeDmg( hero.castSpell( self.myMenu.invMenu(hero.getSpells(), "Spells:" ), game, True ) )
+                enemy.takeDmg( hero.castSpell( self.myMenu.invMenu(hero.getSpells(), "Spells:", ['Cast', 'Return'] ), game, True ) )
                     
             elif action == 'Item':
-                d = hero.useItem(self.myMenu.invMenu(hero.getItems(), "ITems:" ), game, True )
+                d = hero.useItem(self.myMenu.invMenu(hero.getItems(), "Items:", ['Use', 'Return'] ), game, True )
                 if d > 0:
                     enemy.takeDmg( d )
             elif action == 'Flee':

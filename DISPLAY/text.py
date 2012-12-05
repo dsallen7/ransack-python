@@ -19,12 +19,14 @@ def Text(message, font, fontsize, fgc=colors.white, bgc=colors.gold, transparent
             msgText.blit( font.render( message, 1, fgc, bgc ), (0,0) )
         else:
             # multi-line
-            msgText = pygame.Surface( ( width*math.ceil(0.6*fontsize), 
+            msgText = pygame.Surface( ( width*math.ceil(font.render( 'A', 
+                                                                     1, 
+                                                                     colors.white, 
+                                                                     colors.gold ).get_width() / 1.5 ), 
                                         ((len(message)/width)+1)*math.ceil(font.render( 'A', 
                                                                                         1, 
                                                                                         colors.white, 
-                                                                                        colors.gold ).get_height() * 1.5 
-                                                                           ) 
+                                                                                        colors.gold ).get_height() * 1.5) 
                                         ) 
                                      )
             msgText.fill(colors.gold)

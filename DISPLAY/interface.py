@@ -18,7 +18,7 @@ class Interface( ):
         #for displaying messages or menus
         self.screen = screen
         self.invItems = []
-        imgNames = ["interface_m.bmp", "interface.bmp"]
+        imgNames = ["MENU/interface_m.png", "MENU/interface.png"]
         self.imgs = range(2)
         for i in range( len(imgNames) ):
             self.imgs[i], r = load_image.load_image(imgNames[i],None)
@@ -145,7 +145,7 @@ class Interface( ):
     
     # displays message along with image of face
     def npcMessage(self, message, img):
-        msgText = text.Text(message, os.getcwd()+"/FONTS/devinne.ttf", 14, colors.white, colors.gold, True, 16)
+        msgText = text.Text(message, os.getcwd()+"/FONTS/devinne.ttf", 18, colors.white, colors.gold, True, 16)
         for i in range( 0, 255, 8 ):
             borderBox = pygame.Surface( ( msgText.get_width()+ int(ceil(img.get_width()*2.4))+ int(ceil(20*2.4)), 
                                           msgText.get_height()+ int(ceil(img.get_width()*2.4)) ) )

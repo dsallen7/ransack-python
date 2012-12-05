@@ -1,5 +1,22 @@
+from UTIL import const
+
 descDict = {
-             26: 'Sword',
-             27: 'Axe',
-             28: 'Spear'
+             const.WSWORD: 'Wooden Sword',
+             const.SSWORD: 'Short Sword',
+             const.AXE:    'Battle Axe',
+             const.LSWORD: 'Long Sword',
+             const.TSWORD: 'Templar Sword',
+             const.VAXE:   'Viking Axe',
+             const.GSWORD: 'Great Sword'
             }
+
+wLevels = {
+             const.WSWORD: 1,
+             const.SSWORD: 3,
+             const.AXE:    5,
+             const.LSWORD: 6,
+             const.TSWORD: 7,
+             const.VAXE:   8,
+             const.GSWORD: 10
+              
+              }

@@ -18,7 +18,7 @@ class Shop():
         images.load()
         self.myMenu = menu
         self.images = range(2)
-        self.images[0], r = load_image.load_image('cursor.bmp', -1)
+        self.images[0], r = load_image.load_image( os.path.join('MENU', "cursor.png" ), -1)
         self.type = type
         self.ticker = ticker
         self.storeScreen.fill( colors.black )
@@ -58,10 +58,11 @@ class Shop():
             self.drawStoreScreen()
     
     def sell(self, items):
-        return self.myMenu.invMenu(items, 'Select item to sell:')
+        return self.myMenu.invMenu(items, 'Select item to sell:', ['Sell', 'Return'], self.prices)
     
     def buy(self, items):
-        return self.myMenu.storeMenu( items, 'Select item to buy:', self.prices)
+        return self.myMenu.invMenu( items, 'Select item to buy:', ['Buy', 'Return'], self.prices)
+        #return self.myMenu.storeMenu( items, 'Select item to buy:', self.prices)
     
     def enterStore(self, hero, game):
         self.drawStoreScreen()
@@ -115,7 +116,7 @@ class Blacksmith(Shop):
         itemsList = shopScr.blacksmithShopsByLevel[ level ]
         items = []
         for i in itemsList:
-            items.append( weapon.Weapon(i[0], i[1]) )
+            items.append( weapon.Weapon( i ) )
         
         self.drawStoreScreen()
         while True:
@@ -126,8 +127,8 @@ class Blacksmith(Shop):
                 self.ticker.tick(60)
                 purchase = self.buy(items)
                 if purchase == None: pass
-                elif hero.takeGold( self.prices[ (purchase.getType(), purchase.getLevel()) ] ):
-                    hero.gainWeapon( purchase.getType(), purchase.getLevel() )
+                elif hero.takeGold( self.prices[ purchase.getType() ] ):
+                    hero.gainWeapon( purchase.getType() )
                 else: game.textMessage("You don't have enough money!")
             elif action == 'Sell':
                 self.ticker.tick(120)
@@ -153,7 +154,7 @@ class Armory(Shop):
         itemsList = shopScr.armoriesByLevel[ level ]
         items = []
         for i in itemsList:
-            items.append( armor.Armor(i[0], i[1]) )
+            items.append( armor.Armor( i ) )
         self.drawStoreScreen()
         while True:
             action = self.getAction()
@@ -163,15 +164,15 @@ class Armory(Shop):
                 self.ticker.tick(60)
                 purchase = self.buy(items)
                 if purchase == None: pass
-                elif hero.takeGold( self.prices[(purchase.getType(), purchase.getLevel())] ):
-                    hero.gainArmor( purchase.getType(), purchase.getLevel() )
+                elif hero.takeGold( self.prices[purchase.getType()] ):
+                    hero.gainArmor( purchase.getType() )
                 else: game.textMessage("You don't have enough money!")
             elif action == 'Sell':
                 self.ticker.tick(120)
                 sale = self.sell(hero.getArmor())
                 if sale == None: pass
                 else:
-                    hero.addGold( self.prices[ (sale.getType(), sale.getLevel() )]/2)
+                    hero.addGold( self.prices[ sale.getType() ]/2)
                     hero.loseArmor(sale)
             self.drawStoreScreen()
             
