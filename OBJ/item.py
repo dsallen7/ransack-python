@@ -6,29 +6,27 @@ from SCRIPTS import itemScr
 
 class Item():
     
-    def __init__(self, type, level=None, spellNum = None):
+    def __init__(self, type, num=None):
         self.type = type
         if type == const.GOLD:
-            self.qty = level
+            self.qty = num
             self.name = 'gold'
         if self.type == const.SPELLBOOK:
             from SCRIPTS import spellScr
             self.name = 'spellbook'
-            self.spellNum = spellNum
-            self.level = level
-            self.descrip = itemScr.descDict[self.type] + ': ' + spellScr.descDict[spellNum]
+            self.spellNum = num
+            self.descrip = itemScr.descDict[self.type] + ': ' + spellScr.descDict[num]
+            self.ID = num + 40
         elif self.type == const.PARCHMENT:
             from SCRIPTS import spellScr
             self.name = 'parchment'
-            self.spellNum = spellNum
-            self.level = level
-            self.descrip = itemScr.descDict[self.type] + ': ' + spellScr.descDict[spellNum]
-        elif type in range(102, 108):
-            self.name = 'magicitem'
-            self.level = level
+            self.spellNum = num
+            self.descrip = itemScr.descDict[self.type] + ': ' + spellScr.descDict[num]
+            self.ID = num + 70
         else: 
             self.name = 'item'
             self.descrip = itemScr.descDict[self.type]
+            self.ID = type - const.FRUIT1
         self.img = type
     
     def getType(self):
@@ -39,11 +37,14 @@ class Item():
     
     def setQty(self, qty):
         self.qty = qty
-    
     def getQty(self):
         if self.qty == 0:
             return 999
         else: return self.qty
+    
+    def getID(self):
+        return self.ID
+    
     def getName(self):
         return self.name
     def getLevel(self):

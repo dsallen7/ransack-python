@@ -10,10 +10,13 @@ descDict = {
              const.ISHIELD: 'Iron Shield',
              const.SSHIELD: 'Steel Shield',
              
-             const.HELMET:  'Iron Helmet'
+             const.HELMET:  'Iron Helmet',
+             
+             const.RING: 'Enchanted Ring'
             }
 
 aLevels = { 
+             const.RING: 1,
              const.LSHIRT:  1,
              const.LMAIL:   2,
              const.CMAIL:   4,
@@ -26,6 +29,13 @@ aLevels = {
              const.HELMET:  4
             }
 
+resists = ['Fire', 'Ice', 'Electric']
+
+slotCategories = {0:2, 1:1, 2:0,
+                  3:3, 4:3, 5:4,
+                  6:5, 7:6
+                  }
+
 categories = {
              const.WSHIELD: 0, # shield
              const.ISHIELD: 0,
@@ -36,5 +46,10 @@ categories = {
              const.SPLATE:  1,
              const.TPLATE:  1,
               
-             const.HELMET:  2 # helmet
+             const.HELMET:  2, # helmet
+             
+             const.RING:    3, # ring
+             const.AMULET:  4, #amulet
+             const.CLOAK:   5,
+             const.BOOTS:   6
               }

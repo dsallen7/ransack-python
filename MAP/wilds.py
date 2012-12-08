@@ -2,9 +2,9 @@ import os, pygame, cPickle
 
 from random import choice, randrange
 from MAP import map, tile, room
-from UTIL import const, colors
+from UTIL import const, colors, misc
 
-from SCRIPTS import mEnemyScr, mapScr
+from SCRIPTS import enemyScr, mapScr
 
 from IMG import images
 
@@ -31,12 +31,6 @@ class Generator():
         else:
             return False
     
-    def weightedChoice(self, choices):
-        choicesList = []
-        for c in choices:
-            choicesList += [c[1]]*c[0]
-        return choice(choicesList)
-    
     def getTileByNumber(self, tile):
         rX = randrange( 1, self.map.getDIM()-1 )
         rY = randrange( 1, self.map.getDIM()-1 )
@@ -53,7 +47,7 @@ class Generator():
             for y in range( 1, self.map.getDIM()/2 ):
                 if x == 0 or x == self.map.getDIM()-1:
                     self.map.setEntry(x, y, const.GRASS1 )
-                else: self.map.setEntry(x, y, self.weightedChoice(mapScr.wildsTilesList) )
+                else: self.map.setEntry(x, y, misc.weightedChoice(mapScr.wildsTilesList) )
         #self.draw()
         self.map.pointOfEntry = None
         self.map.pointOfExit = None
@@ -66,27 +60,27 @@ class Generator():
             (rX, rY) = self.getTileByNumber(const.GRASS1)
             chestItems = []
             
-            if self.rollDie(0, 2):
-                chestItems.append( (randrange(26,29), self.level/4,
+            if misc.rollDie(0, 2):
+                chestItems.append( (randrange(const.WSWORD,const.HELMET), self.level/4,
                                                                [randrange( (self.level/4)+1, (self.level/4)+3 ),
                                                                 randrange( (self.level/4)+1, (self.level/4)+3 ),
                                                                 randrange( (self.level/4)+1, (self.level/4)+3 )] ) )
             else: chestItems.append( (randrange(31,34), self.level/4, randrange(0, 3) ) )
             
-            if self.rollDie(0, 8):
+            if misc.rollDie(0, 8):
                 chestItems.append( (randrange(26,29),self.level/4, # weapon level
                                     [randrange( (self.level/4)+1, (self.level/4)+3 ),     # plus str
                                      randrange( (self.level/4)+1, (self.level/4)+3 ),     # plus int
                                      randrange( (self.level/4)+1, (self.level/4)+3 )] ) ) # plus dex
-            elif self.rollDie(0, 5):
+            elif misc.rollDie(0, 5):
                 chestItems.append( (const.PARCHMENT-const.FRUIT1, choice(mapScr.parchByLevel[self.level]) ) )
-            elif self.rollDie(0, 3):
-                chestItems.append( (13, choice( range(15, 50)+range(15,30) ) ))
+            elif misc.rollDie(0, 3):
+                chestItems.append( (const.GOLD, choice( range(15, 50)+range(15,30) ) ))
             else:
-                chestItems.append( (self.weightedChoice( zip( [randrange(1,3),randrange(1,3),randrange(1,3)],
+                chestItems.append( (misc.weightedChoice( zip( [randrange(1,3),randrange(1,3),randrange(1,3)],
                                                                mapScr.fruitList ) ), 
                                     1 ) )
-            self.map.setEntry( rX, rY, 110)
+            self.map.setEntry( rX, rY, const.CHEST)
             chestlist += [( (rX, rY), chestItems )]
             
             i += 1
@@ -98,7 +92,7 @@ class Generator():
             room = choice(rooms)
             (xpos, ypos) = room.getPos()
             (xdim, ydim) = room.getDimensions()
-            self.map.NPCs.append( (( xpos + xdim/2, ypos + ydim/2), choice(mEnemyScr.enemiesByLevel[self.map.level] ) ) )
+            self.map.NPCs.append( (( xpos + xdim/2, ypos + ydim/2), choice(enemyScr.enemiesByLevel[self.map.level] ) ) )
             rooms.remove(room)
         '''
         #(rX, rY) = self.getTileByNumber(const.GRASS1)

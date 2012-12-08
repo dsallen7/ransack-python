@@ -9,6 +9,7 @@ mHeroImages = range(18)
 fHeroImages = range(18)
 mapImages = range(263)
 editorImages = range(7)
+accessories = range(18)
 
 def load(path=''):
 
@@ -30,7 +31,10 @@ def load(path=''):
     siteImgs = ['itemSh.bmp', 'mShop.bmp', 'bSmith.bmp', 'armry.bmp', 'tavrn.bmp','townhall.bmp','house1.bmp']
     for i in range(256, 263):
         mapImages[i], r = load_image.load_image( os.path.join('EXT', siteImgs[i-256]), 1 )
-    
+    for i in range(18):
+        accessories[i] = pygame.Surface((15,10))
+        accessories[i].set_colorkey([255,128,128], pygame.RLEACCEL)
+        accessories[i].blit( mapImages[242 + (i/6) ], ( ((i%6)/3)*-15, (i%3)*-10) )
     mHeroSpriteSheet = spritesheet( os.path.join('CHAR', 'mherosheet.bmp'))
     for i in range(18):
         mHeroImages[i] = mHeroSpriteSheet.image_at( ((i*const.blocksize)%270, 
@@ -46,20 +50,13 @@ def load(path=''):
 
 def loadNPC(file):
     npcSS = spritesheet( os.path.join('CHAR', file) )
-    npcImages = range(9)
-    for i in range(9):
-        npcImages[i] = npcSS.image_at( (i*const.blocksize, 0, const.blocksize, const.blocksize), 1 )
+    npcImages = range(18)
+    for i in range(18):
+        npcImages[i] = npcSS.image_at( ((i*const.blocksize)%270, 
+                                                     (i/9)*const.blocksize, 
+                                                     const.blocksize, 
+                                                     const.blocksize), -1 )
     return npcImages
 
 def getMHero():
     return
-
-siteImgDict = { 
-               'itemshop'  : (256,2),
-               'magicshop' : (257,2),
-               'blacksmith': (258,2),
-               'armory'    : (259,2),
-               'tavern'    : (260,3),
-               'townhall'  : (261,3),
-               'house1'    : (262,2)
-               }

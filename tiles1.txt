@@ -117,7 +117,7 @@
     # 113: axe
     # 114: spear
     # 115: 
-    # 116: dungeon door
+    # 116: 
     # 117: shield
     # 118: breastplate
     # 119: helmet
@@ -160,6 +160,9 @@
     # 158:
     # 159: crenellation
     
+    # 200: book on counter
+    # 201: bookshelf
+    
     # 208: chair 1
     # 209: chair 2
     # 210: table 1
@@ -181,7 +184,12 @@
     # 229: gold
     # 230: spellbook
     # 231: parchment
-    
+    # 240: dungeon door
+    # 242: accessories 1
+    # 243: accessories 2
+    # 244: accessories 3
+    # 245: hammer of Thor
+    # 246: Christian cross
     # 248: stairs up
     # 249: stairs down
     # 254: void

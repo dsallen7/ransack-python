@@ -2,9 +2,9 @@ import os, pygame, cPickle
 
 from random import choice, randrange
 from MAP import map, tile, room
-from UTIL import const, colors
+from UTIL import const, colors, misc
 
-from SCRIPTS import mEnemyScr, mapScr
+from SCRIPTS import enemyScr, mapScr
 
 #from IMG import images
 
@@ -20,13 +20,6 @@ class Generator():
         self.map.type = 'dungeon'
         self.copyText = []
         self.level = level
-    
-    def rollDie(self, target, range):
-        d = randrange(range)
-        if target >= d:
-            return True
-        else:
-            return False
         
     def genRoom(self, pos=(0,0), shape='square' ):
         return room.Room( randrange(5,8), randrange(5,8), pos, shape )
@@ -246,15 +239,15 @@ class Generator():
             (xdim, ydim) = choice4.getDimensions()
             chestItems = []
             '''
-            if self.rollDie(0, 2):
+            if misc.rollDie(0, 2):
                 chestItems.append( (randrange(26,29), self.level/4,
                                                                [randrange( (self.level/4)+1, (self.level/4)+3 ),
                                                                 randrange( (self.level/4)+1, (self.level/4)+3 ),
                                                                 randrange( (self.level/4)+1, (self.level/4)+3 )] ) )
             else: chestItems.append( (randrange(31,34), self.level/4, randrange(0, 3) ) )
             '''
-            chestItems.append( (const.PARCHMENT-const.FRUIT1, choice(mapScr.parchByLevel[self.level]) ) )
-            if self.rollDie(0, 2):
+            chestItems.append( (const.PARCHMENT, choice(mapScr.parchByLevel[self.level]) ) )
+            if misc.rollDie(0, 2):
                 chestItems.append( (const.GOLD, choice( range(15, 50)+range(15,30) ) ))
             self.map.setEntry( xpos + xdim/2, ypos + ydim/2, const.CHEST, len(self.rooms))
             chestlist += [( ( xpos + xdim/2, ypos + ydim/2), chestItems )]
@@ -265,7 +258,7 @@ class Generator():
             (xdim, ydim) = room.getDimensions()
             self.map.setEntry( xpos + xdim/2, ypos + ydim/2, const.CHEST, len(self.rooms))
             sItem = choice( mapScr.specialByLevel[self.level] )
-            if sItem in range(const.WSWORD, const.HELMET):
+            if sItem in range(const.WSWORD, const.RING):
                 mods = [randrange( (self.level/4)+1, 
                                    (self.level/4)+3 ),
                         randrange( (self.level/4)+1, 
@@ -288,7 +281,7 @@ class Generator():
             (xdim, ydim) = room.getDimensions()
             self.map.NPCs.append( (( xpos + xdim/2, 
                                      ypos + ydim/2), 
-                                   choice(mEnemyScr.enemiesByLevel[self.map.level] ) ) )
+                                   choice(enemyScr.enemiesByLevel[self.map.level] ) ) )
             self.rooms.remove(room)
                
     def addRoom(self, map, room, pos):

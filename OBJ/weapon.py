@@ -5,7 +5,7 @@ class Weapon():
     
     def __init__(self, type, mods=None):
         self.type = type
-        self.level = weaponScr.wLevels[type]
+        self.level = weaponScr.wLevel[type]
         self.imgNum = type
         self.name = 'weapon'
         self.desc = weaponScr.descDict[self.type]
@@ -29,5 +29,9 @@ class Weapon():
         return self.name
     def getDesc(self):
         return self.desc
+    def getEnhancements(self):
+        return (self.plusStr,
+                self.plusItl,
+                self.plusDex)
     def getStats(self):
-        return self.desc+' '+'Level '+str(self.level)+' +'+str(self.plusStr)+' Str +'+str(self.plusItl)+' Intel +'+str(self.plusDex)+'Dex'
+        return '+'+str(self.plusStr)+'Str +'+str(self.plusItl)+' Intel +'+str(self.plusDex)+'Dex'

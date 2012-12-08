@@ -1,6 +1,5 @@
 import pygame, cPickle, gzip
 from DISPLAY import menu, text
-from IMG import images
 import random, os
 from OBJ import item
 from SCRIPTS import shopScr
@@ -17,7 +16,6 @@ class Tavern():
         self.screen = screen
         self.myInterface = interface
         self.ticker = ticker
-        images.load()
         self.myMenu = menu
         self.images = range(2)
         self.images[0], r = load_image.load_image( os.path.join('MENU', "cursor.png" ), -1)
@@ -74,7 +72,7 @@ class Tavern():
                 if hero.takeGold( (hero.getMaxHP()-hero.getCurrHP()) /2 ):
                     game.textMessage('Your HP and MP are now full')
                     game.textMessage('Thank you for staying with us!')
-                    hero.refillPts()
+                    hero.refillPts(True)
                     FX.scrollFromCenter(self.storeScreen, game.gameBoard)
                     return
                 else:

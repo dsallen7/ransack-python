@@ -35,7 +35,8 @@ colorDict = {
               92:4, 95:4,
               98:2, 99:6, 100:6,
               110:6, 111:6,
-              112:3, 116:3, 117:3, 118:3,
+              112:3, 116:3, 117:3, 118:3, const.EWWALL:3, const.NSWALL:3, const.ULWALL:3, const.URWALL:3, const.LLWALL:3,
+              const.LRWALL:3, const.EWFAKE:11, const.NSFAKE:11, const.EWDOOR:6, const.NSDOOR:6,
               const.STAIRUP:3, const.STAIRDN:3, 126:0, const.VOID:5,
               const.CHAIR1 : 6, const.CHAIR2 : 6, const.TABLE1 : 6, const.TABLE2 : 6
                    }

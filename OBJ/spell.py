@@ -8,7 +8,7 @@ class Spell():
     
     def __init__(self, type):
         self.type = type
-        self.img = type + 102
+        self.img = type + 88
         self.cost = spellScr.costDict[self.type]
         self.level = 0
         self.name = 'spell'

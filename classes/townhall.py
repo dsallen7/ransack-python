@@ -1,6 +1,5 @@
 import pygame, cPickle, gzip
 from DISPLAY import menu, text
-from IMG import images
 import random, os
 from OBJ import item
 from SCRIPTS import shopScr
@@ -16,7 +15,6 @@ class Townhall():
         self.screen = screen
         self.myInterface = interface
         self.ticker = ticker
-        images.load()
         self.myMenu = menu
         self.images = range(2)
         self.images[0], r = load_image.load_image( os.path.join('MENU', "cursor.png" ), -1)

@@ -3,9 +3,9 @@ from numpy.random import random_integers as rnd
 
 from random import choice, randrange
 from MAP import map, tile
-from SCRIPTS import mapScr, enemyScr, mEnemyScr
+from SCRIPTS import mapScr, enemyScr, enemyScr
 import itertools
-from UTIL import load_image, const
+from UTIL import load_image, const, misc
 
 
 class Generator():
@@ -47,13 +47,6 @@ class Generator():
         if not ( (0 <= x and x < self.DIM ) or (0 <= y and y < self.DIM)  ):
             return None
         return self.Z[x][y]
-    
-    def rollDie(self, target, range):
-        d = randrange(range)
-        if target >= d:
-            return True
-        else:
-            return False
         
     def getRandomTile(self, type):
         if type == 'open':
@@ -123,7 +116,7 @@ class Generator():
             if tile == None:
                 pass
             else:
-                self.map.NPCs.append( ( tile, choice(mEnemyScr.enemiesByLevel[self.map.level] ) ) )
+                self.map.NPCs.append( ( tile, choice(enemyScr.enemiesByLevel[self.map.level] ) ) )
                 i += 1
         i = 0
         chestList = []
@@ -134,7 +127,7 @@ class Generator():
                 pass
             else:
                 chestItems.append( (const.PARCHMENT-const.FRUIT1, choice(mapScr.parchByLevel[self.level]) ) )
-                if self.rollDie(0, 2):
+                if misc.rollDie(0, 2):
                     chestItems.append( (13, choice( range(15, 50)+range(15,30) ) ))
                 chestList.append( (tile, chestItems) )
                 (x,y) = tile

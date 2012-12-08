@@ -10,11 +10,13 @@ from random import choice
 class npc(pygame.sprite.Sprite):
     
     def __init__(self, x, y, message, imgFile):
+        self.start = (x, y)
         self.X = x
         self.Y = y
         self.images = images.loadNPC(imgFile)
         pygame.sprite.Sprite.__init__(self) #call Sprite intializer
         self.imgIdx = 2
+        self.stepIdx = 0
         self.image = self.images[self.imgIdx]
         self.dir = 'down'
         self.moving = False
@@ -32,7 +34,10 @@ class npc(pygame.sprite.Sprite):
         self.Y = y
     
     def takeStep(self):
-        self.imgIdx = (1 - (self.imgIdx % 2)) + (2 * (self.imgIdx / 2))
+        #self.imgIdx = (1 - (self.imgIdx % 2)) + (2 * (self.imgIdx / 2))
+        self.imgIdx = self.imgIdx + const.walkingList[self.stepIdx]
+        self.stepIdx = ( self.stepIdx + 1 ) % 4
+        
         self.image = self.images[self.imgIdx]
     
     def interact(self, interface, game):
@@ -72,9 +77,10 @@ class npc(pygame.sprite.Sprite):
             self.setRect(x1 - sign, y1, x2, y2)
 
 class Citizen(npc):
-    def __init__(self, x, y, name, filename):
+    def __init__(self, x, y, name, filename, roam=5):
         npc.__init__(self, x, y, name, filename)
         self.home = (x,y)
+        self.roam = 5
         
     def move(self, dir, map, heroPos):
         (hX, hY) = heroPos
@@ -86,7 +92,7 @@ class Citizen(npc):
         (mX, mY) = const.scrollingDict[dir]
         self.imgIdx = const.imgDict[dir]
         self.image = self.images[self.imgIdx]
-        if misc.Distance( self.home, (sX + mX, sY + mY)  ) <= 5:
+        if misc.eDistance( self.home, (sX + mX, sY + mY)  ) <= self.roam:
             if map.getEntry(sX + mX, sY + mY) in range(25) and (sX + mX, sY + mY) != (hX, hY) and not map.isOccupied(sX + mX, sY + mY):
                 self.setXY(sX + mX, sY + mY)
             else: self.moving = False
@@ -127,9 +133,9 @@ class Housewife(Citizen):
         elif game.Director.quests[0] == 1:
             if interface.npcDialog('Did you get those things yet?', self.images[8]) == 'Yes':
                 if game.myHero.hasItem(const.CHEESE, 2) and game.myHero.hasItem(const.BREAD, 1):
-                    game.myHero.takeItem(const.CHEESE)
-                    game.myHero.takeItem(const.CHEESE)
-                    game.myHero.takeItem(const.BREAD)
+                    game.myHero.takeItem( const.CHEESE )
+                    game.myHero.takeItem( const.CHEESE )
+                    game.myHero.takeItem( const.BREAD )
                     game.displayOneFrame()
                     interface.npcMessage("Thanks so much!", self.images[8])
                     game.Director.advanceQuest(0)
@@ -148,6 +154,12 @@ class Housewife(Citizen):
 class Magician(Citizen):
     def __init__(self, x, y, name):
         Citizen.__init__(self, x, y, name, 'magician.bmp')
+        self.roam = 3
+
+class Blacksmith(Citizen):
+    def __init__(self, x, y, name):
+        Citizen.__init__(self, x, y, name, 'blacksmith.bmp')
+        self.roam = 3
 
 class Tramp(Citizen):
     def __init__(self, x, y, name):
@@ -307,7 +319,9 @@ class skeletonKing(Enemy):
 
 def newNpc( n, game ):
     (x,y) = n[0]
-    if n[1] == 'guard':
+    if n[1] == 'blacksmith':
+        return Blacksmith(x, y, n[2])
+    elif n[1] == 'guard':
         return Guard(x, y, n[2])
     elif n[1] == 'female':
         return Female(x, y, n[2], game.myHero.gender, game.myHero.level )

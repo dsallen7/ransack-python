@@ -24,5 +24,8 @@ class Ticker():
     def getDays(self):
         return self.count / 86400
     
+    def getCount(self):
+        return self.count
+    
     def setTimeRate(self, tr):
         self.timeRate = tr

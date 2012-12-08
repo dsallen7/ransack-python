@@ -6,20 +6,19 @@ from IMG import images
 from HERO import hero
 from NPC import npc
 from DISPLAY import display, interface, menu
-from SCRIPTS import mapScr
+from SCRIPTS import mapScr, enemyScr
 #from SND import sfx
 
 from MAP import world, map, mapgen#, mazegen
-from UTIL import ticker, const, colors, load_image
+from UTIL import ticker, const, colors, load_image, misc
 
 from math import ceil, floor
 
 class game():
     
-    def __init__(self, screen, clock, iFace, FX, iH, titleScreen, loadTicker=None, loadHero=None, loadWorld=None, loadDirector=None):
-        self.Display = display.Display(screen)
+    def __init__(self, images, screen, clock, iFace, FX, iH, titleScreen, loadTicker=None, loadHero=None, loadWorld=None, loadDirector=None):
+        self.Display = display.Display(screen, images)
         self.FX = FX
-        FX.displayLoadingMessage(titleScreen, 'Loading game engine...')
         if loadTicker == None:
             self.Ticker = ticker.Ticker()
         else: self.Ticker = loadTicker
@@ -46,15 +45,16 @@ class game():
             self.myMap = self.myWorld.currentMap
             self.myHero = hero.hero(loadHero)
         
+        FX.displayLoadingMessage(titleScreen, 'Loading game engine...')
         self.NPCs = []
         self.screen = screen
         self.gameBoard = pygame.Surface( [300,300] )
+        
+        #self.gameBoard = self.gameBoard.convert(32)
                 
         #this is true while player is in a particular game
         self.gameOn = True
         self.DIM = const.DIM
-
-        images.load()
                         
         self.myInterface = iFace
         self.addShops()
@@ -152,18 +152,22 @@ class game():
         elif event == pygame.K_i:
             # use item
             self.myHero.useItem( self.myMenu.invMenu(self.myHero.getItems(), "Items:", ['Use', 'Return'] ), self )
+            '''
         elif event == pygame.K_w:
-            # equip weapon
+            # equip weapon - DEPRECATED
             self.myHero.equipWeapon(self.myMenu.invMenu(self.myHero.getWeapons(), "Weapons:", ['Equip', 'Return'] ))
         elif event == pygame.K_a:
-            # equip armor
+            # equip armor - DEPRECATED
             self.myHero.equipArmor(self.myMenu.invMenu(self.myHero.getArmor(), "Armor:", ['Equip', 'Return'] ))
+            '''
         elif event == pygame.K_t:
             # take screenshot
             self.screenShot()
         elif event == pygame.K_m:
             # show minimap
-            self.myMap.callDrawMiniMap(self.screen, self.inputHandler)
+            if self.myMap.type in ['dungeon', 'maze', 'fortress']:
+                self.myMap.callDrawMiniMap(self.screen, self.inputHandler)
+            else: self.myWorld.callDrawMiniMap(self.screen, self.inputHandler)
         elif event == pygame.K_RETURN:
             # action command
             self.actionCommand()
@@ -353,13 +357,21 @@ class game():
             X += moveX
             Y += moveY
             self.myHero.setXY(X,Y)
-        self.Display.redrawXMap(self.myMap)
+        #self.Display.redrawXMap(self.myMap)
         
         if not self.myHero.updateStatus(self):
             self.gameOver()
         
         self.Ticker.tick(2)
         return True
+    
+    def getLoot(self, e):
+        lootItems = []
+        lootItems.append( (const.GOLD, random.randrange(enemyScr.lootDict[e]-3, 
+                                             enemyScr.lootDict[e]+3) ) )
+        if misc.rollDie(0, 4):
+            lootItems.append( (const.PARCHMENT, random.choice( mapScr.parchByLevel[self.myWorld.currentMap.level] ) ) )
+        return lootItems
     
     def launchBattle(self, mName, lD):
         self.boxMessage("The baTTle is joined!")
@@ -370,20 +382,19 @@ class game():
         elif g == False: # died in battle
             self.gameOver()
         else: # won battle
-            self.textMessage('You find '+str(g)+' gold pieces!')
-            self.myHero.addGold(g)
+            #self.textMessage('You find '+str(g)+' gold pieces!')
+            #self.myHero.addGold(g)            chestlist = self.myMap.chests[(x, y)]
+            for item in self.myMenu.displayChest( self.getLoot(mName), 'Enemy Loot' ):
+                msg = self.myHero.getItem(item)
+                self.Ticker.tick(30)
+                self.textMessage(msg)
+            #self.myMap.setEntry( x, y, const.OCHEST )
+            #self.Display.redrawXMap(self.myMap)
             self.myHero.notchKill()
             # final boss
             if mName == 'Skeleton King':
                 self.Director.setEvent(11)
             return True
-    
-    def rollDie(self, target, range):
-        d = random.randrange(range)
-        if target >= d:
-            return True
-        else:
-            return False
 
     # calls interface.boxMessage
     def boxMessage(self, msg):
@@ -460,7 +471,7 @@ class game():
                     self.event_handler(event_)
             
             if self.updateNPCs() or self.myHero.moving:
-                    self.Display.drawSprites(self.myHero, self.myMap, self.gameBoard, self, self.myHero.dir, animated=True)
+                self.Display.drawSprites(self.myHero, self.myMap, self.gameBoard, self, self.myHero.dir, animated=True)
                     #self.Display.drawSprites(self.myHero, self.myMap, self.gameBoard, self, None, animated=True)
             self.displayOneFrame()
             

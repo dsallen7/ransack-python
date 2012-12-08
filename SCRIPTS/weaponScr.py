@@ -10,7 +10,7 @@ descDict = {
              const.GSWORD: 'Great Sword'
             }
 
-wLevels = {
+wLevel = {
              const.WSWORD: 1,
              const.SSWORD: 3,
              const.AXE:    5,

@@ -3,7 +3,6 @@ from pygame.locals import *
 
 import random
 
-from IMG import images
 from UTIL import const, colors, load_image, button
 from DISPLAY import text
 from math import ceil, floor
@@ -29,7 +28,6 @@ class Interface( ):
         self.popupWin = None
         self.popupLoc = None
         self.inputHandler = iH
-        images.load()
     
     def writeText(self, surface, loc, text, fgc, bgc, size=14, font=os.getcwd()+"/FONTS/gothic.ttf"):
         font = pygame.font.Font(font, size)
@@ -91,21 +89,21 @@ class Interface( ):
         self.boxStat(cEX, nEX, colors.green, colors.black, (23, 199) )
         
         if game.myHero.isPoisoned:
-            self.mainImg.blit(images.mapImages[const.POISON], (134, 142))
+            self.mainImg.blit(game.Display.images[const.POISON], (134, 142))
         elif game.myHero.isDamned:
-            self.mainImg.blit(images.mapImages[const.DAMNATION], (134, 142))
+            self.mainImg.blit(game.Display.images[const.DAMNATION], (134, 142))
         
         # ticker
         self.drawClock(35, 142, game.Ticker)
 
         # gold
         goldBox = pygame.Surface( (30,30) )
-        goldBox.blit( images.mapImages[const.GOLD], (0,0) )
+        goldBox.blit( game.Display.images[const.GOLD], (0,0) )
         self.writeText(goldBox, (5,17), '$'+str(game.myHero.getGold()), colors.white, colors.black,10)
         self.mainImg.blit( goldBox, (134, 105) )
         # keys
         keyBox = pygame.Surface( (30,30) )
-        keyBox.blit( images.mapImages[const.KEY], (-5,0) )
+        keyBox.blit( game.Display.images[const.KEY], (-5,0) )
         self.writeText(keyBox, (13,17), 'x'+str(kys), colors.white, colors.black,10)
         self.mainImg.blit( keyBox, (97, 105) )
         
@@ -163,27 +161,6 @@ class Interface( ):
             self.screen.blit( msgText, 
                             ( (self.screen.get_width()/2-borderBox.get_width()/2)+int(ceil(50*2.4)) , 150 ) )
             pygame.display.flip()
-        '''
-        for i in range( 10, ( msgText.get_width()+ int(ceil(img.get_width()*2.4))+ int(ceil(20*2.4)) )/2, 5 ):
-            borderBox = pygame.Surface( ( i*2, msgText.get_height()+ int(ceil(img.get_width()*2.4)) ) )
-            borderBox.fill( colors.grey )
-            borderBox.set_alpha(128)
-            borderBox.blit( pygame.transform.scale(img,
-                                                   (int(ceil(img.get_width()*2.4)),
-                                                    int(ceil(img.get_width()*2.4)) ) ), 
-                            (int(ceil(10*2.4)),
-                             int(ceil(10*2.4))  ) )
-            borderBox.blit(msgText, (int(ceil(50*2.4)), int(ceil(10*2.4))) )
-            self.screen.blit( borderBox, 
-                            ( self.screen.get_width()/2- i, 150 ) )
-            
-            self.screen.blit(pygame.transform.scale(borderBox,
-                                                    (int( ceil(borderBox.get_width()*2.4)) , 
-                                                     int( ceil(borderBox.get_height()*2.4) ) ) ), 
-                                                     ( (self.screen.get_width()/2- msgText.get_width()/2) - i, 
-                                                        150 ) )
-            pygame.display.flip()
-        ''' 
         while (pygame.event.wait().type != pygame.MOUSEBUTTONDOWN): pass
     
     # same as npcMessage but returns yes/no input

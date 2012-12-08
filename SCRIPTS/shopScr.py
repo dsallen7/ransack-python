@@ -16,10 +16,15 @@ blacksmithShopsByLevel = {
 
 armoriesByLevel = { 
                    1: [ const.LSHIRT, const.LMAIL, const.WSHIELD ],
-                   2: [ const.LMAIL, const.CMAIL ]
-
-
+                   2: [ const.LMAIL, const.CMAIL, const.RING ]
 }
+
+
+enhancementsByLevel = {
+                       1: [ 'plusWP' ],
+                       2: [ 'plusHP', 'plusMP', 'plusWP' ]
+                       
+                       }
 
 # 100: spellbook
 # 101: parchment

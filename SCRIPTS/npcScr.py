@@ -12,14 +12,21 @@ enemyDict = { 'skeleton'  : ('Skeleton', 'skeleton.bmp'),
               'wolf'      : ('Wolf', 'wolf.bmp')
              }
 
-npcList = ['female',
-           'firepit',
-           'fireplace',
+npcList = [
+           # citizens
+           'blacksmith',
+           'female',
            'guard',
            'housewife',
            'king',
            'magician',
+           'shopkeep',
            'tramp',
+           'woodsman',
+           # inanimate
+           'firepit',
+           'fireplace',
+           # enemies
            'cobra',
            'orc',
            'orcsgt',
@@ -27,7 +34,6 @@ npcList = ['female',
            'dskeleton',
            'skeletonking',
            'vampire',
-           'woodsman',
            'wolf',
            'zombie'
            ]

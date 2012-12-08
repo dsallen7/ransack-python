@@ -27,6 +27,15 @@ dWallDict = {
              
              }
 
+siteImgDict = { 
+               'itemshop'  : (256,2),
+               'magicshop' : (257,2),
+               'blacksmith': (258,2),
+               'armory'    : (259,2),
+               'tavern'    : (260,3),
+               'townhall'  : (261,3),
+               'house1'    : (262,2)
+               }
 # 'special' items behind secret doors
 specialByLevel = { 1: [const.WSWORD, const.LSHIRT],
                    2: [const.WSWORD, const.LSHIRT],
@@ -41,17 +50,41 @@ specialByLevel = { 1: [const.WSWORD, const.LSHIRT],
                   
                   }
 
-parchByLevel = { 1 : [0, 1],
-                 2 : [0, 1],
-                 3 : [0, 1],
-                 4 : [0, 1, 2],
-                 5 : [0, 1, 2],
-                 6 : [0, 1, 2],
-                 7 : [0, 1, 2, 3],
-                 8 : [0, 1, 2, 3],
-                 9 : [0, 1, 2, 3],
-                10 : [0, 1, 2, 3]
+parchByLevel = { 1 : [const.HEAL, const.DART],
+                 2 : [const.HEAL, const.DART],
+                 3 : [const.HEAL, const.DART],
+                 4 : [const.HEAL, const.DART, const.HEL2, const.FRBL],
+                 5 : [const.HEAL, const.DART, const.HEL2, const.FRBL],
+                 6 : [const.HEAL, const.DART, const.HEL2, const.FRBL],
+                 7 : [const.HEL2, const.FRBL, const.HEL3, const.ICBL, const.ASCD],
+                 8 : [const.HEL2, const.FRBL, const.HEL3, const.ICBL, const.ASCD],
+                 9 : [const.HEL2, const.FRBL, const.HEL3, const.ICBL, const.ASCD],
+                10 : [const.HEL2, const.FRBL, const.HEL3, const.ICBL, const.ASCD]
                 }
+
+lootByLevel = { 1: [ (2, const.GOLD),
+                     (1, const.PARCHMENT) ],
+               2: [ (2, const.GOLD),
+                     (1, const.PARCHMENT) ],
+               3: [ (2, const.GOLD),
+                     (1, const.PARCHMENT) ],
+               4: [ (3, const.GOLD),
+                     (2, const.PARCHMENT) ],
+               5: [ (3, const.GOLD),
+                     (2, const.PARCHMENT) ],
+               6: [ (3, const.GOLD),
+                     (2, const.PARCHMENT) ],
+               7: [ (8, const.GOLD),
+                     (6, const.PARCHMENT) ],
+               8: [ (8, const.GOLD),
+                     (6, const.PARCHMENT) ],
+               9: [ (8, const.GOLD),
+                     (6, const.PARCHMENT) ],
+              10: [ (8, const.GOLD),
+                     (6, const.PARCHMENT) ]
+               
+               
+               }
 wildsTilesList = [ (8, const.GRASS1),
                    (3, const.PINE1) ]
 fruitList = [const.FRUIT1,
@@ -60,13 +93,18 @@ fruitList = [const.FRUIT1,
 
 pines = [const.PINE1, const.PINE2, const.PINE3, const.PINE4]
 
+accessoryList = ['cards1','cards2','','','','','','','','','','','','','','','','']
+
 descriptions = {
                 const.PINE1   : "They don't call it the Pinelands for nothing!",
                 const.PINE2   : "They don't call it the Pinelands for nothing!",
                 const.PINE3   : "They don't call it the Pinelands for nothing!",
                 const.PINE4   : "They don't call it the Pinelands for nothing!",
+                const.STAGHEAD : "A massive stag's head",
                 const.WELLSP : "A village wellspring",
-                const.COLUMN : "A tall marble column.",
+                const.COLUMN1 : "A tall marble column.",
+                const.COLUMN2 : "A tall marble column.",
+                const.BOOKSHELF : "Proud words on a dusty shelf...",
                 const.CHAIR1  : "A sturdy hand-carved wooden chair.",
                 const.CHAIR2  : "A sturdy hand-carved wooden chair.",
                 const.OCHEST : "The chest is empty."

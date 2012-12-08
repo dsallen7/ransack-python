@@ -1,16 +1,17 @@
 import pygame
-from IMG import images
 from UTIL import colors, const
 from math import ceil, floor
+
+from SCRIPTS import mapScr
 
 # Main graphics engine for Ransack.
 
 class Display():
     
-    def __init__(self, screen):
+    def __init__(self, screen, images):
         self.screen = screen
-        images.load()
         self.images = images.mapImages
+        self.accImages = images.accessories
         self.fog = pygame.Surface( (30,30) )
         self.fog.fill( colors.black )
         self.fog.set_alpha( 192 )
@@ -27,8 +28,8 @@ class Display():
                 #board.blit( self.SS_, (0, 0) )
             #pygame.time.delay(500)
             self.screen.blit( pygame.transform.scale(board, 
-                                                     (int(ceil(300 * 2.4)), 
-                                                      int(ceil(300 * 2.4)) ) ), (0,0) )
+                                                           (int(ceil(300 * 2.4)), 
+                                                            int(ceil(300 * 2.4)) ) ), (0,0) )
         pygame.display.flip()
     
     # Takes first two coordinates of hero rect, gameBoard and
@@ -91,12 +92,18 @@ class Display():
                     else: self.xGameBoard.blit( self.images[ tile ], ( (x*const.blocksize), (y*const.blocksize) ) )
                     '''
                     self.xGameBoard.blit( self.images[ tile ], ( (x*const.blocksize), (y*const.blocksize) ) )
+                    if map.getEntry(x, y) in range(const.TABLE1, const.TABLE3+1):
+                        try:
+                            self.xGameBoard.blit( self.accImages[map.grid[x][y].accessory], ( x*const.blocksize+10,
+                                                                                              y*const.blocksize+5) )
+                        except AttributeError:
+                            pass
         if map.type == 'village':
             for s in map.shops:
                 (sX, sY) = s
-                self.xGameBoard.blit( self.images[ images.siteImgDict[ map.shops[s][0] ][0] ], 
+                self.xGameBoard.blit( self.images[ mapScr.siteImgDict[ map.shops[s][0] ][0] ], 
                                       (sX*const.blocksize - const.blocksize, 
-                                       sY*const.blocksize - (images.siteImgDict[ map.shops[s][0] ][1]*const.blocksize)) )
+                                       sY*const.blocksize - (mapScr.siteImgDict[ map.shops[s][0] ][1]*const.blocksize)) )
     
     # draws all pending sprite movements
     def drawSprites(self, hero, map, gameBoard, game=None, dir=None, animated=True):
@@ -167,7 +174,7 @@ class Display():
                 for npc in game.NPCs:
                     if npc.moving:
                         npc.shiftOnePixel(npc.dir, -1)
-                        if (idx % 6) == 0:
+                        if idx in [6,12,21,27]:
                             npc.takeStep()
                 # compensate for scrolling
                 if scrolling:

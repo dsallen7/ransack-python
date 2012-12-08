@@ -27,9 +27,11 @@ class Creator():
         self.bDex = randrange(8, 10)
         self.sliders = [slider.Slider(216, 145), # Warrior/Wizard
                         slider.Slider(172, 145), # Lawful/neutral/chaotic
-                        slider.Slider(101, 61, 0, 1) #Male/female
+                        slider.Slider(101, 61, 0, 1), #Male/female
+                        slider.Slider(81, 134, 0, 1) #Faith
                         ]
         self.gender = 'male'
+        self.faith = 'xtian'
         self.images = range(3)
         self.images[0], r = load_image.load_image( os.path.join('MENU', "cursor.png" ), -1)
         self.images[1], r = load_image.load_image( os.path.join('MENU', 'cursor_l.png'), -1)
@@ -118,11 +120,18 @@ class Creator():
                     self.displayField.blit(self.images[1], (s.getXLoc(), s.getYLoc()+(s.getValue()*10)) )
                 else: self.displayField.blit(self.images[0], (s.getXLoc(), s.getYLoc()+(s.getValue()*10)) )
             if self.sliders[2].getValue() == 0:
-                self.gender = 'Male'
+                self.gender = 'male'
                 self.displayField.blit(images.mHeroImages[8], (40 , 59) )
             else:
-                self.gender = 'Female'
+                self.gender = 'female'
                 self.displayField.blit(images.fHeroImages[8], (40 , 59) )
+            
+            if self.sliders[3].getValue() == 0:
+                self.faith = 'xtian'
+                self.displayField.blit(images.mapImages[246], (40 , 134) )
+            else:
+                self.faith = 'asatru'
+                self.displayField.blit(images.mapImages[245], (40 , 134) )
             screen.blit(pygame.transform.scale(self.displayField, (720, 720) ), (0, 0) )
             pygame.display.flip()
         elif step == 'name':
@@ -133,7 +142,7 @@ class Creator():
     def getBall(self):
         if android:
             android.hide_keyboard()
-        return (self.gender,
+        return (self.gender, self.faith,
                 self.str, 
                 self.itl, 
                 self.dex, 
@@ -144,10 +153,12 @@ class Creator():
                 0, 0,             # score, keys
                 1, 0, 50,         # level, current XP, XP for next lev
                 [], None,         # weapons, eq. weapons
-                [], [None,None,None], #armor, eq. armor (helmet, plate, shield)
-                range(24),        # items
-                [],               # spells
-                100, [False, False], 0, #gold, stats, slain
+                [], [None, None, None,  #armor, eq. armor (helmet, plate, shield,
+                     None, None, None,  #ring, ring, amulet, 
+                     None, None, None], #cloak, boots, ?)
+                range(100),        # items
+                [],                # spells
+                1000, [False, False], 0, #gold, stats, slain
                 self.name )
     def mainLoop(self, screen):
         while True:

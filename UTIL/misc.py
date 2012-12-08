@@ -1,9 +1,14 @@
-import math, types
+import math, types, random
 
 def Distance(p1, p2):
     (x1, y1) = p1
     (x2, y2) = p2
     return max( abs(y2-y1), abs(x2-x1)  )
+
+def eDistance(p1, p2):
+    (x1, y1) = p1
+    (x2, y2) = p2
+    return abs(y2-y1) + abs(x2-x1)
 
 def DistanceX(p1, p2):
     (x1, y1) = p1
@@ -22,3 +27,21 @@ def flatten(x):
         elif type(el) is types.TupleType:
             result.append(el)
     return result
+
+def weightedChoice(choices):
+        choicesList = []
+        for c in choices:
+            choicesList += [c[1]]*c[0]
+        return choice(choicesList)
+
+
+def rollDie(target, range):
+    d = random.randrange(range)
+    if target >= d:
+        return True
+    else:
+        return False
+
+def armorIsCategory(armor, cat):
+    from SCRIPTS import armorScr
+    return cat == armorScr[armor.getType() ]

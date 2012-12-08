@@ -1,7 +1,7 @@
 import pygame, os
 from DISPLAY import menu
 import random
-from UTIL import const, colors, load_image, button
+from UTIL import const, colors, load_image, button, misc
 from math import floor, ceil
 from SCRIPTS import enemyScr
 
@@ -80,9 +80,7 @@ class battle():
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     (x, y) = pygame.mouse.get_pos()
-                    print x, y
                     for b in self.buttons:
-                        print b.locX, b.locY
                         if b.hit(int(ceil(x/2.4)), 
                                  int(ceil(y/2.4)) ):
                             return b.msg
@@ -99,13 +97,6 @@ class battle():
     
     def commence(self, screen):
         while (pygame.event.wait().type != pygame.KEYDOWN): pass
-        
-    def rollDie(self, target, range):
-        d = random.randrange(range)
-        if target >= d:
-            return True
-        else:
-            return False
     
     def boxStat(self, stat, mStat, fgc, bgc, loc):
         (x, y) = loc
@@ -119,6 +110,19 @@ class battle():
             maxBox.blit(currBox, (0,0) )
         return maxBox
     
+    def showEnemyDeath(self, game):
+        for i in range(50, 300, 10):
+            self.battleField, r = load_image.load_image(os.path.join('ANIMATION', 'battlefield.bmp'), -1)
+            if game.myMap.type == 'wilds':
+                self.background.blit(self.forestField, (0,0) )
+            else: self.background.blit(self.dungeonField, (0,0) )
+            self.battleField.blit( self.enemyImg, (125, i)  )
+            self.battleField.blit( self.heroImg, (0, 75)  )
+            self.background.blit(self.battleField, (0,0) )
+            game.Display.displayOneFrame(game.myInterface, game.FX, self.background, game)
+            pygame.display.flip()
+        
+    
     def loadEnemyImg(self, hero, enemy):
         if hero.gender == 'Male':
             self.heroImgs[0], r = load_image.load_image( os.path.join('ANIMATION', 'hero_m1.bmp'), 2 )
@@ -129,7 +133,7 @@ class battle():
         self.heroImg = self.heroImgs[0]
         enemyImgFilenames = enemyScr.imgFileDict[enemy.getName()]
         for i in range(len(enemyImgFilenames)):
-             self.enemyImgs[i], r = load_image.load_image( os.path.join('ANIMATION', enemyImgFilenames[i]), -1 )
+             self.enemyImgs[i], r = load_image.load_image( os.path.join('ANIMATION', enemyImgFilenames[i]), 2 )
         self.enemyImg = self.enemyImgs[0]
     
     # this controls all the logic of what goes on in an actual battle
@@ -176,7 +180,7 @@ class battle():
                 if d > 0:
                     enemy.takeDmg( d )
             elif action == 'Flee':
-                if self.rollDie(1,3):
+                if misc.rollDie(1,3):
                     game.textMessage("You escaped safely.")
                     game.FX.scrollFromCenter(self.battleField, board_)
                     return True
@@ -190,7 +194,7 @@ class battle():
             game.Ticker.tick(10)
             #enemy attacks
             if enemy.getHP() > 0:
-                if self.rollDie(0,2):
+                if misc.rollDie(0,2):
                     dmg = random.randrange(enemy.getBaseAttack()-5,enemy.getBaseAttack()+5) - ( hero.armorClass + 1 )
                     if dmg > 0:
                         game.textMessage("The "+enemy.getName()+" hits you for "+str(dmg)+" points!")
@@ -200,14 +204,14 @@ class battle():
                             android.vibrate(0.1)
                     else: game.textMessage("The "+enemy.getName()+" attack is ineffective.")
                     if enemy.poison:
-                        if self.rollDie(0,3):
+                        if misc.rollDie(0,3):
                             if hero.isDamned:
                                 hero.isDamned = False
                             hero.isPoisoned = True
                             hero.poisonedAt = game.Ticker.getTicks()
                             game.textMessage("You are poisoned!")
                     elif enemy.damned:
-                        if self.rollDie(0,3):
+                        if misc.rollDie(0,3):
                             if hero.isPoisoned:
                                 hero.isPoisoned = False
                             hero.isDamned = True
@@ -225,6 +229,7 @@ class battle():
             self.drawBattleScreen(game, enemy)
             pygame.time.wait(1000)
         game.textMessage("The "+enemy.getName()+" is dead!")
+        self.showEnemyDeath(game)
         if hero.increaseExp( 5 + random.randrange(enemy.level, 2*enemy.level)  ):
             game.textMessage("Congratulations! You have gained a level.")
         game.FX.scrollFromCenter(self.background, board_)

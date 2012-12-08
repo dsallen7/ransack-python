@@ -62,31 +62,84 @@ class Handler():
     def addMap(self, name):
         myWorld.addMap(name, None)
     
+    def addNPC(self, loc):
+        npcWin = pygame.Surface((300,300))
+        npcWin.fill(colors.black)
+        for i in range( len( npcScr.npcList ) ):
+            npcWin.blit( self.npcImg[ npcScr.npcList[i] ], ( (i%4)*blocksize, (i/4)*blocksize))
+        screen.blit(npcWin, (100,100) )
+        pygame.display.flip()
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        return
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    (mx, my) = event.pos
+                    if 100 <= mx < 400 and 100 <= my < 400:
+                        self.myMap.NPCs.append( ( loc, 
+                                                  npcScr.npcList[(mx-100)/blocksize + (my-100)/blocksize * 4], 
+                                                  self.getInput('Enter message (optional): ') ) )
+                        return 
+    
+    def selectAccessory(self):
+        accWin = pygame.Surface((100,100))
+        accWin.fill(colors.black)
+        for i in range( len( accImages ) ):
+            accWin.blit( accImages[ i ], ( (i%4)*15, (i/4)*10))
+        screen.blit(accWin, (100,100) )
+        pygame.display.flip()
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        return
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    (mx, my) = event.pos
+                    if 100 <= mx < 400 and 100 <= my < 400:
+                        return (mx-100)/15 + (my-100)/10 * 4
+    
     def tileProperties(self, tile):
         (x, y) = tile
         
         while True:
-            infoWin = pygame.Surface((300,270))
+            if self.myMap.getEntry(x,y) in range(const.TABLE1, const.TABLE3+1):
+                infoWin = pygame.Surface((300,300))
+            else: 
+                infoWin = pygame.Surface((300,270))
             infoWin.fill(colors.black)
             if pygame.font:
                 font = pygame.font.SysFont("arial",20)
                 infoWin.blit( font.render('Foreground: '+str(self.myMap.getEntry(x, y) ), 1, colors.white, colors.black), (0,0) )
                 try:
                     p = self.myMap.grid[x][y].portal
-                    p = p[0]+' at '+str(p[1])+', '+str(p[2])
+                    if p == None:
+                        p = '-'
+                    else: p = p[0]+' at '+str(p[1])+', '+str(p[2])
                 except AttributeError:
                     p = '-'
                 infoWin.blit( font.render('Portal at: '+p, 1, colors.white, colors.black), (0,30) )
                 try:
                     s = self.myMap.grid[x][y].shopID
-                    s = s[0]+' level '+str(s[1])
+                    if s == None:
+                        s = '-'
+                    else: s = s[0]+' level '+str(s[1])
                 except AttributeError:
                     s = '-'
                 infoWin.blit( font.render('Shop: '+s, 1, colors.white, colors.black), (0, 60) )
+                infoWin.blit( font.render('Reset Tile', 1, colors.white, colors.black), (0, 90) )
+                if self.myMap.getEntry(x,y) in range(const.TABLE1, const.TABLE3+1):
+                    try:
+                        a = mapScr.accessoryList[ self.myMap.grid[x][y].accessory ]+'('+str(self.myMap.grid[x][y].accessory)+')'
+                        if a == None:
+                            a = '-'
+                    except AttributeError:
+                        a = '-'
+                    infoWin.blit( font.render('Accessory: '+a, 1, colors.white, colors.black), (0, 120) )
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     (mX, mY) = pygame.mouse.get_pos()
-                    if 200 <= mX < 400 and 200 <= mY < 470:
+                    if 200 <= mX < 500 and 200 <= mY < 200 + infoWin.get_height():
                         Index = (mY-200)/30
                         if Index == 0:
                             self.myMap.setEntry( x, y, int( self.getInput('Enter tile FG: ') ) )
@@ -97,6 +150,13 @@ class Handler():
                         elif Index == 2:
                             self.myMap.grid[x][y].shopID = ( self.getInput('Enter shop type: '), 
                                                              int( self.getInput('Enter level: ') ) )
+                        elif Index == 3:
+                            self.myMap.setEntry( x, y, const.DFLOOR1 )
+                            self.myMap.grid[x][y].portal = None
+                            self.myMap.grid[x][y].shopID = None
+                            self.myMap.grid[x][y].accessory = None
+                        elif Index == 4:
+                            self.myMap.grid[x][y].accessory = ( self.selectAccessory() )
                     return
                 if event.type == pygame.QUIT:
                     os.sys.exit()
@@ -176,9 +236,12 @@ class Handler():
                 infoWin.blit( font.render('East: '+self.myMap.neighbors[2], 1, colors.white, colors.black), (0,150) )
                 infoWin.blit( font.render('West: '+self.myMap.neighbors[3], 1, colors.white, colors.black), (0,180) )
                 infoWin.blit( font.render('Type: '+self.myMap.type, 1, colors.white, colors.black), (0,210) )
-                if myWorld.initialMap.getName() == self.myMap.getName():
-                    infoWin.blit( font.render('Initial: Yes', 1, colors.white, colors.black), (0,240) )
-                else: infoWin.blit( font.render('Initial: No', 1, colors.white, colors.black), (0,240) )
+                try:
+                    if myWorld.initialMap.getName() == self.myMap.getName():
+                        infoWin.blit( font.render('Initial: Yes', 1, colors.white, colors.black), (0,240) )
+                    else: infoWin.blit( font.render('Initial: No', 1, colors.white, colors.black), (0,240) )
+                except AttributeError:
+                    infoWin.blit( font.render('Initial: No', 1, colors.white, colors.black), (0,240) )
                 try:
                     infoWin.blit( font.render('Level: '+str(self.myMap.level), 1, colors.white, colors.black), (0,270) )
                 except AttributeError:
@@ -291,7 +354,7 @@ class Handler():
     
     def fillChest(self, chestItems):
         menuBox = pygame.Surface( (150, 350) )
-        itemsList = range(216, 232)+range(const.WSWORD, const.SSHIELD+1)
+        itemsList = range(const.FRUIT1, const.PARCHMENT+1)+range(const.WSWORD, const.SSHIELD+1)
         for i in range( len( itemsList ) ):
             menuBox.blit(mapImages[itemsList[i]], (15+((i)%4)*blocksize, 50+((i)/4)*blocksize))
         while True:
@@ -303,19 +366,19 @@ class Handler():
                     (mx, my) = event.pos
                     if 115 <= mx < 235 and 150 <= my < 330:
                         itemNum = itemsList[(mx-115)/blocksize + (my-150)/blocksize * 4]
-                        if itemNum in range(86, 99):
-                            chestItems.append( (itemNum-const.FRUIT1, 1) )
+                        if itemNum in range(const.FRUIT1, const.GOLD):
+                            chestItems.append( (itemNum, 1) )
                         elif itemNum == const.GOLD:
-                            chestItems.append( (itemNum-const.FRUIT1, int(self.getInput('Enter amount of gold: ')) ) )
+                            chestItems.append( (itemNum, int(self.getInput('Enter amount of gold: ')) ) )
                         elif itemNum == const.SPELLBOOK or itemNum == const.PARCHMENT:
-                            chestItems.append( (itemNum-const.FRUIT1, int(self.getInput('Enter spell number: ') ) ) )
-                        elif itemNum in range(const.WSWORD, const.HELMET): #weapon
+                            chestItems.append( (itemNum, int(self.getInput('Enter spell number: ') ) ) )
+                        elif itemNum in range(const.WSWORD, const.RING): #weapon
                             chestItems.append( (itemNum,
                                                 [ int(self.getInput("Enter plus Str: ")),
                                                   int(self.getInput("Enter plus Int: ")),
                                                   int(self.getInput("Enter plus Dex "))   ] ) )
-                        elif itemNum in range(const.HELMET, const.SSHIELD+1):
-                            chestItems.append( (itemNum-const.FRUIT1, 
+                        elif itemNum in range(const.HELMET, const.SSHIELD+1): #armor
+                            chestItems.append( (itemNum, 
                                                 int(self.getInput("Enter armor level: ")), 
                                                 int(self.getInput("Enter resist: ")) ) )
             for item in chestItems:
@@ -389,7 +452,7 @@ class Handler():
     
     def place(self, x, y, tile):            
         if self.placeNPC:
-            self.myMap.NPCs.append( ( (x, y), self.getInput('Enter NPC type: '), self.getInput('Enter message: ') ) )
+            self.addNPC( (x,y) )
         else:
             if self.currentTile == const.CHEST:
                 self.myMap.addChest( (x, y), self.fillChest( [] ))
@@ -400,16 +463,6 @@ class Handler():
                 param=None
             else: param=None
             self.myMap.setEntry(x, y, tile, param)
-            '''
-            elif self.currentTile == const.ITEMSDOOR:
-                param = int(self.getInput('Itemshop level: '))
-            elif self.currentTile == const.ARMRYDOOR:
-                param = int(self.getInput('Armory level: '))
-            elif self.currentTile == const.BLKSMDOOR:
-                param = int(self.getInput('Blacksmith level: '))
-            elif self.currentTile == const.MAGICDOOR:
-                param = int(self.getInput('Magicshop level: '))
-            '''
         
     def removeNPC(self, x, y):
         for n in self.myMap.NPCs:
@@ -495,6 +548,10 @@ class Handler():
             self.switchMap()
         elif event.key == pygame.K_a:
             self.addMap( self.getInput('Enter title of new map: ') )
+        elif event.key == pygame.K_c:
+            filename = self.getInput('Enter filename for screenshot: ')+".bmp"
+            self.updateDisplay()
+            pygame.image.save(gridField, filename)
         elif event.key == pygame.K_p:
             self.importMap( self.getInput('Enter filename of map: ') )
         elif event.key == pygame.K_RETURN:
@@ -600,7 +657,7 @@ class Handler():
             if e.button == 1:
                 if self.mouseAction == 'draw':
                     if self.placeNPC:
-                        self.myMap.NPCs.append( ( (mx/blocksize, my/blocksize), self.getInput('Enter NPC type: '), self.getInput('Enter message: ') ) )
+                        self.addNPC( (mx/blocksize, my/blocksize) )
                     else:
                         if self.currentTile == const.CHEST:
                             self.myMap.addChest( (mx/blocksize,my/blocksize), self.fillChest( [] ))
@@ -664,12 +721,18 @@ class Handler():
                 if self.myMap.getEntry(i,j) in range(24, 86):
                     gridField.blit( mapImages[self.myMap.defaultBkgd], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
                 gridField.blit( mapImages[self.myMap.getEntry(i,j)], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
+                if self.myMap.getEntry(i,j) in range(const.TABLE1, const.TABLE3+1):
+                    try:
+                        gridField.blit( accImages[self.myMap.grid[i][j].accessory], ( (i-self.topX)*blocksize+10,
+                                                                                      (j-self.topY)*blocksize+5) )
+                    except AttributeError:
+                        pass
                 if (i,j) == self.myMap.heroStart:
                     gridField.blit( mapImages[const.HEROSTART], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
                 if self.myMap.shops is not None:
                     for s in self.myMap.shops:
                         (sX, sY) = s
-                        (imgN, ht) = images.siteImgDict[ self.myMap.shops[s][0] ]
+                        (imgN, ht) = mapScr.siteImgDict[ self.myMap.shops[s][0] ]
                         gridField.blit( mapImages[ imgN ], (sX*blocksize - blocksize - (self.topX * blocksize), sY*blocksize - ( ht*blocksize) - (self.topY * blocksize) ) )
         for n in self.myMap.NPCs:
             (x,y) = n[0]
@@ -733,7 +796,7 @@ screen=pygame.display.set_mode(size)
 
 images.load()
 mapImages = images.mapImages
-
+accImages = images.accessories
 
 pygame.init()
 pygame.key.set_repeat(50, 100)
