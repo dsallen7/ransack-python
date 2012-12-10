@@ -63,7 +63,7 @@ class battle():
             self.battleField.blit( self.heroImg, (0, 75)  )
             self.background.blit(self.battleField, (0,0) )
         #self.screen.blit( pygame.transform.scale(self.battleField, (720, 720) ), (0, 0) )
-        game.Display.displayOneFrame(game.myInterface, game.FX, self.background, game)
+        game.Display.displayOneFrame(game.myInterface, game.FX, self.background, game, False, True)
         pygame.display.flip()
     
     # displays battle menu and waits for player to select choice,
@@ -81,8 +81,8 @@ class battle():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     (x, y) = pygame.mouse.get_pos()
                     for b in self.buttons:
-                        if b.hit(int(ceil(x/2.4)), 
-                                 int(ceil(y/2.4)) ):
+                        if b.hit(int(ceil(x/const.scaleFactor)), 
+                                 int(ceil(y/const.scaleFactor)) ):
                             return b.msg
                 event_ = self.inputHandler.getCmd(event)
                 if event_ == pygame.K_t:
@@ -119,12 +119,12 @@ class battle():
             self.battleField.blit( self.enemyImg, (125, i)  )
             self.battleField.blit( self.heroImg, (0, 75)  )
             self.background.blit(self.battleField, (0,0) )
-            game.Display.displayOneFrame(game.myInterface, game.FX, self.background, game)
+            game.Display.displayOneFrame(game.myInterface, game.FX, self.background, game, False, True)
             pygame.display.flip()
         
     
     def loadEnemyImg(self, hero, enemy):
-        if hero.gender == 'Male':
+        if hero.gender == 'male':
             self.heroImgs[0], r = load_image.load_image( os.path.join('ANIMATION', 'hero_m1.bmp'), 2 )
             self.heroImgs[1], r = load_image.load_image( os.path.join('ANIMATION', 'hero_m2.bmp'), 2 )
         else:
@@ -174,7 +174,7 @@ class battle():
                     #game.SFX.play(2)
             elif action == 'Magic':
                 enemy.takeDmg( hero.castSpell( self.myMenu.invMenu(hero.getSpells(), "Spells:", ['Cast', 'Return'] ), game, True ) )
-                    
+                
             elif action == 'Item':
                 d = hero.useItem(self.myMenu.invMenu(hero.getItems(), "Items:", ['Use', 'Return'] ), game, True )
                 if d > 0:

@@ -9,14 +9,14 @@ from math import ceil, floor
 
 from types import *
 
-menuBoxPositions = [ ( int(ceil(80*2.4)), int(ceil(80*2.4)) ), 
-                     ( int(ceil(115*2.4)), int(ceil(80*2.4)) ), 
-                     ( int(ceil(150*2.4)), int(ceil(80*2.4)) ), 
-                     ( int(ceil(185*2.4)), int(ceil(80*2.4)) ),
-                     ( int(ceil(80*2.4)), int(ceil(115*2.4)) ), 
-                     ( int(ceil(115*2.4)), int(ceil(115*2.4)) ), 
-                     ( int(ceil(150*2.4)), int(ceil(115*2.4)) ), 
-                     ( int(ceil(185*2.4)), int(ceil(115*2.4)) ) ]
+menuBoxPositions = [ ( int(ceil(80*const.scaleFactor)), int(ceil(80*const.scaleFactor)) ), 
+                     ( int(ceil(115*const.scaleFactor)), int(ceil(80*const.scaleFactor)) ), 
+                     ( int(ceil(150*const.scaleFactor)), int(ceil(80*const.scaleFactor)) ), 
+                     ( int(ceil(185*const.scaleFactor)), int(ceil(80*const.scaleFactor)) ),
+                     ( int(ceil(80*const.scaleFactor)), int(ceil(115*const.scaleFactor)) ), 
+                     ( int(ceil(115*const.scaleFactor)), int(ceil(115*const.scaleFactor)) ), 
+                     ( int(ceil(150*const.scaleFactor)), int(ceil(115*const.scaleFactor)) ), 
+                     ( int(ceil(185*const.scaleFactor)), int(ceil(115*const.scaleFactor)) ) ]
 '''
 menuBoxPositions = [ ( 0, 0 ), ( 35, 0 ), ( 70, 0 ), ( 105, 0 ),
                      ( 0, 35 ), ( 35, 35), ( 70, 35 ), ( 105, 35 ) ]
@@ -24,9 +24,9 @@ menuBoxPositions = [ ( 150, 70 ), ( 185, 70 ), ( 220, 70 ), ( 255, 70 ),
                      ( 150, 105 ), ( 185, 105), ( 220, 105 ), ( 255, 105 ) ]
 '''
 boxPointsFn = lambda x: ( (x[0],x[1]), 
-                          (x[0],x[1] + int(ceil(const.blocksize*2.4)) ), 
-                          (x[0] + int(ceil(const.blocksize*2.4)), x[1]+int(ceil(const.blocksize*2.4)) ), 
-                          (x[0] + int(ceil(const.blocksize*2.4)), x[1]) )
+                          (x[0],x[1] + int(ceil(const.blocksize*const.scaleFactor)) ), 
+                          (x[0] + int(ceil(const.blocksize*const.scaleFactor)), x[1]+int(ceil(const.blocksize*const.scaleFactor)) ), 
+                          (x[0] + int(ceil(const.blocksize*const.scaleFactor)), x[1]) )
 
 class menu():
     
@@ -53,8 +53,8 @@ class menu():
             msgBox.fill( colors.gold )
             borderBox.blit(msgBox, (5, 5) )
             borderBox = pygame.transform.scale(borderBox,
-                                                (int( ceil(borderBox.get_width()*2.4) ),
-                                                 int( ceil(borderBox.get_height()*2.4) ) ) )
+                                                (int( ceil(borderBox.get_width()*const.scaleFactor) ),
+                                                 int( ceil(borderBox.get_height()*const.scaleFactor) ) ) )
             self.screen.blit(borderBox, 
                              ( (self.screen.get_width()/2)-(borderBox.get_width()/2), 41) )
             #(self.screen.get_width()/2)-(menuWin.get_width()/2)
@@ -101,7 +101,7 @@ class menu():
                             itemBox.img.blit(msgText, (17,17) )
                 menu.append( itemBox )
                 (x, y) = menuBoxPositions[i]
-                menuWin.blit(itemBox.img, ( int(floor(x/2.4))%150, int(floor(y/2.4))%70) )
+                menuWin.blit(itemBox.img, ( int(floor(x/const.scaleFactor))%150, int(floor(y/const.scaleFactor))%70) )
         return menuWin, menu
     
     def displayChest(self, chest, msg='Chest'):
@@ -133,15 +133,15 @@ class menu():
         itemsBox, menu = self.itemsWin(availableItems)
         #menuBox.blit(itemsBox, ( (menuBox.get_width()/2)-(itemsBox.get_width()/2), 60 ) )
         menuBox = pygame.transform.scale( menuBox, 
-                                                 (int(ceil(menuBox.get_width() *2.4)),
-                                                  int(ceil(menuBox.get_height()*2.4) ) ) )
+                                                 (int(ceil(menuBox.get_width() *const.scaleFactor)),
+                                                  int(ceil(menuBox.get_height()*const.scaleFactor) ) ) )
         self.screen.blit(menuBox, ( ((self.screen.get_width()/2)-(menuBox.get_width()/2), 41) ) )
         for b in menu:
-            self.screen.blit( pygame.transform.scale(b.img, (int(ceil(b.img.get_width()*2.4)),
-                                                                     int(ceil(b.img.get_height()*2.4)) )), 
+            self.screen.blit( pygame.transform.scale(b.img, (int(ceil(b.img.get_width()*const.scaleFactor)),
+                                                                     int(ceil(b.img.get_height()*const.scaleFactor)) )), 
                                          (b.locX, b.locY) )
         self.screen.blit(msgText, ( (self.screen.get_width()/2)-(msgText.get_width()/2), 
-                                     int(ceil(45*2.4)) ) )
+                                     int(ceil(45*const.scaleFactor)) ) )
         self.Display.displayOneFrame(self.interface, self.FX)
         numItems = len(availableItems)
         while (pygame.event.wait().type != pygame.MOUSEBUTTONDOWN): pass
@@ -167,8 +167,8 @@ class menu():
         helpBox = self.helpBox.copy()
                 
         self.screen.blit(pygame.transform.scale(helpBox, 
-                                                ( int(ceil(helpBox.get_width()*2.4) ), 
-                                                  int(ceil(helpBox.get_height()*2.4) )) ), 
+                                                ( int(ceil(helpBox.get_width()*const.scaleFactor) ), 
+                                                  int(ceil(helpBox.get_height()*const.scaleFactor) )) ), 
                                                 ( 0, 41) )
         self.Display.displayOneFrame(self.interface, self.FX)
         while (pygame.event.wait().type != pygame.MOUSEBUTTONDOWN): pass
@@ -177,8 +177,8 @@ class menu():
     def displayStory(self, msg):
         storyBox = self.openWindow(350, 300)
         storyBox = pygame.transform.scale(self.storyBox.copy(), 
-                                                ( int(ceil(self.storyBox.get_width()*2.4) ), 
-                                                  int(ceil(self.storyBox.get_height()*2.4) )) )
+                                                ( int(ceil(self.storyBox.get_width()*const.scaleFactor) ), 
+                                                  int(ceil(self.storyBox.get_height()*const.scaleFactor) )) )
         
         msg_ = text.Text(msg, os.getcwd()+"/FONTS/devinne.ttf", 16, colors.white, colors.gold, True, 22)
         storyBox.blit(msg_, ( (storyBox.get_width()/2)-(msg_.get_width()/2), 
@@ -249,12 +249,12 @@ class menu():
             msgText = text.Text('Hero Stats', os.getcwd()+"/FONTS/Squealer.ttf", 18, colors.white, colors.grey)
             msgText.set_alpha(i)
             
-            statsBox.blit(msgText, ( (statsBox.get_width()/2)-(msgText.get_width()/2) ,int(ceil(18*2.4))) )
-            statsBox.blit(self.getStatsTextImg(hero),  (int(ceil(10*2.4)),
-                                                        int(ceil(40*2.4))) )
+            statsBox.blit(msgText, ( (statsBox.get_width()/2)-(msgText.get_width()/2) ,int(ceil(18*const.scaleFactor))) )
+            statsBox.blit(self.getStatsTextImg(hero),  (int(ceil(10*const.scaleFactor)),
+                                                        int(ceil(40*const.scaleFactor))) )
             statsBox.blit( pygame.transform.scale(hero.images[8], 
-                                                  (int(ceil(2.4*hero.images[8].get_width() ) ),
-                                                   int(ceil(2.4*hero.images[8].get_width() ) ) )), 
+                                                  (int(ceil(const.scaleFactor*hero.images[8].get_width() ) ),
+                                                   int(ceil(const.scaleFactor*hero.images[8].get_width() ) ) )), 
                           (25, 30)  )
     
             self.screen.blit( statsBox, ( (self.screen.get_width()/2)-(statsBox.get_width()/2), 41) )
@@ -273,8 +273,8 @@ class menu():
         weaponCopy = pygame.Surface( (30,30) )
         weaponCopy.blit( images.mapImages[ weapon.getImg() ], (0,0) )
         equipBox.blit(weaponCopy, (26, 30))
-        menu.append( button.Button( ( int(ceil(26*2.4)),
-                                      int(ceil(30*2.4)) ), 
+        menu.append( button.Button( ( int(ceil(26*const.scaleFactor)),
+                                      int(ceil(30*const.scaleFactor)) ), 
                     'weapon', 
                     invisible=True ) )
         
@@ -289,7 +289,7 @@ class menu():
         armorDescriptions = []
         for A in range( len(armor)-1 ):
             (x, y) = armorLocList[A]
-            b = button.Button( ( int(ceil(x*2.4)), int(ceil(y*2.4)) ), 'armor', invisible=True )
+            b = button.Button( ( int(ceil(x*const.scaleFactor)), int(ceil(y*const.scaleFactor)) ), 'armor', invisible=True )
             b.slot = A
             if armor[A] == None:
                 menu.append( b )
@@ -298,19 +298,19 @@ class menu():
                 armorCopy = images.mapImages[ armor[A].getImg() ]
                 aBox = self.getDescText(armor[A], font, size, 'double')
                 armorDescriptions.append( [ aBox,
-                                           (int(ceil( (x*2.4) - 0.1*aBox.get_width()  )), 
-                                            int(ceil( (y+50) * 2.4)) ) ] )
+                                           (int(ceil( (x*const.scaleFactor) - 0.1*aBox.get_width()  )), 
+                                            int(ceil( (y+50) * const.scaleFactor)) ) ] )
                 #self.writeText(armorCopy, (20,20), 'L'+str(armor[A].getLevel()), colors.white, colors.black,10)
                 equipBox.blit(armorCopy, armorLocList[A])
         self.screen.blit(pygame.transform.scale(equipBox, 
-                                            ( int(ceil(equipBox.get_width()*2.4) ), 
-                                              int(ceil(equipBox.get_height()*2.4) )) ), 
+                                            ( int(ceil(equipBox.get_width()*const.scaleFactor) ), 
+                                              int(ceil(equipBox.get_height()*const.scaleFactor) )) ), 
                                             ( 0, 41) )
         for d in armorDescriptions:
             self.screen.blit( d[0], d[1] )
         self.screen.blit( self.getDescText(weapon, font, size, 'double'), 
-                      ( int(ceil(20*2.4 )), 
-                        int(ceil(104*2.4)) ) )
+                      ( int(ceil(20*const.scaleFactor )), 
+                        int(ceil(104*const.scaleFactor)) ) )
         
         self.Display.displayOneFrame(self.interface, self.FX)
         return menu
@@ -322,8 +322,8 @@ class menu():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     for b in menu:
                         (x, y) = pygame.mouse.get_pos()
-                        #x = int(ceil(2.4*x))
-                        #y = int(ceil(2.4*y))
+                        #x = int(ceil(const.scaleFactor*x))
+                        #y = int(ceil(const.scaleFactor*y))
                         if b.hit(x, y):
                             if b.msg == 'weapon':
                                 game.myHero.equipWeapon(self.invMenu(game.myHero.getWeapons(), "Weapons:", ['Equip', 'Return'] ))
@@ -394,36 +394,39 @@ class menu():
                         return None
                     else: return selection.item
             menuWin = pygame.transform.scale( menuWin, 
-                                                 (int(ceil(menuWin.get_width() *2.4)),
-                                                  int(ceil(menuWin.get_height()*2.4) ) ) )
+                                                 (int(ceil(menuWin.get_width() *const.scaleFactor)),
+                                                  int(ceil(menuWin.get_height()*const.scaleFactor) ) ) )
             self.screen.blit( menuWin, ( (self.screen.get_width()/2)-(menuWin.get_width()/2), 41) )
             self.screen.blit(msgText, ( (self.screen.get_width()/2)-(msgText.get_width()/2), 
-                                         int(ceil(45*2.4)) ) )
+                                         int(ceil(45*const.scaleFactor)) ) )
             if selection.type == 'menuBox':
                 pygame.draw.lines( self.screen, colors.white, True, boxPoints, 2 )
-                self.screen.blit(descText, ( int(ceil(80*2.4)), 
-                                              int(ceil(165*2.4)) ) )
+                self.screen.blit(descText, ( int(ceil(80*const.scaleFactor)), 
+                                              int(ceil(165*const.scaleFactor)) ) )
                 if prices is not None:
-                    self.screen.blit(priceText, ( int(ceil(80*2.4)), 
-                                                  int(ceil(185*2.4)) ) )
+                    self.screen.blit(priceText, ( int(ceil(80*const.scaleFactor)), 
+                                                  int(ceil(185*const.scaleFactor)) ) )
             
             if menu is not []:
                 for b in menu:
                     if b.type == 'menuBox':
-                        self.screen.blit( pygame.transform.scale(b.img, (int(ceil(b.img.get_width()*2.4)),
-                                                                     int(ceil(b.img.get_height()*2.4)) )), 
+                        self.screen.blit( pygame.transform.scale(b.img, (int(ceil(b.img.get_width()*const.scaleFactor)),
+                                                                     int(ceil(b.img.get_height()*const.scaleFactor)) )), 
                                          (b.locX, b.locY) )
             for b in menu:
                 if b.type == 'button':
                     self.screen.blit(b.img, (b.locX, b.locY) )
             self.Display.displayOneFrame(self.interface, self.FX)
     
-    def getPriceText(self, item, prices):
-        return 'Price: $'+str( prices[item.priceID] )
-        if item.getName() in ['item', 'armor', 'weapon']:
-            return 'Price: $'+str( prices[item.priceID] )
-        elif item.getName() == 'spellbook' or item.getName() == 'parchment':
-            return 'Price: $'+str( prices[(item.getType(), item.getLevel(), item.getSpellNum() )] )
+    def getPriceText(self, it, prices):
+        if hasattr(it, "__iter__"):
+            it = it[0]
+        if it.getName() in ['armor', 'weapon']:
+            return 'Price: $'+str( prices[it.priceID] )
+        elif it.getName() == 'item':
+            return 'Price: $'+str( prices[it.getType()] )
+        elif it.getName() == 'spellbook' or it.getName() == 'parchment':
+            return 'Price: $'+str( prices[(it.getType(), it.getSpellNum() )] )
     
     def getDescText(self, item, font, size, form = 'single'):
         if hasattr(item, "__iter__"):

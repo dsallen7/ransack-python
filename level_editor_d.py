@@ -10,8 +10,6 @@ from SCRIPTS import npcScr, mapScr
 
 from random import choice
 
-displayOpts = ['fore', 'back', 'both']
-
 # Eztext courtesy of http://www.pygame.org/project-EzText-920-.html
 class Handler():
     
@@ -37,6 +35,8 @@ class Handler():
         self.BFSQueue = queue.Queue()
         
         self.mouseAction = 'draw'
+        self.drawLayers = ['fore', 'back']
+        self.drawLayer = self.drawLayers[0]
         self.selecting = False
         
         self.selectBoxPoints = None
@@ -58,6 +58,8 @@ class Handler():
     def switchTile(self):
         self.currentTile += 1
         self.currentTile = self.currentTile % self.numImages
+        
+#    def drawTile(self, x, y):
     
     def addMap(self, name):
         myWorld.addMap(name, None)
@@ -110,7 +112,8 @@ class Handler():
             infoWin.fill(colors.black)
             if pygame.font:
                 font = pygame.font.SysFont("arial",20)
-                infoWin.blit( font.render('Foreground: '+str(self.myMap.getEntry(x, y) ), 1, colors.white, colors.black), (0,0) )
+                infoWin.blit( font.render('Foreground: '+str(self.myMap.getEntry(x, y) ), 1, colors.white, colors.black), (0, 0) )
+                infoWin.blit( font.render('Background: '+str(self.myMap.getEntry(x, y) ), 1, colors.white, colors.black), (0, 30) )
                 try:
                     p = self.myMap.grid[x][y].portal
                     if p == None:
@@ -118,7 +121,7 @@ class Handler():
                     else: p = p[0]+' at '+str(p[1])+', '+str(p[2])
                 except AttributeError:
                     p = '-'
-                infoWin.blit( font.render('Portal at: '+p, 1, colors.white, colors.black), (0,30) )
+                infoWin.blit( font.render('Portal at: '+p, 1, colors.white, colors.black), (0, 60) )
                 try:
                     s = self.myMap.grid[x][y].shopID
                     if s == None:
@@ -126,8 +129,8 @@ class Handler():
                     else: s = s[0]+' level '+str(s[1])
                 except AttributeError:
                     s = '-'
-                infoWin.blit( font.render('Shop: '+s, 1, colors.white, colors.black), (0, 60) )
-                infoWin.blit( font.render('Reset Tile', 1, colors.white, colors.black), (0, 90) )
+                infoWin.blit( font.render('Shop: '+s, 1, colors.white, colors.black), (0, 90) )
+                infoWin.blit( font.render('Reset Tile', 1, colors.white, colors.black), (0, 120) )
                 if self.myMap.getEntry(x,y) in range(const.TABLE1, const.TABLE3+1):
                     try:
                         a = mapScr.accessoryList[ self.myMap.grid[x][y].accessory ]+'('+str(self.myMap.grid[x][y].accessory)+')'
@@ -135,7 +138,7 @@ class Handler():
                             a = '-'
                     except AttributeError:
                         a = '-'
-                    infoWin.blit( font.render('Accessory: '+a, 1, colors.white, colors.black), (0, 120) )
+                    infoWin.blit( font.render('Accessory: '+a, 1, colors.white, colors.black), (0, 150) )
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     (mX, mY) = pygame.mouse.get_pos()
@@ -144,18 +147,20 @@ class Handler():
                         if Index == 0:
                             self.myMap.setEntry( x, y, int( self.getInput('Enter tile FG: ') ) )
                         elif Index == 1:
+                            self.myMap.setEntry( x, y, int( self.getInput('Enter tile BG: ') ) )
+                        elif Index == 2:
                             self.myMap.grid[x][y].portal = ( self.getInput('Enter target map: '), 
                                                              int( self.getInput('Enter portal x: ') ), 
                                                              int( self.getInput('Enter portal y: ') ) )
-                        elif Index == 2:
+                        elif Index == 3:
                             self.myMap.grid[x][y].shopID = ( self.getInput('Enter shop type: '), 
                                                              int( self.getInput('Enter level: ') ) )
-                        elif Index == 3:
+                        elif Index == 4:
                             self.myMap.setEntry( x, y, const.DFLOOR1 )
                             self.myMap.grid[x][y].portal = None
                             self.myMap.grid[x][y].shopID = None
                             self.myMap.grid[x][y].accessory = None
-                        elif Index == 4:
+                        elif Index == 5:
                             self.myMap.grid[x][y].accessory = ( self.selectAccessory() )
                     return
                 if event.type == pygame.QUIT:
@@ -318,7 +323,8 @@ class Handler():
         floodArea = list( set(floodArea) )
         for entry in floodArea:
             (x,y) = entry
-            self.myMap.setEntry(x,y,tile)
+            self.place(x, y, tile)
+            #self.myMap.setEntry(x,y,tile)
     
     def getInput(self, msg):
         #get file name
@@ -434,13 +440,14 @@ class Handler():
             print 'Cannot load world:', filename
             return
     
-    def generateMap(self, type):
+    def generateMap(self, type, trials=1):
         level = int( self.getInput('Enter level: ') )
         if type == 'dungeon':
             rooms = int( self.getInput('Enter # of rooms (max 20): ') )
-            MG = mapgen.Generator(self.myMap.getDIM(), level)
-            MG.generateMap(rooms)
-            self.myMap.installBall( MG.getMapBall() )
+            for i in range(trials):
+                MG = mapgen.Generator(self.myMap.getDIM(), level)
+                MG.generateMap(rooms)
+                self.myMap.installBall( MG.getMapBall() )
         elif type == 'maze':
             MG = mazegen.Generator(self.myMap.getDIM(), level)
             MG.generateMap()
@@ -449,11 +456,16 @@ class Handler():
             MG = wilds.Generator(self.myMap.getDIM(), level)
             MG.generateMap()
             self.myMap.installBall( MG.getMapBall() )
+        else:
+            print 'Invalid map type'
     
     def place(self, x, y, tile):            
         if self.placeNPC:
             self.addNPC( (x,y) )
         else:
+            if self.drawLayer == 'back':
+                self.myMap.setTileBG(x, y, tile)
+                return
             if self.currentTile == const.CHEST:
                 self.myMap.addChest( (x, y), self.fillChest( [] ))
                 param=None
@@ -484,7 +496,7 @@ class Handler():
                 if x < self.myMap.DIM*blocksize and x == 20*blocksize + self.topX*blocksize:
                     self.topX += 1
                 if self.drawMode:
-                    self.myMap.setEntry(x/blocksize,y/blocksize,self.currentTile)
+                    self.place(x/blocksize,y/blocksize,self.currentTile)
                 self.cursorPos = (x,y)
         elif event.key == pygame.K_LEFT:
             for i in range(count):
@@ -493,7 +505,7 @@ class Handler():
                 if x > 0 and x == self.topX*blocksize:
                     self.topX -= 1
                 if self.drawMode:
-                    self.myMap.setEntry(x/blocksize,y/blocksize,self.currentTile)
+                    self.place(x/blocksize,y/blocksize,self.currentTile)
                 self.cursorPos = (x,y)
         elif event.key == pygame.K_UP:
             for i in range(count):
@@ -502,7 +514,7 @@ class Handler():
                 if y > 0 and y == self.topY*blocksize:
                     self.topY -= 1
                 if self.drawMode:
-                    self.myMap.setEntry(x/blocksize,y/blocksize,self.currentTile)
+                    self.place(x/blocksize,y/blocksize,self.currentTile)
                 self.cursorPos = (x,y)
         elif event.key == pygame.K_DOWN:
             for i in range(count):
@@ -511,7 +523,7 @@ class Handler():
                 if y < self.myMap.DIM*blocksize and y == 20*blocksize + self.topY*blocksize:
                     self.topY += 1
                 if self.drawMode:
-                    self.myMap.setEntry(x/blocksize,y/blocksize,self.currentTile)
+                    self.place(x/blocksize,y/blocksize,self.currentTile)
                 self.cursorPos = (x,y)
         elif event.key == pygame.K_p:
             self.loadMap()
@@ -532,7 +544,8 @@ class Handler():
         elif event.key == pygame.K_f:
             self.floodFill(self.currentTile, (x,y) )
         elif event.key == pygame.K_g:
-            self.generateMap( self.getInput('Enter type: ') )
+            #self.generateMap( self.getInput('Enter type: dungeon, maze or wilds :'), int(self.getInput('Enter number of trials :')) )
+            self.generateMap( self.getInput('Enter type: dungeon, maze or wilds :') )
         elif event.key == pygame.K_e:
             self.offset += 32
             if self.offset == 256:
@@ -655,23 +668,9 @@ class Handler():
         (mx, my) = e.pos
         if 0 <= mx < gridField.get_width() and 0 <= my < gridField.get_height():
             if e.button == 1:
+                #self.drawTile( mx/blocksize, my/blocksize )
                 if self.mouseAction == 'draw':
-                    if self.placeNPC:
-                        self.addNPC( (mx/blocksize, my/blocksize) )
-                    else:
-                        if self.currentTile == const.CHEST:
-                            self.myMap.addChest( (mx/blocksize,my/blocksize), self.fillChest( [] ))
-                            level=None
-                        elif self.currentTile == const.ITEMSDOOR:
-                            level = int(self.getInput('Itemshop level: '))
-                        elif self.currentTile == const.ARMRYDOOR:
-                            level = int(self.getInput('Armory level: '))
-                        elif self.currentTile == const.BLKSMDOOR:
-                            level = int(self.getInput('Blacksmith level: '))
-                        elif self.currentTile == const.MAGICDOOR:
-                            level = int(self.getInput('Magicshop level: '))
-                        else: level = None
-                        self.myMap.setEntry(mx/blocksize,my/blocksize,self.currentTile, level)
+                    self.place(mx/blocksize, my/blocksize, self.currentTile)
                     self.cursorPos = ( (mx/blocksize)*blocksize, (my/blocksize)*blocksize )
                 elif self.mouseAction == 'select':
                     if self.selectBoxPoints is not None:
@@ -682,13 +681,16 @@ class Handler():
                     else: self.selection = ( (mx/blocksize, my/blocksize), self.select( (mx/blocksize, my/blocksize) ) )
             elif e.button == 3:
                 pass
-        elif gridField.get_width()+50 <= mx < gridField.get_width()+80 and 170 <= my < 200:
+        elif gridField.get_width()+80 <= mx < gridField.get_width()+180 and 130 <= my < 180:
+            self.drawLayers = [self.drawLayers[1]]+[self.drawLayers[0]]
+            self.drawLayer = self.drawLayers[0]
+        elif gridField.get_width()+50 <= mx < gridField.get_width()+80 and 170 <= my < 200: #NPC placement
             self.placeNPC = not self.placeNPC
-        elif gridField.get_width()+50 <= mx < gridField.get_width()+170 and 200 <= my < 440:
+        elif gridField.get_width()+50 <= mx < gridField.get_width()+170 and 200 <= my < 440:  
             if e.button == 1:
-                self.currentTile = ( self.offset + (mx-gridField.get_width()-45)/blocksize + (my-200)/blocksize * 4 )
-            elif e.button == 3: self.myMap.defaultBkgd = ( self.offset + (mx-gridField.get_width()-45)/blocksize + (my-200)/blocksize * 4 )
-        elif gridField.get_width()+65 <= mx < gridField.get_width()+95 and 500 <= my < 530:
+                self.currentTile = ( self.offset + (mx-gridField.get_width()-45)/blocksize + (my-200)/blocksize * 4 ) #change FG tile
+            elif e.button == 3: self.myMap.defaultBkgd = ( self.offset + (mx-gridField.get_width()-45)/blocksize + (my-200)/blocksize * 4 ) #change BG tile
+        elif gridField.get_width()+65 <= mx < gridField.get_width()+95 and 500 <= my < 530: # flip through pages
             self.offset -= 32
             if self.offset < 0:
                 self.offset = 224
@@ -718,10 +720,14 @@ class Handler():
         gridField.fill(colors.black)
         for i in range(self.topX, self.topX+40):
             for j in range(self.topY, self.topY+40):
-                if self.myMap.getEntry(i,j) in range(24, 86):
-                    gridField.blit( mapImages[self.myMap.defaultBkgd], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
-                gridField.blit( mapImages[self.myMap.getEntry(i,j)], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
-                if self.myMap.getEntry(i,j) in range(const.TABLE1, const.TABLE3+1):
+                fTile = self.myMap.getTileFG(i, j)
+                bTile = self.myMap.getTileBG(i, j)
+                if fTile in const.SOLIDS:
+                    if bTile is not None:
+                        gridField.blit( mapImages[bTile], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
+                    else: gridField.blit( mapImages[self.myMap.defaultBkgd], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
+                gridField.blit( mapImages[fTile], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
+                if fTile in range(const.TABLE1, const.TABLE3+1):
                     try:
                         gridField.blit( accImages[self.myMap.grid[i][j].accessory], ( (i-self.topX)*blocksize+10,
                                                                                       (j-self.topY)*blocksize+5) )
@@ -750,9 +756,16 @@ class Handler():
         boxPoints = ( (x,y), (x,y+blocksize), (x+blocksize,y+blocksize), (x+blocksize,y) )
         pygame.draw.lines( gridField, self.cursorColor, True, boxPoints, 1 )
         self.sideImg, sideRect = load_image.load_image('sidebar.bmp')
+        
         if self.placeNPC: self.sideImg.blit(self.npcImg['king'],(50,50))
         else: self.sideImg.blit(mapImages[self.currentTile],(50,50))
+        
+        if pygame.font:
+            font = pygame.font.SysFont("arial",12)
+        
         self.sideImg.blit(mapImages[self.myMap.defaultBkgd],(50,130))
+        self.sideImg.blit( font.render(self.drawLayer, 1, colors.white, colors.black ), (80,130) )
+        
         if self.mouseAction == 'draw':
             self.sideImg.blit(self.editorImages[5], (50,80) )
         else: self.sideImg.blit(self.editorImages[6], (50,80) )
@@ -773,11 +786,9 @@ class Handler():
         (x,y) = self.cursorPos
         entryBox = pygame.Surface((150,30))
         entryBox.fill(colors.black)
-        if pygame.font:
-            font = pygame.font.SysFont("arial",12)
-            entry = font.render(str(self.myMap.getEntry( (x+self.topX)/blocksize, (y+self.topY)/blocksize))+' '+'x:'+str(x)+'('+str(x/blocksize)+')'+' y:'+str(y)+'('+str(y/blocksize)+')',1, colors.white, colors.black )
-            entryBox.blit(entry,(0,0))
-            self.sideImg.blit(entryBox,(50,450))
+        entry = font.render(str(self.myMap.getEntry( (x+self.topX)/blocksize, (y+self.topY)/blocksize))+' '+'x:'+str(x)+'('+str(x/blocksize)+')'+' y:'+str(y)+'('+str(y/blocksize)+')',1, colors.white, colors.black )
+        entryBox.blit(entry,(0,0))
+        self.sideImg.blit(entryBox,(50,450))
         if self.drawMode:
             msgBox = pygame.Surface( ( 186, 60 ) )
             msgBox.fill( colors.grey )
@@ -817,19 +828,24 @@ os.sys.setrecursionlimit(15000)
 
 def main():
     myHandler.updateDisplay()
+    screen.blit(gridField, (0,0) )
+    pygame.display.flip()
     while True :
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 myHandler.event_handler(event)
                 myHandler.updateDisplay()
+                screen.blit(gridField, (0,0) )
+                pygame.display.flip()
             if event.type == pygame.MOUSEBUTTONDOWN:# or event.type == pygame.MOUSEBUTTONUP:
                 myHandler.mouseHandler(event)
+                myHandler.mouseUpdate()
                 myHandler.updateDisplay()
+                screen.blit(gridField, (0,0) )
+                pygame.display.flip()
             if event.type == pygame.QUIT:
                 os.sys.exit()
-        myHandler.mouseUpdate()
+            pygame.time.wait(10)
         #myHandler.updateDisplay()
-        screen.blit(gridField, (0,0) )
-        pygame.display.flip()
 
 main()

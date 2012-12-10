@@ -15,26 +15,26 @@ class effects():
         self.keyFlash = None
         self.flashImg = None
         
-        self.flashDict = { pygame.K_c      : (int(floor(173*2.4)), int(ceil(106*2.4))+int(ceil(300*2.4))),    # upper left   (7) cast spell
-                           pygame.K_LEFT   : (int(floor(173*2.4)), int(ceil(143*2.4))+int(ceil(300*2.4))),    # middle left  (4) left
-                           pygame.K_m      : (int(floor(173*2.4)), 1 + int(ceil(180*2.4))+int(ceil(300*2.4))),# lower left   (1) map *
-                           pygame.K_UP     : (int(floor(210*2.4)), int(ceil(106*2.4))+int(ceil(300*2.4))),     # upper center (8) up
-                           pygame.K_RETURN : (int(floor(210*2.4)), int(ceil(143*2.4))+int(ceil(300*2.4))), # middle center(5) action
-                           pygame.K_DOWN   : (int(floor(210*2.4)), 1 + int(ceil(180*2.4))+int(ceil(300*2.4))),   # lower center (2) down *
-                           pygame.K_i      : (int(ceil(247*2.4)),  int(ceil(106*2.4))+int(ceil(300*2.4))),      # upper right  (9) item *
-                           pygame.K_RIGHT  : (int(ceil(247*2.4)),  int(ceil(143*2.4))+int(ceil(300*2.4))),  # middle right (6) right *
-                           pygame.K_s      : (int(ceil(247*2.4)),  1 + int(ceil(180*2.4))+int(ceil(300*2.4))),      # lower right  (3) hero stats *
+        self.flashDict = { pygame.K_c      : (int(floor(173*const.scaleFactor)), int(ceil(106*const.scaleFactor))+int(ceil(300*const.scaleFactor))),    # upper left   (7) cast spell
+                           pygame.K_LEFT   : (int(floor(173*const.scaleFactor)), int(ceil(143*const.scaleFactor))+int(ceil(300*const.scaleFactor))),    # middle left  (4) left
+                           pygame.K_m      : (int(floor(173*const.scaleFactor)), 1 + int(ceil(180*const.scaleFactor))+int(ceil(300*const.scaleFactor))),# lower left   (1) map *
+                           pygame.K_UP     : (int(floor(210*const.scaleFactor)), int(ceil(106*const.scaleFactor))+int(ceil(300*const.scaleFactor))),     # upper center (8) up
+                           pygame.K_RETURN : (int(floor(210*const.scaleFactor)), int(ceil(143*const.scaleFactor))+int(ceil(300*const.scaleFactor))), # middle center(5) action
+                           pygame.K_DOWN   : (int(floor(210*const.scaleFactor)), 1 + int(ceil(180*const.scaleFactor))+int(ceil(300*const.scaleFactor))),   # lower center (2) down *
+                           pygame.K_i      : (int(ceil(247*const.scaleFactor)),  int(ceil(106*const.scaleFactor))+int(ceil(300*const.scaleFactor))),      # upper right  (9) item *
+                           pygame.K_RIGHT  : (int(ceil(247*const.scaleFactor)),  int(ceil(143*const.scaleFactor))+int(ceil(300*const.scaleFactor))),  # middle right (6) right *
+                           pygame.K_s      : (int(ceil(247*const.scaleFactor)),  1 + int(ceil(180*const.scaleFactor))+int(ceil(300*const.scaleFactor))),      # lower right  (3) hero stats *
                            
-                           pygame.K_a      : (int(floor(135*2.4)), int(ceil(143*2.4))+int(ceil(300*2.4))),      # armor
-                           pygame.K_w      : (int(floor(135*2.4)), int(ceil(180*2.4))+int(ceil(300*2.4))),      # weapons
+                           pygame.K_a      : (int(floor(135*const.scaleFactor)), int(ceil(143*const.scaleFactor))+int(ceil(300*const.scaleFactor))),      # armor
+                           pygame.K_w      : (int(floor(135*const.scaleFactor)), int(ceil(180*const.scaleFactor))+int(ceil(300*const.scaleFactor))),      # weapons
                            
-                           pygame.K_h      : (int(floor(78*2.4)), int(ceil(143*2.4))+int(ceil(300*2.4)))        # help
+                           pygame.K_h      : (int(floor(78*const.scaleFactor)), int(ceil(143*const.scaleFactor))+int(ceil(300*const.scaleFactor)))        # help
                           
                           }
 
     def fadeOut(self, size):
-        fadeScreen = pygame.Surface( (int(ceil(300 * 2.4)) - 2*size, 
-                                      int(ceil(300 * 2.4)) - 2*size) )
+        fadeScreen = pygame.Surface( (int(ceil(300 * const.scaleFactor)) - 2*size, 
+                                      int(ceil(300 * const.scaleFactor)) - 2*size) )
         fadeScreen.fill( colors.black )
         for i in range(0, 255, 5):
             fadeScreen.set_alpha(i)
@@ -54,8 +54,8 @@ class effects():
                            ( 0,0, 2*i, 300 )                     # area
                            )
             #self.clock.tick(100)
-            self.screen.blit(pygame.transform.scale(screenOne_, (int(ceil(300 * 2.4)), 
-                                                                int(ceil(300 * 2.4))) ), (0, 0) )
+            self.screen.blit(pygame.transform.scale(screenOne_, (int(ceil(300 * const.scaleFactor)), 
+                                                                int(ceil(300 * const.scaleFactor))) ), (0, 0) )
             pygame.display.flip()
     
     def drawKeyFlash(self, key):

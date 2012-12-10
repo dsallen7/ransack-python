@@ -33,14 +33,39 @@ class map():
             else: return const.VOID
         else: return const.VOID
     def getTileFG(self, x, y):
-        return self.grid[x][y].getFG()
+        if 0 <= x < self.DIM and 0 <= y < self.DIM:
+            if self.grid[x][y] is not None:
+                return self.grid[x][y].getFG()
+            else: return const.VOID
+        else: return const.VOID
     def setTileFG(self, x, y, fg):
-        self.grid[x][y].setFG(fg)
+        if 0 <= x < self.DIM and 0 <= y < self.DIM:
+            if self.grid[x][y] is not None:
+                self.grid[x][y].setFG(fg)
+        
+    def getTileBG(self, x, y):
+        if 0 <= x < self.DIM and 0 <= y < self.DIM:
+            if self.grid[x][y] is not None:
+                return self.grid[x][y].getBG()
+            else: return const.VOID
+        else: return const.VOID
+    def setTileBG(self, x, y, bg):
+        if 0 <= x < self.DIM and 0 <= y < self.DIM:
+            if self.grid[x][y] is not None:
+                self.grid[x][y].setBG(bg)
     
     def getName(self):
         return self.name[0]
     def setName(self, name):
         self.name = (name,)
+    
+    
+    def cardinalNeighbors(self, tile):
+        returnList = []
+        (x,y) = tile
+        for (Cx, Cy) in const.CARDINALS:
+            returnList.append( self.getTileFG(Cx+x, Cy+y) )
+        return returnList
     
     def getGrid(self):
         return self.grid
@@ -174,12 +199,6 @@ class gameMap(map):
         (x1,y1) = pos1
         (x2,y2) = pos2
         return max(abs(y2-y1), abs(x2-x1), abs(y2-y1) + abs(x2-x1))
-    def neighbors(self, tile):
-        returnList = []
-        (x,y) = tile
-        for (Cx, Cy) in const.CARDINALS:
-            returnList.append((Cx+x, Cy+y))
-        return returnList
     def getRandomTile(self):
         x = random.randrange(0, self.DIM)
         y = random.randrange(0, self.DIM)
@@ -441,6 +460,7 @@ class genMap(map):
     #Updates one map Entry to type at map coordinates x,y
     # Overridden for gen class with room SN
         self.grid[x][y].setFG(fg)
+        self.grid[x][y].setBG(const.DFLOOR1)
         self.grid[x][y].roomN = roomN
         #print roomN
         

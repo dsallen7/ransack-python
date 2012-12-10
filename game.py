@@ -4,9 +4,10 @@ from classes import battle, enemy, shop, tavern, townhall, director
 import OBJ
 from IMG import images
 from HERO import hero
-from NPC import npc
 from DISPLAY import display, interface, menu
 from SCRIPTS import mapScr, enemyScr
+
+from NPC import npcspawner
 #from SND import sfx
 
 from MAP import world, map, mapgen#, mazegen
@@ -84,7 +85,7 @@ class game():
         self.NPCs = []
         visibleNPCs = []
         for n in map.NPCs:
-            self.NPCs.append( npc.newNpc( n, self ) )
+            self.NPCs.append( npcspawner.newNpc( n, self ) )
         self.allsprites = pygame.sprite.RenderPlain((self.myHero, self.NPCs))
         self.allsprites.clear(self.screen, self.gameBoard)
     
@@ -165,9 +166,12 @@ class game():
             self.screenShot()
         elif event == pygame.K_m:
             # show minimap
+            self.myMap.callDrawMiniMap(self.screen, self.inputHandler)
+            '''
             if self.myMap.type in ['dungeon', 'maze', 'fortress']:
                 self.myMap.callDrawMiniMap(self.screen, self.inputHandler)
             else: self.myWorld.callDrawMiniMap(self.screen, self.inputHandler)
+            '''
         elif event == pygame.K_RETURN:
             # action command
             self.actionCommand()
@@ -429,7 +433,7 @@ class game():
             if self.myMap.isVisible(x, y):
                 self.visibleNPCs.append(n)
             r = n.update(self.myMap, self.myHero.getXY() )
-            if r == True and n in self.visibleNPCs:
+            if r == True:# and n in self.visibleNPCs:
                 redraw = True
             elif r == 'battle':
                 if self.launchBattle(n.name, self.myWorld.currentMap.level):
@@ -453,9 +457,9 @@ class game():
         (pX, pY) = self.myHero.getXY()
         self.myMap.setPlayerXY( pX/const.blocksize, pY/const.blocksize )
         self.myMap.updateWindowCoordinates(self.myHero)
+        self.Display.redrawXMap(self.myMap)
         self.Display.drawSprites(self.myHero, self.myMap, self.gameBoard, self, animated=False)
         self.updateSprites()
-        self.Display.redrawXMap(self.myMap)
         while self.gameOn:
             self.gameBoard.fill(colors.black)
             for event in pygame.event.get():

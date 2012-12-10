@@ -19,6 +19,11 @@ class Tile():
     def setFG(self, fg):
         self.fg = fg
     
+    def getBG(self):
+        return self.bg
+    def setBG(self, bg):
+        self.bg = bg
+        
     def getMsgText(self):
         return self.msgText
     def setMsgText(self, txt):

@@ -18,18 +18,18 @@ class Room():
             (xpos, ypos) = self.getPos()
             (xdim, ydim) = self.getDimensions()
             for i in range(1, xdim-1):
-                self.setGrid(i, 0, const.EWWALL)
-                self.setGrid(i, ydim-1, const.EWWALL)
+                self.setGrid(i, 0, const.EWWALL, const.DFLOOR1)
+                self.setGrid(i, ydim-1, const.EWWALL, const.DFLOOR1)
             for i in range(1, ydim-1):
-                self.setGrid(0, i, const.NSWALL)
-                self.setGrid(xdim-1, i, const.NSWALL)
-            self.setGrid(0,0, const.ULWALL)
-            self.setGrid(xdim-1,0, const.URWALL)
-            self.setGrid(0,ydim-1, const.LLWALL)
-            self.setGrid(xdim-1,ydim-1, const.LRWALL)
+                self.setGrid(0, i, const.NSWALL, const.DFLOOR1)
+                self.setGrid(xdim-1, i, const.NSWALL, const.DFLOOR1)
+            self.setGrid(0,0, const.ULWALL, const.DFLOOR1)
+            self.setGrid(xdim-1,0, const.URWALL, const.DFLOOR1)
+            self.setGrid(0,ydim-1, const.LLWALL, const.DFLOOR1)
+            self.setGrid(xdim-1,ydim-1, const.LRWALL, const.DFLOOR1)
             for i in range(1,xdim-1):
                 for j in range(1,ydim-1):
-                    self.setGrid(i, j, 0)
+                    self.setGrid(i, j, const.DFLOOR1, const.DFLOOR1)
         if shape == 'round':
             (xpos, ypos) = self.getPos()
             self.xdim = 9
@@ -57,10 +57,17 @@ class Room():
     
     def setPos(self, pos):
         self.pos = pos
+    def printGrid(self):
+        printout = ''
+        for x in self.grid:
+            for y in x:
+                printout += str(y.getFG() )+' '
+        print printout
     
-    def setGrid(self, x, y, e):
+    def setGrid(self, x, y, FG, BG):
         #self.grid[y] = self.grid[y][:x] + [e] + self.grid[y][x+1:]
-        self.grid[y][x].setFG(e)
+        self.grid[y][x].setFG(FG)
+        self.grid[y][x].setBG(BG)
     
     def getGrid(self, x, y):
         return self.grid[y][x]

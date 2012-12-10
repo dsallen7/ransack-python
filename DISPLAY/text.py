@@ -6,7 +6,7 @@ from math import floor, ceil
 
 def Text(message, font, fontsize, fgc=colors.white, bgc=colors.gold, transparent=False, width=const.maxLineWidth):
     # returns a nicely formatted text box
-    fontsize = int( ceil( fontsize*2.4 ) )
+    fontsize = int( ceil( fontsize*const.scaleFactor ) )
     if pygame.font:
         font = pygame.font.Font(font, fontsize)
         #print len(message), width

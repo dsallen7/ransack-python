@@ -34,10 +34,13 @@ class Spell():
         return self.name
     
     def execute(self, hero, battle):
-        hero.currMP = hero.currMP - self.cost
-        [cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX, psn] = hero.getPlayerStats()
-        stats = [cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX, psn]
-        fn = spellScr.spellDict[(self.getType(), battle)]
-        stats = fn(stats)
-        [cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX, psn] = stats
-        hero.setPlayerStats( (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX, psn) )
+        if battle and self.type in spellScr.battleOnlySpells:
+            return
+        else:
+            hero.currMP = hero.currMP - self.cost
+            [cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX, psn] = hero.getPlayerStats()
+            stats = [cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX, psn]
+            fn = spellScr.spellDict[(self.getType())]
+            stats = fn(stats)
+            [cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX, psn] = stats
+            hero.setPlayerStats( (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX, psn) )

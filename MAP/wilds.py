@@ -1,7 +1,7 @@
 import os, pygame, cPickle
 
 from random import choice, randrange
-from MAP import map, tile, room
+from MAP import map, tile
 from UTIL import const, colors, misc
 
 from SCRIPTS import enemyScr, mapScr

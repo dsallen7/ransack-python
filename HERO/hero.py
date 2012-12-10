@@ -299,10 +299,10 @@ class hero(pygame.sprite.Sprite):
             dmg = spellScr.baseDmg[spell.getType()]+random.randrange(self.intell-5,self.intell+5)/2
             game.textMessage('You hit the monster for '+str(dmg)+' points!')
             return dmg
-        #spell.execute(self, battle)
+        spell.execute(self, battle)
         game.Ticker.tick(spell.getCastTime() )
         game.textMessage(spell.getCastMsg())
-        return True
+        return 0
     def getSpells(self):
         return self.spells
     
@@ -404,7 +404,7 @@ class hero(pygame.sprite.Sprite):
                               None,None,None]
         for i in range(len(aeq)):
             if aeq[i] != None:
-                self.equipArmor(a, i)
+                self.equipArmor(aeq[i], i)
         
         self.items = itm
         

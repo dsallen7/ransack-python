@@ -6,8 +6,8 @@ class menuBox:
     def __init__(self, x, y, item):
         self.locX = x
         self.locY = y
-        self.sizeX = int(ceil(const.blocksize*2.4))
-        self.sizeY = int(ceil(const.blocksize*2.4))
+        self.sizeX = int(ceil(const.blocksize*const.scaleFactor))
+        self.sizeY = int(ceil(const.blocksize*const.scaleFactor))
         self.type = 'menuBox'
         self.item = item
     

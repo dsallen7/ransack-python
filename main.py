@@ -4,6 +4,8 @@ from DISPLAY import interface, effects
 from HERO import creator
 from OBJ import weapon
 
+from UTIL import const
+
 from math import ceil
 
 from IMG import images
@@ -13,6 +15,9 @@ try:
 except:
     android = False
     print "No Android in main"
+    const.setScaleFactor(1)
+
+print const.scaleFactor
 
 # Set the height and width of the screen
 screenSize=[720,1280]

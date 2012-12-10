@@ -3,29 +3,31 @@ from UTIL import const
 wallDict = { (False, False, False, False) : 28, # center
              (False, False, False, True)  : const.ULWALL, # UL
              (False, False, True, False)  : const.LLWALL, # UL
-             (False, False, True, True)   : const.ULWALL, # UL
+             (False, False, True, True)   : const.EWWALL, # UL
              (False, True, False, False)  : const.LRWALL, # LR
-             (False, True, False, True)   : const.URWALL, # UR
-             (False, True, True, False)   : const.EWWALL,
+             (False, True, False, True)   : const.ULWALL, # UR
+             (False, True, True, False)   : const.URWALL,
              (False, True, True, True)    : const.URWALL,
              (True, False, False, False)  : const.LLWALL,
-             (True, False, False, True)   : const.NSWALL,
-             (True, False, True, False)   : const.LLWALL,
-             (True, False, True, True)    : const.NSWALL,
-             (True, True, False, False)   : const.LRWALL,
-             (True, True, False, True)    : const.URWALL,
-             (True, True, True, False)    : const.EWWALL,
-             (True, True, True, True) : 28,
+             (True, False, False, True)   : const.LLWALL,
+             (True, False, True, False)   : const.LRWALL,
+             (True, False, True, True)    : const.EWWALL,
+             (True, True, False, False)   : const.NSWALL,
+             (True, True, False, True)    : const.NSWALL,
+             (True, True, True, False)    : const.URWALL,
+             (True, True, True, True) : const.URWALL
             
             }
 
-dWallDict = {
-             
-             ()
-             
-             
-             
-             }
+def getMappedNeighborList(L):
+    L_ = []
+    for l in L:
+        if l == const.DFLOOR1 or l == const.VOID:
+            L_.append(False)
+        else: L_.append(True)
+    return (L_[0], L_[1], L_[2], L_[3])
+
+dirDict = { 'w':(-1,0), 'e':(1,0), 'n':(0,-1), 's':(0,1) }
 
 siteImgDict = { 
                'itemshop'  : (256,2),
@@ -50,7 +52,8 @@ specialByLevel = { 1: [const.WSWORD, const.LSHIRT],
                   
                   }
 
-parchByLevel = { 1 : [const.HEAL, const.DART],
+parchByLevel = {0 : [const.HEAL, const.DART], 
+                1 : [const.HEAL, const.DART],
                  2 : [const.HEAL, const.DART],
                  3 : [const.HEAL, const.DART],
                  4 : [const.HEAL, const.DART, const.HEL2, const.FRBL],
@@ -93,7 +96,7 @@ fruitList = [const.FRUIT1,
 
 pines = [const.PINE1, const.PINE2, const.PINE3, const.PINE4]
 
-accessoryList = ['cards1','cards2','','','','','','','','','','','','','','','','']
+accessoryList = ['cards1','cards2','beer1','veggies','','','','','','','','','','','','','','']
 
 descriptions = {
                 const.PINE1   : "They don't call it the Pinelands for nothing!",

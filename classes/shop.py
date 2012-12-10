@@ -21,13 +21,13 @@ class Shop():
         self.ticker = ticker
         self.storeScreen.fill( colors.black )
         self.inputHandler = iH
-        self.menuBox = pygame.Surface( ( int(ceil(124*2.4)), int(ceil(99*2.4)) ) )
+        self.menuBox = pygame.Surface( ( int(ceil(124*const.scaleFactor)), int(ceil(99*const.scaleFactor)) ) )
     
     def drawStoreScreen(self):
         #self.myInterface.update()
         storeScreen_ = pygame.transform.scale(self.storeScreen, (720, 720) )
-        storeScreen_.blit( self.menuBox, ( int(ceil(165*2.4)),
-                                               int(ceil(190*2.4))) )
+        storeScreen_.blit( self.menuBox, ( int(ceil(165*const.scaleFactor)),
+                                               int(ceil(190*const.scaleFactor))) )
         self.screen.blit( storeScreen_, (0, 0) )
         pygame.display.flip()
         
@@ -38,8 +38,8 @@ class Shop():
             self.menuBox.fill( colors.gold )
             if pygame.font:
                 for i in range(3):
-                    self.menuBox.blit( text.Text(options[i], os.getcwd()+"/FONTS/Squealer.ttf", const.shopTextFontSize), ( int(ceil(25*2.4)),
-                                                                                                                      i*int(ceil(25*2.4)) ) )
+                    self.menuBox.blit( text.Text(options[i], os.getcwd()+"/FONTS/Squealer.ttf", const.shopTextFontSize), ( int(ceil(25*const.scaleFactor)),
+                                                                                                                      i*int(ceil(25*const.scaleFactor)) ) )
                 for event in pygame.event.get():
                     event_ = self.inputHandler.getCmd(event)
                     if event_ == pygame.K_UP:
@@ -52,7 +52,7 @@ class Shop():
                             selection = 0
                     if event_ == pygame.K_RETURN:
                         return options[selection]
-            self.menuBox.blit( self.images[0], (0, selection* int(ceil(25*2.4)) ) )
+            self.menuBox.blit( self.images[0], (0, selection* int(ceil(25*const.scaleFactor)) ) )
             self.drawStoreScreen()
     
     def sell(self, items, pD ):
@@ -232,8 +232,7 @@ class itemShop(Shop):
         Shop.__init__(self, screen, interface, type, ticker, iH, menu)
         self.images[1], r = load_image.load_image( os.path.join('INT', 'itemshop.bmp'))
         self.storeScreen.blit( self.images[1], (0,0) )
-        from prices import itemPrices as prices
-        self.prices = prices
+        self.iPrices = prices.itemPrices
         
         
     def enterStore(self, hero, game, level):
@@ -249,19 +248,22 @@ class itemShop(Shop):
                 return
             elif action == 'Buy':
                 self.ticker.tick(60)
-                purchase = self.buy(items)
+                purchase = self.buy(items, self.iPrices)
                 if purchase == None: pass
-                elif hero.takeGold( self.prices[purchase.getType()] ):
+                elif hero.takeGold( self.iPrices[purchase.getType()] ):
                     hero.getItem( purchase )
                 else: game.textMessage("You don't have enough money!")
             elif action == 'Sell':
                 self.ticker.tick(120)
-                sale = self.sell(hero.getItems())
+                sPD = {}
+                for p in self.iPrices:
+                    sPD[p] = self.iPrices[p]/2
+                sale = self.sell(hero.getItems(), sPD)
                 if sale == None: pass
                 else:
                     if hasattr(sale, "__iter__"):
                         sale = sale[0]
-                    hero.addGold( self.prices[ sale.getType() ]/2 )
+                    hero.addGold( self.iPrices[ sale.getType() ]/2 )
                     hero.takeItem( sale )
             self.drawStoreScreen()
             
@@ -272,15 +274,14 @@ class magicShop(Shop):
         Shop.__init__(self, screen, interface, type, ticker, iH, menu)
         self.images[1], r = load_image.load_image( os.path.join('INT', 'magicshop.bmp'))
         self.storeScreen.blit( self.images[1], (0,0) )
-        from prices import magicPrices as prices
-        self.prices = prices
+        self.mPrices = prices.magicPrices
             
         
     def enterStore(self, hero, game, level):
         itemsList = shopScr.magicShopsByLevel[ level ]
         items = []
         for i in itemsList:
-            items.append( item.Item( i[0], i[1], i[2] ) )
+            items.append( item.Item( i[0], i[1] ) )
         
         self.drawStoreScreen()
         while True:
@@ -289,22 +290,25 @@ class magicShop(Shop):
                 return
             elif action == 'Buy':
                 self.ticker.tick(60)
-                purchase = self.buy(items)
+                purchase = self.buy(items, self.mPrices)
                 if purchase == None: pass
-                elif hero.takeGold( self.prices[(purchase.getType(), purchase.getLevel(), purchase.getSpellNum() )] ):
+                elif hero.takeGold( self.mPrices[(purchase.getType(), purchase.getSpellNum() )] ):
                     hero.getItem( purchase )
                 else: game.textMessage("You don't have enough money!")
             elif action == 'Sell':
                 self.ticker.tick(120)
-                sale = self.sell(hero.getItems())
+                sPD = {}
+                for p in self.mPrices:
+                    sPD[p] = self.mPrices[p]/2
+                sale = self.sell(hero.getItems(), sPD)
                 if sale == None: pass
                 else:
                     try:
                         if hasattr(sale, "__iter__"):
-                            hero.addGold( self.prices[ ( sale[0].getType(), sale[0].getLevel(), sale[0].getSpellNum() ) ]/2 )
+                            hero.addGold( sPD[ ( sale[0].getType(), sale[0].getSpellNum() ) ] )
                             hero.takeItem(sale[0])
                         else:
-                            hero.addGold( self.prices[ ( sale.getType(), sale.getLevel(), sale.getSpellNum() ) ]/2 )
+                            hero.addGold( sPD[ ( sale.getType(), sale.getSpellNum() ) ] )
                             hero.takeItem(sale)
                     except KeyError:
                         self.myInterface.txtMessage("We don't buy those...", None)

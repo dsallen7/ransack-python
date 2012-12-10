@@ -30,13 +30,12 @@ enhancementsByLevel = {
 # 101: parchment
 # level, spellnum
 magicShopsByLevel = { 
-                     1: [(const.SPELLBOOK,0,1),
-                          (const.PARCHMENT,0,0),
-                          (const.PARCHMENT,0,1)],
-                     2: [(const.SPELLBOOK,0,2),
-                          (const.SPELLBOOK,0,3),
-                          (const.PARCHMENT,0,0),
-                          (const.PARCHMENT,0,1),
-                          (const.PARCHMENT,0,3)]
+                     1: [(const.SPELLBOOK,const.DART),
+                          (const.PARCHMENT,const.DART),
+                          (const.PARCHMENT,const.HEAL)],
+                     2: [(const.SPELLBOOK,const.FRBL),
+                          (const.PARCHMENT,const.FRBL),
+                          (const.PARCHMENT,const.HEAL),
+                          (const.PARCHMENT,const.DART)]
                       
                       }

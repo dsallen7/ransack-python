@@ -44,8 +44,8 @@ class Creator():
                              maxlength=12,
                              color=(255,255,255),
                              prompt='')
-        inputWindow = pygame.Surface( (int(ceil(223*2.4)),
-                                       int(ceil(36*2.4))) )
+        inputWindow = pygame.Surface( (int(ceil(223*const.scaleFactor)),
+                                       int(ceil(36*const.scaleFactor))) )
         while input == None:
 
             # events for txtbx
@@ -65,7 +65,7 @@ class Creator():
             txtbx.update(events)
             # blit txtbx on the sceen
             txtbx.draw(inputWindow)
-            screen.blit(inputWindow, ( int(ceil(38*2.4)), int(ceil(73*2.4)) ) )
+            screen.blit(inputWindow, ( int(ceil(38*const.scaleFactor)), int(ceil(73*const.scaleFactor)) ) )
             # refresh the display
             pygame.display.flip()
         return input
@@ -88,9 +88,9 @@ class Creator():
                     return
                 elif event.type == pygame.MOUSEMOTION:
                     (mX, mY) = pygame.mouse.get_pos()
-                    #if int(floor(sldr.getYLoc()*2.4)) <= mY <= int(ceil(sldr.getYLoc() + sldr.getMax()*10*2.4)):
-                    if sldr.getYLoc()*2.4 <= mY <= (sldr.getYLoc() + sldr.getMax()*12)*2.4:
-                        sldr.setValue( int( floor( ( (mY - (sldr.getYLoc())*2.4 ) / 12 ) / 2.4 ) ) )
+                    #if int(floor(sldr.getYLoc()*const.scaleFactor)) <= mY <= int(ceil(sldr.getYLoc() + sldr.getMax()*10*const.scaleFactor)):
+                    if sldr.getYLoc()*const.scaleFactor <= mY <= (sldr.getYLoc() + sldr.getMax()*12)*const.scaleFactor:
+                        sldr.setValue( int( floor( ( (mY - (sldr.getYLoc())*const.scaleFactor ) / 12 ) / const.scaleFactor ) ) )
                     else:
                         sldr.sliding = False
                         return
@@ -166,10 +166,10 @@ class Creator():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     (mX, mY) = pygame.mouse.get_pos()
                     for s in self.sliders:
-                        if s.getXLoc()* 2.4 <= mX < (s.getXLoc() + 24) * 2.4 and (s.getYLoc()+(s.getValue()*10)) * 2.4 <= mY < (s.getYLoc()+(s.getValue()*10) + 24 )* 2.4:
+                        if s.getXLoc()* const.scaleFactor <= mX < (s.getXLoc() + 24) * const.scaleFactor and (s.getYLoc()+(s.getValue()*10)) * const.scaleFactor <= mY < (s.getYLoc()+(s.getValue()*10) + 24 )* const.scaleFactor:
                             self.slide(s, screen)
                     # done
-                    if int(floor(33*2.4)) <= mX < int(ceil(82*2.4)) and int(floor(237*2.4)) <= mY < int(ceil(266*2.4)):
+                    if int(floor(33*const.scaleFactor)) <= mX < int(ceil(82*const.scaleFactor)) and int(floor(237*const.scaleFactor)) <= mY < int(ceil(266*const.scaleFactor)):
                         self.displayField, r = load_image.load_image(os.path.join('MENU', "createBox2.png") )
                         self.updateDisplay(screen, 'name')
                         if android:

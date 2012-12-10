@@ -53,6 +53,7 @@ magicPrices = { (const.SPELLBOOK,const.DART): 100,
                 (const.SPELLBOOK,const.FBL2): 1750,
                 (const.SPELLBOOK,const.GNCD): 2000,
                 
+                (const.PARCHMENT,const.HEAL): 10,
                 (const.PARCHMENT,const.DART): 10,
                (const.PARCHMENT,const.FRBL): 25,
                (const.PARCHMENT,const.HEL2): 10,

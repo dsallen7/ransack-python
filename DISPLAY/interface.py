@@ -75,8 +75,8 @@ class Interface( ):
     def update( self, game=None ):
         if self.state == 'mainmenu':
             self.mainImg = self.imgs[0]
-            self.screen.blit( pygame.transform.scale(self.mainImg, (int(ceil(300 * 2.4)), 
-                                                                    int(ceil(233 * 2.4)) ) ), (0, int(ceil(300 * 2.4))) )
+            self.screen.blit( pygame.transform.scale(self.mainImg, (int(ceil(300 * const.scaleFactor)), 
+                                                                    int(ceil(233 * const.scaleFactor)) ) ), (0, int(ceil(300 * const.scaleFactor))) )
             return
         self.mainImg = self.imgs[1].copy()
         stats = game.myHero.getPlayerStats()
@@ -145,50 +145,50 @@ class Interface( ):
     def npcMessage(self, message, img):
         msgText = text.Text(message, os.getcwd()+"/FONTS/devinne.ttf", 18, colors.white, colors.gold, True, 16)
         for i in range( 0, 255, 8 ):
-            borderBox = pygame.Surface( ( msgText.get_width()+ int(ceil(img.get_width()*2.4))+ int(ceil(20*2.4)), 
-                                          msgText.get_height()+ int(ceil(img.get_width()*2.4)) ) )
+            borderBox = pygame.Surface( ( msgText.get_width()+ int(ceil(img.get_width()*const.scaleFactor))+ int(ceil(20*const.scaleFactor)), 
+                                          msgText.get_height()+ int(ceil(img.get_width()*const.scaleFactor)) ) )
             borderBox.fill( colors.grey )
-            #borderBox.blit(msgText, (int(ceil(50*2.4)), int(ceil(10*2.4))) )
+            #borderBox.blit(msgText, (int(ceil(50*const.scaleFactor)), int(ceil(10*const.scaleFactor))) )
             borderBox.set_alpha( int(ceil(i*0.1)) )
             msgText.set_alpha(i)
             self.screen.blit( borderBox, 
                             ( self.screen.get_width()/2-borderBox.get_width()/2 , 150 ) )
             self.screen.blit( pygame.transform.scale(img,
-                                                   (int(ceil(img.get_width()*2.4)),
-                                                    int(ceil(img.get_width()*2.4)) ) ), 
-                            ( self.screen.get_width()/2-borderBox.get_width()/2 + int(ceil(10*2.4)),
-                              150 + int(ceil(10*2.4))  ) )
+                                                   (int(ceil(img.get_width()*const.scaleFactor)),
+                                                    int(ceil(img.get_width()*const.scaleFactor)) ) ), 
+                            ( self.screen.get_width()/2-borderBox.get_width()/2 + int(ceil(10*const.scaleFactor)),
+                              150 + int(ceil(10*const.scaleFactor))  ) )
             self.screen.blit( msgText, 
-                            ( (self.screen.get_width()/2-borderBox.get_width()/2)+int(ceil(50*2.4)) , 150 ) )
+                            ( (self.screen.get_width()/2-borderBox.get_width()/2)+int(ceil(50*const.scaleFactor)) , 150 ) )
             pygame.display.flip()
         while (pygame.event.wait().type != pygame.MOUSEBUTTONDOWN): pass
     
     # same as npcMessage but returns yes/no input
     def npcDialog(self, message, img):
         msgText = text.Text(message, os.getcwd()+"/FONTS/devinne.ttf", 18, colors.white, colors.gold, True)
-        borderBox = pygame.Surface( ( msgText.get_width()+ int(ceil(img.get_width()*2.4))+ int(ceil(20*2.4)), 
-                                      msgText.get_height()+ int(ceil(img.get_width()*2.4)) ) )
+        borderBox = pygame.Surface( ( msgText.get_width()+ int(ceil(img.get_width()*const.scaleFactor))+ int(ceil(20*const.scaleFactor)), 
+                                      msgText.get_height()+ int(ceil(img.get_width()*const.scaleFactor)) ) )
         borderBox.fill( colors.grey )
-        buttons = [ button.Button( ( (self.screen.get_width()/2-borderBox.get_width()/2)+int(ceil(50*2.4)),
+        buttons = [ button.Button( ( (self.screen.get_width()/2-borderBox.get_width()/2)+int(ceil(50*const.scaleFactor)),
                                  150 + msgText.get_height() ),
                                  'Yes' ),
-                    button.Button( ( (self.screen.get_width()/2-borderBox.get_width()/2)+int(ceil(50*2.4))+(borderBox.get_width()-200),
+                    button.Button( ( (self.screen.get_width()/2-borderBox.get_width()/2)+int(ceil(50*const.scaleFactor))+(borderBox.get_width()-200),
                                  150 + msgText.get_height() ),
                                  'No' )
                    ]
         for i in range( 0, 255, 8 ):
-            #borderBox.blit(msgText, (int(ceil(50*2.4)), int(ceil(10*2.4))) )
+            #borderBox.blit(msgText, (int(ceil(50*const.scaleFactor)), int(ceil(10*const.scaleFactor))) )
             borderBox.set_alpha( int(ceil(i*0.1)) )
             msgText.set_alpha(i)
             self.screen.blit( borderBox, 
                             ( self.screen.get_width()/2-borderBox.get_width()/2 , 150 ) )
             self.screen.blit( pygame.transform.scale(img,
-                                                   (int(ceil(img.get_width()*2.4)),
-                                                    int(ceil(img.get_width()*2.4)) ) ), 
-                            ( self.screen.get_width()/2-borderBox.get_width()/2 + int(ceil(10*2.4)),
-                              150 + int(ceil(10*2.4))  ) )
+                                                   (int(ceil(img.get_width()*const.scaleFactor)),
+                                                    int(ceil(img.get_width()*const.scaleFactor)) ) ), 
+                            ( self.screen.get_width()/2-borderBox.get_width()/2 + int(ceil(10*const.scaleFactor)),
+                              150 + int(ceil(10*const.scaleFactor))  ) )
             self.screen.blit( msgText, 
-                            ( (self.screen.get_width()/2-borderBox.get_width()/2)+int(ceil(50*2.4)) , 150 ) )
+                            ( (self.screen.get_width()/2-borderBox.get_width()/2)+int(ceil(50*const.scaleFactor)) , 150 ) )
             for b in buttons:
                 self.screen.blit(b.img, (b.locX, b.locY ) )
             pygame.display.flip()

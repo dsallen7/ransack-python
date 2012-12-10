@@ -2,17 +2,20 @@ from UTIL import const
 
 from random import randrange
 
+battleOnlySpells = [const.DART, const.FRBL, const.ICBL, const.FBL2, const.IBL2]
+
 heal = lambda s: [s[0] + randrange(5, 15) ] + s[1:]
+heal2 = lambda s: [s[0] + randrange(10, 25) ] + s[1:]
+heal3 = lambda s: [s[0] + randrange(25, 50) ] + s[1:]
+heal4 = lambda s: [s[0] + randrange(50, 100) ] + s[1:]
+heal5 = lambda s: [s[0] + randrange(100, 250) ] + s[1:]
 nothing = lambda s: s
 
-spellDict = { (const.HEAL, True): heal,
-              (const.HEAL, False): heal,
-              (const.FRBL, True): nothing,
-              (const.FRBL, False): nothing,
-              (const.ICBL, True): nothing,
-              (const.ICBL, False): nothing,
-              (const.TLPT, True): nothing,
-              (const.TLPT, False): nothing,
+spellDict = { (const.HEAL): heal,
+              (const.HEL2): heal2,
+              (const.HEL3): heal3,
+              (const.HEL4): heal4,
+              (const.HEL5): heal5
 
                 }
 

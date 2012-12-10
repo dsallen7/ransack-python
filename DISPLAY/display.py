@@ -16,7 +16,7 @@ class Display():
         self.fog.fill( colors.black )
         self.fog.set_alpha( 192 )
     
-    def displayOneFrame(self, iFace, FX, board=None, game=None, dark=False):
+    def displayOneFrame(self, iFace, FX, board=None, game=None, dark=False, smooth=False):
         if game is not None:
             game.updateSprites()
             iFace.update(game)
@@ -27,9 +27,16 @@ class Display():
                 self.drawDarkness(game.myMap, board)
                 #board.blit( self.SS_, (0, 0) )
             #pygame.time.delay(500)
+            if smooth:
+                pass
+            '''
+                self.screen.blit( pygame.transform.smoothscale(board, 
+                                                           (int(ceil(300 * const.scaleFactor)), 
+                                                            int(ceil(300 * const.scaleFactor)) ) ), (0,0) )
+                                                            '''
             self.screen.blit( pygame.transform.scale(board, 
-                                                           (int(ceil(300 * 2.4)), 
-                                                            int(ceil(300 * 2.4)) ) ), (0,0) )
+                                                           (int(ceil(300 * const.scaleFactor)), 
+                                                            int(ceil(300 * const.scaleFactor)) ) ), (0,0) )
         pygame.display.flip()
     
     # Takes first two coordinates of hero rect, gameBoard and
@@ -72,18 +79,27 @@ class Display():
         #self.drawDarkness
         return window
     # draws entire map to DIMxDIM Surface
-    def redrawXMap(self, map):
+    def redrawXMap(self, map, local=False):
         self.xGameBoard = pygame.Surface( (map.getDIM()*const.blocksize, map.getDIM()*const.blocksize) )
         if map.type in ['dungeon', 'maze', 'fortress']:
             map.revealMap()
-        for x in range(map.getDIM()):
-            for y in range(map.getDIM()):
-                tile = map.getEntry(x,y)
-                if tile != const.VOID and map.visDict[(x,y)]:
-                    self.xGameBoard.blit( self.images[ map.defaultBkgd ], ( (x*const.blocksize), (y*const.blocksize) ) )
+        if local:
+            (tX, tY) = map.topMapCorner
+            rX = range(tX-1, tX+const.HALFDIM+1)
+            rY = range(tY-1, tY+const.HALFDIM+1)
+        else:
+            (rX, rY) = ( range(map.getDIM()), range(map.getDIM()) )
+        for x in rX:
+            for y in rY:
+                fTile = map.getTileFG(x,y)
+                bTile = map.getTileBG(x,y)
+                if fTile != const.VOID and map.visDict[(x,y)]:
+                    if bTile is not None:
+                        self.xGameBoard.blit( self.images[ bTile ], ( (x*const.blocksize), (y*const.blocksize) ) )
+                    else: self.xGameBoard.blit( self.images[ map.defaultBkgd ], ( (x*const.blocksize), (y*const.blocksize) ) )
                     '''
                     if tile > 24:
-                        shortList = [map.getEntry(tx, ty) for (tx, ty) in map.neighbors((x,y))]
+                        shortList = [map.getEntry(tx, ty) for (tx, ty) in map.cardinalNeighbors((x,y))]
                         if const.VOID not in shortList:
                             self.xGameBoard.blit( self.images[ map.defaultBkgd ], ( (x*const.blocksize), (y*const.blocksize) ) )
                     
@@ -91,8 +107,9 @@ class Display():
                         self.xGameBoard.blit( self.images[128], (x*const.blocksize - const.blocksize, y*const.blocksize - 2*const.blocksize), area = self.images[128].get_rect() )
                     else: self.xGameBoard.blit( self.images[ tile ], ( (x*const.blocksize), (y*const.blocksize) ) )
                     '''
-                    self.xGameBoard.blit( self.images[ tile ], ( (x*const.blocksize), (y*const.blocksize) ) )
-                    if map.getEntry(x, y) in range(const.TABLE1, const.TABLE3+1):
+                    self.xGameBoard.blit( self.images[ fTile ], ( (x*const.blocksize), (y*const.blocksize) ) )
+                    # accessories
+                    if fTile in range(const.TABLE1, const.TABLE3+1):
                         try:
                             self.xGameBoard.blit( self.accImages[map.grid[x][y].accessory], ( x*const.blocksize+10,
                                                                                               y*const.blocksize+5) )
@@ -209,5 +226,7 @@ class Display():
             npc.setRect(nRX, nRY, const.blocksize, const.blocksize)
             npc.moving = False
         hero.setRect( newX, newY, const.blocksize, const.blocksize)
-        self.redrawXMap(map)
+        
+        if map.type in ['dungeon', 'maze', 'fortress']:
+            self.redrawXMap(map, True)
         self.redrawMap(map, hero, gameBoard)

@@ -1,14 +1,14 @@
 import os, pygame, cPickle
 
 from random import choice, randrange
-from MAP import map, tile, room
+from MAP import map, tile
+from ROOM import room, roomtools
 from UTIL import const, colors, misc
 
 from SCRIPTS import enemyScr, mapScr
 
 #from IMG import images
 
-dirDict = { 'w':(-1,0), 'e':(1,0), 'n':(0,-1), 's':(0,1) }
 DefaultWallTile = 29
 
 DEFAULTBKGD = 0
@@ -28,13 +28,24 @@ class Generator():
     def branchTile(self, map, room):
         (xpos, ypos) = room.getPos()
         (xdim, ydim) = room.getDimensions()
-        candidateList = []
+        candidateList = [ ]
+        #room.printGrid()
         for i in range(1,xdim-1):
+            #print map.getEntry(i+xpos,ypos), room.getGrid(i,0).getFG()
             if map.getEntry(i+xpos,ypos) == const.EWWALL:
-                candidateList += [(i+xpos,ypos)] + [(i+xpos,ypos+ydim-1)]
+                candidateList += [(i+xpos,ypos)]
+            #print map.getEntry(i+xpos,ypos+ydim-1), room.getGrid(i,ydim-1).getFG()
+            if map.getEntry(i+xpos,ypos+ydim-1) == const.EWWALL:
+                candidateList += [(i+xpos,ypos+ydim-1)]
         for i in range(1,ydim-1):
+            #print map.getEntry(xpos,i+ypos), room.getGrid(0,i).getFG()
             if map.getEntry(xpos,i+ypos) == const.NSWALL:
-                candidateList += [(xpos,i+ypos)] + [(xpos+xdim-1,i+ypos)]
+                candidateList += [(xpos,i+ypos)]
+            #print map.getEntry(xpos+xdim-1,i+ypos), room.getGrid(xdim-1,i).getFG()
+            if map.getEntry(xpos+xdim-1,i+ypos) == const.NSWALL:
+                candidateList += [(xpos+xdim-1,i+ypos)]
+        
+        #print candidateList
         cand = choice(candidateList)
         if cand[0] == xpos:
             return (cand, 'w')
@@ -111,78 +122,9 @@ class Generator():
                     self.secretRooms.append(newRoom)
                 
             #10 create doorway into new room
-                (x1,y1) = tile
-                if dir in ['n','s']:
-                    if newRoom.secret:
-                        self.map.setEntry( x1,y1,const.EWFAKE, len(self.rooms) )
-                    else: self.map.setEntry( x1,y1,const.EWDOOR, len(self.rooms) )
-                else:
-                    if newRoom.secret:
-                        self.map.setEntry( x1,y1,const.NSFAKE, len(self.rooms) )
-                    else: self.map.setEntry( x1,y1,const.NSDOOR, len(self.rooms) )
-                candidateRoom.entrances.append( (x1,y1) )
-                (x2,y2) = dirDict[dir]
-                if dir == 'n':
-                    self.map.setEntry( x1+x2-1, y1+y2, const.URWALL, len(self.rooms))
-                    self.map.setEntry( x1+x2+1, y1+y2, const.ULWALL, len(self.rooms))
-                elif dir == 's':
-                    self.map.setEntry( x1+x2-1, y1+y2, const.LRWALL, len(self.rooms))
-                    self.map.setEntry( x1+x2+1, y1+y2, const.LLWALL, len(self.rooms))
-                elif dir == 'e':
-                    self.map.setEntry( x1+x2, y1+y2-1, const.LRWALL, len(self.rooms))
-                    self.map.setEntry( x1+x2, y1+y2+1, const.URWALL, len(self.rooms))
-                elif dir == 'w':
-                    self.map.setEntry( x1+x2, y1+y2-1, const.LLWALL, len(self.rooms))
-                    self.map.setEntry( x1+x2, y1+y2+1, const.ULWALL, len(self.rooms))
-                self.map.setEntry( x1+x2, y1+y2, 0, len(self.rooms))
-                newRoom.entrances.append( (x1+x2,y1+y2) )
+                roomtools.addDoorway(tile, dir, newRoom, candidateRoom, self)
             # 10a check to see if more neighbors can be added
-                (xpos, ypos) = newRoom.getPos()
-                (xD, yD) = newRoom.getDimensions()
-                [nFlag, sFlag, eFlag, wFlag] = [False, False, False, False]
-                for i in range( xpos+1, xpos+xD ):
-                    if self.map.getEntry( i, ypos ) == const.EWWALL:
-                        if self.map.getEntry( i, ypos-1 ) == const.EWWALL and not nFlag:
-                            if self.getRoomByNo( self.map.getRoomN(i, ypos-1)) is not candidateRoom: # to the north
-                                if self.getRoomByNo( self.map.getRoomN(i, ypos) ) not in self.getRoomByNo( self.map.getRoomN(i, ypos-1)).neighbors and self.getRoomByNo( self.map.getRoomN(i, ypos-1) ) not in self.getRoomByNo( self.map.getRoomN(i, ypos)).neighbors: # to the north
-                                    self.map.setEntry( i, ypos, const.EWDOOR, len(self.rooms) )
-                                    self.map.setEntry( i, ypos-1, const.DFLOOR1, len(self.rooms) )
-                                    #self.map.setEntry( i-1, ypos-1, const.URWALL, len(self.rooms) )
-                                    #self.map.setEntry( i+1, ypos-1, const.ULWALL, len(self.rooms) )
-                                    nFlag = True
-                    elif self.map.getEntry( i, ypos + yD ) == const.EWWALL:
-                        if self.map.getEntry( i, ypos + yD + 1 ) == const.EWWALL and not sFlag:
-                            if self.getRoomByNo( self.map.getRoomN(i, ypos+yD+1) ) is not candidateRoom: # south
-                                if self.getRoomByNo( self.map.getRoomN(i, ypos+yD) ) not in self.getRoomByNo( self.map.getRoomN(i, ypos+yD+1) ).neighbors and self.getRoomByNo( self.map.getRoomN(i, ypos+yD+1) ) not in self.getRoomByNo( self.map.getRoomN(i, ypos+yD) ).neighbors:
-                                    self.map.setEntry( i, ypos+yD, const.EWDOOR, len(self.rooms) )
-                                    self.map.setEntry( i, ypos+yD+1, const.DFLOOR1, len(self.rooms) )
-                                    #self.map.setEntry( (xpos + xD/2)-1, ypos+yD+1, const.LRWALL, len(self.rooms) )
-                                    #self.map.setEntry( (xpos + xD/2)+1, ypos+yD+1, const.LLWALL, len(self.rooms) )
-                                    sFlag = True
-                for i in range( ypos+1, ypos+yD ):
-                    if self.map.getEntry( xpos, i ) == const.NSWALL:
-                        if self.map.getEntry( xpos-1, i ) == const.NSWALL and not eFlag:
-                            if self.getRoomByNo( self.map.getRoomN(xpos-1, i) ) is not candidateRoom: # east
-                                if self.getRoomByNo( self.map.getRoomN(xpos, i) ) not in self.getRoomByNo( self.map.getRoomN(xpos-1, i) ).neighbors and self.getRoomByNo( self.map.getRoomN(xpos-1, i) ) not in self.getRoomByNo( self.map.getRoomN(xpos, i) ).neighbors:
-                                    self.map.setEntry( xpos, i, const.NSDOOR, len(self.rooms) )
-                                    self.map.setEntry( xpos-1, i, const.DFLOOR1, len(self.rooms) )
-                                    #self.map.setEntry( xpos-1, i-1, const.LRWALL, len(self.rooms) )
-                                    #self.map.setEntry( xpos-1, i+1, const.URWALL, len(self.rooms) )
-                                    eFlag = True
-                    elif self.map.getEntry( xpos+xD, i ) == const.NSWALL:
-                        if self.map.getEntry( xpos+xD+1, i ) == const.NSWALL and not wFlag:
-                            if self.getRoomByNo( self.map.getRoomN(xpos+xD+1, i)) is not candidateRoom: # west
-                                if self.getRoomByNo( self.map.getRoomN(xpos+xD, i) ) not in self.getRoomByNo( self.map.getRoomN(xpos+xD+1, i)).neighbors and self.getRoomByNo( self.map.getRoomN(xpos+xD+1, i) ) not in self.getRoomByNo( self.map.getRoomN(xpos+xD, i)).neighbors:
-                                    self.map.setEntry( xpos+xD, i, const.NSDOOR, len(self.rooms) )
-                                    self.map.setEntry( xpos+xD+1, i, const.DFLOOR1, len(self.rooms) )
-                                    #self.map.setEntry( xpos+xD+1, i-1, const.LLWALL, len(self.rooms) )
-                                    #self.map.setEntry( xpos+xD+1, i+1, const.ULWALL, len(self.rooms) )
-                                    wFlag = True
-            
-            #candidateTileN = self.myMap.grid[xpos + xdim/2][ypos]
-            #candidateTileS = self.myMap.grid[xpos + xdim/2][ypos + ydim]
-            #candidateTileE = self.myMap.grid[xpos + xdim][ypos + ydim/2]
-            #candidateTileW = self.myMap.grid[xpos][ypos + ydim/2]
+                roomtools.checkForNeighbors(newRoom, candidateRoom, self)
                 
             # 11 repeat step 4
             
@@ -296,6 +238,8 @@ class Generator():
         for r in self.rooms:
             if r.serial == N:
                 return r
+    def addDoorway(self, t1, t2):
+        pass
     
     def draw(self):
         gridField.fill( [0,0,0] )

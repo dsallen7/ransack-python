@@ -13,6 +13,8 @@ enemyDict = { 'skeleton'  : ('Skeleton', 'skeleton.bmp'),
              }
 
 npcList = [
+           # animals (non-enemy)
+           'deer',
            # citizens
            'blacksmith',
            'female',

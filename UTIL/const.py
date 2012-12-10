@@ -1,5 +1,10 @@
 # Constant variables for Ransack game
 
+scaleFactor = 2.4
+
+def setScaleFactor(sF):
+    scaleFactor = sF
+
 # Size of a "block" unit
 blocksize = 30
 miniblocksize = 15
@@ -193,6 +198,7 @@ SMP_I       = 95
 MMP_I       = 96
 LMP_I       = 97
 
+SOLIDS = range(BRICK1, HOUSEDOOR1)+range(TAVRNDOOR, 88)+range(EWWALL_W, FRUIT1)
 
 # List of maps in dungeon
 mapList = ['castle2.dat','castle1.dat','village1.dat','village2.dat']#,'map.dat', 'map2.dat']

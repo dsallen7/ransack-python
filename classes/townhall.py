@@ -22,13 +22,13 @@ class Townhall():
         self.storeScreen.fill( colors.black )
         self.storeScreen.blit( self.images[1], (0,0) )
         self.inputHandler = iH
-        self.menuBox = pygame.Surface( ( int(ceil(124*2.4)), int(ceil(99*2.4)) ) )
+        self.menuBox = pygame.Surface( ( int(ceil(124*const.scaleFactor)), int(ceil(99*const.scaleFactor)) ) )
     
     def drawStoreScreen(self):
         #self.myInterface.update()
         storeScreen_ = pygame.transform.scale(self.storeScreen, (720, 720) )
-        storeScreen_.blit( self.menuBox, ( int(ceil(165*2.4)),
-                                               int(ceil(190*2.4))) )
+        storeScreen_.blit( self.menuBox, ( int(ceil(165*const.scaleFactor)),
+                                               int(ceil(190*const.scaleFactor))) )
         self.screen.blit( storeScreen_, (0, 0) )
         pygame.display.flip()
     
@@ -39,8 +39,8 @@ class Townhall():
             self.menuBox.fill( colors.gold )
             if pygame.font:
                 for i in range(len(options)):
-                    self.menuBox.blit( text.Text(options[i], os.getcwd()+"/FONTS/Squealer.ttf", const.shopTextFontSize), ( int(ceil(25*2.4)),
-                                                                                                                      i*int(ceil(25*2.4)) ) )
+                    self.menuBox.blit( text.Text(options[i], os.getcwd()+"/FONTS/Squealer.ttf", const.shopTextFontSize), ( int(ceil(25*const.scaleFactor)),
+                                                                                                                      i*int(ceil(25*const.scaleFactor)) ) )
             for event in pygame.event.get():
                 event_ = self.inputHandler.getCmd(event)
                 if event_ == pygame.K_UP:
@@ -53,7 +53,7 @@ class Townhall():
                         selection = 0
                 if event_ == pygame.K_RETURN:
                     return options[selection]
-            self.menuBox.blit( self.images[0], (0, selection* int(ceil(25*2.4)) ) )
+            self.menuBox.blit( self.images[0], (0, selection* int(ceil(25*const.scaleFactor)) ) )
             self.drawStoreScreen()
     
     def getFile(self, FX):
