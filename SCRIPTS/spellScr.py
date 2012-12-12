@@ -19,12 +19,38 @@ spellDict = { (const.HEAL): heal,
 
                 }
 
+imgDict = {const.HEAL: 88,
+             const.DART: 89,
+             const.FRBL: 90,
+             const.FBL2: 90,
+             const.FBL3: 90,
+             const.ICBL: 91,
+             const.IBL2: 91,
+             const.TLPT: 92
+           
+           }
+
 descDict = {const.HEAL: 'Heal I',
+            const.HEL2: 'Heal II',
+            const.HEL3: 'Heal III',
+            const.HEL4: 'Heal IV',
+            const.HEL5: 'Heal V',
+            
             const.DART: 'Magic Dart',
             const.FRBL: 'Fireball I',
+            const.FBL2: 'Fireball II',
+            const.FBL3: 'Fireball III',
+            
             const.ICBL: 'Iceball I',
+            const.ICBL: 'Iceball II',
+            
             const.TLPT: 'Teleport',
-            const.ASCD: 'Ascend I'
+            const.ASCD: 'Ascend I',
+            
+            const.EXTD: 'Exit Dungeon',
+            const.RTRN: "Return to Village",
+            const.ASCD: 'Ascend',
+            const.GNCD: 'Genocide'
             }
 
 costDict = { const.HEAL: 4,
@@ -54,9 +80,20 @@ baseDmg = {const.DART : 5,
                 const.IBL2 : 30
            }
 
-castMsgs = { const.HEAL: 'You feel better.',
+castMsgs = { const.HEAL: 'You feel a little better.',
+             const.HEL2: 'You feel better.',
+             const.HEL3: 'You feel much better.',
+             const.HEL4: 'You feel great!',
+             const.HEL5: 'You feel awesome!',
              const.DART: 'An electric dart stabs the enemy!',
-             const.FRBL: 'A ball of fire materializes before your fingertips!',
-             const.ICBL: 'A grim and frostbitten ball of ice emerges!',
-             const.TLPT: 'Your body disintegrates...'
+             const.FRBL: 'A fireball materializes before your fingertips!',
+             const.FBL2: 'A fireball materializes before your fingertips!',
+             const.FBL3: 'A fireball materializes before your fingertips!',
+             const.ICBL: 'A grim and frostbitten iceball emerges!',
+             const.IBL2: 'A grim and frostbitten iceball emerges!',
+             const.EXTD: 'Everything goes black... you wake up outside the dungeon.',
+             const.RTRN: "You feel like you're leaving your body",
+             const.TLPT: 'Your body disintegrates...',
+             const.ASCD: 'You float up through the ceiling!',
+             const.GNCD: 'A deadly feeling permeates the air!'
             }

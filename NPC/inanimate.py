@@ -24,3 +24,15 @@ class Fireplace(Inanimate):
             self.imgIdx = ( self.imgIdx + 1 ) % 8
             self.image = self.images[self.imgIdx]
         self.flicker = ( self.flicker + 1 ) % 5
+
+class Candleabra(Inanimate):
+    def __init__(self, x, y, name):
+        Inanimate.__init__(self, x, y, name, 'candleabra.bmp')
+        self.message = 'The candles cast an eerie glow over the room!'
+        self.flicker = 0
+    
+    def update(self, map, hero):
+        if self.flicker == 4:
+            self.imgIdx = ( self.imgIdx + 1 ) % 8
+            self.image = self.images[self.imgIdx]
+        self.flicker = ( self.flicker + 1 ) % 5

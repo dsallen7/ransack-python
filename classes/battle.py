@@ -136,6 +136,11 @@ class battle():
              self.enemyImgs[i], r = load_image.load_image( os.path.join('ANIMATION', enemyImgFilenames[i]), 2 )
         self.enemyImg = self.enemyImgs[0]
     
+    def damageEnemy(self, game, enemy, dmg):
+        for i in range(enemy.getHP(), enemy.getHP()-dmg, -1):
+            enemy.takeDmg(1)
+            self.drawBattleScreen(game, enemy)
+    
     # this controls all the logic of what goes on in an actual battle
     def fightBattle(self, game, enemy, board_):
         self.loadEnemyImg(game.myHero, enemy)
@@ -166,24 +171,25 @@ class battle():
                     dmg = random.randrange(sth/2,sth) + weapon.getLevel()**2
                     game.textMessage('You hit the '+enemy.getName() +' for '+str(dmg)+' points!')
                     #game.SFX.play(1)
-                    for i in range(enemy.getHP(), enemy.getHP()-dmg, -1):
-                        enemy.takeDmg(1)
-                        self.drawBattleScreen(game, enemy)
+                    self.damageEnemy(game, enemy, dmg)
                 else:
                     game.textMessage("You missed The "+enemy.getName()+"!")
                     #game.SFX.play(2)
             elif action == 'Magic':
-                enemy.takeDmg( hero.castSpell( self.myMenu.invMenu(hero.getSpells(), "Spells:", ['Cast', 'Return'] ), game, True ) )
+                dmg = hero.castSpell( self.myMenu.invMenu(hero.getSpells(), "Spells:", ['Cast', 'Return'] ), game, True )
+                if dmg in [True, False]: pass
+                else: self.damageEnemy(game, enemy, dmg)
                 
             elif action == 'Item':
-                d = hero.useItem(self.myMenu.invMenu(hero.getItems(), "Items:", ['Use', 'Return'] ), game, True )
-                if d > 0:
-                    enemy.takeDmg( d )
+                dmg = hero.useItem(self.myMenu.invMenu(hero.getItems(), "Items:", ['Use', 'Return'] ), game, True )
+                if dmg in [True, False]: pass
+                else: self.damageEnemy(game, enemy, dmg)
+                
             elif action == 'Flee':
                 if misc.rollDie(1,3):
                     game.textMessage("You escaped safely.")
                     game.FX.scrollFromCenter(self.battleField, board_)
-                    return True
+                    return 'escaped'
                 else:
                     game.textMessage("You can't escape!")
             self.heroImg = self.heroImgs[0]
@@ -194,33 +200,33 @@ class battle():
             game.Ticker.tick(10)
             #enemy attacks
             if enemy.getHP() > 0:
-                if misc.rollDie(0,2):
-                    dmg = random.randrange(enemy.getBaseAttack()-5,enemy.getBaseAttack()+5) - ( hero.armorClass + 1 )
+                if not misc.rollDie(hero.dex, const.maxStats):
+                    dmg = random.randrange(enemy.getBaseAttack()-5,enemy.getBaseAttack()+5) - ( hero.armorClass )
                     if dmg > 0:
                         game.textMessage("The "+enemy.getName()+" hits you for "+str(dmg)+" points!")
+                        if enemy.poison:
+                            if misc.rollDie(0,3):
+                                if hero.isDamned:
+                                    hero.isDamned = False
+                                hero.isPoisoned = True
+                                hero.poisonedAt = game.Ticker.getTicks()
+                                game.textMessage("You are poisoned!")
+                        elif enemy.damned:
+                            if misc.rollDie(0,3):
+                                if hero.isPoisoned:
+                                    hero.isPoisoned = False
+                                hero.isDamned = True
+                                hero.damnedAt = game.Ticker.getTicks()
+                                game.textMessage("You are damned!")
                         #game.SFX.play(1)
                         self.enemyImg = self.enemyImgs[1]
                         if android:
                             android.vibrate(0.1)
                     else: game.textMessage("The "+enemy.getName()+" attack is ineffective.")
-                    if enemy.poison:
-                        if misc.rollDie(0,3):
-                            if hero.isDamned:
-                                hero.isDamned = False
-                            hero.isPoisoned = True
-                            hero.poisonedAt = game.Ticker.getTicks()
-                            game.textMessage("You are poisoned!")
-                    elif enemy.damned:
-                        if misc.rollDie(0,3):
-                            if hero.isPoisoned:
-                                hero.isPoisoned = False
-                            hero.isDamned = True
-                            hero.damnedAt = game.Ticker.getTicks()
-                            game.textMessage("You are damned!")                        
                     if hero.takeDmg(dmg) < 1:
                         game.textMessage("You have died!")
                         game.FX.scrollFromCenter(self.battleField, board_)
-                        return False
+                        return 'died'
                 else:
                     game.textMessage("The "+enemy.getName()+" missed you!")
                     #game.SFX.play(2)
@@ -230,9 +236,7 @@ class battle():
             pygame.time.wait(1000)
         game.textMessage("The "+enemy.getName()+" is dead!")
         self.showEnemyDeath(game)
-        if hero.increaseExp( 5 + random.randrange(enemy.level, 2*enemy.level)  ):
+        if hero.increaseExp( enemyScr.expDict[enemy.getName()] + random.randrange(enemy.getLevel()*2, enemy.getLevel()*4)  ):
             game.textMessage("Congratulations! You have gained a level.")
         game.FX.scrollFromCenter(self.background, board_)
-        if enemy.getLevel() > 0:
-            return random.randrange(enemy.getLevel()*2, enemy.getLevel()*4)
-        else: return 1
+        return 'won'

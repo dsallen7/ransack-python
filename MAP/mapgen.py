@@ -160,12 +160,6 @@ class Generator():
         self.rooms.remove(choice1)
         
         self.rooms.remove(choice2)
-        # add key for door
-        keyRoom = choice(self.rooms)
-        (xpos, ypos) = keyRoom.getPos()
-        (xdim, ydim) = keyRoom.getDimensions()
-        self.map.setEntry( xpos + xdim/2, ypos + ydim/2, const.KEY, len(self.rooms))
-        self.rooms.remove(keyRoom)
         # set hero starting location - optional
         choice3 = choice(self.rooms)
         (xpos, ypos) = choice3.getPos()
@@ -213,18 +207,25 @@ class Generator():
             elif sItem in range(const.HELMET, const.SSHIELD+1):
                 chestlist += [ ( ( xpos + xdim/2, 
                                    ypos + ydim/2), 
-                               [sItem] )]
+                               [(sItem,None)] )]
             
         self.map.chests = dict(chestlist)
         # add enemies
-        while len(self.rooms) > 0:
+        while len(self.rooms) > 1:
             room = choice(self.rooms)
             (xpos, ypos) = room.getPos()
             (xdim, ydim) = room.getDimensions()
             self.map.NPCs.append( (( xpos + xdim/2, 
                                      ypos + ydim/2), 
-                                   choice(enemyScr.enemiesByLevel[self.map.level] ) ) )
+                                   choice(enemyScr.enemiesByDungeonLevel[self.map.level] ) ) )
             self.rooms.remove(room)
+        
+        # add key for door
+        keyRoom = self.rooms[0]
+        (xpos, ypos) = keyRoom.getPos()
+        (xdim, ydim) = keyRoom.getDimensions()
+        self.map.setEntry( xpos + xdim/2, ypos + ydim/2, const.KEY, len(self.rooms))
+        self.rooms.remove(keyRoom)
                
     def addRoom(self, map, room, pos):
         room.serial = len(self.rooms)

@@ -24,6 +24,7 @@ class Npc(pygame.sprite.Sprite):
         self.moving = False
         self.message = message
         self.setRect(x * const.blocksize, y * const.blocksize, const.blocksize, const.blocksize)
+        self.movingRate = 20
     
     def setRect(self, x1, y1, x2, y2):
         self.rect = (x1, y1, x2, y2)
@@ -43,9 +44,63 @@ class Npc(pygame.sprite.Sprite):
         self.image = self.images[self.imgIdx]
     
     def interact(self, interface, game):
+        (hX, hY) = game.myHero.getXY()
+        hX = hX / const.blocksize
+        hY = hY / const.blocksize
+        (sX, sY) = self.getXY()
+        for (cX, cY) in const.CARDINALS:
+            if (sX + cX, sY + cY) == (hX, hY):
+                if (cX, cY) == (0,-1):
+                    self.dir = 'up'
+                elif (cX, cY) == (0,1):
+                    self.dir = 'down'
+                elif (cX, cY) == (-1, 0):
+                    self.dir = 'left'
+                elif (cX, cY) == (1,0):
+                    self.dir = 'right'
         interface.npcMessage(self.message, self.images[8])
         return None
     
+    def playerIsFacingMe(self, hero):
+        (hX, hY) = hero.getXY()
+        hX = hX / const.blocksize
+        hY = hY / const.blocksize
+        (sX, sY) = self.getXY()
+        for (cX, cY) in const.CARDINALS:
+            if (sX + cX, sY + cY) == (hX, hY):
+                if (cX, cY) == (0,-1):
+                    if hero.dir == 'down':
+                        return True
+                elif (cX, cY) == (0,1):
+                    if hero.dir == 'up':
+                        return True
+                elif (cX, cY) == (-1, 0):
+                    if hero.dir == 'right':
+                        return True
+                elif (cX, cY) == (1,0):
+                    if hero.dir == 'left':
+                        return True
+        return False
+        
+    def moveIT(self, map, heroPos):
+        (hX, hY) = heroPos
+        hX = hX / const.blocksize
+        hY = hY / const.blocksize
+        (sX, sY) = self.getXY()
+        for (cX, cY) in const.CARDINALS:
+            if map.getEntry(sX + cX, sY + cY) in range(25) and (sX + cX, sY + cY) != (hX, hY) and not map.isOccupied(sX + cX, sY + cY):
+                if (cX, cY) == (0,-1):
+                    self.dir = 'up'
+                elif (cX, cY) == (0,1):
+                    self.dir = 'down'
+                elif (cX, cY) == (-1, 0):
+                    self.dir = 'left'
+                elif (cX, cY) == (1,0):
+                    self.dir = 'right'
+                self.moving = True
+                return
+        self.moving = False
+        
     def move(self, dir, map, heroPos):
         (hX, hY) = heroPos
         hX = hX / const.blocksize
@@ -58,14 +113,29 @@ class Npc(pygame.sprite.Sprite):
         self.image = self.images[self.imgIdx]
         if map.getEntry(sX + mX, sY + mY) in range(25) and (sX + mX, sY + mY) != (hX, hY) and not map.isOccupied(sX + mX, sY + mY):
             self.setXY(sX + mX, sY + mY)
+            map.clearOccupied(sX, sY)
+            map.setOccupied(sX+mX, sY+mY)
         else: self.moving = False
     
+    def confuse(self, t):
+        self.confused = t
+        
     def update(self, map, heroPos):
-        i = random.randrange(1, 20)
-        if i == 5:
+        if self.moving == True:
+            #print 'Im Moving IT!'
+            self.move(self.dir, map, heroPos)
+            return True
+        i = random.randrange(1, self.movingRate)
+        if i == 1:
             self.move(random.choice(['up', 'down', 'left', 'right']), map, heroPos)
             return True
         else: return False
+    
+    def getID(self):
+        try:
+            return self.ID
+        except AttributeError:
+            return None
     
     def shiftOnePixel(self, dir, sign):
         (x1, y1, x2, y2) = self.rect

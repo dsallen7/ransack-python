@@ -127,21 +127,21 @@ class World():
         if dir == 0: # north
             if self.currentMap.neighbors[0] is not '':
                 if self.getMapByName( self.currentMap.neighbors[0] ).getTileFG(loc[0], 
-                                                                               self.getMapByName( self.currentMap.neighbors[0] ).getDIM()-1  ) in range(24):
+                                                                               self.getMapByName( self.currentMap.neighbors[0] ).getDIM()-1  ) in range(const.BRICK1):
                     self.currentMap = self.getMapByName( self.currentMap.neighbors[0] )
                     return (loc[0], self.currentMap.getDIM()-1)
                 else: return False
             else: return False
         elif dir == 1: # south
             if self.currentMap.neighbors[1] is not '':
-                if self.getMapByName( self.currentMap.neighbors[1] ).getTileFG(loc[0], 0  ) in range(24):
+                if self.getMapByName( self.currentMap.neighbors[1] ).getTileFG(loc[0], 0  ) in range(const.BRICK1):
                     self.currentMap = self.getMapByName( self.currentMap.neighbors[1] )
                     return (loc[0], 0)
                 else: return False
             else: return False
         elif dir == 2: # east
             if self.currentMap.neighbors[2] is not '':
-                if self.getMapByName( self.currentMap.neighbors[2] ).getTileFG(0, loc[1] ) in range(24):
+                if self.getMapByName( self.currentMap.neighbors[2] ).getTileFG(0, loc[1] ) in range(const.BRICK1):
                     self.currentMap = self.getMapByName( self.currentMap.neighbors[2] )
                     return (0, loc[1])
                 else: return False
@@ -149,7 +149,7 @@ class World():
         elif dir == 3: # west
             if self.currentMap.neighbors[3] is not '':
                 if self.getMapByName( self.currentMap.neighbors[3] ).getTileFG(self.getMapByName( self.currentMap.neighbors[3] ).getDIM()-1, 
-                                                                               loc[1] ) in range(24):
+                                                                               loc[1] ) in range(const.BRICK1):
                     self.currentMap = self.getMapByName( self.currentMap.neighbors[3] )
                     return (self.currentMap.getDIM()-1, loc[1])
                 else: return False

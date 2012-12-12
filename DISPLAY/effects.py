@@ -53,7 +53,7 @@ class effects():
                            ( (screenOne.get_width()/2)-i, 0 ), # dest
                            ( 0,0, 2*i, 300 )                     # area
                            )
-            #self.clock.tick(100)
+            #pygame.time.wait(10)
             self.screen.blit(pygame.transform.scale(screenOne_, (int(ceil(300 * const.scaleFactor)), 
                                                                 int(ceil(300 * const.scaleFactor))) ), (0, 0) )
             pygame.display.flip()

@@ -1,10 +1,10 @@
 import pygame, game, random, cPickle, gzip, os
 from UTIL import const, colors, load_image, inputHandler, button
-from DISPLAY import interface, effects
+from DISPLAY import interface, effects, menu, display
 from HERO import creator
 from OBJ import weapon
 
-from UTIL import const
+from UTIL import const, inputHandler
 
 from math import ceil
 
@@ -12,12 +12,11 @@ from IMG import images
 
 try:
     import android
-except:
+    import android.mixer as mixer
+except ImportError as e:
+    print e
     android = False
-    print "No Android in main"
     const.setScaleFactor(1)
-
-print const.scaleFactor
 
 # Set the height and width of the screen
 screenSize=[720,1280]
@@ -46,6 +45,23 @@ iH = inputHandler.inputHandler(FX)
 iFace = interface.Interface(screen, iH)
 
 images.load()
+
+D = display.Display(screen, images )
+
+selection = 0
+options = ['Begin New Game', 'Load Saved Game', 'Credits', 'Exit']
+buttons = []
+
+if pygame.font:
+    font = pygame.font.Font("./FONTS/chancery.ttf", 60)
+y = 350
+for o in options:
+    line = font.render(o, 1, colors.white, colors.black)
+    buttons.append( button.Button( ( (screen.get_width()/2)-(line.get_width()/2), y), o ) )
+    y = y + 75
+
+ifaceImg, r = load_image.load_image( os.path.join('MENU', 'interface_m.png'), None)
+logo, r = load_image.load_image( 'logo.png', None)
         
 def endScreen(game, msg):
     dScreen = pygame.Surface( (300, 300) )
@@ -114,30 +130,36 @@ def mouseHandler(m):
         loadSavedGame()
     elif (230 <= mx < 300) and (485 <= my < 540):
         os.sys.exit()
+
+def updateDisplay():
+    titleScreen = pygame.Surface((screenSize[0],screenSize[0]))
+    screen.blit( pygame.transform.scale(ifaceImg, (int(ceil(300 * 2.4)), 
+                                                   int(ceil(233 * 2.4)) ) ), 
+                 (0, int(ceil(300 * 2.4))) )
+    menuBox = pygame.Surface( (450,450) )
+    menuBox.fill( colors.black )
+    menuBox.set_colorkey(colors.black)
     
+    screen.blit(titleScreen, (0,0))
+    screen.blit( logo, ( (screen.get_width()/2)-(logo.get_width()/2), 100 ) )
+    #screen.blit( pygame.transform.scale(logo, (int(ceil(logo.get_width() * 2.4)), 
+    #                                           int(ceil(logo.get_height() * 2.4)) ) ), 
+    #             ( (screen.get_width()/2)-(logo.get_width()/2), 100 ) )
+    for b in buttons:
+        #screen.blit(b.img, ( (b.locX + b.sizeX) - (b.sizeX) , b.locY ) )
+        screen.blit(b.img, ( b.locX, b.locY ) )
+
+def showCredits():
+    creditsMenu = menu.menu(screen, iH, D, iFace, FX)
+    creditsMenu.displayStory("Ransack - An RPG Roguelike. All game code, story (if you can call it that!) and artwork, with the exclusion of fonts, created by D. Allen. dsallen7@gmail.com")
+    creditsMenu.displayStory("Powered by Python - www.python.org Game engine built with Pygame - pygame.org and ported to Android using PGS4a - pygame.renpy.org/")
+    creditsMenu.displayStory("Fonts used in game: Steelfish, Sqeualer by Ray Larabie, Typodermic Fonts - http://www.dafont.com/ typodermic.d1705 Gothic and Chancery by URW Software. urwpp.de/")
+    creditsMenu.displayStory("I'm a big fan of all the classic roguelikes, and cult favorites like Castle of the Winds and Moraff's World, as well as Japanese-style RPGs, from Final Fantasy to Suikoden to Pokemon.")
+    creditsMenu.displayStory("So, you could call this a melting pot of all my gaming influences. This is a work in progress. I thank you for playing and if you notice any bugs or errors, have any ideas for improvments or enhancenments please drop me a line!")
 
 def main():
-    titleScreen = pygame.Surface((screenSize[0],screenSize[0]))
-    ifaceImg, r = load_image.load_image( os.path.join('MENU', 'interface_m.png'), None)
-    screen.blit( pygame.transform.scale(ifaceImg, (int(ceil(300 * 2.4)), 
-                                                   int(ceil(233 * 2.4)) ) ), (0, int(ceil(300 * 2.4))) )
-    selection = 0
-    options = ['Begin New Game', 'Load Saved Game', 'Exit']
-    screen.blit(titleScreen, (0,0))
-    buttons = []
-    
-    if pygame.font:
-        font = pygame.font.Font("./FONTS/chancery.ttf", 60)
-    y = 350
-    for o in options:
-        line = font.render(o, 1, colors.white, colors.black)
-        buttons.append( button.Button( ( (screen.get_width()/2)-(line.get_width()/2), y), o ) )
-        y = y + 75
     
     while True:
-        menuBox = pygame.Surface( (450,450) )
-        menuBox.fill( colors.black )
-        menuBox.set_colorkey(colors.black)
             
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -147,21 +169,20 @@ def main():
                     if b.hit(mX, mY):
                         selection = b.msg
                 if selection == 'Begin New Game':
-                    launchNewGame(titleScreen)
+                    launchNewGame(pygame.Surface((screenSize[0],screenSize[0])))
                 elif selection == 'Load Saved Game':
-                    loadSavedGame(titleScreen)
+                    loadSavedGame(pygame.Surface((screenSize[0],screenSize[0])))
+                elif selection == 'Credits':
+                    showCredits()
                 elif selection == 'Exit':
                     FX.fadeOut(0)
                     os.sys.exit()
                 elif selection == None:
                     pass
-        screen.blit(titleScreen, (0,0))
-        for b in buttons:
-            #screen.blit(b.img, ( (b.locX + b.sizeX) - (b.sizeX) , b.locY ) )
-            screen.blit(b.img, ( b.locX, b.locY ) )
         iFace.update()
         font = pygame.font.Font(os.getcwd()+"/FONTS/courier.ttf", 28)
         if android:
             screen.blit( font.render( str( android.get_dpi() ), 1, colors.white, colors.black ), (0,0) )
+        updateDisplay()
         pygame.display.flip()
 main()

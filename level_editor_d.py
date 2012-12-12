@@ -1,11 +1,11 @@
 from types import *
 import pygame, os, cPickle, random, gzip
 
-from MAP import world, mapgen, mazegen, map, wilds
-
+from MAP import world, mapgen, mazegen, map, wilds, tile
+from DISPLAY import text
 from UTIL import queue, const, colors, eztext, load_image, misc
 from IMG import images, spritesheet
-
+from math import floor, ceil
 from SCRIPTS import npcScr, mapScr
 
 from random import choice
@@ -137,6 +137,8 @@ class Handler():
                         if a == None:
                             a = '-'
                     except AttributeError:
+                        a = '-'
+                    except TypeError:
                         a = '-'
                     infoWin.blit( font.render('Accessory: '+a, 1, colors.white, colors.black), (0, 150) )
             for event in pygame.event.get():
@@ -363,6 +365,7 @@ class Handler():
         itemsList = range(const.FRUIT1, const.PARCHMENT+1)+range(const.WSWORD, const.SSHIELD+1)
         for i in range( len( itemsList ) ):
             menuBox.blit(mapImages[itemsList[i]], (15+((i)%4)*blocksize, 50+((i)/4)*blocksize))
+        print chestItems
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
@@ -383,10 +386,12 @@ class Handler():
                                                 [ int(self.getInput("Enter plus Str: ")),
                                                   int(self.getInput("Enter plus Int: ")),
                                                   int(self.getInput("Enter plus Dex "))   ] ) )
-                        elif itemNum in range(const.HELMET, const.SSHIELD+1): #armor
+                        elif itemNum == const.RING:
                             chestItems.append( (itemNum, 
-                                                int(self.getInput("Enter armor level: ")), 
-                                                int(self.getInput("Enter resist: ")) ) )
+                                                (self.getInput("Enter enhancement type (plusHP, plusMP, plusWP): "),
+                                                int(self.getInput("Enter enhancement level: ")) ) ) )
+                        elif itemNum in range(const.HELMET, const.SSHIELD+1): #armor
+                            chestItems.append( (itemNum, self.getInput("Enter resist: ") ) )
             for item in chestItems:
                 menuBox.blit(mapImages[ item[0] ], (len(chestItems)*blocksize, 15) )
             screen.blit(menuBox, (100,100) )
@@ -420,6 +425,7 @@ class Handler():
     
     def saveWorld(self):
         filename = self.getFilename()
+        self.boxMessage('Saving'+filename+' ...')
         ball = myWorld.getWorldBall()
         try:
             save = gzip.GzipFile(os.getcwd()+'/MAP/WORLDS/'+filename, 'wb')
@@ -430,6 +436,7 @@ class Handler():
             return
     def loadWorld(self):
         filename = self.getFilename()
+        self.boxMessage('Loading'+filename+' ...')
         try:
             loadedWorld = gzip.GzipFile(os.getcwd()+'/MAP/WORLDS/'+filename, 'rb')
             ball = cPickle.load(loadedWorld)
@@ -440,6 +447,22 @@ class Handler():
             print 'Cannot load world:', filename
             return
     
+    def boxMessage(self, message):
+        
+        msgText = text.Text(message, os.getcwd()+"/FONTS/devinne.ttf", 18, colors.white, colors.gold, True)
+        for i in range( 0, 255, 8 ):
+            borderBox = pygame.Surface( ( msgText.get_width(), msgText.get_height() ) )
+            borderBox.fill( colors.grey )
+            borderBox.set_alpha( int(ceil(i*0.1)) )
+            msgText.set_alpha(i)
+            screen.blit( borderBox, 
+                            ( screen.get_width()/2-borderBox.get_width()/2, 150 ) )
+            screen.blit( msgText, 
+                            ( screen.get_width()/2-borderBox.get_width()/2, 150 ) )
+            pygame.display.flip()
+            
+        #while (pygame.event.wait().type != pygame.MOUSEBUTTONDOWN): pass
+
     def generateMap(self, type, trials=1):
         level = int( self.getInput('Enter level: ') )
         if type == 'dungeon':
@@ -459,12 +482,15 @@ class Handler():
         else:
             print 'Invalid map type'
     
-    def place(self, x, y, tile):            
+    def place(self, x, y, nTile):
+        if self.myMap.getEntry(x,y) == const.VOID:
+            self.myMap.grid[x] = self.myMap.grid[x][:y]+[tile.Tile(x,y,nTile,const.DFLOOR1)]+self.myMap.grid[x][y+1:]
+            return
         if self.placeNPC:
             self.addNPC( (x,y) )
         else:
             if self.drawLayer == 'back':
-                self.myMap.setTileBG(x, y, tile)
+                self.myMap.setTileBG(x, y, nTile)
                 return
             if self.currentTile == const.CHEST:
                 self.myMap.addChest( (x, y), self.fillChest( [] ))
@@ -474,7 +500,7 @@ class Handler():
             elif self.currentTile in const.doorsList:
                 param=None
             else: param=None
-            self.myMap.setEntry(x, y, tile, param)
+            self.myMap.setEntry(x, y, nTile, param)
         
     def removeNPC(self, x, y):
         for n in self.myMap.NPCs:
@@ -563,7 +589,7 @@ class Handler():
             self.addMap( self.getInput('Enter title of new map: ') )
         elif event.key == pygame.K_c:
             filename = self.getInput('Enter filename for screenshot: ')+".bmp"
-            self.updateDisplay()
+            self.updateDisplay('field')
             pygame.image.save(gridField, filename)
         elif event.key == pygame.K_p:
             self.importMap( self.getInput('Enter filename of map: ') )
@@ -591,23 +617,26 @@ class Handler():
                 if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                     self.selectBox = self.selectBoxPoints
                     return (endX, endY)
-                (tempX, tempY) = pygame.mouse.get_pos()
-                if tempX > 600:
-                    tempX = 600
-                    pygame.mouse.set_pos([tempX,tempY])
-                if tempY > 600:
-                    tempY = 600
-                    pygame.mouse.set_pos([tempX,tempY])
-                endX = tempX/blocksize + 1
-                endY = tempY/blocksize + 1
-                self.updateDisplay()
-                self.selectBoxPoints = ( (startX*blocksize,startY*blocksize), 
-                                          (startX*blocksize,(startY+(endY-startY))*blocksize), 
-                                          (endX*blocksize,endY*blocksize), 
-                                          ((startX+(endX-startX))*blocksize,startY*blocksize) )
-                pygame.draw.lines( gridField, colors.red, True, self.selectBoxPoints, 1 )
-                screen.blit(gridField, (0,0) )
-                pygame.display.flip()
+                elif event.type == pygame.MOUSEMOTION:
+                    (tempX, tempY) = pygame.mouse.get_pos()
+                    '''
+                    if tempX > 600:
+                        tempX = 600
+                        #pygame.mouse.set_pos([tempX,tempY])
+                    if tempY > 600:
+                        tempY = 600
+                        #pygame.mouse.set_pos([tempX,tempY])
+                    '''
+                    endX = tempX/blocksize + 1
+                    endY = tempY/blocksize + 1
+                    #self.updateDisplay()
+                    self.selectBoxPoints = ( (startX*blocksize,startY*blocksize), 
+                                              (startX*blocksize,(startY+(endY-startY))*blocksize), 
+                                              (endX*blocksize,endY*blocksize), 
+                                              ((startX+(endX-startX))*blocksize,startY*blocksize) )
+                    pygame.draw.lines( gridField, colors.red, True, self.selectBoxPoints, 1 )
+                    screen.blit(gridField, (0,0) )
+                    pygame.display.flip()
     
     def move(self, start):
         (p1, p2, p3, p4) = self.selectBoxPoints
@@ -652,7 +681,7 @@ class Handler():
                                                  ((newTopX+ ((p3[0]-p1[0])/blocksize) )*blocksize,(newTopY+ ((p3[1]-p1[1])/blocksize) )*blocksize), 
                                                  ((newTopX+ ((p3[0]-p1[0])/blocksize) )*blocksize,newTopY*blocksize) )
                         (p1, p2, p3, p4) = self.selectBoxPoints
-                        self.updateDisplay()
+                        self.updateDisplay('field')
                         gridField.blit( emptyImg, (sX*blocksize, sY*blocksize) )
                         gridField.blit( selectionImg, (newTopX*blocksize, newTopY*blocksize) )
                         pygame.draw.lines( gridField, colors.red, True, self.selectBoxPoints, 1 )
@@ -677,7 +706,9 @@ class Handler():
                         (p1, p2, p3, p4) = self.selectBoxPoints
                         if p1[0] <= mx < p3[0] and p1[1] <= my < p3[1]:
                             self.move( (p1[0], p1[1]) )
-                        else: self.selection = ( (mx/blocksize, my/blocksize), self.select( (mx/blocksize, my/blocksize) ) )
+                        else: 
+                            self.selectBoxPoints = None
+                            self.cursorPos = ( (mx/blocksize)*blocksize, (my/blocksize)*blocksize )
                     else: self.selection = ( (mx/blocksize, my/blocksize), self.select( (mx/blocksize, my/blocksize) ) )
             elif e.button == 3:
                 pass
@@ -701,9 +732,9 @@ class Handler():
         elif gridField.get_width()+50 <= mx < gridField.get_width()+80 and 530 <= my < 560:
             self.myMap.mapCut()
         elif gridField.get_width()+80 <= mx < gridField.get_width()+110 and 530 <= my < 560:
-            self.myMap.mapCopy(self.selection)
+            self.myMap.mapPaste( self.cursorPos )
         elif gridField.get_width()+110 <= mx < gridField.get_width()+140 and 530 <= my < 560:
-            self.myMap.mapPaste()
+            self.myMap.mapCopy(self.selection[0],self.selection[1])
         elif gridField.get_width()+65 <= mx < gridField.get_width()+95 and 560 <= my < 590:
             self.mouseAction = 'draw'
         elif gridField.get_width()+95 <= mx < gridField.get_width()+125 and 560 <= my < 590:
@@ -716,89 +747,96 @@ class Handler():
             boxPoints = ( (mx,my), (mx,my+blocksize), (mx+blocksize,my+blocksize), (mx+blocksize,my) )
             pygame.draw.lines( screen, colors.red, True, boxPoints, 1 )
     
-    def updateDisplay(self):
-        gridField.fill(colors.black)
-        for i in range(self.topX, self.topX+40):
-            for j in range(self.topY, self.topY+40):
-                fTile = self.myMap.getTileFG(i, j)
-                bTile = self.myMap.getTileBG(i, j)
-                if fTile in const.SOLIDS:
-                    if bTile is not None:
-                        gridField.blit( mapImages[bTile], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
-                    else: gridField.blit( mapImages[self.myMap.defaultBkgd], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
-                gridField.blit( mapImages[fTile], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
-                if fTile in range(const.TABLE1, const.TABLE3+1):
-                    try:
-                        gridField.blit( accImages[self.myMap.grid[i][j].accessory], ( (i-self.topX)*blocksize+10,
-                                                                                      (j-self.topY)*blocksize+5) )
-                    except AttributeError:
-                        pass
-                if (i,j) == self.myMap.heroStart:
-                    gridField.blit( mapImages[const.HEROSTART], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
-                if self.myMap.shops is not None:
-                    for s in self.myMap.shops:
-                        (sX, sY) = s
-                        (imgN, ht) = mapScr.siteImgDict[ self.myMap.shops[s][0] ]
-                        gridField.blit( mapImages[ imgN ], (sX*blocksize - blocksize - (self.topX * blocksize), sY*blocksize - ( ht*blocksize) - (self.topY * blocksize) ) )
-        for n in self.myMap.NPCs:
-            (x,y) = n[0]
-            gridField.blit(self.npcImg[ n[1] ], ((x-self.topX)*blocksize, (y-self.topY)*blocksize) )
-        (x,y) = self.cursorPos
-        x = x - self.topX*blocksize
-        y = y - self.topY*blocksize
-        if self.drawMode:
-            self.cursorColor = colors.yellow
-        else:
-            self.cursorColor = colors.white
-        if self.selectBoxPoints is not None:
-            pygame.draw.lines( gridField, colors.red, True, self.selectBoxPoints, 1 )
-
-        boxPoints = ( (x,y), (x,y+blocksize), (x+blocksize,y+blocksize), (x+blocksize,y) )
-        pygame.draw.lines( gridField, self.cursorColor, True, boxPoints, 1 )
-        self.sideImg, sideRect = load_image.load_image('sidebar.bmp')
-        
-        if self.placeNPC: self.sideImg.blit(self.npcImg['king'],(50,50))
-        else: self.sideImg.blit(mapImages[self.currentTile],(50,50))
-        
-        if pygame.font:
-            font = pygame.font.SysFont("arial",12)
-        
-        self.sideImg.blit(mapImages[self.myMap.defaultBkgd],(50,130))
-        self.sideImg.blit( font.render(self.drawLayer, 1, colors.white, colors.black ), (80,130) )
-        
-        if self.mouseAction == 'draw':
-            self.sideImg.blit(self.editorImages[5], (50,80) )
-        else: self.sideImg.blit(self.editorImages[6], (50,80) )
-        self.sideImg.blit(self.npcImg['king'], (50,170) )
-        for i in range(8):
-            for j in range(4):
-                self.sideImg.blit(mapImages[self.offset + j + (4*i)], (50+j*blocksize, 200+(i*blocksize)))
-        
-        toolBox = pygame.Surface( (90, 90) )
-        toolBox.blit( self.editorImages[0], (15,0) )
-        toolBox.blit( self.editorImages[1], (45,0) )
-        toolBox.blit( self.editorImages[2], (0,30) )
-        toolBox.blit( self.editorImages[3], (30,30) )
-        toolBox.blit( self.editorImages[4], (60,30) )
-        toolBox.blit( self.editorImages[5], (15,60) )
-        toolBox.blit( self.editorImages[6], (45,60) )
-        self.sideImg.blit(toolBox, (50,500) )
-        (x,y) = self.cursorPos
-        entryBox = pygame.Surface((150,30))
-        entryBox.fill(colors.black)
-        entry = font.render(str(self.myMap.getEntry( (x+self.topX)/blocksize, (y+self.topY)/blocksize))+' '+'x:'+str(x)+'('+str(x/blocksize)+')'+' y:'+str(y)+'('+str(y/blocksize)+')',1, colors.white, colors.black )
-        entryBox.blit(entry,(0,0))
-        self.sideImg.blit(entryBox,(50,450))
-        if self.drawMode:
-            msgBox = pygame.Surface( ( 186, 60 ) )
-            msgBox.fill( colors.grey )
+    def updateDisplay(self, type='all'):
+        if type in ['all', 'field']:
+            gridField.fill(colors.black)
+            for i in range(self.topX, self.topX+40):
+                for j in range(self.topY, self.topY+40):
+                    fTile = self.myMap.getTileFG(i, j)
+                    bTile = self.myMap.getTileBG(i, j)
+                    if fTile in const.SOLIDS:
+                        if bTile is not None:
+                            gridField.blit( mapImages[bTile], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
+                        else: gridField.blit( mapImages[self.myMap.defaultBkgd], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
+                    gridField.blit( mapImages[fTile], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
+                    if fTile in range(const.TABLE1, const.TABLE3+1):
+                        try:
+                            gridField.blit( accImages[self.myMap.grid[i][j].accessory], ( (i-self.topX)*blocksize+10,
+                                                                                          (j-self.topY)*blocksize+5) )
+                        except AttributeError:
+                            pass
+                        except TypeError:
+                            pass
+                    if (i,j) == self.myMap.heroStart:
+                        gridField.blit( mapImages[const.HEROSTART], ( (i-self.topX)*blocksize,(j-self.topY)*blocksize) )
+                    if self.myMap.shops is not None:
+                        for s in self.myMap.shops:
+                            (sX, sY) = s
+                            (imgN, ht) = mapScr.siteImgDict[ self.myMap.shops[s][0] ]
+                            gridField.blit( mapImages[ imgN ], (sX*blocksize - blocksize - (self.topX * blocksize), sY*blocksize - ( ht*blocksize) - (self.topY * blocksize) ) )
+            for n in self.myMap.NPCs:
+                (x,y) = n[0]
+                try:
+                    gridField.blit(self.npcImg[ n[1] ], ((x-self.topX)*blocksize, (y-self.topY)*blocksize) )
+                except KeyError:
+                    gridField.blit(self.npcImg[ 'duke' ], ((x-self.topX)*blocksize, (y-self.topY)*blocksize) )
+            (x,y) = self.cursorPos
+            x = x - self.topX*blocksize
+            y = y - self.topY*blocksize
+            if self.drawMode:
+                self.cursorColor = colors.yellow
+            else:
+                self.cursorColor = colors.white
+            if self.selectBoxPoints is not None:
+                pygame.draw.lines( gridField, colors.red, True, self.selectBoxPoints, 1 )
+    
+            boxPoints = ( (x,y), (x,y+blocksize), (x+blocksize,y+blocksize), (x+blocksize,y) )
+            pygame.draw.lines( gridField, self.cursorColor, True, boxPoints, 1 )
+        if type in ['all', 'bar']:
+            self.sideImg, sideRect = load_image.load_image('sidebar.bmp')
+            
+            if self.placeNPC: self.sideImg.blit(self.npcImg['duke'],(50,50))
+            else: self.sideImg.blit(mapImages[self.currentTile],(50,50))
+            
             if pygame.font:
-                font = pygame.font.SysFont("arial", 24)
-                msgText = font.render( 'draw', 1, colors.red, colors.yellow )
-                msgBox.blit(msgText, (10,10) )
-            self.sideImg.blit( msgBox, (50,100) )
-            #pygame.display.flip()
-        screen.blit(self.sideImg, (1200,0) )
+                font = pygame.font.SysFont("arial",12)
+            
+            self.sideImg.blit(mapImages[self.myMap.defaultBkgd],(50,130))
+            self.sideImg.blit( font.render(self.drawLayer, 1, colors.white, colors.black ), (80,130) )
+            
+            if self.mouseAction == 'draw':
+                self.sideImg.blit(self.editorImages[5], (50,80) )
+            else: self.sideImg.blit(self.editorImages[6], (50,80) )
+            self.sideImg.blit(self.npcImg['duke'], (50,170) )
+            for i in range(8):
+                for j in range(4):
+                    self.sideImg.blit(mapImages[self.offset + j + (4*i)], (50+j*blocksize, 200+(i*blocksize)))
+            
+            toolBox = pygame.Surface( (90, 90) )
+            toolBox.blit( self.editorImages[0], (15,0) )
+            toolBox.blit( self.editorImages[1], (45,0) )
+            toolBox.blit( self.editorImages[2], (0,30) )
+            toolBox.blit( self.editorImages[3], (30,30) )
+            toolBox.blit( self.editorImages[4], (60,30) )
+            toolBox.blit( self.editorImages[5], (15,60) )
+            toolBox.blit( self.editorImages[6], (45,60) )
+            self.sideImg.blit(toolBox, (50,500) )
+            (x,y) = self.cursorPos
+            entryBox = pygame.Surface((150,30))
+            entryBox.fill(colors.black)
+            entry = font.render(str(self.myMap.getEntry( (x+self.topX)/blocksize, (y+self.topY)/blocksize))+' '+'x:'+str(x)+'('+str(x/blocksize)+')'+' y:'+str(y)+'('+str(y/blocksize)+')',1, colors.white, colors.black )
+            entryBox.blit(entry,(0,0))
+            self.sideImg.blit(entryBox,(50,450))
+            if self.drawMode:
+                msgBox = pygame.Surface( ( 186, 60 ) )
+                msgBox.fill( colors.grey )
+                if pygame.font:
+                    font = pygame.font.SysFont("arial", 24)
+                    msgText = font.render( 'draw', 1, colors.red, colors.yellow )
+                    msgBox.blit(msgText, (10,10) )
+                self.sideImg.blit( msgBox, (50,100) )
+                #pygame.display.flip()
+            screen.blit(self.sideImg, (1200,0) )
     
 
 # Set the height and width of the screen
@@ -827,20 +865,20 @@ os.sys.setrecursionlimit(15000)
 
 
 def main():
-    myHandler.updateDisplay()
+    myHandler.updateDisplay('all')
     screen.blit(gridField, (0,0) )
     pygame.display.flip()
     while True :
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 myHandler.event_handler(event)
-                myHandler.updateDisplay()
+                myHandler.updateDisplay('all')
                 screen.blit(gridField, (0,0) )
                 pygame.display.flip()
             if event.type == pygame.MOUSEBUTTONDOWN:# or event.type == pygame.MOUSEBUTTONUP:
                 myHandler.mouseHandler(event)
                 myHandler.mouseUpdate()
-                myHandler.updateDisplay()
+                myHandler.updateDisplay('all')
                 screen.blit(gridField, (0,0) )
                 pygame.display.flip()
             if event.type == pygame.QUIT:

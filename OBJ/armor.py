@@ -21,6 +21,8 @@ class Armor():
             elif pE[0] == 'plusWP':
                 self.enh = 'Plus WC'
                 self.enhAmt = pE[1]
+        else:
+            (self.enh, self.enhAmt) = (None, 0)
     
     def getType(self):
         return self.type

@@ -8,7 +8,7 @@ from UTIL import const, colors
 from SCRIPTS import spellScr
 import Queue
 
-
+from math import floor, ceil
 
 class hero(pygame.sprite.Sprite):
     
@@ -125,24 +125,24 @@ class hero(pygame.sprite.Sprite):
     def setItem(self, item, num=1):
         self.items[item] += num
     # Input: tile number denoting item
-    def getItem(self, item):
-        if item.getType() == const.KEY:
+    def getItem(self, gItem):
+        if gItem.getType() == const.KEY:
             self.keys += 1
             return 'A dungeon key'
-        elif item.getType() == const.GOLD:
-            self.addGold( item.qty )
-            return str(item.qty)+' gold pieces'
-        elif item.getType() in range(const.WSWORD, const.RING):
-            return self.gainWeapon(item.getType(), [item.plusStr, item.plusItl, item.plusDex] )
-        elif item.getType() in range(const.HELMET, const.SSHIELD+1):
-            return self.gainArmor(item.getType() )
-        itype = item.getID()
+        elif gItem.getType() == const.GOLD:
+            self.addGold( gItem.qty )
+            return str(gItem.qty)+' gold pieces'
+        elif gItem.getType() in range(const.WSWORD, const.RING):
+            return self.gainWeapon(gItem.getType(), [gItem.plusStr, gItem.plusItl, gItem.plusDex] )
+        elif gItem.getType() in range(const.RING, const.SSHIELD+1):
+            return self.gainArmor( gItem )
+        itype = gItem.getID()
         entry = self.items[ itype ]
         if hasattr(entry, "__iter__"):
-            self.items[itype].append( item )
+            self.items[itype].append( gItem )
         else:
-            self.items[itype] = [item]
-        return item.getDesc()
+            self.items[itype] = [gItem]
+        return gItem.getDesc()
     
     def getItems(self):
         availableItems = []
@@ -152,7 +152,7 @@ class hero(pygame.sprite.Sprite):
                     if len(it) > 0:
                         for i in it:
                             i.qty = len(it)
-                        availableItems.append(it)
+                        availableItems.append(it[0])
                 else: 
                     it.qty = 1
                     availableItems.append( it )
@@ -164,14 +164,24 @@ class hero(pygame.sprite.Sprite):
                     availableItems.append(i[0])
         return availableItems
     def takeItem(self, tItem):
+        try:
+            if tItem.getName() == 'weapon':
+                self.loseWeapon(tItem)
+                return
+            elif tItem.getName() == 'armor':
+                self.loseArmor(tItem)
+                return
+        except AttributeError as e:
+            print 'AttributeError in takeItem: ', e
         if type(tItem) == IntType:
             tItem = item.Item( tItem )
         try:
-            self.items[ tItem.getID() ].remove(tItem)
+            self.items[ tItem.getID() ] = self.items[ tItem.getID() ][1:]
             if self.items[ tItem.getID()] == []:
                 self.items[ tItem.getID() ] = 0
             return True
-        except ValueError:
+        except ValueError as e:
+            print 'ValueError in takeItem: ', e
             return False
     
     def hasItem(self, item, qty = 1):
@@ -189,12 +199,10 @@ class hero(pygame.sprite.Sprite):
         if item.getName() == 'parchment':
             mySpell = spell.Spell( item.spellNum )
             d = self.castSpell(mySpell, game, battle, True)
-            if d > 0:
+            if d != False:
                 self.takeItem(item)
-                self.currMP = self.currMP + mySpell.cost
                 game.Ticker.tick(mySpell.cost)
-                return d
-            else: return 0
+            return d
         item.execute(self)
         self.takeItem(item)
         game.Ticker.tick(60)
@@ -209,7 +217,7 @@ class hero(pygame.sprite.Sprite):
         self.weapons.append(newW)
         return newW.getDesc()
     def loseWeapon(self, weapon):
-        self.weapons.remove(weapon)        
+        self.weapons.remove(weapon)
     def equipWeapon(self, weapon):
         if weapon == None: return
         if self.weaponEquipped is not None:
@@ -223,7 +231,7 @@ class hero(pygame.sprite.Sprite):
         self.intell = self.intell + weapon.plusItl
         self.dex = self.dex + weapon.plusDex
         self.weaponClass = self.weaponClass + self.weaponEquipped.level
-        if self.weapons != []:
+        if weapon in self.weapons:
             self.loseWeapon(weapon)
     
     def getArmor(self):
@@ -237,18 +245,44 @@ class hero(pygame.sprite.Sprite):
         return newA.getDesc()
     def loseArmor(self, armor):
         self.armor.remove(armor)
-    def equipArmor(self, armor, slot):
-        if armor == None: return
+    def equipArmor(self, newArmor, slot):
+        oldArmor = self.armorEquipped[slot]
+        if newArmor == None: return
         if self.armorEquipped[slot] == None:
-            self.armorEquipped[slot] = armor
-            self.armorClass += (armor.getLevel())
+            self.armorEquipped[slot] = newArmor
+            self.armorClass += (newArmor.getLevel())
+            if newArmor.enh == 'Plus HP':
+                self.currHP = int(ceil( self.currHP*( self.maxHP + newArmor.enhAmt)/self.maxHP ))
+                self.maxHP += newArmor.enhAmt
+            if newArmor.enh == 'Plus MP':
+                self.currMP = int(ceil( self.currMP*( self.maxMP + newArmor.enhAmt)/self.maxMP ))
+                self.maxMP += newArmor.enhAmt
+            if newArmor.enh == 'Plus WP':
+                self.weaponClass += newArmor.enhAmt
         else:
-            self.armorClass -= (self.armorEquipped[slot].getLevel())
+            self.armorClass -= (oldArmor.getLevel())
             self.armorClass += (armor.getLevel())
-            self.armor.append(self.armorEquipped[slot])
+            self.armor.append(oldArmor)
             self.armorEquipped[slot] = armor
+            if oldArmor.enh == 'Plus HP':
+                self.maxHP += newArmor.enhAmt
+                self.currHP = min( self.currHP, self.maxHP )
+            if oldArmor.enh == 'Plus MP':
+                self.maxMP += oldArmor.enhAmt
+                self.currMP = min( self.currMP, self.maxMP )
+            if oldArmor.enh == 'Plus WP':
+                self.weaponClass -= oldArmor.enhAmt
+                
+            if newArmor.enh == 'Plus HP':
+                self.currHP = int(ceil( self.currHP*( self.maxHP + armor.enhAmt)/self.maxHP ))
+                self.maxHP += newArmor.enhAmt
+            if newArmor.enh == 'Plus MP':
+                self.currMP = int(ceil( self.currMP*( self.maxMP + armor.enhAmt)/self.maxMP ))
+                self.maxMP += newArmor.enhAmt
+            if newArmor.enh == 'Plus WP':
+                self.weaponClass += newArmor.enhAmt
         if self.armor != []:
-            self.loseArmor(armor)
+            self.loseArmor(newArmor)
     
     def addGold(self, amt):
         self.gold += amt
@@ -264,7 +298,7 @@ class hero(pygame.sprite.Sprite):
     def learnSpell(self, num):
         self.spells += [spell.Spell( num )]
     
-    def castSpell(self, spell, game, battle=False, item=False):
+    def castSpell(self, spell, game, battle=False, isItem=False):
         if spell == None:
             #game.textMessage('')
             return
@@ -279,7 +313,7 @@ class hero(pygame.sprite.Sprite):
                 game.textMessage("You don't have enough MP!")
                 return
         else:
-            if not item:
+            if isItem == False:
                 self.takeMP(spell.cost)
         if spell.getType() == const.TLPT:
             game.textMessage( spell.getCastMsg() )
@@ -302,7 +336,7 @@ class hero(pygame.sprite.Sprite):
         spell.execute(self, battle)
         game.Ticker.tick(spell.getCastTime() )
         game.textMessage(spell.getCastMsg())
-        return 0
+        return True
     def getSpells(self):
         return self.spells
     

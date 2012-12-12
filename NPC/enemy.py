@@ -23,14 +23,17 @@ class Enemy(Npc):
         (sX, sY) = self.getXY()
         (mX, mY) = const.scrollingDict[dir]
         self.dir = dir
-        sX += mX
-        sY += mY
-        if map.getEntry(sX, sY) in range(25):
-            if (sX, sY) != (hX, hY):
-                self.setXY(sX, sY)
-            else:
+        if map.getEntry(sX + mX, sY + mY) in range(const.BRICK1):
+            if (sX + mX, sY + mY) == (hX, hY): # encountered hero
                 self.moving = False
                 return 'battle'
+            elif not map.isOccupied(sX + mX, sY + mY): # open space
+                self.setXY(sX + mX, sY + mY)
+                map.clearOccupied(sX, sY)
+                map.setOccupied(sX+mX, sY+mY)
+            else: # blocked by another NPC
+                self.moving = False
+                return False
         else: 
             self.moving = False
             return False
@@ -54,6 +57,7 @@ class Enemy(Npc):
     def interact(self, interface, game):
         interface.boxMessage('The battle is joined!')
         return 'battle'
+    
     def update(self, map, heroPos):
         if self.confused > 0:
             imgCopy = self.image.copy()
@@ -75,12 +79,8 @@ class Enemy(Npc):
             i = random.randrange(1, 10)
             if i == 5:
                 return self.move(random.choice(['up', 'down', 'left', 'right']), map, heroPos)
-    def confuse(self, t):
-        self.confused = t
-    def getID(self):
-        return self.ID
     
-class skeletonKing(Enemy):
+class rattleHead(Enemy):
     
     def __init__(self, x, y, name, filename, mID, d):
         
@@ -92,8 +92,8 @@ class skeletonKing(Enemy):
         return 'battle'
     
     def update(self, map, heropos):
-        i = random.randrange(1, 6)
-        if i == 5:
+        i = random.randrange(1, self.movingRate)
+        if i == 1:
             self.takeStep()
     def die(self):
         self.Director.setEvent(11)

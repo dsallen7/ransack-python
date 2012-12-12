@@ -26,7 +26,7 @@ def Text(message, font, fontsize, fgc=colors.white, bgc=colors.gold, transparent
                                         ((len(message)/width)+1)*math.ceil(font.render( 'A', 
                                                                                         1, 
                                                                                         colors.white, 
-                                                                                        colors.gold ).get_height() * 1.5) 
+                                                                                        colors.gold ).get_height() * 1.6) 
                                         ) 
                                      )
             msgText.fill(colors.gold)

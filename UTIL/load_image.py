@@ -3,12 +3,12 @@ import pygame
 
 try:
     import android
-except:
+except ImportError:
     android = False
     print "No Android in load_image"
 
 def load_image(name, colorkey=None):
-    fullname = os.path.join('IMG', name)
+    fullname = os.path.join('assets/IMG', name)
     try:
         image = pygame.image.load(fullname)
     except pygame.error, message:

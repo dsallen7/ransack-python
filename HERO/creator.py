@@ -150,7 +150,7 @@ class Creator():
                 const.blocksize,
                 self.HP, self.HP, # max, current
                 self.MP, self.MP,
-                0, 0,             # score, keys
+                0, 5,             # score, keys
                 1, 0, 50,         # level, current XP, XP for next lev
                 [], None,         # weapons, eq. weapons
                 [], [None, None, None,  #armor, eq. armor (helmet, plate, shield,
@@ -158,7 +158,7 @@ class Creator():
                      None, None, None], #cloak, boots, ?)
                 range(100),        # items
                 [],                # spells
-                1000, [False, False], 0, #gold, stats, slain
+                100, [False, False], 0, #gold, stats, slain
                 self.name )
     def mainLoop(self, screen):
         while True:

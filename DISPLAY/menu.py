@@ -118,18 +118,19 @@ class menu():
         availableItems = []
         hPosList = [10]
         for i in chest:
-            (type, num) = i         # num can be either an item level or quantity of gold
-                                    # mods are the str, itl, dex modifiers of a weapon
+            (type, param) = i         # param can be quantity of gold, spell type, or enhancement
             if type in range(const.FRUIT1, const.GOLD):
                 availableItems += [ item.Item(type) ]
             elif type == const.GOLD:
-                availableItems += [ item.Item(type, num) ]
+                availableItems += [ item.Item(type, param) ]
             elif type in [const.PARCHMENT, const.SPELLBOOK]:
-                availableItems += [ item.Item(type, num) ]
+                availableItems += [ item.Item(type, param) ]
             elif type in range(const.WSWORD, const.RING):
-                availableItems += [ weapon.Weapon(type, num ) ]
+                availableItems += [ weapon.Weapon(type, param ) ]
+            elif type == const.RING:
+                availableItems += [ armor.Armor(type, None, param ) ]
             elif type in range(const.HELMET, const.SSHIELD+1):
-                availableItems += [ armor.Armor(type, num) ]
+                availableItems += [ armor.Armor(type, param) ]
         itemsBox, menu = self.itemsWin(availableItems)
         #menuBox.blit(itemsBox, ( (menuBox.get_width()/2)-(itemsBox.get_width()/2), 60 ) )
         menuBox = pygame.transform.scale( menuBox, 
@@ -165,24 +166,70 @@ class menu():
     def displayHelp(self):
         helpBox = self.openWindow(350, 300)
         helpBox = self.helpBox.copy()
-                
+        buttons = []
+        helpButtonsLocationList = [(99, 67, 'spells'),
+                                   (136,67, 'up'),
+                                   (173,67, 'items'),
+                                   (99, 104, 'left'),
+                                   (136,104, 'action'),
+                                   (173,104, 'right'),
+                                   (99, 141, 'map'),
+                                   (136,141, 'down'),
+                                   (173,141, 'stats'),
+                                   (38, 242, 'done')
+                                   
+                                   ]
         self.screen.blit(pygame.transform.scale(helpBox, 
-                                                ( int(ceil(helpBox.get_width()*const.scaleFactor) ), 
-                                                  int(ceil(helpBox.get_height()*const.scaleFactor) )) ), 
-                                                ( 0, 41) )
+                                        ( int(ceil(helpBox.get_width()*const.scaleFactor) ), 
+                                          int(ceil(helpBox.get_height()*const.scaleFactor) )) ), 
+                                        ( 0, 41) )
+        for l in helpButtonsLocationList:
+            (x,y,msg) = l
+            buttons.append( button.Button( ( int(ceil(x*const.scaleFactor)), int(ceil(y*const.scaleFactor)) ), msg, invisible=True ) )
         self.Display.displayOneFrame(self.interface, self.FX)
-        while (pygame.event.wait().type != pygame.MOUSEBUTTONDOWN): pass
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    for b in buttons:
+                        (x, y) = pygame.mouse.get_pos()
+                        if b.hit(x, y):
+                            if b.msg == 'spells':
+                                self.interface.boxMessage('Spells!')
+                            elif b.msg in ['up', 'down', 'left', 'right']:
+                                self.interface.boxMessage('Use the arrows to move about the world')
+                            elif b.msg == 'items':
+                                self.interface.boxMessage('Spells!')
+                            elif b.msg == 'action':
+                                self.interface.boxMessage('This is the action key - use to activate various things on the map.')
+                            elif b.msg == 'map':
+                                self.interface.boxMessage('Show the world map, use arrows to navigate map.')
+                            elif b.msg == 'stats':
+                                self.interface.boxMessage('Display detailed list of hero statistics.')
+                            elif b.msg == 'done':
+                                return
+                            
+                            self.screen.blit(pygame.transform.scale(helpBox, 
+                                                                    ( int(ceil(helpBox.get_width()*const.scaleFactor) ), 
+                                                                      int(ceil(helpBox.get_height()*const.scaleFactor) )) ), 
+                                                                    ( 0, 41) )
+                            pygame.display.flip()
+                event_ = self.inputHandler.getCmd(event)
+                if event_ == pygame.K_ESCAPE:
+                    return
+                if event_ == pygame.K_RETURN:
+                    return
     
     
     def displayStory(self, msg):
+        if msg == None: return
         storyBox = self.openWindow(350, 300)
         storyBox = pygame.transform.scale(self.storyBox.copy(), 
                                                 ( int(ceil(self.storyBox.get_width()*const.scaleFactor) ), 
                                                   int(ceil(self.storyBox.get_height()*const.scaleFactor) )) )
         
-        msg_ = text.Text(msg, os.getcwd()+"/FONTS/devinne.ttf", 16, colors.white, colors.gold, True, 22)
+        msg_ = text.Text(msg, os.getcwd()+"/FONTS/devinne.ttf", 16, colors.white, colors.gold, True, 26)
         storyBox.blit(msg_, ( (storyBox.get_width()/2)-(msg_.get_width()/2), 
-                              (storyBox.get_height()/2)-(msg_.get_height()/2)) )
+                              (storyBox.get_height()/2)-(msg_.get_height()/2)+41 ) )
         self.screen.blit( storyBox, ( 0, 41) )
         self.Display.displayOneFrame(self.interface, self.FX)
         while (pygame.event.wait().type != pygame.MOUSEBUTTONDOWN): pass
@@ -421,12 +468,7 @@ class menu():
     def getPriceText(self, it, prices):
         if hasattr(it, "__iter__"):
             it = it[0]
-        if it.getName() in ['armor', 'weapon']:
-            return 'Price: $'+str( prices[it.priceID] )
-        elif it.getName() == 'item':
-            return 'Price: $'+str( prices[it.getType()] )
-        elif it.getName() == 'spellbook' or it.getName() == 'parchment':
-            return 'Price: $'+str( prices[(it.getType(), it.getSpellNum() )] )
+        return 'Price: $'+str( prices[it.priceID] )
     
     def getDescText(self, item, font, size, form = 'single'):
         if hasattr(item, "__iter__"):

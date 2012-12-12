@@ -3,6 +3,10 @@ from UTIL import queue, const, colors, load_image, misc
 from types import *
 from MAP import tile, minimap, submap
 
+from math import sqrt
+
+from SCRIPTS import enemyScr
+
 class map():
     def __init__(self, DIM=const.DIM, dFG=const.DFLOOR1):
         self.grid = []
@@ -32,6 +36,15 @@ class map():
                 return self.grid[x][y].getFG()
             else: return const.VOID
         else: return const.VOID
+        
+    def getEntrySingle(self, pos):
+        (x,y) = pos
+        if 0 <= x < self.DIM and 0 <= y < self.DIM:
+            if self.grid[x][y] is not None:
+                return self.grid[x][y].getFG()
+            else: return const.VOID
+        else: return const.VOID
+        
     def getTileFG(self, x, y):
         if 0 <= x < self.DIM and 0 <= y < self.DIM:
             if self.grid[x][y] is not None:
@@ -65,6 +78,12 @@ class map():
         (x,y) = tile
         for (Cx, Cy) in const.CARDINALS:
             returnList.append( self.getTileFG(Cx+x, Cy+y) )
+        return returnList
+    def cardinalNeighborsByCoords(self, tile):
+        returnList = []
+        (x,y) = tile
+        for (Cx, Cy) in const.CARDINALS:
+            returnList.append( (Cx+x, Cy+y) )
         return returnList
     
     def getGrid(self):
@@ -129,11 +148,10 @@ class map():
         for i in range(x2-x1):
             for j in range(y2-y1):
                 grid[j][i] = self.getEntry(x1+i, y1+j)
-                self.setEntry(x1+i, y1+j, 0)
+                #self.setEntry(x1+i, y1+j, 0)
         self.copyText = grid
         
     def mapPaste(self, pos):
-        (sX, sY) = pos
         copyText = self.copyText
         for i in range( len(copyText[0]) ):
             for j in range( len(copyText) ):
@@ -148,6 +166,8 @@ class gameMap(map):
         
         self.level = level
         self.BFSQueue = queue.Queue()
+        
+        self.newNPCs = []
         
         if mapball != None:
             self.installBall(mapball)
@@ -169,6 +189,23 @@ class gameMap(map):
         self.myMiniMap = minimap.miniMap(self.grid)
         
         self.litTiles = []
+    
+    def addMonster(self):
+        (x,y) = self.getRandomTile(True)
+        print (x,y)
+        if self.type in ['dungeon','maze']:
+            newEnemy = random.choice( enemyScr.enemiesByDungeonLevel[self.level] )
+        elif self.type == 'wilds': newEnemy = random.choice( enemyScr.enemiesByWildsLevel[self.level] )
+        self.newNPCs.append( ( (x,y),  newEnemy, '') )
+    
+    # used for performing tasks like adding monsters to map, etc
+    
+    def update(self, npcCount):
+        if self.type in ['dungeon', 'wilds', 'maze']:
+            if npcCount < 5:
+                self.addMonster()
+                return 'newNPCs'
+        else: return None
     
     def getImages(self):
         return self.images
@@ -198,23 +235,29 @@ class gameMap(map):
     def distanceFunc(self, pos1, pos2):
         (x1,y1) = pos1
         (x2,y2) = pos2
-        return max(abs(y2-y1), abs(x2-x1), abs(y2-y1) + abs(x2-x1))
-    def getRandomTile(self):
+        return int( sqrt( (x2-x1)**2 + (y2-y1)**2 ) )
+        #return max(abs(y2-y1), abs(x2-x1), abs(y2-y1) + abs(x2-x1))
+    
+    def getRandomTile(self, offscreen=False):
         x = random.randrange(0, self.DIM)
         y = random.randrange(0, self.DIM)
-        while ( self.getEntry(x, y) not in range(0, 25) ):
-            x = random.randrange(0, self.DIM)
-            y = random.randrange(0, self.DIM)
-        return x, y
+        if offscreen:
+            while ( self.getEntry(x, y) not in range(0, 25) ) or self.isOccupied(x, y) or self.distanceFunc( (x,y), self.playerXY) < 10:
+                x = random.randrange(0, self.DIM)
+                y = random.randrange(0, self.DIM)
+            return x, y
+        else:
+            while ( self.getEntry(x, y) not in range(0, 25) ) or self.isOccupied(x, y):
+                x = random.randrange(0, self.DIM)
+                y = random.randrange(0, self.DIM)
+            return x, y
     def setPlayerXY(self, x, y):
         self.playerXY = (x,y)
             
     # calculate location of map window based on hero location and hero sprite rect
     def updateWindowCoordinates(self, hero):
         DIMEN = self.getDIM()
-        oldX, oldY = self.getPlayerXY()#hero.getXY()
-        #oldX = oldX / const.blocksize
-        #oldY = oldY / const.blocksize
+        oldX, oldY = self.getPlayerXY()
         # Compute top map corner
         (px,py) = hero.getXY()
         px = px/const.blocksize
@@ -315,6 +358,10 @@ class gameMap(map):
     
     def isOccupied(self, x, y):
         return self.grid[x][y].occupied
+    def setOccupied(self, x, y):
+        self.grid[x][y].occupied = True
+    def clearOccupied(self, x, y):
+        self.grid[x][y].occupied = False
 
 # inherited map class to be used by level editor
 class edMap(map):
@@ -462,7 +509,6 @@ class genMap(map):
         self.grid[x][y].setFG(fg)
         self.grid[x][y].setBG(const.DFLOOR1)
         self.grid[x][y].roomN = roomN
-        #print roomN
         
     def mapPaste(self, pos, roomN):
         (sX, sY) = pos
@@ -476,7 +522,6 @@ class genMap(map):
         try:
             return self.grid[x][y].roomN
         except AttributeError:
-            print None
             return None
     
     def pathfinderBFS(self, start):
@@ -487,7 +532,7 @@ class genMap(map):
         while not self.BFSQueue.isEmpty():
             (x, y) = self.BFSQueue.pop()
             for (Cx,Cy) in const.CARDINALS:
-                if (x+Cx,y+Cy) not in self.visited and  not self.BFSQueue.has( (x+Cx, y+Cy) ) and self.getEntry(x+Cx,y+Cy) in range(24):
+                if (x+Cx,y+Cy) not in self.visited and  not self.BFSQueue.has( (x+Cx, y+Cy) ) and self.getEntry(x+Cx,y+Cy) in range(const.BRICK1):
                     self.BFSQueue.push( (x+Cx, y+Cy) )
                     self.visited += [ (x+Cx,y+Cy) ]
         return self.visited

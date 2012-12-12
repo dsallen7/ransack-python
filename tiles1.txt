@@ -157,16 +157,43 @@
     # 155: portcullis 4
     # 156: portcullis 5
     # 157: portcullis 6
-    # 158:
+    # 158: 
     # 159: crenellation
     
+    # 160: brick wall EW
+    # 161: brick wall NS
+    
+    # 168: turret
+    # 169: turret
+    # 170: turret
+    # 171: turret
+    # 172: turret
+    # 173: turret
+    # 174:
+    # 175:
+    # 176: turret
+    # 177: turret
+    # 178: turret
+    # 179: turret
+    # 180: turret
+    # 181: turret
+    
+    # 184: turret
+    
+    # 192: turret
+        
     # 200: book on counter
     # 201: bookshelf
+    # 202: china shelf
     
     # 208: chair 1
     # 209: chair 2
     # 210: table 1
     # 211: table 2
+    # 212: table 3
+    # 213: barrel
+    # 214: grocery veggies
+    # 215: grocery meat n cheese
     
     # 216: fruit 1
     # 217: cheese

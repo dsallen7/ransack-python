@@ -3,60 +3,89 @@ dEnemies = ['Zombie','Skeleton', 'Vampire']
 
 healthDict = { 
               # Undead
-              'Skeleton'     : 30,
-              'Dark Skeleton': 80,
-              'Skeleton King': 250,
-              'Zombie'       : 50,
-              'Vampire'      : 75,
+              'Skeleton'       : 30,
+              'Dark Skeleton'  : 80,
+              'Rattlehead'     : 250,
+              'Zombie'         : 50,
+              'Vampire'        : 75,
               
               # Humanoid
-              'Orc'          : 25,
-              'Orc Sergeant' : 75,
+              'Orc'            : 25,
+              'Orc Sergeant'   : 75,
               
               # Animal
-              'Cobra'        : 30,
-              'Wolf'         : 40
+              'Wild Dog'       : 25,
+              'Badger'         : 20,
+              'Cobra'          : 30,
+              'Carpathian Wolf': 60,
+              'Wolf'           : 40
               }
 
 attackDict = { 
               # Undead
-              'Skeleton'     : 10,
-              'Dark Skeleton': 17,
-              'Skeleton King': 25,
-              'Zombie'       : 13,
-              'Vampire'      : 15,
+              'Skeleton'       : 10,
+              'Dark Skeleton'  : 17,
+              'Rattlehead'     : 25,
+              'Zombie'         : 13,
+              'Vampire'        : 15,
               
               # Humanoid
-              'Orc'          : 10,
-              'Orc Sergeant' : 18,
+              'Orc'            : 10,
+              'Orc Sergeant'   : 18,
               
               # Animal
-              'Cobra'        : 7,
-              'Wolf'         : 15
+              'Wild Dog'       : 7,
+              'Badger'         : 5,
+              'Cobra'          : 7,
+              'Carpathian Wolf': 20,
+              'Wolf'           : 15
+              }
+
+expDict = { 
+              # Undead
+              'Skeleton'       : 10,
+              'Dark Skeleton'  : 50,
+              'Rattlehead'     : 250,
+              'Zombie'         : 30,
+              'Vampire'        : 40,
+              
+              # Humanoid
+              'Orc'            : 10,
+              'Orc Sergeant'   : 50,
+              
+              # Animal
+              'Wild Dog'       : 5,
+              'Badger'         : 5,
+              'Cobra'          : 8,
+              'Carpathian Wolf': 50,
+              'Wolf'           : 35
               }
 
 imgFileDict = { 
               # Undead
-              'Skeleton'     : ['rattlehead1.bmp', 'rattlehead2.bmp'],
-              'Dark Skeleton': ['rattlehead1.bmp', 'rattlehead2.bmp'],
-              'Skeleton King': ['rattlehead1.bmp', 'rattlehead2.bmp'],
-              'Zombie'       : ['cobra1.bmp', 'cobra2.bmp'],
-              'Vampire'      : ['cobra1.bmp', 'cobra2.bmp'],
+              'Skeleton'       : ['rattlehead1.bmp', 'rattlehead2.bmp'],
+              'Dark Skeleton'  : ['rattlehead1.bmp', 'rattlehead2.bmp'],
+              'Rattlehead'  : ['rattlehead1.bmp', 'rattlehead2.bmp'],
+              'Zombie'         : ['cobra1.bmp', 'cobra2.bmp'],
+              'Vampire'        : ['cobra1.bmp', 'cobra2.bmp'],
               
               # Humanoid
-              'Orc'          : ['orc1.bmp', 'orc2.bmp'],
-              'Orc Sergeant' : ['orc1.bmp', 'orc2.bmp'],
+              'Orc'            : ['orc1.bmp', 'orc2.bmp'],
+              'Orc Sergeant'   : ['orc1.bmp', 'orc2.bmp'],
               
               # Animal
-              'Cobra'        : ['cobra1.bmp', 'cobra2.bmp'],
-              'Wolf'         : ['cobra1.bmp', 'cobra2.bmp']               
+              'Wild Dog'       : ['cobra1.bmp', 'cobra2.bmp'],
+              'Badger'         : ['cobra1.bmp', 'cobra2.bmp'],
+              'Cobra'          : ['cobra1.bmp', 'cobra2.bmp'],
+              'Carpathian Wolf': ['cobra1.bmp', 'cobra2.bmp'],
+              'Wolf'           : ['cobra1.bmp', 'cobra2.bmp']
                }
 
 lootDict = { 
               # Undead
               'Skeleton'     : 10,
               'Dark Skeleton': 50,
-              'Skeleton King': 250,
+              'Rattlehead'   : 250,
               'Zombie'       : 30,
               'Vampire'      : 45,
               
@@ -65,18 +94,30 @@ lootDict = {
               'Orc Sergeant' : 75,
               
               # Animal
+              'Wild Dog'     : 5,
+              'Badger'       : 5,
               'Cobra'        : 5,
+              'Carpathian Wolf': 7,
               'Wolf'         : 5
               }
 
-enemiesByLevel = {  1: ['skeleton', 'orc', 'cobra'],
-                    2: ['skeleton', 'orc', 'cobra'],
-                    3: ['skeleton', 'orc', 'cobra'],
-                    4: ['skeleton', 'orc', 'cobra', 'zombie', 'wolf'],
-                    5: ['skeleton', 'orc', 'cobra', 'zombie', 'wolf'],
-                    6: ['skeleton', 'orc', 'cobra', 'zombie', 'wolf'],
-                    7: ['zombie', 'wolf', 'vampire'],
-                    8: ['zombie', 'wolf', 'vampire'],
-                    9: ['zombie', 'wolf', 'vampire'],
-                   10: ['zombie', 'wolf', 'vampire']
+enemiesByDungeonLevel = {
+                         1: ['skeleton', 'orc', 'cobra'],
+                         2: ['skeleton', 'orc', 'cobra'],
+                         3: ['skeleton', 'orc', 'cobra'],
+                         4: ['skeleton', 'orc', 'cobra', 'zombie', 'wolf'],
+                         5: ['skeleton', 'orc', 'cobra', 'zombie', 'wolf'],
+                         6: ['skeleton', 'orc', 'cobra', 'zombie', 'wolf'],
+                         7: ['zombie', 'cwolf', 'vampire'],
+                         8: ['zombie', 'cwolf', 'vampire'],
+                         9: ['zombie', 'cwolf', 'vampire'],
+                        10: ['zombie', 'cwolf', 'vampire']
 }
+
+# badger badger badger badger badger badger  &c 
+
+enemiesByWildsLevel = { 0: ['badger', 'wilddog'],
+                       1: ['orc', 'orc', 'orc', 'wolf']
+                       
+                       
+                       }

@@ -55,7 +55,6 @@ class inputHandler():
         else: return None
         try:
             self.FX.drawKeyFlash( self.keyDict[(mX_, mY_)] )
-            print self.keyDict[(mX_, mY_)]
             return self.keyDict[(mX_, mY_)]
         except KeyError:
             return None

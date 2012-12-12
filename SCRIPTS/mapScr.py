@@ -59,8 +59,8 @@ parchByLevel = {0 : [const.HEAL, const.DART],
                  4 : [const.HEAL, const.DART, const.HEL2, const.FRBL],
                  5 : [const.HEAL, const.DART, const.HEL2, const.FRBL],
                  6 : [const.HEAL, const.DART, const.HEL2, const.FRBL],
-                 7 : [const.HEL2, const.FRBL, const.HEL3, const.ICBL, const.ASCD],
-                 8 : [const.HEL2, const.FRBL, const.HEL3, const.ICBL, const.ASCD],
+                 7 : [const.HEL2, const.FRBL, const.ICBL, const.ASCD],
+                 8 : [const.HEL2, const.FRBL, const.ICBL, const.ASCD],
                  9 : [const.HEL2, const.FRBL, const.HEL3, const.ICBL, const.ASCD],
                 10 : [const.HEL2, const.FRBL, const.HEL3, const.ICBL, const.ASCD]
                 }
@@ -96,7 +96,7 @@ fruitList = [const.FRUIT1,
 
 pines = [const.PINE1, const.PINE2, const.PINE3, const.PINE4]
 
-accessoryList = ['cards1','cards2','beer1','veggies','','','','','','','','','','','','','','']
+accessoryList = ['cards1','cards2','beer1','veggies','fish','beers','dinnerplate','','','','','','','','','','','']
 
 descriptions = {
                 const.PINE1   : "They don't call it the Pinelands for nothing!",
@@ -108,8 +108,14 @@ descriptions = {
                 const.COLUMN1 : "A tall marble column.",
                 const.COLUMN2 : "A tall marble column.",
                 const.BOOKSHELF : "Proud words on a dusty shelf...",
+                const.CHINASHELF: "Fine china, the kind you never actually eat off!",
                 const.CHAIR1  : "A sturdy hand-carved wooden chair.",
                 const.CHAIR2  : "A sturdy hand-carved wooden chair.",
+                const.TABLE1: "A massive oaken table",
+                const.TABLE2: "A massive oaken table",
+                const.TABLE3: "A massive oaken table",
+                const.GVEG: "An assortment of fresh vegetables",
+                const.GMEAT: "Meats and cheeses are on display",
                 const.OCHEST : "The chest is empty."
                 
                 

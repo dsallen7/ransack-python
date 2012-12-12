@@ -87,25 +87,25 @@ class Interface( ):
         self.boxStat(cHP, mHP, colors.red, colors.black, (23, 163) )
         self.boxStat(cMP, mMP, colors.blue, colors.black, (23, 181) )
         self.boxStat(cEX, nEX, colors.green, colors.black, (23, 199) )
-        
+        # status ailments
         if game.myHero.isPoisoned:
-            self.mainImg.blit(game.Display.images[const.POISON], (134, 142))
+            self.mainImg.blit(game.Display.images[const.POISON], (60, 105))
         elif game.myHero.isDamned:
-            self.mainImg.blit(game.Display.images[const.DAMNATION], (134, 142))
+            self.mainImg.blit(game.Display.images[const.DAMNATION], (60, 105))
         
         # ticker
-        self.drawClock(35, 142, game.Ticker)
+        self.drawClock(35, 117, game.Ticker)
 
         # gold
         goldBox = pygame.Surface( (30,30) )
         goldBox.blit( game.Display.images[const.GOLD], (0,0) )
         self.writeText(goldBox, (5,17), '$'+str(game.myHero.getGold()), colors.white, colors.black,10)
-        self.mainImg.blit( goldBox, (134, 105) )
+        self.mainImg.blit( goldBox, (97, 105) )
         # keys
         keyBox = pygame.Surface( (30,30) )
         keyBox.blit( game.Display.images[const.KEY], (-5,0) )
         self.writeText(keyBox, (13,17), 'x'+str(kys), colors.white, colors.black,10)
-        self.mainImg.blit( keyBox, (97, 105) )
+        self.mainImg.blit( keyBox, (134, 105) )
         
         if self.popupWin is not None:
             self.mainImg.blit( self.popupWin, self.popupLoc )

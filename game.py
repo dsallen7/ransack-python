@@ -78,16 +78,27 @@ class game():
         for n in self.NPCs:
             if n.getID() == ID:
                 self.NPCs.remove(n)
-                self.myMap.NPCs.remove( n.getID() )
+                try:
+                    self.myMap.NPCs.remove( n.getID() )
+                except ValueError as e:
+                    print 'ValueError while removing NPC: ', e
                 return
     
-    def addNPCs(self, map):
-        self.NPCs = []
-        visibleNPCs = []
-        for n in map.NPCs:
-            self.NPCs.append( npcspawner.newNpc( n, self ) )
-        self.allsprites = pygame.sprite.RenderPlain((self.myHero, self.NPCs))
-        self.allsprites.clear(self.screen, self.gameBoard)
+    def addNPCs(self, map, type='all'):
+        if type=='all':
+            self.NPCs = []
+            self.myMap.newNPCs = []
+            visibleNPCs = []
+            for n in map.NPCs:
+                self.NPCs.append( npcspawner.newNpc( n, self ) )
+            self.allsprites = pygame.sprite.RenderPlain((self.myHero, self.NPCs))
+            self.allsprites.clear(self.screen, self.gameBoard)
+        elif type=='new':
+            for n in map.newNPCs[:]:
+                self.NPCs.append( npcspawner.newNpc( n, self ) )
+                map.newNPCs.remove(n)
+            self.allsprites = pygame.sprite.RenderPlain((self.myHero, self.NPCs))
+            self.allsprites.clear(self.screen, self.gameBoard)
     
     def addShops(self):
         self.Tavern = tavern.Tavern(self.screen, self.myInterface, self.Ticker, 
@@ -108,11 +119,11 @@ class game():
         #transition
         oldType = self.myMap.type
         self.myMap = self.myWorld.currentMap
-        if oldType != self.myWorld.currentMap.type:
-            if self.myMap.getType() == 'dungeon':
-                self.boxMessage('Now entering dungeon level '+str( self.myWorld.currentMap.level ))
-            else:
-                self.boxMessage('Now entering '+self.myMap.getType())
+        
+        if self.myMap.getType() == 'dungeon':
+            self.boxMessage('Now entering dungeon level '+str( self.myWorld.currentMap.level ))
+        elif oldType != self.myWorld.currentMap.type:
+            self.boxMessage('Now entering '+self.myMap.getType())
         
         self.addNPCs(self.myMap)
         self.Display.redrawXMap(self.myMap)
@@ -123,6 +134,7 @@ class game():
         self.myHero.setXY( x*const.blocksize,y*const.blocksize )
         self.Display.redrawMap(self.myMap, self.myHero, self.gameBoard)
         self.FX.scrollFromCenter( gameBoard_old, self.gameBoard  )
+        self.myMenu.displayStory(self.Director.getNarrartionEventByMapName(self.myMap.getName() ) )
     
     #takes screen shot and saves as bmp in serial fashion, beginning with 1
     def screenShot(self):
@@ -179,7 +191,6 @@ class game():
             # do nothing - advance clock by 1 min
             self.myMenu.displayHelp()
         elif event == pygame.K_e:
-            print 'e'
             #equipment menu
             self.myMenu.equipmentMenu(self)
         elif event == pygame.K_ESCAPE:
@@ -188,8 +199,8 @@ class game():
             if not self.myHero.moving:
                 try:
                     return self.move(pygame.key.name(event))
-                except TypeError:
-                    pass
+                except TypeError as e:
+                    print 'TypeError while trying to move: ', e
     
     def actionCommand(self):
         (dX, dY) = const.scrollingDict[self.myHero.dir]
@@ -279,7 +290,8 @@ class game():
         y = (Y + moveY)/const.blocksize
         # check for blocking NPCs
         for n in self.NPCs:
-            if ( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize ) == n.getXY():
+            if ( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize ) == n.getXY() and n.playerIsFacingMe( self.myHero ):
+                #n.moveIT(self.myMap, self.myHero.getXY())
                 return
         i = self.myMap.getEntry( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize)
         # detect blocking tiles first, otherwise they will be ignored
@@ -292,7 +304,7 @@ class game():
                                    self.myMap.grid[x][y].portal[2] ) )
                 self.Display.drawSprites(self.myHero,self.myMap,self.gameBoard,self,animated=False)
             except AttributeError as e:
-                print 'AttributeError: ', e
+                print 'AttributeError while trying to enter a door: ', e
                 pass
             return
         elif i == const.EWDOOR:
@@ -303,7 +315,7 @@ class game():
             self.myMap.setEntry( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize,const.NSDOORO)
             self.Display.redrawXMap(self.myMap)
             return
-        elif i == -1 or i in range(24,86)+[const.CHEST]+[const.OCHEST]+range(128, 216):
+        elif i == -1 or i in range(const.BRICK1,86)+[const.CHEST]+[const.OCHEST]+range(128, 216):
             return
         # dungeon door
         elif i == const.DOOR:
@@ -351,17 +363,18 @@ class game():
                 if loc is not False:
                     self.transition(loc)
                     self.Display.drawSprites(self.myHero,self.myMap,self.gameBoard,self,animated=False)
-            except UnboundLocalError:
-                pass
+            except UnboundLocalError as e:
+                print 'UnboundLocalError while leaving edge of map: ', e
             return
         # open space
         self.myHero.moving = True
-        if ( (0 <= X+moveX < const.blocksize*self.myMap.getDIM() ) and (0 <= Y+moveY < const.blocksize*self.myMap.getDIM() ) and i in range(24) ):
+        if ( (0 <= X+moveX < const.blocksize*self.myMap.getDIM() ) and (0 <= Y+moveY < const.blocksize*self.myMap.getDIM() ) and i in range(const.BRICK1) ):
             self.myHero.moving = True
+            self.myMap.clearOccupied(X/const.blocksize,Y/const.blocksize)
             X += moveX
             Y += moveY
             self.myHero.setXY(X,Y)
-        #self.Display.redrawXMap(self.myMap)
+            self.myMap.setOccupied(X/const.blocksize,Y/const.blocksize)
         
         if not self.myHero.updateStatus(self):
             self.gameOver()
@@ -378,22 +391,17 @@ class game():
         return lootItems
     
     def launchBattle(self, mName, lD):
-        self.boxMessage("The baTTle is joined!")
-        #self.FX.fadeOut(const.gameBoardOffset)
-        g = self.myBattle.fightBattle(self, enemy.enemy(mName, lD), self.gameBoard )
-        if g == True: # escaped from battle
+        self.boxMessage("The battle is joined!")
+        result = self.myBattle.fightBattle(self, enemy.enemy(mName, lD), self.gameBoard )
+        if result == 'escaped': # escaped from battle
             return False
-        elif g == False: # died in battle
+        elif result == 'died': # died in battle
             self.gameOver()
-        else: # won battle
-            #self.textMessage('You find '+str(g)+' gold pieces!')
-            #self.myHero.addGold(g)            chestlist = self.myMap.chests[(x, y)]
+        elif result == 'won': # won battle
             for item in self.myMenu.displayChest( self.getLoot(mName), 'Enemy Loot' ):
                 msg = self.myHero.getItem(item)
                 self.Ticker.tick(30)
                 self.textMessage(msg)
-            #self.myMap.setEntry( x, y, const.OCHEST )
-            #self.Display.redrawXMap(self.myMap)
             self.myHero.notchKill()
             # final boss
             if mName == 'Skeleton King':
@@ -448,20 +456,18 @@ class game():
         self.Display.displayOneFrame(self.myInterface, self.FX, self.gameBoard, self, self.myMap.type in ['dungeon', 'maze', 'fortress'])
 
     def mainLoop(self):
-        '''
-        (pX, pY) = self.myHero.getPlayerXY()
-        self.myMap.setPlayerXY(  )
-        self.myHero.setXY(pX*const.blocksize, pY*const.blocksize)
-        '''
-        self.myMenu.displayStory('Welcome to Ransack. So you think you can surivive in this grim and frostbitten land?')
+        self.visibleNPCs = []
+        if not self.Director.getEvent(0):
+            self.myMenu.displayStory("So here you are in the same town, in front of the same house you've lived in forever. There's gotta be something else out there. It's time to go find it. Welcome to Ransack.")
+            self.Director.setEvent(0)
         (pX, pY) = self.myHero.getXY()
         self.myMap.setPlayerXY( pX/const.blocksize, pY/const.blocksize )
         self.myMap.updateWindowCoordinates(self.myHero)
         self.Display.redrawXMap(self.myMap)
-        self.Display.drawSprites(self.myHero, self.myMap, self.gameBoard, self, animated=False)
         self.updateSprites()
+        self.Display.drawSprites(self.myHero, self.myMap, self.gameBoard, self, animated=False)
         while self.gameOn:
-            self.gameBoard.fill(colors.black)
+            #self.gameBoard.fill(colors.black)
             for event in pygame.event.get():
                 event_ = self.inputHandler.getCmd(event)
                 self.event_handler(event_)
@@ -473,12 +479,13 @@ class game():
                               pygame.K_LEFT,
                               pygame.K_RIGHT,]:
                     self.event_handler(event_)
+            if self.myMap.update( len(self.NPCs) ) == 'newNPCs':
+                self.addNPCs(self.myMap, 'new')
             
             if self.updateNPCs() or self.myHero.moving:
                 self.Display.drawSprites(self.myHero, self.myMap, self.gameBoard, self, self.myHero.dir, animated=True)
                     #self.Display.drawSprites(self.myHero, self.myMap, self.gameBoard, self, None, animated=True)
             self.displayOneFrame()
             
-            #self.clock.tick(240)
         self.myInterface.state = 'mainmenu'
         return self.won

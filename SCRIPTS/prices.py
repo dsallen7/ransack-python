@@ -50,7 +50,7 @@ magicPrices = { (const.SPELLBOOK,const.DART): 100,
                 (const.SPELLBOOK,const.HEL5): 750,
                 (const.SPELLBOOK,const.RTRN): 1500,
                 (const.SPELLBOOK,const.IBL2): 1500,
-                (const.SPELLBOOK,const.FBL2): 1750,
+                (const.SPELLBOOK,const.FBL3): 1750,
                 (const.SPELLBOOK,const.GNCD): 2000,
                 
                 (const.PARCHMENT,const.HEAL): 10,
@@ -67,7 +67,7 @@ magicPrices = { (const.SPELLBOOK,const.DART): 100,
                 (const.PARCHMENT,const.HEL5): 75,
                 (const.PARCHMENT,const.RTRN): 150,
                 (const.PARCHMENT,const.IBL2): 150,
-                (const.PARCHMENT,const.FBL2): 175,
+                (const.PARCHMENT,const.FBL3): 175,
                 (const.PARCHMENT,const.GNCD): 200,
                 }
 
@@ -81,3 +81,5 @@ def priceItem(item):
         return weaponPrices[item.type] + 25*enh[0] + 25*enh[1] + 25*enh[2]
     elif item.name == 'spellbook' or item.name == 'parchment':
         return magicPrices[ (item.type, item.spellNum) ]
+    else:
+        return itemPrices[item.type]

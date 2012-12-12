@@ -1,8 +1,8 @@
 from UTIL import const
 
 itemShopsByLevel = { 
-                    1: [0,1,4],
-                    2: [5,6,7,9,10]
+                    1: [const.FRUIT1,const.CHEESE,const.BREAD],
+                    2: [const.ANTIDOTE,const.SHP,const.MHP,const.SMP,const.MMP]
 
 
 

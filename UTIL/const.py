@@ -11,6 +11,10 @@ miniblocksize = 15
 
 gameBoardOffset = 75
 
+# max of stats (str, int, dex)
+
+maxStats = 30
+
 timeRate = 6
 
 maxLineWidth = 24
@@ -37,7 +41,7 @@ ROAD2   = 9
 
 GRASS1  = 12
 
-BRICK1  = 24
+BRICK1  = 32
 
 
 HOUSEDOOR1 = 41
@@ -96,6 +100,7 @@ COLUMN2 = 151
 
 LOGBOOK = 200
 BOOKSHELF = 201
+CHINASHELF = 202
 CHAIR1 = 208
 
 CHAIR2 = 209
@@ -103,6 +108,9 @@ CHAIR2 = 209
 TABLE1 = 210
 TABLE2 = 211
 TABLE3 = 212
+
+GVEG = 214
+GMEAT = 215
 
 FRUIT1    = 216
 CHEESE    = 217
@@ -183,6 +191,7 @@ IBL2 = 22
 # L6
 HEL6 = 25
 GNCD = 26
+FBL3 = 27
 
 # Items
 FRUIT1_I = 0

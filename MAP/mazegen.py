@@ -116,7 +116,7 @@ class Generator():
             if tile == None:
                 pass
             else:
-                self.map.NPCs.append( ( tile, choice(enemyScr.enemiesByLevel[self.map.level] ) ) )
+                self.map.NPCs.append( ( tile, choice(enemyScr.enemiesByDungeonLevel[self.map.level] ) ) )
                 i += 1
         i = 0
         chestList = []
