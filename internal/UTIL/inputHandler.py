@@ -5,7 +5,7 @@ from math import floor, ceil
 from UTIL import const
 
 '''
-            left bound of button, top bound of button + size of gameboard
+            (left bound of button, top bound of button + size of gameboard) : key
 '''
 
 class inputHandler():

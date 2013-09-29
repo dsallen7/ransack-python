@@ -295,7 +295,6 @@ class hero(pygame.sprite.Sprite):
                 self.maxMP += newArmor.enhAmt
             elif newArmor.enh == 'Plus WP':
                 self.weaponClass += newArmor.enhAmt
-                
         else:
             self.armorClass -= (oldArmor.getLevel())
             self.armorClass += (newArmor.getLevel())
@@ -309,7 +308,6 @@ class hero(pygame.sprite.Sprite):
                 self.currMP = min( self.currMP, self.maxMP )
             if oldArmor.enh == 'Plus WP':
                 self.weaponClass -= oldArmor.enhAmt
-                
             if newArmor.enh == 'Plus HP':
                 self.currHP = int(ceil( self.currHP*( self.maxHP + armor.enhAmt)/self.maxHP ))
                 self.maxHP += newArmor.enhAmt

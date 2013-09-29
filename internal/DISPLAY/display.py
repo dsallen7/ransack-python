@@ -145,9 +145,11 @@ class Display():
         map.setPlayerXY(newX/const.blocksize, newY/const.blocksize)
         (oldX, oldY, c, d) = hero.getRect()
         scrolling = False
+        '''
         delta = int( ceil( float(DIMEN)/2.) )
         if map.getDIM() % 2 == 0:
             delta = delta + 1
+            '''
         # where is new on-screen location of hero?
         if DIMEN > const.HALFDIM:
             if (5*const.blocksize <= newX <= (DIMEN-5)*const.blocksize):
@@ -172,13 +174,6 @@ class Display():
             newX += (const.HALFDIM - DIMEN)/2*const.blocksize
             newY += (const.HALFDIM - DIMEN)/2*const.blocksize
         
-        
-        # use this to control speed of animation
-        
-        # speedFactor of 1 is normal speed, 2 is 2x as fast, etc.
-        
-        speedFactor = 1
-       
         #make the move animated
         if animated:
             if not hero.moving:
@@ -190,17 +185,17 @@ class Display():
             pos, oldPos = map.updateWindowCoordinates( hero )
             (topX, topY) = pos
             if oldX == newX:
-                xAxis = [oldX] * (const.blocksize/speedFactor)
+                xAxis = [oldX] * (const.blocksize)
             elif oldX < newX:
-                xAxis = range(oldX, newX, speedFactor)
+                xAxis = range(oldX, newX, 1)
             else:
-                xAxis = range(oldX, newX, -speedFactor)
+                xAxis = range(oldX, newX, -1)
             if oldY == newY:
-                yAxis = [oldY] * (const.blocksize/speedFactor)
+                yAxis = [oldY] * (const.blocksize/1)
             elif oldY < newY:
-                yAxis = range(oldY, newY, speedFactor)
+                yAxis = range(oldY, newY, 1)
             elif oldY > newY:
-                yAxis = range(oldY, newY, -speedFactor)
+                yAxis = range(oldY, newY, -1)
             for (idx, (i, j)) in list( enumerate(zip(xAxis, yAxis), start=1) ):
                 hero.setRect( i, j, const.blocksize, const.blocksize)
                 for npc in game.NPCs:
@@ -223,7 +218,6 @@ class Display():
                     
                     if hero.moving:
                         if idx in [6,12,21,27]:
-                            #print idx
                             hero.takeStep()
                     if map.type in ['dungeon', 'maze', 'fortress']:
                         self.drawDarkness(map, gameBoard, (idx*scrollX, 
@@ -255,9 +249,11 @@ class Display():
         (newX,newY) = hero.getXY()
         map.setPlayerXY(newX/const.blocksize, newY/const.blocksize)
         (oldX, oldY) = loc1
+        '''
         delta = int( ceil( float(DIMEN)/2.) )
         if map.getDIM() % 2 == 0:
             delta = delta + 1
+            '''
         # where is new on-screen location of hero?
         if DIMEN > const.HALFDIM:
             if (5*const.blocksize <= newX <= (DIMEN-5)*const.blocksize):

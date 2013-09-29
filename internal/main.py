@@ -7,9 +7,10 @@ from OBJ import weapon
 
 from UTIL import const, inputHandler
 
-from math import ceil
+from math import ceil, floor
 from SND import sfx
 from IMG import images
+
 
 try:
     import android
@@ -22,7 +23,8 @@ except ImportError as e:
     mixer = pygame.mixer
 
 # Set the height and width of the screen
-screenSize=[720,1280]
+cfac = 1.0
+screenSize=[ int( floor(720*cfac) ), int( floor(1280*cfac) ) ]
 screen=pygame.display.set_mode(screenSize)
 
 
@@ -143,6 +145,7 @@ def mouseHandler(m):
 
 def updateDisplay():
     titleScreen = pygame.Surface((screenSize[0],screenSize[0]))
+    screen.fill(colors.black)
     screen.blit( pygame.transform.scale(ifaceImg, (int(ceil(300 * 2.4)), 
                                                    int(ceil(233 * 2.4)) ) ), 
                  (0, int(ceil(300 * 2.4))) )

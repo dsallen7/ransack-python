@@ -318,7 +318,7 @@ class game():
             self.transition( (newX, newY) )
             self.Display.drawSprites(self.myHero,self.myMap,self.gameBoard,self,animated=False)
         except AttributeError as e:
-            print 'AttributeError while trying to enter a door: ', e
+            #print 'AttributeError while trying to enter a door: ', e
             pass
         
     def move(self, direction):
