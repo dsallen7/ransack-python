@@ -40,6 +40,11 @@ magicShopsByLevel = {
                           (const.PARCHMENT,const.FRBL),
                           (const.PARCHMENT,const.HEAL),
                           (const.PARCHMENT,const.DART),
+                          (const.PARCHMENT,const.TLPT)],
+                     3: [(const.SPELLBOOK,const.FRBL),
+                          (const.PARCHMENT,const.FRBL),
+                          (const.PARCHMENT,const.HEAL),
+                          (const.PARCHMENT,const.DART),
                           (const.PARCHMENT,const.TLPT)]
                       
                       }

@@ -9,11 +9,12 @@ enemyDict = {
               
               'orc'       : ('Orc', 'orc.bmp'),
               'orcsgt'    : ('Orc Sergeant', 'orc.bmp'),
+              'dguard'    : ('Dark Guard', 'darkguard.bmp'),
                             
               'zombie'    : ('Zombie', 'zombie.bmp'),
               'cobra'     : ('Cobra', 'cobra.bmp'),
               'vampire'   : ('Vampire', 'vampire.bmp'),
-              'cwolf'     : ('Carpathian Wolf', 'wolf.bmp'),
+              'cwolf'     : ('Carpathian Wolf', 'cwolf.bmp'),
               'wolf'      : ('Wolf', 'wolf.bmp')
              }
 
@@ -26,6 +27,7 @@ npcList = [
            # citizens
            'blacksmith',
            'castleguard1',
+           'darkguard',
            'dungeonguard',
            'female',
            'gardener',

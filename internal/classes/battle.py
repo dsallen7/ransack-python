@@ -12,23 +12,22 @@ except:
     print "No Android in battle"
 
 # this class will be used to draw the animation occuring in the battle.
+# using game sprites instead of full blown animations here
 
 class battle():
     
     def __init__(self, screen, iH, menu):
-        self.battleField, r = load_image.load_image( os.path.join('ANIMATION', 'battlefield.bmp'), None)
-        self.battleField.set_colorkey([255,0,0])
-        self.forestField, r = load_image.load_image( os.path.join('ANIMATION', 'forestField.bmp'), None)
-        self.dungeonField, r = load_image.load_image( os.path.join('ANIMATION', 'dungeonField.bmp'), None)
-        self.images = range(3)
         self.screen = screen
         
+        self.battleField, r = load_image.load_image( os.path.join('ANIMATION', 'battlefield.bmp'), None)
+        self.battleField.set_colorkey([255,0,0])
         self.background = pygame.Surface((300, 300))
         
+        self.forestField, r = load_image.load_image( os.path.join('ANIMATION', 'forestField.bmp'), None)
+        self.dungeonField, r = load_image.load_image( os.path.join('ANIMATION', 'dungeonField.bmp'), None)
+        self.townField, r = load_image.load_image( os.path.join('ANIMATION', 'townField.bmp'), None)
         self.myMenu = menu
-        
-        #self.images[0], r = load_image.load_image('cursor.bmp', -1)
-        
+                
         self.enemyImgs = range(2)
         
         self.enemyImg = None
@@ -55,12 +54,12 @@ class battle():
     def drawBattleScreen(self, game, enemy=None):
         if enemy is not None:
             self.battleField, r = load_image.load_image(os.path.join('ANIMATION', 'battlefield.bmp'), -1)
-            if game.myMap.type == 'wilds':
-                self.background.blit(self.forestField, (0,0) )
-            else: self.background.blit(self.dungeonField, (0,0) )
-            self.battleField.blit( self.boxStat(enemy.getHP(), enemy.maxHP, colors.red, colors.black, (150, 30) ), (204, 97) )
-            self.battleField.blit( self.enemyImg, (125, 50)  )
-            self.battleField.blit( self.heroImg, (0, 75)  )
+            if game.myMap.type == 'dungeon': self.background.blit(self.dungeonField, (0,0) )
+            elif game.myMap.type == 'dungeon': self.background.blit(self.forestField, (0,0) )
+            elif game.myMap.type == 'village': self.background.blit(self.townField, (0,0) )
+            self.battleField.blit( self.enemyAvatar, (50, 100) )
+            self.battleField.blit( self.heroAvatar, (250, 100) )
+            self.battleField.blit( self.boxStat(enemy.getHP(), enemy.maxHP, colors.red, colors.black, (150, 30) ), (10, 85) )
             self.background.blit(self.battleField, (0,0) )
         #self.screen.blit( pygame.transform.scale(self.battleField, (720, 720) ), (0, 0) )
         game.Display.displayOneFrame(game.myInterface, game.FX, self.background, game, False, True)
@@ -110,31 +109,6 @@ class battle():
             maxBox.blit(currBox, (0,0) )
         return maxBox
     
-    def showEnemyDeath(self, game):
-        for i in range(50, 300, 10):
-            self.battleField, r = load_image.load_image(os.path.join('ANIMATION', 'battlefield.bmp'), -1)
-            if game.myMap.type == 'wilds':
-                self.background.blit(self.forestField, (0,0) )
-            else: self.background.blit(self.dungeonField, (0,0) )
-            self.battleField.blit( self.enemyImg, (125, i)  )
-            self.battleField.blit( self.heroImg, (0, 75)  )
-            self.background.blit(self.battleField, (0,0) )
-            game.Display.displayOneFrame(game.myInterface, game.FX, self.background, game, False, True)
-            pygame.display.flip()
-        
-    def loadEnemyImg(self, hero, enemy):
-        if hero.gender == 'male':
-            self.heroImgs[0], r = load_image.load_image( os.path.join('ANIMATION', 'hero_m1.bmp'), 2 )
-            self.heroImgs[1], r = load_image.load_image( os.path.join('ANIMATION', 'hero_m2.bmp'), 2 )
-        else:
-            self.heroImgs[0], r = load_image.load_image( os.path.join('ANIMATION', 'hero_f1.bmp'), 2 )
-            self.heroImgs[1], r = load_image.load_image( os.path.join('ANIMATION', 'hero_f2.bmp'), 2 )
-        self.heroImg = self.heroImgs[0]
-        enemyImgFilenames = enemyScr.imgFileDict[enemy.getName()]
-        for i in range(len(enemyImgFilenames)):
-             self.enemyImgs[i], r = load_image.load_image( os.path.join('ANIMATION', enemyImgFilenames[i]), 2 )
-        self.enemyImg = self.enemyImgs[0]
-    
     def damageEnemy(self, game, enemy, dmg):
         for i in range(enemy.getHP(), enemy.getHP()-dmg, -1):
             enemy.takeDmg(1)
@@ -180,11 +154,11 @@ class battle():
                 game.textMessage("You can't escape!")
                 return True
     # this controls all the logic of what goes on in an actual battle
-    def fightBattle(self, game, enemy, board_):
-        self.loadEnemyImg(game.myHero, enemy)
+    def fightBattle(self, game, enemy, board_, eA, hA):
+        self.enemyAvatar = eA
+        self.heroAvatar = hA
         self.drawBattleScreen(game, enemy)
         game.FX.scrollFromCenter(board_, self.battleField)
-        #game.myInterface.update()
         hero = game.myHero
         (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX, psn) = hero.getPlayerStats()
         (armor, weapon) = ( hero.getArmorEquipped(), hero.getWeaponEquipped() )
@@ -194,15 +168,11 @@ class battle():
             game.textMessage( 'You are facing the '+enemy.getName()+'!' )
         time = 0
         while enemy.getHP() > 0:
-            #clock.tick(15)
-            self.enemyImg = self.enemyImgs[0]
             self.drawBattleScreen(game, enemy)
             if not hero.updateStatus(game):
                 return False
             # hero turn
             while not self.heroTurn(game, enemy, board_): pass
-            self.heroImg = self.heroImgs[0]
-            pygame.time.wait(1000)
             game.myInterface.update(game)
             self.drawBattleScreen(game, enemy)
             
@@ -234,7 +204,7 @@ class battle():
                     else: game.textMessage("The "+enemy.getName()+" attack is ineffective.")
                     if hero.takeDmg(dmg) < 1:
                         game.textMessage("You have died!")
-                        game.FX.scrollFromCenter(self.battleField, board_)
+                        #game.FX.scrollFromCenter(self.battleField, board_)
                         return 'died'
                 else:
                     game.textMessage("The "+enemy.getName()+" missed you!")
@@ -244,7 +214,6 @@ class battle():
             self.drawBattleScreen(game, enemy)
             pygame.time.wait(1000)
         game.textMessage("The "+enemy.getName()+" is dead!")
-        self.showEnemyDeath(game)
         if hero.increaseExp( enemyScr.expDict[enemy.getName()] + random.randrange(enemy.getLevel()*2, enemy.getLevel()*4)  ):
             game.textMessage("Congratulations! You have gained a level.")
         game.FX.scrollFromCenter(self.background, board_)

@@ -234,7 +234,7 @@ class game():
                 r = n.interact(self.myInterface, self)
                 if r == None: return
                 elif r == 'battle':
-                    if self.launchBattle(n.name, self.myWorld.currentMap.level):
+                    if self.launchBattle(n, self.myWorld.currentMap.level):
                         self.removeNPC(n.getID())
                     else: n.confuse(30)
                     return
@@ -430,25 +430,27 @@ class game():
             lootItems.append( (const.PARCHMENT, random.choice( mapScr.parchByLevel[self.myWorld.currentMap.level] ) ) )
         return lootItems
     
-    def launchBattle(self, mName, lD):
+    # takes enemy NPC object, dungeon level
+    def launchBattle(self, enemyNpc, lD):
         #self.boxMessage("The battle is joined!")
-        result = self.myBattle.fightBattle(self, enemy.enemy(mName, lD), self.gameBoard )
+        result = self.myBattle.fightBattle(self, enemy.enemy(enemyNpc.name, lD), self.gameBoard, enemyNpc.images[6], self.myHero.images[4])
+        #result = self.myBattle.fightBattle(self, enemy.enemy(enemyNpc.name, lD), self.gameBoard )
         if result == 'escaped': # escaped from battle
             return False
         elif result == 'died': # died in battle
             self.gameOver()
         elif result == 'won': # won battle
-            for item in self.myMenu.displayChest( self.getLoot(mName), 'Enemy Loot' ):
+            for item in self.myMenu.displayChest( self.getLoot(enemyNpc.name), 'Enemy Loot' ):
                 msg = self.myHero.getItem(item)
                 self.Ticker.tick(30)
                 self.textMessage(msg)
             self.myHero.notchKill()
             # final boss
-            if mName == 'Garden Badger':
+            if enemyNpc.name == 'Garden Badger':
                 self.Director.advanceQuest(0)
                 if self.Director.getQuestStatus(0) == 3:
                     self.boxMessage("Finished off those garden badgers, did ya? Garden Variety is more like it!")
-            elif mName == 'Skeleton King':
+            elif enemyNpc.name == 'Skeleton King':
                 self.Director.setEvent(11)
             return True
 
@@ -492,7 +494,7 @@ class game():
                 elif r == 'battle':
                     self.myInterface.npcMessage( n.message, n.images[2] )
                     self.displayOneFrame()
-                    if self.launchBattle(n.name, self.myWorld.currentMap.level):
+                    if self.launchBattle(n, self.myWorld.currentMap.level):
                         self.removeNPC(n.getID())
                     else: n.confuse(30)
                 

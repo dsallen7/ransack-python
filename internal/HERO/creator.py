@@ -149,7 +149,7 @@ class Creator():
                 const.blocksize,
                 self.HP, self.HP, # max, current
                 self.MP, self.MP,
-                0, 0,             # score, keys
+                0, 10,             # score, keys
                 3, 0, 50,         # level, current XP, XP for next lev
                 [], None,         # weapons, eq. weapons
                 [], [None, None, None,  #armor, eq. armor (helmet, plate, shield,

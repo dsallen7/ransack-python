@@ -12,6 +12,7 @@ healthDict = {
               # Humanoid
               'Orc'            : 25,
               'Orc Sergeant'   : 75,
+              'Dark Guard'     : 100,
               
               # Animal
               'Wild Dog'       : 25,
@@ -33,6 +34,7 @@ attackDict = {
               # Humanoid
               'Orc'            : 10,
               'Orc Sergeant'   : 18,
+              'Dark Guard'     : 20,
               
               # Animal
               'Wild Dog'       : 7,
@@ -54,6 +56,7 @@ expDict = {
               # Humanoid
               'Orc'            : 10,
               'Orc Sergeant'   : 50,
+              'Dark Guard'     : 60,
               
               # Animal
               'Wild Dog'       : 5,
@@ -63,7 +66,7 @@ expDict = {
               'Carpathian Wolf': 50,
               'Wolf'           : 35
               }
-
+'''
 imgFileDict = { 
               # Undead
               'Skeleton'       : ['rattlehead1.bmp', 'rattlehead2.bmp'],
@@ -84,7 +87,7 @@ imgFileDict = {
               'Carpathian Wolf': ['cobra1.bmp', 'cobra2.bmp'],
               'Wolf'           : ['cobra1.bmp', 'cobra2.bmp']
                }
-
+'''
 lootDict = { 
               # Undead
               'Skeleton'     : 10,
@@ -96,6 +99,7 @@ lootDict = {
               # Humanoid
               'Orc'          : 15,
               'Orc Sergeant' : 75,
+              'Dark Guard'   : 80,
               
               # Animal
               'Wild Dog'     : 5,
@@ -115,8 +119,8 @@ enemiesByDungeonLevel = {
                          6: ['skeleton', 'orc', 'cobra', 'zombie', 'wolf'],
                          7: ['zombie', 'cwolf', 'vampire'],
                          8: ['zombie', 'cwolf', 'vampire'],
-                         9: ['zombie', 'cwolf', 'vampire'],
-                        10: ['zombie', 'cwolf', 'vampire']
+                         9: ['zombie', 'cwolf', 'vampire', 'dguard'],
+                        10: ['zombie', 'cwolf', 'vampire', 'dguard']
 }
 
 # badger badger badger badger badger badger  &c 
