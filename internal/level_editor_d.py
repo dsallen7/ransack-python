@@ -3,7 +3,7 @@ import pygame, os, cPickle, random, gzip
 
 from MAP import world, mapgen, mazegen, map, wilds, tile
 from DISPLAY import text
-from UTIL import queue, const, colors, eztext, load_image, misc
+from UTIL import queue, const, colors, eztext, load_image, misc, button
 from IMG import images, spritesheet
 from math import floor, ceil
 from SCRIPTS import npcScr, mapScr
@@ -199,32 +199,38 @@ class Handler():
             pygame.display.flip()
     
     def switchMap(self):
-        mapWin = pygame.Surface((200,900))
-        mapWin.fill(colors.black)
         mapList = myWorld.getMapList()
+        mapWin = pygame.Surface(( 200*(( len(mapList)/10) + 1 ), 900 ))
+        mapWin.fill(colors.black)
         mapList.sort()
+        mapB = []
+        numRows = 20
         if pygame.font:
             font = pygame.font.SysFont("arial",20)
             y_ = 0
+            x_ = 0
             for map in mapList:
-                mapWin.blit( font.render(map, 1, colors.white, colors.black), (0,y_) )
-                y_ += 30
+                b = button.Button( ( 200+(((x_/numRows))*200), (y_*30)), map, os.getcwd()+"/FONTS/gothic.ttf", 14)
+                mapB.append( b )
+                mapWin.blit( b.img, ( ((x_/numRows))*200, (y_*30)) )
+                y_ += 1
+                x_ += 1
+                y_ = y_ % numRows
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     (mX, mY) = pygame.mouse.get_pos()
-                    if 200 <= mX < 400 and 0 <= mY < 900:
-                        mapIndex = mY/30
-                        if mapIndex+1 <= len(mapList):
-                            myWorld.currentMap = myWorld.getMapByName( mapList[mapIndex] )#myWorld.worldArray[mapIndex]
+                    for b in mapB:
+                        (x, y) = pygame.mouse.get_pos()
+                        if b.hit(x, y):
+                            myWorld.currentMap = myWorld.getMapByName( b.msg )
                             self.myMap = myWorld.currentMap
-                        self.cursorPos = (0,0)
-                        self.topX = 0
-                        self.topY = 0
-                    return
+                            self.cursorPos = (0,0)
+                            self.topX = 0
+                            self.topY = 0
+                            return
                 if event.type == pygame.QUIT:
                     os.sys.exit()
-                        
             screen.blit(mapWin, (200, 0) )
             pygame.display.flip()
     
@@ -853,6 +859,7 @@ class Handler():
 # Set the height and width of the screen
 size=[1400,800]
 screen=pygame.display.set_mode(size)
+pygame.display.set_caption("Ransack Level Editor")
 
 images.load()
 mapImages = images.mapImages

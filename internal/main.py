@@ -24,7 +24,7 @@ except ImportError as e:
 
 # Set the height and width of the screen
 cfac = 1.0
-screenSize=[ int( floor(720*cfac) ), int( floor(1280*cfac) ) ]
+screenSize=[ 720, 1280 ]
 screen=pygame.display.set_mode(screenSize)
 
 

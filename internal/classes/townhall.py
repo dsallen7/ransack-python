@@ -31,38 +31,6 @@ class Townhall(Shop):
             iT.priceID = i
             self.items[level].append( iT )
             self.prices[level][i] = prices.priceItem(iT)
-
-    def drawStoreScreen(self):
-        #self.myInterface.update()
-        storeScreen_ = pygame.transform.scale(self.storeScreen, (720, 720) )
-        storeScreen_.blit( self.menuBox, ( int(ceil(165*const.scaleFactor)),
-                                               int(ceil(190*const.scaleFactor))) )
-        self.screen.blit( storeScreen_, (0, 0) )
-        pygame.display.flip()
-    
-    def getAction(self):
-        options = ['Buy', 'Save', 'Return To Game', 'Exit Game']
-        selection = 0
-        while True:
-            self.menuBox.fill( colors.gold )
-            if pygame.font:
-                for i in range(len(options)):
-                    self.menuBox.blit( text.Text(options[i], os.getcwd()+"/FONTS/Squealer.ttf", const.shopTextFontSize), ( int(ceil(25*const.scaleFactor)),
-                                                                                                                      i*int(ceil(25*const.scaleFactor)) ) )
-            for event in pygame.event.get():
-                event_ = self.inputHandler.getCmd(event)
-                if event_ == pygame.K_UP:
-                    selection -= 1
-                    if selection == -1:
-                        selection = len(options)-1
-                if event_ == pygame.K_DOWN:
-                    selection += 1
-                    if selection == len(options):
-                        selection = 0
-                if event_ == pygame.K_RETURN:
-                    return options[selection]
-            self.menuBox.blit( self.images[0], (0, selection* int(ceil(25*const.scaleFactor)) ) )
-            self.drawStoreScreen()
     
     def save(self, fileName, game, FX):
         return game.saveGame(fileName)
@@ -71,12 +39,13 @@ class Townhall(Shop):
         pass
     # loc is: (mapname, playerX, playerY )
     def enterStore(self, hero, game, FX, level, loc):
+        self.gameboard_copy = game.gameBoard
         self.stockStore(level)
         self.storeScreen.blit( self.images[1], (0,0) )
         FX.scrollFromCenter(game.gameBoard, self.storeScreen)
         self.drawStoreScreen()
         while True:
-            action = self.getAction()
+            action = self.getAction(['Buy', 'Save', 'Return To Game', 'Exit Game'])
             if action == 'Return To Game':
                 FX.scrollFromCenter(self.storeScreen, game.gameBoard)
                 return

@@ -28,18 +28,19 @@ class Shop():
     def drawStoreScreen(self):
         #self.myInterface.update()
         storeScreen_ = pygame.transform.scale(self.storeScreen, (720, 720) )
+        storeScreen_.set_colorkey([0,0,0])
         storeScreen_.blit( self.menuBox, ( int(ceil(165*const.scaleFactor)),
                                                int(ceil(190*const.scaleFactor))) )
+        self.screen.blit( pygame.transform.scale(self.gameboard_copy, (720,720) ), (0, 0))
         self.screen.blit( storeScreen_, (0, 0) )
         pygame.display.flip()
         
-    def getAction(self):
-        options = ['Buy', 'Sell', 'Exit Shop']
+    def getAction(self, options):
         selection = 0
         while True:
             self.menuBox.fill( colors.gold )
             if pygame.font:
-                for i in range(3):
+                for i in range(len(options)):
                     self.menuBox.blit( text.Text(options[i], 
                                                  os.getcwd()+"/FONTS/Squealer.ttf", 
                                                  const.shopTextFontSize), 
@@ -73,12 +74,12 @@ class Shop():
         elif self.name == 'armory' :
             return hero.getArmor()
         elif self.name == 'itemshop':
-            #return hero.getItems()
             return filter( lambda x: x.getType() not in [const.SPELLBOOK, const.PARCHMENT], hero.getItems() )
         elif self.name == 'magicshop':
             return filter( lambda x: x.getType() in [const.SPELLBOOK, const.PARCHMENT], hero.getItems() )
     
     def enterStore(self, hero, game, level):
+        self.gameboard_copy = game.gameBoard
         if self.name in ['itemshop', 'magicshop']:
             self.stockStore(level)
         else:
@@ -92,7 +93,7 @@ class Shop():
                     self.stockedAt = count
         self.drawStoreScreen()
         while True:
-            action = self.getAction()
+            action = self.getAction(['Buy', 'Sell', 'Exit Shop'])
             if action == 'Exit Shop':
                 return
             elif action == 'Buy':
