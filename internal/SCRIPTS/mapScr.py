@@ -36,7 +36,8 @@ siteImgDict = {
                'armory'    : (259,2),
                'tavern'    : (260,3),
                'townhall'  : (261,3),
-               'house1'    : (262,2)
+               'house1'    : (262,2),
+               'tower1'    : (263,3)
                }
 # 'special' items behind secret doors
 specialByLevel = { 1: [const.WSWORD, const.LSHIRT],

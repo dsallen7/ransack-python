@@ -1,7 +1,7 @@
 from types import *
 import pygame, os, cPickle, random, gzip
 
-from MAP import world, mapgen, mazegen, map, wilds, tile
+from MAP import world, mapgen, mazegen, map, wilds, cavegen, tile
 from DISPLAY import text
 from UTIL import queue, const, colors, eztext, load_image, misc, button
 from IMG import images, spritesheet
@@ -223,12 +223,7 @@ class Handler():
                     for b in mapB:
                         (x, y) = pygame.mouse.get_pos()
                         if b.hit(x, y):
-                            myWorld.currentMap = myWorld.getMapByName( b.msg )
-                            self.myMap = myWorld.currentMap
-                            self.cursorPos = (0,0)
-                            self.topX = 0
-                            self.topY = 0
-                            return
+                            return myWorld.getMapByName( b.msg )
                 if event.type == pygame.QUIT:
                     os.sys.exit()
             screen.blit(mapWin, (200, 0) )
@@ -278,13 +273,13 @@ class Handler():
                                                 self.getInput('Enter name of map final map: ') )
                             else: self.myMap.down = (mName,)
                         elif Index == 3:
-                            self.myMap.neighbors[0] = self.getInput('Enter name of map north: ')
+                            self.myMap.neighbors[0] = self.switchMap().getName()#self.getInput('Enter name of map north: ')
                         elif Index == 4:
-                            self.myMap.neighbors[1] = self.getInput('Enter name of map south: ')
+                            self.myMap.neighbors[1] = self.switchMap().getName()#self.getInput('Enter name of map south: ')
                         elif Index == 5:
-                            self.myMap.neighbors[2] = self.getInput('Enter name of map east: ')
+                            self.myMap.neighbors[2] = self.switchMap().getName()#self.getInput('Enter name of map east: ')
                         elif Index == 6:
-                            self.myMap.neighbors[3] = self.getInput('Enter name of map west: ')
+                            self.myMap.neighbors[3] = self.switchMap().getName()#self.getInput('Enter name of map west: ')
                         elif Index == 7:
                             self.myMap.type = self.getInput('Enter map type: ')
                         elif Index == 8:
@@ -496,6 +491,10 @@ class Handler():
             MG = wilds.Generator(self.myMap.getDIM(), level)
             MG.generateMap( self.getInput('Enter orientation (h)orizontal or (v)ertical: ') )
             self.myMap.installBall( MG.getMapBall() )
+        elif type == 'cave':
+            MG = cavegen.Generator(self.myMap.getDIM(), level)
+            MG.generateMap()
+            self.myMap.installBall( MG.getMapBall() )
         else:
             print 'Invalid map type'
     
@@ -588,7 +587,7 @@ class Handler():
             self.floodFill(self.currentTile, (x,y) )
         elif event.key == pygame.K_g:
             #self.generateMap( self.getInput('Enter type: dungeon, maze or wilds :'), int(self.getInput('Enter number of trials :')) )
-            self.generateMap( self.getInput('Enter type: dungeon, maze or wilds :') )
+            self.generateMap( self.getInput('Enter type: dungeon, maze, wilds, or cave:') )
         elif event.key == pygame.K_e:
             self.offset += 32
             if self.offset == 256:
@@ -601,7 +600,11 @@ class Handler():
         elif event.key == pygame.K_i:
             self.getMapInfo()
         elif event.key == pygame.K_m:
-            self.switchMap()
+            myWorld.currentMap = self.switchMap()
+            self.myMap = myWorld.currentMap
+            self.cursorPos = (0,0)
+            self.topX = 0
+            self.topY = 0
         elif event.key == pygame.K_a:
             self.addMap( self.getInput('Enter title of new map: ') )
         elif event.key == pygame.K_c:

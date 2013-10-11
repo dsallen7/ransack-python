@@ -23,8 +23,13 @@ shopTextFontSize = 14
 
 DIM = 20
 
-#NSWE
+#N,S,W,E
 CARDINALS = [ (0,-1), (0,1), (-1,0), (1,0) ]
+
+#NW,N,NE,W,E,SW,S,SE
+ALLNBRS = [ (-1,-1), (0,-1), (1,-1), 
+            (-1,0), (1,0), 
+            (-1,1), (0,1), (1,1)  ]
 HALFDIM = 10
 
 # Map tiles
@@ -46,7 +51,9 @@ GRASS4  = 15
 
 BRICK1  = 32
 
+STONE1 = 36
 
+TOWERDOOR = 40
 HOUSEDOOR1 = 41
 TOWNHALLDOOR = 42
 ITEMSDOOR = 43
@@ -233,6 +240,8 @@ itemMsgs = { FRUIT1: 'You found a piece of fruit.',
 scrollingDict = { 'up': (0, -1), 'down': (0, 1), 'left': (-1, 0), 'right': (1, 0), None : (0,0) }
 imgDict       = { 'up': 0, 'down': 2, 'left': 4, 'right': 6 }
 walkingList = [ 1, 9, -1, -9 ]
+
+darkMaps = ['dungeon', 'maze', 'fortress', 'cave']
 
 # Define the colors we will use in RGB format
 black = [  0,  0,  0]

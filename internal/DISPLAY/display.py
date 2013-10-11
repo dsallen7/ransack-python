@@ -23,7 +23,7 @@ class Display():
             #board.blit( game.myHero.showLocation(), (0,50) )
         FX.update(self.screen)
         if board is not None:
-            if dark:
+            if game.myMap.type in const.darkMaps:
                 self.drawDarkness(game.myMap, board)
                 #board.blit( self.SS_, (0, 0) )
             #pygame.time.delay(500)
@@ -41,10 +41,8 @@ class Display():
     
     # Takes first two coordinates of hero rect, gameBoard and
     # draws darkness
-    def drawDarkness(self, map, gameBoard, offset=None):
-        if offset is not None:
-            (oX, oY) = offset
-        else: (oX, oY) = (0, 0)
+    def drawDarkness(self, map, gameBoard, offset=(0,0) ):
+        (oX, oY) = offset
         (topX, topY) = map.oldTopMapCorner
         (px, py) = map.playerXY
         tiles = map.litTiles
@@ -64,6 +62,8 @@ class Display():
         #map.setPlayerXY(rx, ry)
         (topX, topY), (oldTopX, oldTopY) = map.updateWindowCoordinates(hero)
         gameBoard.blit( self.getMapWindow( (topX, topY), map.WINDOWSIZE ), (map.WINDOWOFFSET,map.WINDOWOFFSET) )
+        if map.type in const.darkMaps:
+            self.drawDarkness(map, gameBoard  )
     
     # takes map coordinates, returns map window
     def getMapWindow(self, pos, wsize=10):
@@ -72,17 +72,16 @@ class Display():
         window.blit( self.xGameBoard, ( -(x1*const.blocksize), -(y1*const.blocksize) ) )
         return window
     # takes pixel coordinates of top left corner of DIMxDIM window of xGameBoard, returns map window
-    def getScrollingMapWindow(self, pos, wsize = 10, darkness=True):
+    def getScrollingMapWindow(self, pos, wsize = 10):
         (x1,y1) = pos
         window = pygame.Surface( (wsize*const.blocksize, wsize*const.blocksize) )
         window.blit( self.xGameBoard, ( -x1, -y1 ) )
-        #self.drawDarkness
         return window
     
     # draws entire map to DIMxDIM Surface
     def redrawXMap(self, map, local=False):
         self.xGameBoard = pygame.Surface( (map.getDIM()*const.blocksize, map.getDIM()*const.blocksize) )
-        if map.type in ['dungeon', 'maze', 'fortress']:
+        if map.type in const.darkMaps:
             map.revealMap()
         if local:
             (tX, tY) = map.topMapCorner
@@ -143,13 +142,9 @@ class Display():
         # by default, the hero is in the upper left corner of the map
         (newX,newY) = hero.getXY()
         map.setPlayerXY(newX/const.blocksize, newY/const.blocksize)
+        #top-left corner of hero sprite location
         (oldX, oldY, c, d) = hero.getRect()
         scrolling = False
-        '''
-        delta = int( ceil( float(DIMEN)/2.) )
-        if map.getDIM() % 2 == 0:
-            delta = delta + 1
-            '''
         # where is new on-screen location of hero?
         if DIMEN > const.HALFDIM:
             if (5*const.blocksize <= newX <= (DIMEN-5)*const.blocksize):
@@ -207,9 +202,9 @@ class Display():
                 if scrolling:
                     for npc in game.NPCs:
                         npc.shiftOnePixel(dir, 1)
+                    #self.redrawMap(map, hero, )
                     gameBoard.blit( self.getScrollingMapWindow( ( (topX*const.blocksize)+(idx*scrollX)-(const.blocksize*scrollX), 
-                                                                  (topY*const.blocksize)+(idx*scrollY)-(const.blocksize*scrollY) ) ), 
-                                   (0,0) )
+                                                                  (topY*const.blocksize)+(idx*scrollY)-(const.blocksize*scrollY) ) ), (0,0) )
                     
                 else:
                     self.redrawMap(map, hero, gameBoard)
@@ -219,10 +214,7 @@ class Display():
                     if hero.moving:
                         if idx in [6,12,21,27]:
                             hero.takeStep()
-                    if map.type in ['dungeon', 'maze', 'fortress']:
-                        self.drawDarkness(map, gameBoard, (idx*scrollX, 
-                                                           idx*scrollY) )
-                    self.displayOneFrame(game.myInterface, game.FX, game.gameBoard, game, False)
+                    self.displayOneFrame(game.myInterface, game.FX, game.gameBoard, game, True)
             hero.moving = False
         
         for npc in game.NPCs:
@@ -238,89 +230,6 @@ class Display():
                 npc.dir = 'down'
         hero.setRect( newX, newY, const.blocksize, const.blocksize)
         
-        if map.type in ['dungeon', 'maze', 'fortress']:
-            self.redrawXMap(map, True)
-        self.redrawMap(map, hero, gameBoard)
-
-    # 'jumps'between map locations 
-    def mapJump(self, hero, map, gameBoard, game, loc1, loc2):
-        DIMEN = map.getDIM()
-        # by default, the hero is in the upper left corner of the map
-        (newX,newY) = hero.getXY()
-        map.setPlayerXY(newX/const.blocksize, newY/const.blocksize)
-        (oldX, oldY) = loc1
-        '''
-        delta = int( ceil( float(DIMEN)/2.) )
-        if map.getDIM() % 2 == 0:
-            delta = delta + 1
-            '''
-        # where is new on-screen location of hero?
-        if DIMEN > const.HALFDIM:
-            if (5*const.blocksize <= newX <= (DIMEN-5)*const.blocksize):
-                newX = 5 * const.blocksize
-            if newX > (DIMEN-5)*const.blocksize:
-                if map.getDIM() % 5 == 0:
-                    newX = (5 * const.blocksize) + ( newX % (5 * const.blocksize) )
-                else:
-                    newX = (5 * const.blocksize) + ( newX % (5 * const.blocksize) ) + const.blocksize
-            if (5*const.blocksize <= newY <= (DIMEN-5)*const.blocksize):
-                newY = 5 * const.blocksize
-            if newY > (DIMEN-5)*const.blocksize:
-                if map.getDIM() % 5 == 0:
-                    newY = (5 * const.blocksize) + ( newY % (5 * const.blocksize) )
-                else:
-                    newY = (5 * const.blocksize) + ( newY % (5 * const.blocksize) ) + const.blocksize
-        else:
-            newX += (const.HALFDIM - DIMEN)/2*const.blocksize
-            newY += (const.HALFDIM - DIMEN)/2*const.blocksize
-        
-        (px,py) = hero.getXY()
-        pos, oldPos = map.updateWindowCoordinates( hero )
-        (topX, topY) = pos
-        if oldX == newX:
-            xAxis = [oldX] * (const.blocksize)
-        elif oldX < newX:
-            xAxis = range(oldX, newX, (newX - oldX) * 3)
-        else:
-            xAxis = range(oldX, newX, -((oldX - newX) * 3) )
-        if oldY == newY:
-            yAxis = [oldY] * (const.blocksize)
-        elif oldY < newY:
-            yAxis = range(oldY, newY, (newY - oldY) * 3 )
-        elif oldY > newY:
-            yAxis = range(oldY, newY, -((oldY - newY) * 3) )
-        for (idx, (i, j)) in list( enumerate(zip(xAxis, yAxis), start=1) ):
-            '''
-            hero.setRect( i, j, const.blocksize, const.blocksize)
-            for npc in game.NPCs:
-                if npc.moving:
-                    npc.shiftOnePixel(npc.dir, -1)
-                    if idx in [6,12,21,27]:
-                        npc.takeStep()
-            '''
-            print idx, i, j
-            # compensate for scrolling
-            for npc in game.NPCs:
-                npc.shiftOnePixel(dir, 1)
-            gameBoard.blit( self.getScrollingMapWindow( (i,j) ), (0,0) )
-            
-            if (idx % 3) == 0:
-                if map.type in ['dungeon', 'maze', 'fortress']:
-                    self.drawDarkness(map, gameBoard, (idx*scrollX, 
-                                                       idx*scrollY) )
-                self.displayOneFrame(game.myInterface, game.FX, game.gameBoard, game, False)
-        
-        for npc in game.NPCs:
-            npcdir = npc.dir
-            (cX, cY) = npc.getXY()
-            (tX, tY) = map.topMapCorner
-            (oRX, oRY, oRX2, oRY2) = npc.getRect()
-            nRX = cX*const.blocksize-(tX*const.blocksize)
-            nRY = cY*const.blocksize-(tY*const.blocksize)
-            npc.setRect(nRX, nRY, const.blocksize, const.blocksize)
-            npc.moving = False
-        hero.setRect( newX, newY, const.blocksize, const.blocksize)
-        
-        if map.type in ['dungeon', 'maze', 'fortress']:
+        if map.type in const.darkMaps:
             self.redrawXMap(map, True)
         self.redrawMap(map, hero, gameBoard)

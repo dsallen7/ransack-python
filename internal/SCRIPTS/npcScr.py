@@ -1,5 +1,5 @@
 # Used for creating in-game non-player characters from names provided in map
-
+# identifier: (display name, NPC image file)
 enemyDict = { 
              'badger'    : ('Badger', 'badger.bmp'),
              'gardenbadger'    : ('Garden Badger', 'badger.bmp'),

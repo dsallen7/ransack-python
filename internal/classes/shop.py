@@ -3,7 +3,7 @@ from DISPLAY import menu, text
 import random
 from OBJ import armor, weapon, item
 from SCRIPTS import shopScr, armorScr, weaponScr, prices
-from UTIL import const, colors, load_image, misc
+from UTIL import const, colors, load_image, misc, button
 
 from math import floor, ceil
 
@@ -24,43 +24,61 @@ class Shop():
         self.items = range(3)
         self.prices = range(3)
         self.menuBox = pygame.Surface( ( int(ceil(124*const.scaleFactor)), int(ceil(99*const.scaleFactor)) ) )
+        self.locations = [(165, 190+0),
+                          (165, 190+30),
+                          (165, 190+60),
+                          (165, 190+90)]
+        self.buttons = []
     
-    def drawStoreScreen(self):
-        #self.myInterface.update()
+    def drawStoreScreen(self, game):
+        self.myInterface.update()
+        #game.displayOneFrame()
         storeScreen_ = pygame.transform.scale(self.storeScreen, (720, 720) )
         storeScreen_.set_colorkey([0,0,0])
         storeScreen_.blit( self.menuBox, ( int(ceil(165*const.scaleFactor)),
                                                int(ceil(190*const.scaleFactor))) )
+        
+        #self.menuBox.fill( colors.gold )
         self.screen.blit( pygame.transform.scale(self.gameboard_copy, (720,720) ), (0, 0))
+        for b in self.buttons:
+            self.gameboard_copy.blit(b.img, (b.locX, b.locY) )
         self.screen.blit( storeScreen_, (0, 0) )
         pygame.display.flip()
-        
-    def getAction(self, options):
+
+    def getAction(self, options, game):
         selection = 0
+        i = 0
+        self.buttons = []
+        for i in range(len(options)):
+            #print ( int(ceil(25*const.scaleFactor)), i*int(ceil(25*const.scaleFactor)) )
+            (x, y) = self.locations[i]
+            #print (x,y)
+            msg = options[i]
+            self.buttons.append( button.Button( ( x, y ), msg, os.getcwd()+"/FONTS/Squealer.ttf", 8) )
+        #print self.buttons
         while True:
-            self.menuBox.fill( colors.gold )
-            if pygame.font:
-                for i in range(len(options)):
-                    self.menuBox.blit( text.Text(options[i], 
-                                                 os.getcwd()+"/FONTS/Squealer.ttf", 
-                                                 const.shopTextFontSize), 
-                                      ( int(ceil(25*const.scaleFactor)),
-                                        i*int(ceil(25*const.scaleFactor)) ) )
-                for event in pygame.event.get():
-                    event_ = self.inputHandler.getCmd(event)
-                    if event_ == pygame.K_UP:
-                        selection -= 1
-                        if selection == -1:
-                            selection = len(options)-1
-                    if event_ == pygame.K_DOWN:
-                        selection += 1
-                        if selection == len(options):
-                            selection = 0
-                    if event_ == pygame.K_RETURN:
-                        return options[selection]
-            self.menuBox.blit( self.images[0], (0, selection* int(ceil(25*const.scaleFactor)) ) )
-            self.drawStoreScreen()
-    
+            self.drawStoreScreen(game)
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    (x, y) = pygame.mouse.get_pos()
+                    #x = x - 165
+                    #y = y - 190
+                    print x, y
+                    for b in self.buttons:
+                        if b.hit(int(ceil(x/const.scaleFactor)), 
+                                 int(ceil(y/const.scaleFactor)) ):
+                            print b.msg
+                            return b.msg
+                event_ = self.inputHandler.getCmd(event)
+                if event_ == pygame.K_t:
+                    game.screenShot()
+                if event_ == pygame.QUIT:
+                    os.sys.exit()
+                elif event_ == pygame.K_ESCAPE:
+                    os.sys.exit()
+            #menuBox.blit( self.images[0], (0, selection*25) )            
+            #self.background.blit( menuBox, (200,150) )
+            
     def buy(self, game, items, pD):
         return game.myMenu.mainMenu(game, 'buy', items, pD)
     
@@ -80,6 +98,7 @@ class Shop():
     
     def enterStore(self, hero, game, level):
         self.gameboard_copy = game.gameBoard
+        self.myInterface.state = 'mainmenu'
         if self.name in ['itemshop', 'magicshop']:
             self.stockStore(level)
         else:
@@ -91,10 +110,11 @@ class Shop():
                 if ( self.stockedAt - count ) > 86400: # num. of secs in 1 day
                     self.items[level] = self.stockStore( level )
                     self.stockedAt = count
-        self.drawStoreScreen()
+        self.drawStoreScreen(game)
         while True:
-            action = self.getAction(['Buy', 'Sell', 'Exit Shop'])
+            action = self.getAction(['Buy', 'Sell', 'Exit Shop'], game)
             if action == 'Exit Shop':
+                self.myInterface.state = 'game'
                 return
             elif action == 'Buy':
                 self.ticker.tick(60)
@@ -131,7 +151,7 @@ class Shop():
                         self.items[level].append(sale)
                     else:
                         self.stockStore(level)
-            self.drawStoreScreen()
+            self.drawStoreScreen(game)
             
 class Blacksmith(Shop):
     

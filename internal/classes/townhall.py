@@ -43,9 +43,9 @@ class Townhall(Shop):
         self.stockStore(level)
         self.storeScreen.blit( self.images[1], (0,0) )
         FX.scrollFromCenter(game.gameBoard, self.storeScreen)
-        self.drawStoreScreen()
+        self.drawStoreScreen(game)
         while True:
-            action = self.getAction(['Buy', 'Save', 'Return To Game', 'Exit Game'])
+            action = self.getAction(['Buy', 'Save', 'Return To Game', 'Exit Game'], game)
             if action == 'Return To Game':
                 FX.scrollFromCenter(self.storeScreen, game.gameBoard)
                 return
@@ -79,4 +79,4 @@ class Townhall(Shop):
                 game.exitCode = 0
                 game.loadFileName = None
                 return
-            self.drawStoreScreen()
+            self.drawStoreScreen(game)

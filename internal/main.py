@@ -69,26 +69,26 @@ ifaceImg, r = load_image.load_image( os.path.join('MENU', 'interface_m.png'), No
 logo, r = load_image.load_image( 'logo.png', None)
         
 def endScreen(game, msg):
+    spi = os.getcwd()+"/FONTS/SpinalTfanboy.ttf"
+    dev = os.getcwd()+"/FONTS/devinne.ttf"
+    got = os.getcwd()+"/FONTS/gothic.ttf"
     dScreen = pygame.Surface( (300, 300) )
-    if pygame.font:
-        font = pygame.font.Font("./FONTS/SpinalTfanboy.ttf", 72)
-        dScreen.blit( font.render(msg, 1, colors.red, colors.black), (50,50) )
-        font = pygame.font.Font("./FONTS/devinne.ttf", 18)
-        if game.myHero.level < 4:
-            dScreen.blit( font.render("Nice Try, loser!", 1, colors.white, colors.black), (50,125) )
-        elif game.myHero.level >= 4 and game.myHero.level < 10:
-            dScreen.blit( font.render("Not bad... for a beginner!", 1, colors.white, colors.black), (50,125) )
-        font = pygame.font.Font("./FONTS/gothic.ttf", 18)
-        dScreen.blit( font.render("Level reached: "+str(game.myHero.level), 1, colors.white, colors.black), (50,225) )
-        font = pygame.font.Font("./FONTS/gothic.ttf", 14)
-        dScreen.blit( font.render(str(game.Ticker.getDays())+"days, "+str(game.Ticker.getHours()%24)+":"+str(game.Ticker.getMins()%60)+"."+str(game.Ticker.getSecs()), 
-                                  1, 
-                                  colors.white, colors.black), 
-                     (50,250) )
-        screen.blit(pygame.transform.scale(dScreen, (int(ceil(300 * 2.4)), 
-                                                     int(ceil(300 * 2.4)) ) ), 
-                                                     (0, 0) )
-        pygame.display.flip()
+    msgText = text.Text( msg, os.getcwd()+"/FONTS/Squealer.ttf", 18, colors.white, colors.gold )
+    dScreen.blit( text.Text( "Game Over", spi, 72, colors.red, colors.black ), (50,50) )
+    font = pygame.font.Font("./FONTS/devinne.ttf", 18)
+    if game.myHero.level < 4:
+        dScreen.blit( text.Text( "Nice Try, loser!", dev, 18, colors.white, colors.black ), (50,125) )
+    elif game.myHero.level >= 4 and game.myHero.level < 10:
+        dScreen.blit( text.Text( "Not bad... for a beginner!", dev, 18, colors.white, colors.black), (50,125) )
+    dScreen.blit( text.Text("Level reached: "+str(game.myHero.level), got, 18, colors.white, colors.black), (50,225) )
+    dScreen.blit( text.Text(str(game.Ticker.getDays())+"days, "+
+                            str(game.Ticker.getHours()%24)+":"+
+                            str(game.Ticker.getMins()%60)+"."+
+                            str(game.Ticker.getSecs()), got, 14, white, colors.black), (50,250) )
+    screen.blit(pygame.transform.scale(dScreen, (int(ceil(300 * 2.4)), 
+                                                 int(ceil(300 * 2.4)) ) ), 
+                                                 (0, 0) )
+    pygame.display.flip()
     while (pygame.event.wait().type != pygame.MOUSEBUTTONDOWN): pass
 
 def launchNewGame(titleScreen):

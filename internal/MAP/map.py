@@ -87,6 +87,13 @@ class map():
             returnList.append( (Cx+x, Cy+y) )
         return returnList
     
+    def allNeighbors(self, tile):
+        returnList = []
+        (x,y) = tile
+        for (Cx, Cy) in const.ALLNBRS:
+            returnList.append( self.getTileFG(Cx+x, Cy+y) )
+        return returnList
+    
     def getGrid(self):
         return self.grid
     def getMapBall(self):
@@ -176,7 +183,7 @@ class gameMap(map):
         for i in range( self.DIM ):
             for j in range( self.DIM ):
                 if self.grid[i][j] is not None:
-                    if self.type in ['dungeon', 'maze', 'fortress']:
+                    if self.type in const.darkMaps:
                         if (i,j) not in self.visDict:
                             self.visDict[ (i,j) ] = False
                             self.grid[i][j].visible = False
@@ -295,7 +302,7 @@ class gameMap(map):
     
     # complete list of tiles is in tiles1.txt
     def revealMap(self):
-        if self.type in ['dungeon', 'maze', 'fortress']:
+        if self.type in const.darkMaps:
             litTiles = self.getLitTiles()
             self.litTiles = litTiles
             if litTiles == None: return
@@ -303,14 +310,15 @@ class gameMap(map):
                 self.visDict[ tile ] = True
         return
     
-    #@tail_call_optimized
+    #gets list of tiles 'visible' from current player pos
     def litBFS(self,start, d=0):
-        if self.type == 'maze':
+        if self.type in ['maze', 'cave']:
             if d > 2:
                 return start
         elif d > 5:
             return start
         (x,y) = start
+        # if standing in doorway, return 8-tile section around door
         if self.getEntry(x,y) in [const.EWDOORO, const.NSDOORO]:
             return [ (x-1,y-1), (x,y-1), (x+1,y-1),
                      (x-1,y), (x,y), (x+1,y),
@@ -353,7 +361,7 @@ class gameMap(map):
         return litTiles
     
     def isVisible(self, x, y):
-        if self.type not in ['dungeon', 'maze', 'fortress']:
+        if self.type not in const.darkMaps:
             return True
         if (x, y) in self.litTiles:
             return True
@@ -439,6 +447,8 @@ class edMap(map):
             self.pointOfEntry = self.changeEntry(x, y, self.pointOfEntry)
         elif e == const.STAIRDN:
             self.pointOfExit = self.changeEntry(x, y, self.pointOfExit)
+        elif e == const.TOWERDOOR:
+            self.shops[ self.changeEntry(x, y, self.itemShop, True) ] = ('tower1', param )
         elif e == const.ITEMSDOOR:
             self.shops[ self.changeEntry(x, y, self.itemShop, True) ] = ('itemshop', param )
         elif e == const.ARMRYDOOR:

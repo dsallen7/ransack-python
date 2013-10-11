@@ -188,11 +188,6 @@ class game():
         elif event == pygame.K_m:
             # show minimap
             self.myMap.callDrawMiniMap(self.screen, self.inputHandler)
-            '''
-            if self.myMap.type in ['dungeon', 'maze', 'fortress']:
-                self.myMap.callDrawMiniMap(self.screen, self.inputHandler)
-            else: self.myWorld.callDrawMiniMap(self.screen, self.inputHandler)
-            '''
         elif event == pygame.K_RETURN:
             # action command
             self.actionCommand()
@@ -203,7 +198,10 @@ class game():
             #equipment menu
             self.myMenu.equipmentMenu(self)
         elif event == pygame.K_ESCAPE:
-            os.sys.exit()
+            if self.myInterface.npcDialog('Are you sure you want to quit?', self.myHero.images[2]) == 'Yes':
+                os.sys.exit()
+            else:
+                pass
         else:
             if not self.myHero.moving:
                 try:
@@ -343,6 +341,8 @@ class game():
                                  self.myMap.grid[x][y].portal[2] )
                 self.portalMove(newMap, newX, newY)
             except AttributeError as e:
+                if i in const.doorsList[:7]:
+                    self.boxMessage( "The door is locked." )
                 print 'AttributeError while trying to enter a door: ', e
                 pass
             return
@@ -468,7 +468,7 @@ class game():
         return saveBall
     
     def updateSprites(self):
-        if self.myMap.type in ['dungeon', 'maze', 'fortress']:
+        if self.myMap.type in const.darkMaps:
             self.allsprites = pygame.sprite.RenderPlain((self.myHero, self.visibleNPCs))
         else: self.allsprites = pygame.sprite.RenderPlain((self.myHero, self.NPCs))
         self.allsprites.clear(self.screen, self.gameBoard)
@@ -503,7 +503,7 @@ class game():
     def displayOneFrame(self):
         self.Display.redrawMap(self.myMap, self.myHero, self.gameBoard)
         #self.updateSprites()
-        self.Display.displayOneFrame(self.myInterface, self.FX, self.gameBoard, self, self.myMap.type in ['dungeon', 'maze', 'fortress'])
+        self.Display.displayOneFrame(self.myInterface, self.FX, self.gameBoard, self, self.myMap.type in const.darkMaps)
 
     def mainLoop(self):
         self.visibleNPCs = []

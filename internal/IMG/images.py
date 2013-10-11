@@ -7,7 +7,7 @@ import os
 
 mHeroImages = range(18)
 fHeroImages = range(18)
-mapImages = range(263)
+mapImages = range(264)
 editorImages = range(7)
 accessories = range(18)
 
@@ -28,8 +28,8 @@ def load(path=''):
                                                   const.blocksize, 
                                                   const.blocksize), 
                                                1 )
-    siteImgs = ['itemSh.bmp', 'mShop.bmp', 'bSmith.bmp', 'armry.bmp', 'tavrn.bmp','townhall.bmp','house1.bmp']
-    for i in range(256, 263):
+    siteImgs = ['itemSh.bmp', 'mShop.bmp', 'bSmith.bmp', 'armry.bmp', 'tavrn.bmp','townhall.bmp','house1.bmp', 'tower1.bmp']
+    for i in range(256, 264):
         mapImages[i], r = load_image.load_image( os.path.join('EXT', siteImgs[i-256]), 1 )
     for i in range(18):
         accessories[i] = pygame.Surface((15,10))

@@ -29,9 +29,9 @@ class Tavern(Shop):
         self.gameboard_copy = game.gameBoard
         self.storeScreen.blit( self.images[1], (0,0) )
         FX.scrollFromCenter(game.gameBoard, self.storeScreen)
-        self.drawStoreScreen()
+        self.drawStoreScreen(game)
         while True:
-            action = self.getAction(['Sleep', 'Return To Game'])
+            action = self.getAction(['Sleep', 'Return To Game'], game)
             if action == 'Return To Game':
                 FX.scrollFromCenter(self.storeScreen, game.gameBoard)
                 return
@@ -44,4 +44,4 @@ class Tavern(Shop):
                     return
                 else:
                     game.textMessage('Sorry! come back when you get paid!')
-            self.drawStoreScreen()
+            self.drawStoreScreen(game)
