@@ -128,6 +128,7 @@ class game():
     def transition(self, loc):
         gameBoard_old = self.gameBoard.copy()
         #transition
+        l = 2 + self.myHero.hasItem(const.LANTERN)
         oldType = self.myMap.type
         self.myMap = self.myWorld.currentMap
         
@@ -136,7 +137,7 @@ class game():
         elif oldType != self.myWorld.currentMap.type:
             self.boxMessage('Now entering '+self.myMap.getType())
         self.addNPCs(self.myMap)
-        self.Display.redrawXMap(self.myMap)
+        self.Display.redrawXMap(self.myMap, l)
         self.DIM = self.myMap.getDIM()
         (x,y) = loc
         self.myMap.setPlayerXY(x, y)
@@ -227,6 +228,7 @@ class game():
         (x, y) = self.myHero.getXY()
         x = (x / const.blocksize) + dX
         y = (y / const.blocksize) + dY
+        l = 2 + self.myHero.hasItem(const.LANTERN)
         for n in self.NPCs:
             if ( x, y ) == n.getXY():
                 r = n.interact(self.myInterface, self)
@@ -256,19 +258,19 @@ class game():
                 self.Ticker.tick(30)
                 self.textMessage(msg)
             self.myMap.setEntry( x, y, const.OCHEST )
-            self.Display.redrawXMap(self.myMap)
+            self.Display.redrawXMap(self.myMap, l)
             return
         elif i == const.EWFAKE:
             self.Ticker.tick(60)
             self.textMessage( 'You find a secret door!')
             self.myMap.setEntry( x, y, const.EWDOOR )
-            self.Display.redrawXMap(self.myMap)
+            self.Display.redrawXMap(self.myMap, l)
             return
         elif i == const.NSFAKE:
             self.Ticker.tick(60)
             self.textMessage( 'You find a secret door!')
             self.myMap.setEntry( x, y, const.NSDOOR )
-            self.Display.redrawXMap(self.myMap)
+            self.Display.redrawXMap(self.myMap, l)
             return
         elif i == const.SIGN:
             self.boxMessage( self.myMap.grid[x][y].getMsgText() )
@@ -324,6 +326,7 @@ class game():
         x1,y1,x2,y2 = self.myHero.getRect()
         (X,Y) = self.myHero.getXY() # pixels
         (moveX,moveY) = self.myHero.changeDirection(direction)
+        l = 2 + self.myHero.hasItem(const.LANTERN)
         x = (X + moveX)/const.blocksize # tiles
         y = (Y + moveY)/const.blocksize
         # check for blocking NPCs
@@ -348,11 +351,11 @@ class game():
             return
         elif i == const.EWDOOR:
             self.myMap.setEntry( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize,const.EWDOORO)
-            self.Display.redrawXMap(self.myMap)
+            self.Display.redrawXMap(self.myMap, l)
             return
         elif i == const.NSDOOR:
             self.myMap.setEntry( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize,const.NSDOORO)
-            self.Display.redrawXMap(self.myMap)
+            self.Display.redrawXMap(self.myMap, l)
             return
         elif i == -1 or i in range(const.BRICK1,86)+[const.CHEST]+[const.OCHEST]+range(128, 216):
             return
@@ -365,13 +368,13 @@ class game():
                 self.boxMessage( "The door creaks open..." )
                 self.myHero.takeKey()
                 self.myMap.setEntry( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize, self.myMap.defaultBkgd)
-                self.Display.redrawXMap(self.myMap)
+                self.Display.redrawXMap(self.myMap, l)
                 return
         #item
         if i in range(const.FRUIT1, const.KEY + 1):
             self.myHero.getItem( OBJ.item.Item(i) )
             self.myMap.setEntry( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize, self.myMap.defaultBkgd)
-            self.Display.redrawXMap(self.myMap)
+            self.Display.redrawXMap(self.myMap, l)
             self.myInterface.boxMessage(const.itemMsgs[i])
             return
         # Stairs down
@@ -513,7 +516,7 @@ class game():
         (pX, pY) = self.myHero.getXY()
         self.myMap.setPlayerXY( pX/const.blocksize, pY/const.blocksize )
         self.myMap.updateWindowCoordinates(self.myHero)
-        self.Display.redrawXMap(self.myMap)
+        self.Display.redrawXMap(self.myMap, 2)
         self.updateSprites()
         self.Display.drawSprites(self.myHero, self.myMap, self.gameBoard, self, animated=False)
         while self.gameOn:

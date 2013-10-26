@@ -1,7 +1,7 @@
 import pygame, random, cPickle, ppov, gzip, os
 from UTIL import queue, const, colors, load_image, misc
 from types import *
-from MAP import tile, minimap, submap
+from MAP import tile, minimap, submap, ppov as PPOV
 
 from math import sqrt
 
@@ -301,18 +301,51 @@ class gameMap(map):
         return (topX, topY), (oldTopX, oldTopY)
     
     # complete list of tiles is in tiles1.txt
-    def revealMap(self):
+    def revealMap(self, light):
         if self.type in const.darkMaps:
-            litTiles = self.getLitTiles()
+            litTiles = self.getLitTiles(light)
             self.litTiles = litTiles
             if litTiles == None: return
             for tile in litTiles:
                 self.visDict[ tile ] = True
         return
     
+    def minBFS(self,start, d=0):
+        (x,y) = start
+        if d == 3:
+            return (x, y)
+        entryList = []
+        if self.getEntry(x, y) in const.SOLIDS:
+            (px, py) = self.playerXY
+            if (x, y) in [ (px-1,py-1), (px,py-1), (px+1,py-1),
+                     (px-1,py), (px,py), (px+1,py),
+                     (px-1,py+1), (px,py+1), (px+1,py+1)]:
+                self.visited += [ (x, y) ]
+                return (x, y)
+            else:
+                self.visited += [ (x, y) ]
+                return []
+        for (Cx,Cy) in const.CARDINALS:
+            if (x+Cx,y+Cy) not in self.visited and ~self.BFSQueue.has( (x+Cy, y+Cy)  ):
+                self.BFSQueue.push( (x+Cx, y+Cy) )
+                entryList += [ (x+Cx,y+Cy) ]
+                self.visited += [ (x+Cx,y+Cy) ]
+        if len( entryList ) < 1:
+            return (x,y)
+        else:
+            returnList = []
+            for i in range( len( entryList ) ): 
+                returnList += [ self.minBFS(self.BFSQueue.pop(), d+1) ]
+            return [ (x,y) ] + returnList
+    
     #gets list of tiles 'visible' from current player pos
     def litBFS(self,start, d=0):
-        if self.type in ['maze', 'cave']:
+        (x,y) = start
+        if self.type in ['cave']:
+            return [ (x-1,y-1), (x,y-1), (x+1,y-1),
+                     (x-1,y), (x,y), (x+1,y),
+                     (x-1,y+1), (x,y+1), (x+1,y+1)]
+        if self.type in ['maze']:
             if d > 2:
                 return start
         elif d > 5:
@@ -351,14 +384,34 @@ class gameMap(map):
                 returnList += [ self.litBFS(self.BFSQueue.pop(), d+1) ]
             return [ (x,y) ] + returnList
     
-    def getLitTiles(self):
+    def getLitTiles(self, l):
         (px, py) = self.playerXY
         self.BFSQueue.reset()
         self.visited = []
-        litTiles = misc.flatten( self.litBFS( (px,py) ) )
+        if self.type == 'cave':
+            self.getPPOV(px, py, l)
+            #litTiles = misc.flatten( self.minBFS( (px,py) ) )
+            return self.visited
+        else:
+            self.getPPOV(px, py, l)
+            #litTiles = misc.flatten( self.minBFS( (px,py) ) )
+            return self.visited
+            litTiles = misc.flatten( self.litBFS( (px,py) ) )
         litTiles = list( set( litTiles) )
         self.litTiles = litTiles
         return litTiles
+    
+    def visitTile(self, x, y):
+        self.visited += [(x, y)]
+    
+    def isVisited(self, x, y):
+        return (x, y) in self.visited
+    def isSolid(self, x, y):
+        return self.getEntry(x, y) in const.SOLIDS
+    
+    def getPPOV(self, x, y, l = 2):
+        PPOV.fieldOfView(x, y, self.DIM, self.DIM, l, self.visitTile, self.isSolid)
+        #print self.visited
     
     def isVisible(self, x, y):
         if self.type not in const.darkMaps:

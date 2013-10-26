@@ -29,6 +29,10 @@ class Item():
             self.descrip = itemScr.descDict[self.type]
             self.effects = itemScr.itemFX[self.certNum]
             self.ID = type - const.FRUIT1
+        elif self.type in const.GAMEITEMS:
+            self.name = 'gameitem'
+            self.descrip = itemScr.descDict[self.type]
+            self.ID = type - const.FRUIT1
         else:
             self.name = 'item'
             self.descrip = itemScr.descDict[self.type]
@@ -69,6 +73,8 @@ class Item():
         if self.name == 'spellbook':
             hero.learnSpell( self.spellNum )
             return
+        if self.name == 'gameitem':
+            return itemScr.itemFX[ self.getType() ]
         [cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX, psn] = hero.getPlayerStats()
         stats = [cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX, psn]
         fn = itemScr.itemDict[self.getType()]

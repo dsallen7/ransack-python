@@ -519,7 +519,7 @@ class menu():
     def getDescText(self, item, font, size, form = 'single'):
         if hasattr(item, "__iter__"):
             item = item[0]
-        if item.getName() in ['item', 'spell', 'certificate']:
+        if item.getName() in ['item', 'spell', 'certificate','gameitem']:
             return text.Text( item.getDesc(), font, size, colors.white, colors.gold, False, 36  )
         elif item.getName() == 'spellbook' or item.getName() == 'parchment':
             return text.Text( item.getDesc(), font, size, colors.white, colors.gold, False, 36  )

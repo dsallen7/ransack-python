@@ -38,7 +38,8 @@ descDict = {
              const.MHP: 'Medium Healing Potion',
              const.SMP: 'Small Magic Potion',
              const.MMP: 'Medium Magic Potion',
-             const.GOLD: 'Gold Pieces'
+             const.GOLD: 'Gold Pieces',
+             const.LANTERN: 'Lantern'
             }
 itemFX = { 
              const.KEY: 'Unlocks a dungeon door',
@@ -54,5 +55,6 @@ itemFX = {
              const.MHP: '+10 HP',
              const.SMP: '+5 MP',
              const.MMP: '+10 MP',
-             const.GOLD: 'Gold Pieces'
+             const.GOLD: 'Gold Pieces',
+             const.LANTERN: 'Lantern: Increases your visibility in the dark'
             }

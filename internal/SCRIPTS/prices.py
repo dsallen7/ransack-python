@@ -3,7 +3,7 @@ from UTIL import const
 itemPrices = { const.FRUIT1: 5, const.CHEESE: 8, const.BREAD: 10, const.ANTIDOTE: 30, 
               const.SHP : 25, const.MHP : 50, const.LHP: 75,
                const.SMP: 25, const.MMP: 50,  const.LMP: 75,
-               const.CERTIFICATE: 25 }
+               const.CERTIFICATE: 25, const.LANTERN: 100 }
 
 weaponPrices = { const.WSWORD: 50,
                  const.SSWORD: 100,

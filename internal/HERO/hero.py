@@ -23,6 +23,8 @@ class hero(pygame.sprite.Sprite):
         #self.weaponEquipped = None
         #self.armorEquipped = [None,None,None]
         
+        self.hasLantern = False
+        
         self.installLoadedHero(load)
         if pos is not None:
             (self.X, self.Y) = pos
@@ -43,7 +45,7 @@ class hero(pygame.sprite.Sprite):
         self.moving = False
         self.stepIdx = 0
         self.moveQueue = queue.Queue()
-
+        
     def takeStep(self):
         self.imgIdx = self.imgIdx + const.walkingList[self.stepIdx]
         self.stepIdx = ( self.stepIdx + 1 ) % 4
@@ -151,6 +153,9 @@ class hero(pygame.sprite.Sprite):
         self.items[item] += num
     # Input: tile number denoting item
     def getItem(self, gItem):
+        if gItem.getType() in const.GAMEITEMS:
+            if gItem.getType() == const.LANTERN:
+                self.hasLantern = True
         if gItem.getType() == const.KEY:
             self.keys += 1
             return 'A dungeon key'
@@ -221,6 +226,10 @@ class hero(pygame.sprite.Sprite):
             return 0
         if hasattr(item, "__iter__"):
             item = item[0]
+        if item.getType() in const.GAMEITEMS:
+            game.textMessage( item.execute(self) )
+            game.Ticker.tick(60)
+            return
         if item.getType() == const.CERTIFICATE:
             if item.certNum == const.SAVECERT:
                 if game.saveGame( 'ransack0.sav'):
@@ -475,7 +484,7 @@ class hero(pygame.sprite.Sprite):
         itm = self.items
         spl = self.spells
         gld = self.gold
-        sts = [self.isPoisoned, self.isDamned]
+        sts = [self.isPoisoned, self.isDamned, self.hasLantern]
         sln = self.slain
         nm = self.name
         return (gnd, fth, flv,
@@ -544,6 +553,7 @@ class hero(pygame.sprite.Sprite):
         self.gold = gld
         self.isPoisoned = sts[0]
         self.isDamned = sts[1]
+        self.hasLantern = sts[2]
         self.slain = sln
         self.name = nm
     

@@ -31,7 +31,7 @@ class Shop():
         self.buttons = []
     
     def drawStoreScreen(self, game):
-        self.myInterface.update()
+        self.myInterface.update(game)
         #game.displayOneFrame()
         storeScreen_ = pygame.transform.scale(self.storeScreen, (720, 720) )
         storeScreen_.set_colorkey([0,0,0])

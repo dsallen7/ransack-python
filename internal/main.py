@@ -1,7 +1,7 @@
 import pygame, random, cPickle, gzip, os
 from classes import game
 from UTIL import const, colors, load_image, inputHandler, button
-from DISPLAY import interface, effects, menu, display
+from DISPLAY import interface, effects, menu, display, text
 from HERO import creator
 from OBJ import weapon
 
@@ -72,22 +72,26 @@ def endScreen(game, msg):
     spi = os.getcwd()+"/FONTS/SpinalTfanboy.ttf"
     dev = os.getcwd()+"/FONTS/devinne.ttf"
     got = os.getcwd()+"/FONTS/gothic.ttf"
-    dScreen = pygame.Surface( (300, 300) )
+    dScreen = pygame.Surface( (screen.get_width(), screen.get_width()) )
+    dScreen.fill(colors.black)
     msgText = text.Text( msg, os.getcwd()+"/FONTS/Squealer.ttf", 18, colors.white, colors.gold )
-    dScreen.blit( text.Text( "Game Over", spi, 72, colors.red, colors.black ), (50,50) )
+    dScreen.blit( text.Text( "Game Over", spi, 72, colors.red, colors.black ), (50,0) )
     font = pygame.font.Font("./FONTS/devinne.ttf", 18)
     if game.myHero.level < 4:
-        dScreen.blit( text.Text( "Nice Try, loser!", dev, 18, colors.white, colors.black ), (50,125) )
+        dScreen.blit( text.Text( "Nice Try, loser!", dev, 18, colors.white, colors.black ), (50,200) )
     elif game.myHero.level >= 4 and game.myHero.level < 10:
-        dScreen.blit( text.Text( "Not bad... for a beginner!", dev, 18, colors.white, colors.black), (50,125) )
-    dScreen.blit( text.Text("Level reached: "+str(game.myHero.level), got, 18, colors.white, colors.black), (50,225) )
+        dScreen.blit( text.Text( "Not bad... for a beginner!", dev, 18, colors.white, colors.black), (50,350) )
+    dScreen.blit( text.Text("Level reached: "+str(game.myHero.level), got, 18, colors.white, colors.black), (50,500) )
     dScreen.blit( text.Text(str(game.Ticker.getDays())+"days, "+
                             str(game.Ticker.getHours()%24)+":"+
                             str(game.Ticker.getMins()%60)+"."+
-                            str(game.Ticker.getSecs()), got, 14, white, colors.black), (50,250) )
+                            str(game.Ticker.getSecs()), got, 14, colors.white, colors.black), (50,250) )
+    '''
     screen.blit(pygame.transform.scale(dScreen, (int(ceil(300 * 2.4)), 
                                                  int(ceil(300 * 2.4)) ) ), 
                                                  (0, 0) )
+                                                 '''
+    screen.blit(dScreen, (0, 0) )
     pygame.display.flip()
     while (pygame.event.wait().type != pygame.MOUSEBUTTONDOWN): pass
 

@@ -157,7 +157,7 @@ class Creator():
                      None, None, None], #cloak, boots, ?)
                 range(100),        # items
                 [],                # spells
-                100, [False, False], 0, #gold, stats, slain
+                100, [False, False, False], 0, #gold, stats, slain
                 self.name )
     def mainLoop(self, screen):
         while True:

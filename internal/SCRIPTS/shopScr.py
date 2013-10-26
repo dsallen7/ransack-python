@@ -1,7 +1,7 @@
 from UTIL import const
 
 itemShopsByLevel = { 
-                    1: [const.FRUIT1,const.CHEESE,const.BREAD],
+                    1: [const.FRUIT1,const.CHEESE,const.BREAD,const.LANTERN],
                     2: [const.ANTIDOTE,const.SHP,const.MHP,const.SMP,const.MMP]
 
 

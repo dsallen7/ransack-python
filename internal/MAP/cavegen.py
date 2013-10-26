@@ -24,14 +24,14 @@ class Generator():
     def singlePass(self):
         for i in range(self.map.DIM):
             for j in range(self.map.DIM):
-                if self.map.getEntry(i,j) == const.STONE1:
+                if self.map.getEntry(i,j) == const.CAVEWALL1:
                     count = 1
                 else: count = 0
                 for n in self.map.cardinalNeighbors( (i,j) ):
-                    if n == const.STONE1 or n == const.VOID:
+                    if n == const.CAVEWALL1 or n == const.VOID:
                         count += 1
                 if count >= 5:
-                    self.map.setEntry(i,j, const.STONE1)
+                    self.map.setEntry(i,j, const.CAVEWALL1)
                 elif count <= 2:
                     self.map.setEntry(i,j, const.DFLOOR1)
     
@@ -41,14 +41,14 @@ class Generator():
                 if misc.rollDie(50,100):
                     self.map.setEntry(i,j, const.DFLOOR1)
                 else:
-                    self.map.setEntry(i,j, const.STONE1)
+                    self.map.setEntry(i,j, const.CAVEWALL1)
         #borders
         for i in range(self.map.DIM):
-            self.map.setEntry(i,0, const.STONE1)
-            self.map.setEntry(i,self.map.DIM-1, const.STONE1)
-            self.map.setEntry(0,i, const.STONE1)
-            self.map.setEntry(self.map.DIM-1,i, const.STONE1)
-        for i in range(10):
+            self.map.setEntry(i,0, const.CAVEWALL1)
+            self.map.setEntry(i,self.map.DIM-1, const.CAVEWALL1)
+            self.map.setEntry(0,i, const.CAVEWALL1)
+            self.map.setEntry(self.map.DIM-1,i, const.CAVEWALL1)
+        for i in range(4):
             self.singlePass()
             #self.draw()
         self.map.pointOfEntry = ( 0,0 )

@@ -49,6 +49,7 @@ class Display():
         for x in range( -1, map.WINDOWSIZE+1 ):
             for y in range( -1, map.WINDOWSIZE+1 ):
                 if (x+topX, y+topY) not in tiles:
+                    #AAfilledRoundedRect(surface,rect,color,radius=0.4)
                     gameBoard.blit(self.fog, 
                                    ( (x)*const.blocksize - oX, 
                                      (y)*const.blocksize - oY), 
@@ -79,10 +80,10 @@ class Display():
         return window
     
     # draws entire map to DIMxDIM Surface
-    def redrawXMap(self, map, local=False):
+    def redrawXMap(self, map, light, local=False):
         self.xGameBoard = pygame.Surface( (map.getDIM()*const.blocksize, map.getDIM()*const.blocksize) )
         if map.type in const.darkMaps:
-            map.revealMap()
+            map.revealMap(light)
         if local:
             (tX, tY) = map.topMapCorner
             rX = range(tX-1, tX+const.HALFDIM+1)
@@ -231,5 +232,5 @@ class Display():
         hero.setRect( newX, newY, const.blocksize, const.blocksize)
         
         if map.type in const.darkMaps:
-            self.redrawXMap(map, True)
-        self.redrawMap(map, hero, gameBoard)
+            self.redrawXMap(map, 2 + hero.hasItem(const.LANTERN), True)
+        #self.redrawMap(map, hero, gameBoard)
