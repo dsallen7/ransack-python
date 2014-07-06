@@ -14,7 +14,10 @@ def Text(message, font, fontsize, fgc=colors.white, bgc=colors.gold,
             msgText = pygame.Surface((len(message) * math.ceil(0.5 * fontsize),
                 math.ceil(1.5 * fontsize)))
             msgText.fill(bgc)
-            msgText.blit(font.render(message, 1, fgc, bgc), (0, 0))
+            try:
+                msgText.blit(font.render(message, 1, fgc, bgc), (0, 0))
+            except TypeError as detail:
+                print 'TypeError in text.py, fgc bgc', detail, fgc, bgc
         else:
             msgText = pygame.Surface((const.maxLineWidth *
                 math.ceil(0.5 * fontsize), ((len(message) /
@@ -29,7 +32,10 @@ def Text(message, font, fontsize, fgc=colors.white, bgc=colors.gold,
                         line + ' ' + words[0]) < const.maxLineWidth:
                     line = line + words[0] + ' '
                     words = words[1:]
-                lineText = font.render(line, 1, fgc, bgc)
+                try:
+                    lineText = font.render(line, 1, fgc, bgc)
+                except TypeError as detail:
+                    print 'TypeError in text.py, fgc bgc', detail, fgc, bgc
                 msgText.blit(lineText, ((msgText.get_width() / 2)
                     - (lineText.get_width() / 2), hPos))
                 hPos += math.ceil(fontsize * 1.5)

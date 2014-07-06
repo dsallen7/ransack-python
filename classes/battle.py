@@ -116,7 +116,7 @@ class battle():
                     dmg = random.randrange(sth / 2, sth) + (
                         weapon.getLevel() + 1) ** 2
                     game.textMessage('You hit the ' + enemy.getName()
-                        + ' for ' + str(dmg)  ' points!')
+                        + ' for ' + str(dmg) + ' points!')
                     game.SFX.play(1)
                     for i in range(enemy.getHP(), enemy.getHP() - dmg, -1):
                         enemy.takeDmg(1)
