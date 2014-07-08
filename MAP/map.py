@@ -1,4 +1,9 @@
-import pygame, random, pickle, ppov, gzip, os
+import pygame
+import random
+import pickle
+import ppov
+import gzip
+import os
 from UTIL import queue, const, colors, load_image, misc
 from types import *
 from MAP import tile, minimap, submap
@@ -18,19 +23,25 @@ class map():
     #Updates one map Entry to type at map coordinates x,y
         #self.grid[y] = self.grid[y][:x]+[type]+self.grid[y][x+1:]
         self.grid[x][y].setFG(fg)
-    def getEntry(self,x,y):
+
+    def getEntry(self, x, y):
         if 0 <= x < self.DIM and 0 <= y < self.DIM:
             return self.grid[x][y].getFG()
         else: return const.VOID
+
     def getTileFG(self, x, y):
         return self.grid[x][y].getFG()
+
     def setTileFG(self, x, y, fg):
         self.grid[x][y].setFG(fg)
     
     def getGrid(self):
         return self.grid
+
     def getMapBall(self):
-        return (self.grid, self.defaultBkgd, self.pointOfEntry, self.pointOfExit, self.heroStart, self.shops, self.chests, self.NPCs)
+        return (self.grid, self.defaultBkgd, self.pointOfEntry,
+            self.pointOfExit, self.heroStart, self.shops,
+            self.chests, self.NPCs)
 
     def installBall(self, ball):
         (grid, DBGD, poe, poex, hs, shops, chests, npcs) = ball
@@ -326,32 +337,32 @@ class edMap(map):
         if e == const.BLKSMDOOR:
             if self.Blacksmith == None:
                 self.Blacksmith = (x, y)
-                self.shops[(x,y)] = ( 'blacksmith', level )
+                self.shops[(x,y)] = ('blacksmith', level)
             else:
                 (px, py) = self.Blacksmith
                 self.setEntry(px, py, self.defaultBkgd)
                 self.shops.pop((px,py))
-                self.shops[(x,y)] = ( 'blacksmith', level )
+                self.shops[(x,y)] = ('blacksmith', level)
                 self.Blacksmith = (x, y)
         if e == const.MAGICDOOR:
             if self.magicShop == None:
                 self.magicShop = (x, y)
-                self.shops[(x,y)] = ( 'magicshop', level )
+                self.shops[(x,y)] = ('magicshop', level)
             else:
                 (px, py) = self.magicShop
                 self.setEntry(px, py, self.defaultBkgd)
                 self.shops.pop((px,py))
-                self.shops[(x,y)] = ( 'magicshop', level )
+                self.shops[(x, y)] = ('magicshop', level)
                 self.magicShop = (x, y)
         if e == const.TAVRNDOOR:
             if self.Tavern == None:
                 self.Tavern = (x, y)
-                self.shops[(x,y)] = ( 'tavern', level )
+                self.shops[(x, y)] = ('tavern', level)
             else:
                 (px, py) = self.Tavern
                 self.setEntry(px, py, self.defaultBkgd)
-                self.shops.pop((px,py))
-                self.shops[(x,y)] = ( 'tavern', level )
+                self.shops.pop((px, py))
+                self.shops[(x, y)] = ('tavern', level)
                 self.Tavern = (x, y)
         self.grid[x][y].setFG(e)
     def changeDimensions(self, nDim):
@@ -376,7 +387,7 @@ class edMap(map):
         #same
         else: return
         self.DIM = nDim
-        self.cursorPos = (0,0)
+        self.cursorPos = (0, 0)
     
     def mapMove(self, source, size, dest):
         (sX, sY) = source
@@ -385,13 +396,13 @@ class edMap(map):
         tmpGrid = [range(xDim) for _ in range(yDim)]
         for i in range(xDim):
             for j in range(yDim):
-                tmpGrid[j][i] = self.getEntry(i+sX, j+sY)
+                tmpGrid[j][i] = self.getEntry(i + sX, j + sY)
         for i in range(xDim):
             for j in range(yDim):
-                self.setEntry(i+sX, j+sY, 0)
+                self.setEntry(i + sX, j + sY, 0)
         for i in range(xDim):
             for j in range(yDim):
-                self.setEntry(i+dX, j+dY, tmpGrid[j][i])
+                self.setEntry(i + dX, j + dY, tmpGrid[j][i])
     
     def mapErase(self):
         pass
@@ -399,7 +410,7 @@ class edMap(map):
 # inherited map class to be used by map generator
 class genMap(map):
     
-    def __init__(self, DIM, level ):
+    def __init__(self, DIM, level):
         map.__init__(self, DIM, const.VOID)
         self.level = level
         self.BFSQueue = queue.Queue()
@@ -411,20 +422,22 @@ class genMap(map):
     def pathfinderBFS(self, start):
         (x,y) = start
         entryList = []
-        self.visited += [ (x, y) ]
-        self.BFSQueue.push( (x, y) )
+        self.visited += [(x, y)]
+        self.BFSQueue.push((x, y))
         while not self.BFSQueue.isEmpty():
             (x, y) = self.BFSQueue.pop()
-            for (Cx,Cy) in const.CARDINALS:
-                if (x+Cx,y+Cy) not in self.visited and  not self.BFSQueue.has( (x+Cx, y+Cy) ) and self.getEntry(x+Cx,y+Cy) in range(24):
-                    self.BFSQueue.push( (x+Cx, y+Cy) )
-                    self.visited += [ (x+Cx,y+Cy) ]
+            for (Cx, Cy) in const.CARDINALS:
+                if ((x + Cx, y + Cy) not in self.visited
+                        and not self.BFSQueue.has((x + Cx, y + Cy))
+                        and self.getEntry(x + Cx, y + Cy) in range(24)):
+                    self.BFSQueue.push((x + Cx, y + Cy))
+                    self.visited += [(x + Cx, y + Cy)]
         return self.visited
-        
+
     def pathfinder(self, t1, t2):
         self.visited = []
         self.BFSQueue.reset()
-        tiles = self.pathfinderBFS( t1 )
+        tiles = self.pathfinderBFS(t1)
         if t2 in tiles:
             return True
         else:
