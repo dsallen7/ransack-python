@@ -3,12 +3,13 @@ from UTIL import const
 addHP1 = lambda s: [s[0] + 5] + s[1:]
 addHP2 = lambda s: [s[0] + 10] + s[1:]
 addHP3 = lambda s: [s[0] + 20] + s[1:]
-addMP1 = lambda s: s[:2] + [s[2]+5] + s[3:]
-addMP2 = lambda s: s[:2] + [s[2]+10] + s[3:]
-addMP3 = lambda s: s[:2] + [s[2]+20] + s[3:]
+addMP1 = lambda s: s[:2] + [s[2] + 5] + s[3:]
+addMP2 = lambda s: s[:2] + [s[2] + 10] + s[3:]
+addMP3 = lambda s: s[:2] + [s[2] + 20] + s[3:]
 curePSN = lambda s: s[:11] + [False]
 
-itemDict = { const.FRUIT1: addHP1,
+itemDict = {
+             const.FRUIT1: addHP1,
              const.CHEESE: addHP1,
              const.BREAD1: addHP2,
              const.ANT: curePSN,
@@ -18,9 +19,9 @@ itemDict = { const.FRUIT1: addHP1,
              const.SMP: addMP1,
              const.MMP: addMP2,
              const.LMP: addMP3,
-                }
+            }
 
-descDict = { 
+descDict = {
              const.KEY: 'A dungeon key',
              const.SPELLBOOK: 'A spellbook',
              const.PARCHMENT: 'A magic parchment',
