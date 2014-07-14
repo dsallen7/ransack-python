@@ -1,36 +1,32 @@
 pEnemies = ['Cobra', 'Scorpion']
-dEnemies = ['Zombie','Skeleton', 'Vampire']
+dEnemies = ['Zombie', 'Skeleton', 'Vampire']
 
-healthDict = { 
+healthDict = {
               # Undead
-              'Skeleton'     : 10,
+              'Skeleton': 10,
               'Dark Skeleton': 20,
               'Skeleton King': 30,
-              'Zombie'       : 12,
-              'Vampire'      : 15,
-              
+              'Zombie': 12,
+              'Vampire': 15,
               # Humanoid
-              'Orc'          : 10,
-              'Orc Sergeant' : 25,
-              
+              'Orc': 10,
+              'Orc Sergeant': 25,
               # Animal
-              'Cobra'        : 10,
-              'Wolf'         : 20
+              'Cobra': 10,
+              'Wolf': 20
               }
 
-attackDict = { 
+attackDict = {
               # Undead
-              'Skeleton'     : 5,
+              'Skeleton': 5,
               'Dark Skeleton': 10,
               'Skeleton King': 12,
-              'Zombie'       : 7,
-              'Vampire'      : 8,
-              
+              'Zombie': 7,
+              'Vampire': 8,
               # Humanoid
-              'Orc'          : 5,
-              'Orc Sergeant' : 12,
-              
+              'Orc': 5,
+              'Orc Sergeant': 12,
               # Animal
-              'Cobra'        : 5,
-              'Wolf'         : 10
+              'Cobra': 5,
+              'Wolf': 10
               }

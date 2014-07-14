@@ -6,7 +6,7 @@ class subMap():
         self.DIMX = dX
         self.DIMY = dY
         self.grid = []
-        self.portal = (0,0)
+        self.portal = (0, 0)
         for i in range(self.DIMX):
             for j in range(self.DIMY):
                 self.grid[i][j] = tile.Tile(i, j, 0)
