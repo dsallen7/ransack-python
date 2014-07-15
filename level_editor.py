@@ -8,7 +8,7 @@ import cPickle
 import random
 import gzip
 
-from MAP import mapgen, mazegen, map
+from MAP import mapgen, mazegen, generalmap
 
 from UTIL import queue, const, colors, eztext, load_image, misc
 from IMG import images
@@ -586,7 +586,7 @@ clock = pygame.time.Clock()
 
 cursorPos = (0, 0)
 
-myMap = map.edMap()
+myMap = generalmap.edMap()
 myHandler = Handler(cursorPos)
 
 blocksize = 30
