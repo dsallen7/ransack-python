@@ -9,7 +9,7 @@ from types import *
 from MAP import tile, minimap, submap
 
 
-class map():
+class generalmap():
     def __init__(self, DIM=const.DIM, dFG=const.DFLOOR1):
         self.grid = []
         self.DIM = DIM
@@ -89,10 +89,10 @@ class map():
                 self.grid[i + sX][j + sY].setXY(i + sX, j + sY)
 
 
-class gameMap(map):
+class gameMap(generalmap):
 
     def __init__(self, filename=None, mapball=None, level=0, type='dungeon'):
-        map.__init__(self)
+        generalmap.__init__(self)
 
         self.level = level
         self.lineOfVision = 0
@@ -288,11 +288,11 @@ class gameMap(map):
         return self.grid[x][y].occupied
 
 
-class edMap(map):
+class edMap(generalmap):
     """inherited map class to be used by map generator
     """
     def __init__(self):
-        map.__init__(self, 2 * const.DIM)
+        generalmap.__init__(self, 2 * const.DIM)
         self.defaultBkgd = const.DFLOOR1
         for i in range(self.DIM):
             self.grid += [range(self.DIM)]
@@ -440,12 +440,12 @@ class edMap(map):
         pass
 
 
-class genMap(map):
+class genMap(generalmap):
     """inherited map class to be used by map generator
     """
 
     def __init__(self, DIM, level):
-        map.__init__(self, DIM, const.VOID)
+        generalmap.__init__(self, DIM, const.VOID)
         self.level = level
         self.BFSQueue = queue.Queue()
         for i in range(self.DIM):
