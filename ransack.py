@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+ransack-python
+
+Ransack - a Python based roguelike
+"""
 import pygame
 import game
 import random
