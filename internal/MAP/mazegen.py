@@ -1,5 +1,5 @@
-import numpy as np
-from numpy.random import random_integers as rnd
+#import numpy as np
+#from numpy.random import random_integers as rnd
 
 from random import choice, randrange
 from MAP import map, tile

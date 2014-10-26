@@ -28,13 +28,16 @@ class battle():
         self.townField, r = load_image.load_image( os.path.join('ANIMATION', 'townField.bmp'), None)
         self.myMenu = menu
                 
-        self.enemyImgs = range(2)
-        
+        self.enemyImgs = range(10)
         self.enemyImg = None
-        
-        self.heroImgs = range(2)
-        
+        self.heroImgs = range(10)
         self.heroImg = None
+
+        self.heroImgIdx = 4
+        self.enemyImgIdx = 6
+
+        self.heroStepIdx = 0
+        self.enemyStepIdx = 0
         
         self.inputHandler = iH
         
@@ -51,20 +54,50 @@ class battle():
     
     # can be called with or without enemy argument
     # if enemy is specified, battlefield will be drawn fresh
-    def drawBattleScreen(self, game, enemy=None):
+    def drawBattleScreen(self, game, enemy=None, enemyX = 50, enemyY = 100, heroX = 250, heroY = 100):
         if enemy is not None:
             self.battleField, r = load_image.load_image(os.path.join('ANIMATION', 'battlefield.bmp'), -1)
             if game.myMap.type == 'dungeon': self.background.blit(self.dungeonField, (0,0) )
             elif game.myMap.type == 'dungeon': self.background.blit(self.forestField, (0,0) )
             elif game.myMap.type == 'village': self.background.blit(self.townField, (0,0) )
-            self.battleField.blit( self.enemyAvatar, (50, 100) )
-            self.battleField.blit( self.heroAvatar, (250, 100) )
+            self.battleField.blit( self.enemyAvatar, (enemyX, enemyY) )
+            self.battleField.blit( self.heroAvatar, (heroX, heroY) )
             self.battleField.blit( self.boxStat(enemy.getHP(), enemy.maxHP, colors.red, colors.black, (150, 30) ), (10, 85) )
             self.background.blit(self.battleField, (0,0) )
         #self.screen.blit( pygame.transform.scale(self.battleField, (720, 720) ), (0, 0) )
         game.Display.displayOneFrame(game.myInterface, game.FX, self.background, game, False, True)
         pygame.display.flip()
-    
+
+    def drawHeroAttack(self, game, enemy):
+        for i in range(250, 240, -1):
+            self.heroImgIdx = self.heroImgIdx + const.walkingList[self.heroStepIdx]
+            self.heroStepIdx = ( self.heroStepIdx + 1 ) % 4
+            self.heroAvatar = self.heroImgs[self.heroImgIdx]
+            self.drawBattleScreen(game, enemy, 50, 100, i, 100)
+        for i in range(240, 250):
+            self.heroImgIdx = self.heroImgIdx + const.walkingList[self.heroStepIdx]
+            self.heroStepIdx = ( self.heroStepIdx + 1 ) % 4
+            self.heroAvatar = self.heroImgs[self.heroImgIdx]
+            self.drawBattleScreen(game, enemy, 50, 100, i, 100)
+
+    def drawEnemyAttack(self, game, enemy):
+        for i in range(50, 60):
+            self.enemyImgIdx = self.enemyImgIdx + const.walkingList[self.enemyStepIdx]
+            self.enemyStepIdx = ( self.enemyStepIdx + 1 ) % 4
+            self.enemyAvatar = self.enemyImgs[self.enemyImgIdx]
+            self.drawBattleScreen(game, enemy, i, 100, 250, 100)
+        for i in range(60, 50, -1):
+            self.enemyImgIdx = self.enemyImgIdx + const.walkingList[self.enemyStepIdx]
+            self.enemyStepIdx = ( self.enemyStepIdx + 1 ) % 4
+            self.enemyAvatar = self.enemyImgs[self.enemyImgIdx]
+            self.drawBattleScreen(game, enemy, i, 100, 250, 100)
+
+    def drawHeroDamage(self, game, enemy):
+        pass
+
+    def drawEnemyDamage(self, game, enemy):
+        pass
+
     # displays battle menu and waits for player to select choice,
     # returns choice to fightBattle()
     def getAction(self, game):
@@ -113,6 +146,7 @@ class battle():
         for i in range(enemy.getHP(), enemy.getHP()-dmg, -1):
             enemy.takeDmg(1)
             self.drawBattleScreen(game, enemy)
+
     def heroTurn(self, game, enemy, board_):
         hero = game.myHero
         (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX, psn) = hero.getPlayerStats()
@@ -120,7 +154,8 @@ class battle():
         action = self.getAction(game)
         if action == 'Fight':
             #hero attacks
-            self.heroImg = self.heroImgs[1]
+            #self.heroImg = self.heroImgs[1]
+            self.drawHeroAttack(game, enemy)
             a = random.randrange(0, dex+5)
             if not (a > dex):
                 dmg = random.randrange(sth/2,sth) + weapon.getLevel()**2
@@ -154,9 +189,12 @@ class battle():
                 game.textMessage("You can't escape!")
                 return True
     # this controls all the logic of what goes on in an actual battle
-    def fightBattle(self, game, enemy, board_, eA, hA):
-        self.enemyAvatar = eA
-        self.heroAvatar = hA
+
+    def fightBattle(self, game, enemy, board_, enemyImgs, heroImgs):
+        self.heroImgs = heroImgs
+        self.enemyImgs = enemyImgs
+        self.enemyAvatar = enemyImgs[self.enemyImgIdx]
+        self.heroAvatar = heroImgs[self.heroImgIdx]
         self.drawBattleScreen(game, enemy)
         game.FX.scrollFromCenter(board_, self.battleField)
         hero = game.myHero
@@ -178,6 +216,7 @@ class battle():
             
             game.Ticker.tick(10)
             #enemy attacks
+            self.drawEnemyAttack(game, enemy)
             if enemy.getHP() > 0:
                 if not misc.rollDie(hero.dex, const.maxStats):
                     dmg = random.randrange(enemy.getBaseAttack()-5,enemy.getBaseAttack()+5) - ( hero.armorClass )

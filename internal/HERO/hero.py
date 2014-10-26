@@ -383,7 +383,7 @@ class hero(pygame.sprite.Sprite):
             return
         if spell.getType() == const.ASCD:
             loc = game.myWorld.upLevel()
-            game.transition( loc )
+            game.transition(loc)
             game.Display.drawSprites(game.myHero,
                                      game.myMap,
                                      game.gameBoard,

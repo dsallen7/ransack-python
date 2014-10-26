@@ -436,7 +436,7 @@ class game():
     # takes enemy NPC object, dungeon level
     def launchBattle(self, enemyNpc, lD):
         #self.boxMessage("The battle is joined!")
-        result = self.myBattle.fightBattle(self, enemy.enemy(enemyNpc.name, lD), self.gameBoard, enemyNpc.images[6], self.myHero.images[4])
+        result = self.myBattle.fightBattle(self, enemy.enemy(enemyNpc.name, lD), self.gameBoard, enemyNpc.images, self.myHero.images)
         #result = self.myBattle.fightBattle(self, enemy.enemy(enemyNpc.name, lD), self.gameBoard )
         if result == 'escaped': # escaped from battle
             return False

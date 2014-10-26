@@ -23,7 +23,7 @@ class Display():
             #board.blit( game.myHero.showLocation(), (0,50) )
         FX.update(self.screen)
         if board is not None:
-            if game.myMap.type in const.darkMaps:
+            if game.myMap.type in const.darkMaps and dark:
                 self.drawDarkness(game.myMap, board)
                 #board.blit( self.SS_, (0, 0) )
             #pygame.time.delay(500)
@@ -64,7 +64,7 @@ class Display():
         (topX, topY), (oldTopX, oldTopY) = map.updateWindowCoordinates(hero)
         gameBoard.blit( self.getMapWindow( (topX, topY), map.WINDOWSIZE ), (map.WINDOWOFFSET,map.WINDOWOFFSET) )
         if map.type in const.darkMaps:
-            self.drawDarkness(map, gameBoard  )
+            pass#self.drawDarkness(map, gameBoard  )
     
     # takes map coordinates, returns map window
     def getMapWindow(self, pos, wsize=10):
