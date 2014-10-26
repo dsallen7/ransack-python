@@ -11,7 +11,7 @@ from NPC import npc
 from DISPLAY import display, hud, menu
 from SND import sfx
 
-from MAP import map, mapgen, mazegen
+from MAP import generalmap, mapgen, mazegen
 from UTIL import ticker, const, colors, load_image
 
 
@@ -39,13 +39,13 @@ class game():
         if loadDungeon is None:
             self.myDungeon = []
             for mapFileName in const.mapList:
-                self.myDungeon += [map.gameMap(mapFileName, type='village')]
+                self.myDungeon += [generalmap.gameMap(mapFileName, type='village')]
         else:
             self.myDungeon = loadDungeon
 
         self.fortressMaps = []
         for mapFileName in const.fMapList:
-            self.fortressMaps += [map.gameMap(mapFileName, type='fortress')]
+            self.fortressMaps += [generalmap.gameMap(mapFileName, type='fortress')]
 
         self.myMap = self.myDungeon[self.currentMap]
         self.NPCs = []
@@ -80,52 +80,52 @@ class game():
                 self.myMap.NPCs.remove(n.getID())
                 return
 
-    def addNPCs(self, map):
+    def addNPCs(self, thisMap):
         self.NPCs = []
         visibleNPCs = []
-        for n in map.NPCs:
+        for n in thisMap.NPCs:
             self.NPCs.append(npc.newNpc(n, self))
         self.allsprites = pygame.sprite.RenderPlain((self.myHero, self.NPCs))
         self.allsprites.clear(self.screen, self.gameBoard)
 
-    def addShops(self, map):
+    def addShops(self, thisMap):
         self.Blacksmiths = range(4)
         self.Armories = range(4)
         self.Itemshops = range(4)
         self.Magicshops = range(4)
         self.Taverns = range(4)
-        if map.shops is not None:
-            for s in map.shops:
-                if map.shops[s][0] == 'tavern':
+        if thisMap.shops is not None:
+            for s in thisMap.shops:
+                if thisMap.shops[s][0] == 'tavern':
                     self.Tavern = tavern.Tavern(self.screen,
                                                 self.myHud,
                                                 self.Ticker)
-                if map.shops[s][0] == 'itemshop':
-                    self.Itemshops[map.shops[s][1]] = shop.itemShop(
-                        self.screen, self.myHud, map.shops[s][1],
+                if thisMap.shops[s][0] == 'itemshop':
+                    self.Itemshops[thisMap.shops[s][1]] = shop.itemShop(
+                        self.screen, self.myHud, thisMap.shops[s][1],
                         'itemshop', self.Ticker)
-                if map.shops[s][0] == 'magicshop':
-                    self.Magicshops[map.shops[s][1]] = shop.magicShop(
-                         self.screen, self.myHud, map.shops[s][1],
+                if thisMap.shops[s][0] == 'magicshop':
+                    self.Magicshops[thisMap.shops[s][1]] = shop.magicShop(
+                         self.screen, self.myHud, thisMap.shops[s][1],
                          'magicshop', self.Ticker)
-                if map.shops[s][0] == 'blacksmith':
-                    self.Blacksmiths[map.shops[s][1]] = shop.Blacksmith(
-                        self.screen, self.myHud, map.shops[s][1],
+                if thisMap.shops[s][0] == 'blacksmith':
+                    self.Blacksmiths[thisMap.shops[s][1]] = shop.Blacksmith(
+                        self.screen, self.myHud, thisMap.shops[s][1],
                         'blacksmith', self.Ticker)
-                if map.shops[s][0] == 'armory':
-                    self.Armories[map.shops[s][1]] = shop.Armory(self.screen,
-                        self.myHud, map.shops[s][1], 'armory', self.Ticker)
+                if thisMap.shops[s][0] == 'armory':
+                    self.Armories[thisMap.shops[s][1]] = shop.Armory(self.screen,
+                        self.myHud, thisMap.shops[s][1], 'armory', self.Ticker)
 
     def generateMap(self, dimension, level, type):
         if type == 'dungeon':
             MG = mapgen.Generator(dimension, level)
             MG.generateMap(20)
-            newMap = map.gameMap(None, MG.getMapBall(),
+            newMap = generalmap.gameMap(None, MG.getMapBall(),
                 level=self.levelDepth)
         elif type == 'maze':
             MG = mazegen.Generator(dimension, level)
             MG.generateMap()
-            newMap = map.gameMap(None, MG.getMapBall(),
+            newMap = generalmap.gameMap(None, MG.getMapBall(),
                 level=self.levelDepth, type='maze')
         return newMap
 

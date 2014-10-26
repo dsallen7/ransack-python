@@ -3,7 +3,7 @@ import pygame
 import pickle
 
 from random import choice, randrange
-from MAP import map, tile, room
+from MAP import generalmap, tile, room
 from UTIL import const, colors
 
 from SCRIPTS import mEnemyScr, mapScr
