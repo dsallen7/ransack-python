@@ -1,7 +1,7 @@
 import pygame
 from IMG import images
 from UTIL import colors, const
-import math
+from math import ceil
 
 
 class Display():
@@ -9,10 +9,33 @@ class Display():
     def __init__(self, screen, images):
         self.screen = screen
         #images.load()
-        #self.images = images.mapImages
-        self.images = images
+        self.images = images.mapImages
+        #self.images = images
         self.fog = pygame.Surface((30, 30))
         self.fog.fill(colors.black)
+
+    def displayOneFrame(self, iFace, FX, board=None, game=None, dark=False, smooth=False):
+        if game is not None:
+            game.updateSprites()
+            iFace.update(game)
+            #board.blit( game.myHero.showLocation(), (0,50) )
+        FX.update(self.screen)
+        if board is not None:
+            if game.myMap.type in const.darkMaps and dark:
+                self.drawDarkness(game.myMap, board)
+                #board.blit( self.SS_, (0, 0) )
+            #pygame.time.delay(500)
+            if smooth:
+                pass
+            '''
+                self.screen.blit( pygame.transform.smoothscale(board,
+                                                           (int(ceil(300 * const.scaleFactor)),
+                                                            int(ceil(300 * const.scaleFactor)) ) ), (0,0) )
+                                                            '''
+            self.screen.blit( pygame.transform.scale(board,
+                                                           (int(ceil(300 * const.scaleFactor)),
+                                                            int(ceil(300 * const.scaleFactor)) ) ), (0,0) )
+        pygame.display.flip()
 
     def drawShade(self, map, gameBoard):
         """Takes first two coordinates of hero rect, gameBoard and
@@ -66,26 +89,28 @@ class Display():
         #self.drawDarkness
         return window
 
-    def redrawXMap(self, map):
+    def redrawXMap(self, thismap, light):
         """draws entire map to DIMxDIM Surface
+            light: number of tiles visible from player
         """
-        self.xGameBoard = pygame.Surface((map.getDIM() * const.blocksize,
-             map.getDIM() * const.blocksize))
-        if map.type in ['dungeon', 'maze', 'fortress']:
-            map.revealMap()
-        for x in range(map.getDIM()):
-            for y in range(map.getDIM()):
-                tile = map.getEntry(x, y)
-                if tile != const.VOID and map.visDict[(x, y)]:
+        self.xGameBoard = pygame.Surface((thismap.getDIM() * const.blocksize,
+             thismap.getDIM() * const.blocksize))
+        if thismap.type in const.darkMaps:
+            thismap.revealMap(light)
+        for x in range(thismap.getDIM()):
+            for y in range(thismap.getDIM()):
+                tile = thismap.getEntry(x, y)
+                if tile != const.VOID and thismap.visDict[(x, y)]:
+                    '''
                     if tile > 24:
-                        shortList = [map.getEntry(tx, ty) for (
-                            tx, ty) in map.neighbors((x, y))]
+                        shortList = [thismap.getEntry(tx, ty) for (
+                            tx, ty) in thismap.neighbors((x, y))]
                         if const.VOID not in shortList:
                             self.xGameBoard.blit(
-                                self.images[map.defaultBkgd], ((
+                                self.images[thismap.defaultBkgd], ((
                                 x * const.blocksize), (
-                                y * const.blocksize)))
-                    if map.getEntry(x, y) == const.ITEMSDOOR:
+                                y * const.blocksize)))'''
+                    if thismap.getEntry(x, y) == const.ITEMSDOOR:
                         self.xGameBoard.blit(self.images[128],
                             (x * const.blocksize - const.blocksize,
                             y * const.blocksize - 2 * const.blocksize),
@@ -93,29 +118,29 @@ class Display():
                     else:
                         self.xGameBoard.blit(self.images[tile],
                             ((x * const.blocksize), (y * const.blocksize)))
-        if map.type == 'village':
-            for s in map.shops:
-                if map.shops[s][0] == 'itemshop':
+        if thismap.type == 'village':
+            for s in thismap.shops:
+                if thismap.shops[s][0] == 'itemshop':
                     (sX, sY) = s
                     self.xGameBoard.blit(self.images[128],
                         (sX * const.blocksize - const.blocksize,
                          sY * const.blocksize - (2 * const.blocksize)))
-                if map.shops[s][0] == 'magicshop':
+                if thismap.shops[s][0] == 'magicshop':
                     (sX, sY) = s
                     self.xGameBoard.blit(self.images[129],
                         (sX * const.blocksize - const.blocksize,
                         sY * const.blocksize - (2 * const.blocksize)))
-                if map.shops[s][0] == 'blacksmith':
+                if thismap.shops[s][0] == 'blacksmith':
                     (sX, sY) = s
                     self.xGameBoard.blit(self.images[130],
                         (sX * const.blocksize - const.blocksize,
                          sY * const.blocksize - (2 * const.blocksize)))
-                if map.shops[s][0] == 'armory':
+                if thismap.shops[s][0] == 'armory':
                     (sX, sY) = s
                     self.xGameBoard.blit(self.images[131],
                         (sX * const.blocksize - const.blocksize,
                         sY * const.blocksize - (2 * const.blocksize)))
-                if map.shops[s][0] == 'tavern':
+                if thismap.shops[s][0] == 'tavern':
                     (sX, sY) = s
                     self.xGameBoard.blit(self.images[132],
                         (sX * const.blocksize - const.blocksize,
@@ -131,7 +156,7 @@ class Display():
         map.setPlayerXY(newX / const.blocksize, newY / const.blocksize)
         (oldX, oldY, c, d) = hero.getRect()
         scrolling = False
-        delta = int(math.ceil(float(DIMEN) / 2.))
+        delta = int(ceil(float(DIMEN) / 2.))
         if map.getDIM() % 2 == 0:
             delta = delta + 1
         if DIMEN > const.HALFDIM:
@@ -199,9 +224,12 @@ class Display():
                         self.drawShade(map, gameBoard)
                 else:
                     self.redrawMap(map, hero, gameBoard)
-                if (idx % 2 == 0) and hero.moving:
-                    hero.takeStep()
-                game.displayGameBoard()
+                if (idx % 3) == 0:
+
+                    if hero.moving:
+                        if idx in [6,12,21,27]:
+                            hero.takeStep()
+                    self.displayOneFrame(game.myInterface, game.FX, game.gameBoard, game, True)
             hero.moving = False
 
         for npc in game.NPCs:
@@ -214,5 +242,5 @@ class Display():
             npc.setRect(nRX, nRY, const.blocksize, const.blocksize)
             npc.moving = False
         hero.setRect(newX, newY, const.blocksize, const.blocksize)
-        self.redrawXMap(map)
+        self.redrawXMap(map, 2)
         self.redrawMap(map, hero, gameBoard)

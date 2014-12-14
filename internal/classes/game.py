@@ -9,7 +9,7 @@ from SCRIPTS import mapScr, enemyScr
 from NPC import npcspawner
 from SND import sfx
 
-from MAP import world, map, mapgen#, mazegen
+from MAP import world, generalmap, mapgen#, mazegen
 from UTIL import ticker, const, colors, load_image, misc, astar
 
 from math import ceil, floor

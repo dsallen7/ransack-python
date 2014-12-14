@@ -45,7 +45,7 @@ FX = effects.effects(clock, screen)
 SFX = sfx.sfx(mixer)
 C = creator.Creator()
 iH = inputHandler.inputHandler(FX)
-iFace = interface.Interface(screen, iH, SFX)
+iFace = interface.Interface(screen)
 images.load()
 D = display.Display(screen, images )
 
@@ -282,6 +282,7 @@ if __name__ == '__main__':
         MW = open('../assets/WORLDS/MainWorld', 'r')
         loadedWorld = MW#gzip.GzipFile(MW, 'rb', 1)
         myWorldBall = cPickle.load(loadedWorld)
+        print myWorldBall
         loadedWorld.close()
     except cPickle.UnpicklingError as e:
         print 'Cannot load MainWorld: ',e

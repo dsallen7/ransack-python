@@ -2,14 +2,14 @@ import pygame, random, cPickle, ppov, gzip, os
 from UTIL import queue, const, colors, load_image, misc
 from types import *
 
-from MAP import map, mapgen#, mazegen
+from MAP import generalmap, mapgen#, mazegen
 
 class World():
     
     def __init__(self, context, myWorldBall=None, loadWorld=None):
         if context == 'editor':
             self.worldArray = []
-            self.addMap( None, map.edMap() )
+            self.addMap( None, generalmap.edMap() )
             self.currentMap = self.worldArray[0]
             #self.initialMap = self.currentMap.name
             # number of maps in array
@@ -33,13 +33,12 @@ class World():
     def getWorldBall(self, context):
         ballList = []
         if context == 'game':
-            for map in self.worldArray:
-                if map.getName()[:7]=='Dungeon' and map.getType() == 'dungeon':
-                    print map.getName()
-                    ballList.append( map.getMapBall() )
+            for thismap in self.worldArray:
+                if thismap.getName()[:7]=='Dungeon' and thismap.getType() == 'dungeon':
+                    ballList.append( thismap.getMapBall() )
         elif context == 'editor':
-            for map in self.worldArray:
-                ballList.append( map.getMapBall() )
+            for thismap in self.worldArray:
+                ballList.append( thismap.getMapBall() )
         ball = (ballList, self.initialMap.getName(), self.currentMap.getName() )
         return ball
     
@@ -47,18 +46,20 @@ class World():
         self.getMapByName(name)
     
     def installWorldBall(self, context, myWorldBall, loadBall=None ):
+        #print myWorldBall
         self.worldArray = []
         if context == 'editor':
             for mB in myWorldBall[0]:
-                self.worldArray.append( map.edMap(mB, None) )
+                self.worldArray.append( generalmap.edMap(mB) )
             self.initialMap = self.getMapByName( myWorldBall[1] )
             self.currentMap = self.getMapByName( myWorldBall[1] )
         elif context == 'game':
             for mB in myWorldBall[0]:
-                self.worldArray.append( map.gameMap(mB, None) )
+                #print mB
+                self.worldArray.append( generalmap.gameMap(mB, None) )
             if loadBall is not None:
                 for mB in loadBall[0]:
-                    newMap = map.gameMap(mB)
+                    newMap = generalmap.gameMap(mB)
                     self.worldArray.append( newMap )
                     if newMap.up[0] != 'dungeon':
                         self.getMapByName(newMap.up[0]).down = ( newMap.getName(), )
@@ -71,19 +72,19 @@ class World():
                 self.currentMap = self.getMapByName( myWorldBall[2] )
     
     def getMapByName(self, name):
-        for map in self.worldArray:
-            if map.getName() == name:
-                return map
+        for thismap in self.worldArray:
+            if thismap.getName() == name:
+                return thismap
     
     def removeMapByName(self, name):
-        for map in self.worldArray[:]:
-            if map.getName() == name:
+        for thismap in self.worldArray[:]:
+            if thismap.getName() == name:
                 self.worldArray.remove( self.getMapByName(name) )
     
     def getMapList(self):
         L = []
-        for map in self.worldArray:
-            L.append(map.getName())
+        for thismap in self.worldArray:
+            L.append(thismap.getName())
         return L
 
     # adds new map to world array
@@ -91,23 +92,23 @@ class World():
         if nMap is not None:
             self.worldArray.append(nMap)
         elif title is not None:
-            self.worldArray.append( map.edMap(None, title) )
+            self.worldArray.append( generalmap.edMap(None, title) )
     
     # generates map but does not add it to world
     def generateMap(self, dimension, level, type):
         if type == 'dungeon':
             MG = mapgen.Generator(dimension, level)
             MG.generateMap(20)
-            newMap = map.gameMap(MG.getMapBall(), level)
+            newMap = generalmap.gameMap(MG.getMapBall(), level)
         elif type == 'maze':
             MG = mazegen.Generator(dimension, level)
             MG.generateMap()
-            newMap = map.gameMap(self.inputHandler, None, MG.getMapBall(), level=self.levelDepth)
+            newMap = generalmap.gameMap(self.inputHandler, None, MG.getMapBall(), level=self.levelDepth)
         return newMap
 
     # in-game only
     def upLevel(self):
-        self.currentMap = self.getMapByName( self.currentMap.up[0] )
+        self.currentMap = self.getMapByName( self.currentmap.up[0] )
         return self.currentMap.pointOfExit
     
     # in-game only
