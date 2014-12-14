@@ -45,7 +45,7 @@ FX = effects.effects(clock, screen)
 SFX = sfx.sfx(mixer)
 C = creator.Creator()
 iH = inputHandler.inputHandler(FX)
-iFace = interface.Interface(screen)
+iFace = interface.Interface(screen, iH)
 images.load()
 D = display.Display(screen, images )
 

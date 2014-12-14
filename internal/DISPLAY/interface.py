@@ -15,7 +15,7 @@ import Queue
 
 
 class Interface():
-    def __init__(self, screen):
+    def __init__(self, screen, iH):
         self.textBox1 = pygame.Surface((100, 250))
         self.textBox1.fill(colors.gold)
         self.textBox2 = pygame.Surface((300, 100))
@@ -24,11 +24,12 @@ class Interface():
 
         #for displaying messages or menus
         self.screen = screen
-
+        self.inputHandler = iH
         self.invItems = []
 
         self.frameBox1, r = load_image.load_image("hudBox1.bmp", None)
         self.frameBox2, r = load_image.load_image("hudBox2.bmp", None)
+        self.outerframe, r = load_image.load_image("gamescreen600.bmp", None)
 
         self.scrollText = [''] * 5
 
@@ -139,12 +140,12 @@ class Interface():
 
         if self.popupWin is not None:
             self.frameBox1.blit(self.popupWin, self.popupLoc)
-
+        self.screen.blit(self.outerframe, (0,0) )
         self.screen.blit(self.frameBox1, (const.blocksize * 10 + 75, 75))
         self.screen.blit(self.frameBox2, (75, const.blocksize * 10 + 75))
         self.screen.blit(game.gameBoard, (75, 75))
 
-    def txtMessage(self, msg):
+    def txtMessage(self, msg, game):
         self.textBox2 = pygame.Surface((400, 100))
         self.textBox2.fill(colors.gold)
         self.scrollText[0] = self.scrollText[1]
@@ -162,9 +163,9 @@ class Interface():
                     colors.white, colors.gold)
                 self.textBox2.blit(Msg, (0, 20 * i))
         self.frameBox2.blit(self.textBox2, (25, 25))
-        self.gameBoard.blit(self.frameBox2, (0, const.blocksize * 10))
-        self.screen.blit(self.gameBoard, (75, 75))
-        self.update()
+        game.gameBoard.blit(self.frameBox2, (0, const.blocksize * 10))
+        self.screen.blit(game.gameBoard, (75, 75))
+        self.update(game)
 
     # displays message along with image of face
     def npcMessage(self, message, img):
