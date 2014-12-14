@@ -1,24 +1,50 @@
-itemShopsByLevel = {1: [5, 6, 7, 9, 10]}
+from UTIL import const
 
-blacksmithShopsByLevel = {1: [(26, 0),
-                              (27, 0),
-                              (28, 0),
-                              (26, 1),
-                              (27, 1),
-                              (28, 1)]}
+itemShopsByLevel = { 
+                    1: [const.FRUIT1,const.CHEESE,const.BREAD,const.LANTERN],
+                    2: [const.ANTIDOTE,const.SHP,const.MHP,const.SMP,const.MMP]
 
-armoriesByLevel = {1: [(31, 0),
-                      (32, 0),
-                      (33, 0),
-                      (31, 1),
-                      (32, 1),
-                      (33, 1)]}
+
+
+}
+
+blacksmithShopsByLevel = {
+                            1: [ const.WSWORD, const.SSWORD ],
+                            2: [ const.SSWORD, const.AXE ]
+
+}
+
+armoriesByLevel = { 
+                   1: [ const.LSHIRT, const.LMAIL, const.WSHIELD ],
+                   2: [ const.LMAIL, const.CMAIL, const.RING ]
+}
+
+
+enhancementsByLevel = {
+                       1: [ 'plusWP' ],
+                       2: [ 'plusHP', 'plusMP', 'plusWP' ]
+                       
+                       }
+townHallsByLevel = {1: [(const.CERTIFICATE,const.SAVECERT),
+                          (const.CERTIFICATE,const.RETURNCERT)]
+                    }
 
 # 100: spellbook
 # 101: parchment
 # level, spellnum
-magicShopsByLevel = {1: [(100, 0, 2),
-                          (100, 0, 3),
-                          (101, 0, 0),
-                          (101, 0, 1),
-                          (101, 0, 3)]}
+magicShopsByLevel = { 
+                     1: [(const.SPELLBOOK,const.DART),
+                          (const.PARCHMENT,const.DART),
+                          (const.PARCHMENT,const.HEAL)],
+                     2: [(const.SPELLBOOK,const.FRBL),
+                          (const.PARCHMENT,const.FRBL),
+                          (const.PARCHMENT,const.HEAL),
+                          (const.PARCHMENT,const.DART),
+                          (const.PARCHMENT,const.TLPT)],
+                     3: [(const.SPELLBOOK,const.FRBL),
+                          (const.PARCHMENT,const.FRBL),
+                          (const.PARCHMENT,const.HEAL),
+                          (const.PARCHMENT,const.DART),
+                          (const.PARCHMENT,const.TLPT)]
+                      
+                      }
