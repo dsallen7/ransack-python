@@ -275,6 +275,8 @@ class hero(pygame.sprite.Sprite):
         self.strength = self.strength + weapon.plusStr
         self.intell = self.intell + weapon.plusItl
         self.dex = self.dex + weapon.plusDex
+        print self.weaponClass
+        print weapon.level
         self.weaponClass = self.weaponClass + self.weaponEquipped.level
         if weapon in self.weapons:
             self.loseWeapon(weapon)

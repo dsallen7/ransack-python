@@ -14,19 +14,19 @@ from UTIL import const, colors
 
 class Tavern():
 
-    def __init__(self, screen, hud, ticker):
+    def __init__(self, screen, interface, ticker, iH, menu):
         self.storeScreen = pygame.Surface((300, 300))
         self.inventory = []
         self.screen = screen
-        self.myHud = hud
+        self.myHud = interface
         self.ticker = ticker
         images.load()
-        self.myMenu = menu.menu(screen)
+        self.myMenu = menu
         self.images = range(2)
-        self.images[0], r = load_image('cursor.bmp', -1)
-        self.images[1], r = load_image(os.path.join('INT', 'inn.bmp'))
+        #self.images[0], r = load_image('cursor.bmp', -1)
+        #self.images[1], r = load_image(os.path.join('INT', 'inn.bmp'))
         self.storeScreen.fill(colors.black)
-        self.storeScreen.blit(self.images[1], (0, 0))
+        #self.storeScreen.blit(self.images[1], (0, 0))
 
     def drawStoreScreen(self):
         self.myHud.update()

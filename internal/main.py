@@ -272,23 +272,21 @@ def main_():
         pygame.display.flip()
 
 if __name__ == '__main__':
-    main()
-
-try:
-    '''
-    if android:
-        MW = android.assets.open('WORLDS/MainWorld')
-    else:
-        MW = open('../assets/WORLDS/MainWorld', 'r')
+    try:
         '''
-    MW = open('../assets/WORLDS/MainWorld', 'r')
-    loadedWorld = MW#gzip.GzipFile(MW, 'rb', 1)
-    myWorldBall = cPickle.load(loadedWorld)
-    loadedWorld.close()
-except cPickle.UnpicklingError as e:
-    print 'Cannot load MainWorld: ',e
-    os.sys.exit()
-except IOError as e:
-    print 'Cannot load MainWorld: ',e
-    os.sys.exit()
-main()
+        if android:
+            MW = android.assets.open('WORLDS/MainWorld')
+        else:
+            MW = open('../assets/WORLDS/MainWorld', 'r')
+            '''
+        MW = open('../assets/WORLDS/MainWorld', 'r')
+        loadedWorld = MW#gzip.GzipFile(MW, 'rb', 1)
+        myWorldBall = cPickle.load(loadedWorld)
+        loadedWorld.close()
+    except cPickle.UnpicklingError as e:
+        print 'Cannot load MainWorld: ',e
+        os.sys.exit()
+    except IOError as e:
+        print 'Cannot load MainWorld: ',e
+        os.sys.exit()
+    main()
