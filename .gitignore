@@ -35,6 +35,7 @@ nosetests.xml
 .pydevproject
 
 .directory
+.gitignore
 
 *.sav
-*.bmp
+.idea/*
