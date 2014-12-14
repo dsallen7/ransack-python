@@ -6,10 +6,11 @@ import math
 
 class Display():
 
-    def __init__(self, screen):
+    def __init__(self, screen, images):
         self.screen = screen
-        images.load()
-        self.images = images.mapImages
+        #images.load()
+        #self.images = images.mapImages
+        self.images = images
         self.fog = pygame.Surface((30, 30))
         self.fog.fill(colors.black)
 
