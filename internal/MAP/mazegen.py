@@ -2,7 +2,7 @@
 #from numpy.random import random_integers as rnd
 
 from random import choice, randrange
-from MAP import map, tile
+from MAP import generalmap, tile
 from SCRIPTS import mapScr, enemyScr, enemyScr
 import itertools
 from UTIL import load_image, const, misc
@@ -11,7 +11,7 @@ from UTIL import load_image, const, misc
 class Generator():
     def __init__(self, DIM, level):
         self.DIM = DIM
-        self.map = map.genMap(self.DIM, level, 'maze')
+        self.generalmap = generalmap.genMap(self.DIM, level, 'maze')
         self.level = level
 
     def maze(self, width=40, height=40, complexity=.75, density =.75):
@@ -78,37 +78,37 @@ class Generator():
         for i in range(1, self.DIM-1):
             
             if self.getMatrixEntry(i, 1):
-                self.map.setEntry(i, 0, const.URWALL)
+                self.generalmap.setEntry(i, 0, const.URWALL)
             else:
-                self.map.setEntry(i, 0, const.EWWALL)
-            self.map.setEntry(i, self.DIM-1, const.EWWALL)
+                self.generalmap.setEntry(i, 0, const.EWWALL)
+            self.generalmap.setEntry(i, self.DIM-1, const.EWWALL)
             
             
             if self.getMatrixEntry(self.DIM-2, i):
-                self.map.setEntry(self.DIM-1, i, const.URWALL)
+                self.generalmap.setEntry(self.DIM-1, i, const.URWALL)
             else:
-                self.map.setEntry(self.DIM-1, i, const.NSWALL)
-            self.map.setEntry(0, i, const.NSWALL)
+                self.generalmap.setEntry(self.DIM-1, i, const.NSWALL)
+            self.generalmap.setEntry(0, i, const.NSWALL)
             
             for j in range(1, self.DIM-1):
                 if self.getMatrixEntry(i, j):
-                    self.map.setEntry(i, j, mapScr.wallDict[( self.getMatrixEntry(i, j-1), self.getMatrixEntry(i-1, j), self.getMatrixEntry(i+1, j), self.getMatrixEntry(i, j+1) )]   )
-                else: self.map.setEntry(i, j, 0)
+                    self.generalmap.setEntry(i, j, mapScr.wallDict[( self.getMatrixEntry(i, j-1), self.getMatrixEntry(i-1, j), self.getMatrixEntry(i+1, j), self.getMatrixEntry(i, j+1) )]   )
+                else: self.generalmap.setEntry(i, j, 0)
     
     def generateMap(self):
         self.Z = self.maze()
         self.matrixToMap(self.Z)
         
-        while not self.map.pathfinder( (1, self.DIM-2), (self.DIM-2, 1) ):
+        while not self.generalmap.pathfinder( (1, self.DIM-2), (self.DIM-2, 1) ):
             self.Z = self.maze()
             self.matrixToMap(self.Z)
         
-        self.map.setEntry(0, 0, 40)
-        self.map.setEntry( 1, self.DIM-2, const.STAIRDN)
-        self.map.pointOfExit = ( 1, self.DIM-2 )
-        self.map.setEntry( self.DIM-2, 1, const.STAIRUP)
-        self.map.pointOfEntry = ( self.DIM-2, 1)
-        self.map.heroStart = ( self.DIM-2, 1 )
+        self.generalmap.setEntry(0, 0, 40)
+        self.generalmap.setEntry( 1, self.DIM-2, const.STAIRDN)
+        self.generalmap.pointOfExit = ( 1, self.DIM-2 )
+        self.generalmap.setEntry( self.DIM-2, 1, const.STAIRUP)
+        self.generalmap.pointOfEntry = ( self.DIM-2, 1)
+        self.generalmap.heroStart = ( self.DIM-2, 1 )
         
         i = 0
         while i < 15:
@@ -116,7 +116,7 @@ class Generator():
             if tile == None:
                 pass
             else:
-                self.map.NPCs.append( ( tile, choice(enemyScr.enemiesByDungeonLevel[self.map.level] ) ) )
+                self.generalmap.NPCs.append( ( tile, choice(enemyScr.enemiesByDungeonLevel[self.generalmap.level] ) ) )
                 i += 1
         i = 0
         chestList = []
@@ -131,9 +131,9 @@ class Generator():
                     chestItems.append( (13, choice( range(15, 50)+range(15,30) ) ))
                 chestList.append( (tile, chestItems) )
                 (x,y) = tile
-                self.map.setEntry( x, y, 110)
+                self.generalmap.setEntry( x, y, 110)
                 i += 1
-        self.map.chests = dict(chestList)
+        self.generalmap.chests = dict(chestList)
 
     def getMapBall(self):
-        return self.map.getMapBall()
+        return self.generalmap.getMapBall()

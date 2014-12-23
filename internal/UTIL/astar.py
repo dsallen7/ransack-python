@@ -123,7 +123,7 @@ def pathFind(the_map, n, m, dirs, dx, dy, xA, yA, xB, yB):
                     heappush(pq[pqi], m0) # add the better node instead
     return '' # if no route found
 
-def ransackPathfinder(map, start, finish):
+def ransackPathfinder(gmap, start, finish):
 
     # MAIN
     dirs = 4 # number of possible directions to move on the map
@@ -134,9 +134,9 @@ def ransackPathfinder(map, start, finish):
         dx = [1, 1, 0, -1, -1, -1, 0, 1]
         dy = [0, 1, 1, 1, 0, -1, -1, -1]
     
-    n = len(map) # horizontal size of the map
+    n = len(gmap) # horizontal size of the map
     m = n # vertical size of the map
-    the_map = map
+    the_map = gmap
     
     (xA, yA) = start
     (xB, yB) = finish

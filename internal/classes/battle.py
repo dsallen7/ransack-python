@@ -199,18 +199,19 @@ class battle():
         game.FX.scrollFromCenter(board_, self.battleField)
         hero = game.myHero
         (cHP, mHP, cMP, mMP, sth, dex, itl, scr, kys, cEX, nEX, psn) = hero.getPlayerStats()
-        (armor, weapon) = ( hero.getArmorEquipped(), hero.getWeaponEquipped() )
+        (armor, weapon) = (hero.getArmorEquipped(), hero.getWeaponEquipped())
         if enemy.getLevel() > 0:
-            game.textMessage( 'You are facing a level '+str(enemy.getLevel())+' '+enemy.getName()+'!' )
+            game.textMessage('You are facing a level {} {}!'.format(enemy.getLevel(), enemy.getName()))
         else:
-            game.textMessage( 'You are facing the '+enemy.getName()+'!' )
+            game.textMessage('You are facing the {}!'.format(enemy.getName()))
         time = 0
         while enemy.getHP() > 0:
             self.drawBattleScreen(game, enemy)
             if not hero.updateStatus(game):
                 return False
             # hero turn
-            while not self.heroTurn(game, enemy, board_): pass
+            while not self.heroTurn(game, enemy, board_):
+                pass
             game.myInterface.update(game)
             self.drawBattleScreen(game, enemy)
             
@@ -240,7 +241,7 @@ class battle():
                         self.enemyImg = self.enemyImgs[1]
                         if android:
                             android.vibrate(0.1)
-                    else: game.textMessage("The "+enemy.getName()+" attack is ineffective.")
+                    else: game.textMessage("The {} attack is ineffective.".format(enemy.getName()))
                     if hero.takeDmg(dmg) < 1:
                         game.textMessage("You have died!")
                         #game.FX.scrollFromCenter(self.battleField, board_)

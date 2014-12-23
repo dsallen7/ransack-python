@@ -15,13 +15,12 @@ class generalmap():
         self.defaultBkgd = 0
         self.shops = []
         self.NPCs = []
-        '''
         self.neighbors = [ 
                             '', # North
                             '', # South
                             '', # East
                             ''  # West
-        ]'''
+        ]
         self.up = ('',)
         self.down = ('',)
         self.type = ''
@@ -71,6 +70,7 @@ class generalmap():
     
     def getName(self):
         return self.name[0]
+
     def setName(self, name):
         self.name = (name,)
     
@@ -97,6 +97,7 @@ class generalmap():
     
     def getGrid(self):
         return self.grid
+
     def getMapBall(self):
         for x in range( self.getDIM() ):
             for y in range( self.getDIM() ):
@@ -169,7 +170,6 @@ class generalmap():
 
 
 class gameMap(generalmap):
-    
     def __init__(self, mapball = None, level=0):
         generalmap.__init__(self)
         
@@ -178,7 +178,7 @@ class gameMap(generalmap):
         
         self.newNPCs = []
         
-        if mapball != None:
+        if mapball is not None:
             self.installBall(mapball)
         
         for i in range( self.DIM ):
@@ -258,7 +258,7 @@ class gameMap(generalmap):
                 y = random.randrange(0, self.DIM)
             return x, y
         else:
-            while ( self.getEntry(x, y) not in range(0, 25) ) or self.isOccupied(x, y):
+            while (self.getEntry(x, y) not in range(0, 25)) or self.isOccupied(x, y):
                 x = random.randrange(0, self.DIM)
                 y = random.randrange(0, self.DIM)
             return x, y
