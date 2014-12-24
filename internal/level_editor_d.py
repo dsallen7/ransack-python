@@ -1,7 +1,7 @@
 from types import *
 import pygame, os, cPickle, random, gzip
 
-from MAP import world, mapgen, mazegen, map, wilds, cavegen, tile
+from MAP import world, mapgen, mazegen, wilds, cavegen, tile
 from DISPLAY import text
 from UTIL import queue, const, colors, eztext, load_image, misc, button
 from IMG import images, spritesheet

@@ -1,48 +1,49 @@
-import os, pygame, cPickle
+import os
+import pygame
+import pickle
 
 from random import choice, randrange
-from MAP import map, tile
+from MAP import generalmap, tile
 from ROOM import room, roomtools
 from UTIL import const, colors, misc
 
 from SCRIPTS import enemyScr, mapScr
 
-#from IMG import images
 
 DefaultWallTile = 29
 
 DEFAULTBKGD = 0
 
 class Generator():
-    
+
     def __init__(self, DIM, level=1):
-        self.map = map.genMap(DIM, level, 'Dungeon Level '+str(level) )
-        self.map.type = 'dungeon'
+        self.generalmap = generalmap.genMap(DIM, level, 'Dungeon Level ' + str(level))
+        self.generalmap.type = 'dungeon'
         self.copyText = []
         self.level = level
-        
+
     def genRoom(self, pos=(0,0), shape='square' ):
-        return room.Room( randrange(5,8), randrange(5,8), pos, shape )
-    
+        return room.Room(randrange(5,8), randrange(5,8), pos, shape)
+
     # find a random exterior wall tile, see which way we're going
-    def branchTile(self, map, room):
+    def branchTile(self, generalmap, room):
         (xpos, ypos) = room.getPos()
         (xdim, ydim) = room.getDimensions()
         candidateList = [ ]
         #room.printGrid()
         for i in range(1,xdim-1):
-            #print map.getEntry(i+xpos,ypos), room.getGrid(i,0).getFG()
-            if map.getEntry(i+xpos,ypos) == const.EWWALL:
+            #print generalmap.getEntry(i+xpos,ypos), room.getGrid(i,0).getFG()
+            if generalmap.getEntry(i+xpos,ypos) == const.EWWALL:
                 candidateList += [(i+xpos,ypos)]
-            #print map.getEntry(i+xpos,ypos+ydim-1), room.getGrid(i,ydim-1).getFG()
-            if map.getEntry(i+xpos,ypos+ydim-1) == const.EWWALL:
+            #print generalmap.getEntry(i+xpos,ypos+ydim-1), room.getGrid(i,ydim-1).getFG()
+            if generalmap.getEntry(i+xpos,ypos+ydim-1) == const.EWWALL:
                 candidateList += [(i+xpos,ypos+ydim-1)]
         for i in range(1,ydim-1):
-            #print map.getEntry(xpos,i+ypos), room.getGrid(0,i).getFG()
-            if map.getEntry(xpos,i+ypos) == const.NSWALL:
+            #print generalmap.getEntry(xpos,i+ypos), room.getGrid(0,i).getFG()
+            if generalmap.getEntry(xpos,i+ypos) == const.NSWALL:
                 candidateList += [(xpos,i+ypos)]
-            #print map.getEntry(xpos+xdim-1,i+ypos), room.getGrid(xdim-1,i).getFG()
-            if map.getEntry(xpos+xdim-1,i+ypos) == const.NSWALL:
+            #print generalmap.getEntry(xpos+xdim-1,i+ypos), room.getGrid(xdim-1,i).getFG()
+            if generalmap.getEntry(xpos+xdim-1,i+ypos) == const.NSWALL:
                 candidateList += [(xpos+xdim-1,i+ypos)]
         
         #print candidateList
@@ -56,10 +57,11 @@ class Generator():
         elif cand[1] == ypos+ydim-1:
             return (cand, 's')
     
-    def checkNewRoom(self, map, newRoom, tile, dir):
+    def checkNewRoom(self, generalmap, newRoom, tile, dir):
+        print tile
         (xpos, ypos) = tile
         (xdim, ydim) = newRoom.getDimensions()
-        if xpos + xdim + 1 >= map.DIM or ypos + ydim + 1 >= map.DIM:
+        if xpos + xdim + 1 >= generalmap.DIM or ypos + ydim + 1 >= generalmap.DIM:
             return False
         if xpos - xdim - 1 < 0 or ypos - ydim - 1 < 0:
             return False
@@ -73,18 +75,18 @@ class Generator():
             newRoomPos = ( xpos + 1, ypos - ydim/2 )
         for i in range(newRoomPos[0], newRoomPos[0]+xdim):
             for j in range(newRoomPos[1], newRoomPos[1]+ydim):
-                if map.getEntry(i, j) != const.VOID:
+                if generalmap.getEntry(i, j) != const.VOID:
                     return False
         newRoom.setPos(newRoomPos)
         return True
     
     def generateMap(self, maxRooms):
         self.rooms = []
-        startingRoom = self.genRoom( (0,0),'round')
+        startingRoom = self.genRoom((0,0),'round')
         (xdim, ydim) = startingRoom.getDimensions()
-        startingRoom.setPos( ( (self.map.DIM/2)-(xdim/2), (self.map.DIM/2)-(ydim/2) ) )
+        startingRoom.setPos( ( (self.generalmap.DIM/2)-(xdim/2), (self.generalmap.DIM/2) - (ydim/2)))
         self.rooms += [startingRoom]
-        self.addRoom(self.map, startingRoom, startingRoom.getPos() )
+        self.addRoom(self.generalmap, startingRoom, startingRoom.getPos() )
         self.secretRooms = []
         
         while len(self.rooms) < maxRooms:
@@ -94,7 +96,7 @@ class Generator():
             
             # 5 select random wall tile from above room
             
-            tile, dir = self.branchTile(self.map, candidateRoom)
+            tile, dir = self.branchTile(self.generalmap, candidateRoom)
             
             # 6 generate new room
             '''
@@ -105,13 +107,13 @@ class Generator():
             newRoom = self.genRoom( )
             
             # 7 see if new room fits next to selected room
-            if self.checkNewRoom(self.map, newRoom, tile, dir):
-                startingRoom.setPos( ( (self.map.DIM/2)-(xdim/2), (self.map.DIM/2)-(ydim/2) ) )
+            if self.checkNewRoom(self.generalmap, newRoom, tile, dir):
+                startingRoom.setPos( ( (self.generalmap.DIM/2)-(xdim/2), (self.generalmap.DIM/2)-(ydim/2) ) )
             # 8  if yes - continue, if not go back to step 4
             
-            # 9 add new room to map and list of rooms
+            # 9 add new room to generalmap and list of rooms
                 self.rooms += [newRoom]
-                self.addRoom(self.map, newRoom, newRoom.getPos() )
+                self.addRoom(self.generalmap, newRoom, newRoom.getPos() )
             
             # 9.a add rooms as neighbors
                 candidateRoom.neighbors.append(newRoom)
@@ -133,7 +135,7 @@ class Generator():
         choice1 = choice(rooms)
         (xpos, ypos) = choice1.getPos()
         (xdim, ydim) = choice1.getDimensions()
-        self.map.setEntry( xpos + xdim/2, ypos + ydim/2, 120)
+        self.generalmap.setEntry( xpos + xdim/2, ypos + ydim/2, 120)
         self.POE = ( xpos + xdim/2, ypos + ydim/2 )
         rooms.remove(choice1)
         '''
@@ -146,17 +148,17 @@ class Generator():
         (xpos, ypos) = choice1.getPos()
         (xdim, ydim) = choice1.getDimensions()
         (doorX, doorY) = choice1.entrances[0]
-        self.map.setEntry( xpos + xdim/2, ypos + ydim/2, const.STAIRDN, len(self.rooms))
-        self.map.setEntry( doorX, doorY, const.DOOR, len(self.rooms))
-        self.map.pointOfExit = ( xpos + xdim/2, ypos + ydim/2 )
+        self.generalmap.setEntry( xpos + xdim/2, ypos + ydim/2, const.STAIRDN, len(self.rooms))
+        self.generalmap.setEntry( doorX, doorY, const.DOOR, len(self.rooms))
+        self.generalmap.pointOfExit = ( xpos + xdim/2, ypos + ydim/2 )
         
         # up
         choice2 = choice1.neighbors[0]
         (xpos, ypos) = choice2.getPos()
         (xdim, ydim) = choice2.getDimensions()
-        self.map.setEntry( xpos + xdim/2, ypos + ydim/2, const.STAIRUP, len(self.rooms))
-        self.map.pointOfEntry = ( xpos + xdim/2, ypos + ydim/2 )
-        self.map.heroStart = ( xpos + xdim/2, ypos + ydim/2 )
+        self.generalmap.setEntry( xpos + xdim/2, ypos + ydim/2, const.STAIRUP, len(self.rooms))
+        self.generalmap.pointOfEntry = ( xpos + xdim/2, ypos + ydim/2 )
+        self.generalmap.heroStart = ( xpos + xdim/2, ypos + ydim/2 )
         self.rooms.remove(choice1)
         
         self.rooms.remove(choice2)
@@ -164,7 +166,7 @@ class Generator():
         choice3 = choice(self.rooms)
         (xpos, ypos) = choice3.getPos()
         (xdim, ydim) = choice3.getDimensions()
-        self.map.hs = ( xpos + xdim/2, ypos + ydim/2 )
+        self.generalmap.hs = ( xpos + xdim/2, ypos + ydim/2 )
         self.rooms.remove(choice3)
         
         #add chests
@@ -185,14 +187,14 @@ class Generator():
             chestItems.append( (const.PARCHMENT, choice(mapScr.parchByLevel[self.level]) ) )
             if misc.rollDie(0, 2):
                 chestItems.append( (const.GOLD, choice( range(15, 50)+range(15,30) ) ))
-            self.map.setEntry( xpos + xdim/2, ypos + ydim/2, const.CHEST, len(self.rooms))
+            self.generalmap.setEntry( xpos + xdim/2, ypos + ydim/2, const.CHEST, len(self.rooms))
             chestlist += [( ( xpos + xdim/2, ypos + ydim/2), chestItems )]
             self.rooms.remove(choice4)
         
         for room in self.secretRooms:
             (xpos, ypos) = room.getPos()
             (xdim, ydim) = room.getDimensions()
-            self.map.setEntry( xpos + xdim/2, ypos + ydim/2, const.CHEST, len(self.rooms))
+            self.generalmap.setEntry( xpos + xdim/2, ypos + ydim/2, const.CHEST, len(self.rooms))
             sItem = choice( mapScr.specialByLevel[self.level] )
             if sItem in range(const.WSWORD, const.RING):
                 mods = [randrange( (self.level/4)+1, 
@@ -209,45 +211,47 @@ class Generator():
                                    ypos + ydim/2), 
                                [(sItem,None)] )]
             
-        self.map.chests = dict(chestlist)
+        self.generalmap.chests = dict(chestlist)
         # add enemies
         while len(self.rooms) > 1:
             room = choice(self.rooms)
             (xpos, ypos) = room.getPos()
             (xdim, ydim) = room.getDimensions()
-            self.map.NPCs.append( (( xpos + xdim/2, 
+            self.generalmap.NPCs.append( (( xpos + xdim/2, 
                                      ypos + ydim/2), 
-                                   choice(enemyScr.enemiesByDungeonLevel[self.map.level] ) ) )
+                                   choice(enemyScr.enemiesByDungeonLevel[self.generalmap.level] ) ) )
             self.rooms.remove(room)
         
         # add key for door
         keyRoom = self.rooms[0]
         (xpos, ypos) = keyRoom.getPos()
         (xdim, ydim) = keyRoom.getDimensions()
-        self.map.setEntry( xpos + xdim/2, ypos + ydim/2, const.KEY, len(self.rooms))
+        self.generalmap.setEntry( xpos + xdim/2, ypos + ydim/2, const.KEY, len(self.rooms))
         self.rooms.remove(keyRoom)
                
-    def addRoom(self, map, room, pos):
+    def addRoom(self, generalmap, room, pos):
         room.serial = len(self.rooms)
-        map.copyText = room.grid
-        map.mapPaste( pos, len(self.rooms) )
-    
+        generalmap.copyText = room.grid
+        generalmap.mapPaste(pos, len(self.rooms))
+
     def getMapBall(self):
-        return self.map.getMapBall()
-    
+        return self.generalmap.getMapBall()
+
     def getRoomByNo(self, N):
         for r in self.rooms:
             if r.serial == N:
                 return r
+
     def addDoorway(self, t1, t2):
         pass
-    
+
     def draw(self):
-        gridField.fill( [0,0,0] )
+        gridField.fill([0,0,0])
         for i in range(DIM):
             for j in range(DIM):
-                gridField.blit( images.mapImages[myMap.getMapEntry(i,j)], (i*blocksize,j*blocksize) )
+                gridField.blit(images.mapImages[myMap.getMapEntry(i,j)], (i*blocksize,j * blocksize))
 
         screen.blit(gridField, (0,0) )
         pygame.display.flip()
-        while (pygame.event.wait().type != pygame.KEYDOWN): pass
+        while (pygame.event.wait().type != pygame.KEYDOWN):
+            pass

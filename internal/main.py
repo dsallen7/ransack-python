@@ -1,4 +1,9 @@
-import pygame, random, cPickle, gzip, os
+import pygame
+import random
+import gzip
+import cPickle
+import os
+
 from classes import game
 from UTIL import const, colors, load_image, inputHandler, button
 from DISPLAY import interface, effects, menu, display, text
@@ -15,8 +20,8 @@ from IMG import images
 try:
     import android
     import android.mixer as mixer
-except ImportError as e:
-    print "No android in main",e
+except ImportError as err:
+    print ("in main: {}".format(err))
     android = False
     const.setScaleFactor(1)
     pygame.mixer.init()
@@ -24,11 +29,11 @@ except ImportError as e:
 
 # Set the height and width of the screen
 cfac = 1.0
-screenSize = [600, 600]
+screenSize = [720, 700]
 screen=pygame.display.set_mode(screenSize)
 
-
-if not pygame.font: print 'Warning, fonts disabled'
+if not pygame.font:
+    print ('Warning, fonts disabled')
 
 pygame.display.set_caption("Ransack")
 
@@ -93,10 +98,13 @@ def endScreen(game, msg):
                                                  '''
     screen.blit(dScreen, (0, 0) )
     pygame.display.flip()
-    while (pygame.event.wait().type != pygame.MOUSEBUTTONDOWN): pass
+    while (pygame.event.wait().type != pygame.MOUSEBUTTONDOWN):
+        pass
 
 def launchNewGame(titleScreen):
-    newGame = game.game(images, screen, clock, iFace, FX, iH, titleScreen, SFX, myWorldBall, loadHero=C.mainLoop(screen))
+    print('launchNewGame')
+    newGame = game.game(images, screen, clock, iFace, FX, iH, titleScreen, SFX,
+        myWorldBall, loadHero=C.mainLoop(screen))
     FX.fadeOut(0)
     iFace.state = 'game'
     if newGame.mainLoop():
@@ -113,8 +121,8 @@ def loadWorld():
         myWorldBall = cPickle.load(loadedWorld)
         loadedWorld.close()
         #self.installWorldBall(ball, context)
-    except IOError, message:
-        print 'Cannot load world:', filename
+    except IOError as err:
+        print('Cannot load world: {}'.format(err))
         return
         
 def loadSavedGame(titleScreen):
@@ -134,8 +142,8 @@ def loadSavedGame(titleScreen):
         else:
             endScreen(Game, "Game Over.")
         FX.fadeOut(0)
-    except IOError, e:
-        print 'File I/O error', e
+    except IOError as e:
+        print ('loadSavedGame error: {}'.format(e))
     
 
 def mouseHandler(m):
@@ -148,14 +156,14 @@ def mouseHandler(m):
         os.sys.exit()
 
 def updateDisplay():
-    titleScreen = pygame.Surface((screenSize[0],screenSize[0]))
+    titleScreen = pygame.Surface((screenSize[0], screenSize[1]))
     menuBox = pygame.Surface((300, 300))
     menuBox.fill(colors.black)
     menuBox.set_colorkey(colors.black)
     clock.tick(20)
     screen.fill(colors.black)
-    screen.blit(titleScreen, (0,0))
-    screen.blit( logo, ( (screen.get_width()/2)-(logo.get_width()/2), 100 ) )
+    screen.blit(titleScreen, (0, 0))
+    screen.blit(logo, ((screen.get_width()/2) - (logo.get_width() / 2), 100))
     if pygame.font:
         font = pygame.font.Font("./FONTS/SpinalTfanboy.ttf", 48)
         for b in buttons:
@@ -186,9 +194,10 @@ def main():
                     if b.hit(mX, mY):
                         selection = b.msg
                 if selection == 'Begin New Game':
-                    launchNewGame(pygame.Surface((screenSize[0],screenSize[0])))
+                    print ('Begin New Game {}x{}'.format(screenSize[0],screenSize[1]))
+                    launchNewGame(pygame.Surface((screenSize[0],screenSize[1])))
                 elif selection == 'Load Saved Game':
-                    loadSavedGame(pygame.Surface((screenSize[0],screenSize[0])))
+                    loadSavedGame(pygame.Surface((screenSize[0],screenSize[1])))
                 elif selection == 'Credits':
                     showCredits()
                 elif selection == 'Exit':
@@ -203,74 +212,6 @@ def main():
         updateDisplay()
         pygame.display.flip()
 
-def main_():
-    titleScreen = pygame.Surface(screenSize)
-    titleImg, titleRect = load_image.load_image('titlescreen.bmp', None)
-    titleScreen.blit(titleImg, (0, 0))
-    selection = 0
-    options = ['Begin New Game', 'Load Saved Game', 'ExiT']
-    screen.blit(titleScreen, (0, 0))
-    while True:
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                os.sys.exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    os.sys.exit()
-                if event.key == pygame.K_UP:
-                    selection -= 1
-                    if selection == -1:
-                        selection = len(options) - 1
-                if event.key == pygame.K_DOWN:
-                    selection += 1
-                    if selection == len(options):
-                        selection = 0
-                if event.key == pygame.K_RETURN:
-                    if options[selection] == 'Begin New Game':
-                        newGame = game.game(screen, clock, FX,
-                                            loadHero=C.mainLoop(screen))
-                        FX.fadeOut(0)
-                        if newGame.mainLoop():
-                            endScreen(newGame, "You Win!")
-                        else:
-                            endScreen(newGame, "Game Over.")
-                        FX.fadeOut(const.gameBoardOffset)
-                    elif options[selection] == 'Load Saved Game':
-                        try:
-                            loadFile = getFile()
-                            if loadFile is None:
-                                pass
-                            else:
-                                savFile = gzip.GzipFile(loadFile, 'rb')
-                                ball = cPickle.load(savFile)
-                                savFile.close()
-                                Game = game.game(screen, clock, FX,
-                                                 loadTicker=ball[0],
-                                                 loadHero=ball[1],
-                                                 loadDungeon=ball[2],
-                                                 loadDirector=ball[3],
-                                                 currentMap=ball[4],
-                                                 levelDepth=ball[5])
-                                FX.fadeOut(0)
-                                if Game.mainLoop():
-                                    endScreen(Game, "You Win!")
-                                else:
-                                    endScreen(Game, "Game Over.")
-                                FX.fadeOut(const.gameBoardOffset)
-                        except IOError, e:
-                            print 'File I/O error', e
-                    elif options[selection] == 'ExiT':
-                        FX.fadeOut(0)
-                        os.sys.exit()
-
-        menuBox.blit(images[0], (0, selection * line.get_height()
-                                 + (line.get_height() / 2)))
-        titleScreen.blit(titleImg, (0, 0))
-        titleScreen.blit(menuBox, (200, 375))
-        screen.blit(titleScreen, (0, 0))
-        pygame.display.flip()
-
 if __name__ == '__main__':
     try:
         '''
@@ -280,14 +221,14 @@ if __name__ == '__main__':
             MW = open('../assets/WORLDS/MainWorld', 'r')
             '''
         MW = open('../assets/WORLDS/MainWorld', 'r')
-        loadedWorld = MW#gzip.GzipFile(MW, 'rb', 1)
+        loadedWorld = MW
         myWorldBall = cPickle.load(loadedWorld)
-        print myWorldBall
+        # print myWorldBall
         loadedWorld.close()
-    except cPickle.UnpicklingError as e:
-        print 'Cannot load MainWorld: ',e
+    except cPickle.UnpicklingError as err:
+        print('Cannot load MainWorld: {}'.format(err))
         os.sys.exit()
-    except IOError as e:
-        print 'Cannot load MainWorld: ',e
+    except IOError as err:
+        print('Cannot load MainWorld: {}'.format(err))
         os.sys.exit()
     main()
