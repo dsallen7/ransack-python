@@ -3,11 +3,11 @@ from SCRIPTS import weaponScr
 
 
 class Weapon():
-
+    
     def __init__(self, type, mods=None):
         self.type = type
         self.level = weaponScr.wLevel[type]
-        self.imgNum = type + const.FRUIT1
+        self.imgNum = type
         self.name = 'weapon'
         self.desc = weaponScr.descDict[self.type]
 

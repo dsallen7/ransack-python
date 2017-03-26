@@ -1,20 +1,21 @@
 import pygame
-from IMG import images
 from UTIL import colors, const
-from math import ceil
+from math import ceil, floor
+
 from SCRIPTS import mapScr
 
+# Main graphics engine for Ransack.
 
 class Display():
-
+    
     def __init__(self, screen, images):
         self.screen = screen
-        #images.load()
         self.images = images.mapImages
-        #self.images = images
-        self.fog = pygame.Surface((30, 30))
-        self.fog.fill(colors.black)
-
+        self.accImages = images.accessories
+        self.fog = pygame.Surface( (30,30) )
+        self.fog.fill( colors.black )
+        self.fog.set_alpha( 192 )
+    
     def displayOneFrame(self, iFace, FX, board=None, game=None, dark=False, smooth=False):
         if game is not None:
             game.updateSprites()
@@ -161,151 +162,106 @@ class Display():
                                                     y*const.blocksize+5) )
                         except AttributeError:
                             pass
-            '''
-        for x in range(thismap.getDIM()):
-            for y in range(thismap.getDIM()):
-                tile = thismap.getEntry(x, y)
-                if tile != const.VOID and thismap.visDict[(x, y)]:
-
-                    if tile > 24:
-                        shortList = [thismap.getEntry(tx, ty) for (
-                            tx, ty) in thismap.neighbors((x, y))]
-                        if const.VOID not in shortList:
-                            self.xGameBoard.blit(
-                                self.images[thismap.defaultBkgd], ((
-                                x * const.blocksize), (
-                                y * const.blocksize)))
-                    if thismap.getEntry(x, y) == const.ITEMSDOOR:
-                        self.xGameBoard.blit(self.images[128],
-                            (x * const.blocksize - const.blocksize,
-                            y * const.blocksize - 2 * const.blocksize),
-                            area=self.images[128].get_rect())
-                    else:
-                        self.xGameBoard.blit(self.images[tile],
-                            ((x * const.blocksize), (y * const.blocksize)))'''
-        if thismap.type == 'village':
-            for s in thismap.shops:
-                if thismap.shops[s][0] == 'itemshop':
-                    (sX, sY) = s
-                    self.xGameBoard.blit(self.images[128],
-                        (sX * const.blocksize - const.blocksize,
-                         sY * const.blocksize - (2 * const.blocksize)))
-                if thismap.shops[s][0] == 'magicshop':
-                    (sX, sY) = s
-                    self.xGameBoard.blit(self.images[129],
-                        (sX * const.blocksize - const.blocksize,
-                        sY * const.blocksize - (2 * const.blocksize)))
-                if thismap.shops[s][0] == 'blacksmith':
-                    (sX, sY) = s
-                    self.xGameBoard.blit(self.images[130],
-                        (sX * const.blocksize - const.blocksize,
-                         sY * const.blocksize - (2 * const.blocksize)))
-                if thismap.shops[s][0] == 'armory':
-                    (sX, sY) = s
-                    self.xGameBoard.blit(self.images[131],
-                        (sX * const.blocksize - const.blocksize,
-                        sY * const.blocksize - (2 * const.blocksize)))
-                if thismap.shops[s][0] == 'tavern':
-                    (sX, sY) = s
-                    self.xGameBoard.blit(self.images[132],
-                        (sX * const.blocksize - const.blocksize,
-                         sY * const.blocksize - (3 * const.blocksize)))
-
-    def drawSprites(self, hero, map, gameBoard, game=None, dir=None,
-            animated=True):
-        """draws all pending sprite movements
-        """
+        if map.type == 'village':
+            for s in map.shops:
+                (sX, sY) = s
+                self.xGameBoard.blit( self.images[ mapScr.siteImgDict[ map.shops[s][0] ][0] ], 
+                                      (sX*const.blocksize - const.blocksize, 
+                                       sY*const.blocksize - (mapScr.siteImgDict[ map.shops[s][0] ][1]*const.blocksize)) )
+    
+    # draws all pending sprite movements
+    def drawSprites(self, hero, map, gameBoard, game=None, dir=None, animated=True):
         DIMEN = map.getDIM()
         # by default, the hero is in the upper left corner of the map
-        (newX, newY) = hero.getXY()
-        map.setPlayerXY(newX / const.blocksize, newY / const.blocksize)
+        (newX,newY) = hero.getXY()
+        map.setPlayerXY(newX/const.blocksize, newY/const.blocksize)
+        #top-left corner of hero sprite location
         (oldX, oldY, c, d) = hero.getRect()
         scrolling = False
-        delta = int(ceil(float(DIMEN) / 2.))
-        if map.getDIM() % 2 == 0:
-            delta = delta + 1
+        # where is new on-screen location of hero?
         if DIMEN > const.HALFDIM:
-            if (5 * const.blocksize <= newX <= (DIMEN - 5) * const.blocksize):
+            if (5*const.blocksize <= newX <= (DIMEN-5)*const.blocksize):
                 newX = 5 * const.blocksize
-                if dir in ['left', 'right'] and oldX == 5 * const.blocksize:
+                if dir in ['left','right'] and oldX == 5*const.blocksize:
                     scrolling = True
-            if newX > (DIMEN - 5) * const.blocksize:
-                newX = newX - delta * const.blocksize
-                if newX > const.HALFDIM * const.blocksize:
-                    newX = newX - 300
-            if (5 * const.blocksize <= newY <= (DIMEN - 5) * const.blocksize):
+            if newX > (DIMEN-5)*const.blocksize:
+                if map.getDIM() % 5 == 0:
+                    newX = (5 * const.blocksize) + ( newX % (5 * const.blocksize) )# + const.blocksize
+                else:
+                    newX = (5 * const.blocksize) + ( newX % (5 * const.blocksize) ) + const.blocksize
+            if (5*const.blocksize <= newY <= (DIMEN-5)*const.blocksize):
                 newY = 5 * const.blocksize
-                if dir in ['up', 'down'] and oldY == 5 * const.blocksize:
+                if dir in ['up','down'] and oldY == 5*const.blocksize:
                     scrolling = True
-            if newY > (DIMEN - 5) * const.blocksize:
-                newY = newY - delta * const.blocksize
-                if newY > const.HALFDIM * const.blocksize:
-                    newY = newY - 300
+            if newY > (DIMEN-5)*const.blocksize:
+                if map.getDIM() % 5 == 0:
+                    newY = (5 * const.blocksize) + ( newY % (5 * const.blocksize) )# + const.blocksize
+                else:
+                    newY = (5 * const.blocksize) + ( newY % (5 * const.blocksize) ) + const.blocksize
         else:
-            newX += (const.HALFDIM - DIMEN) / 2 * const.blocksize
-            newY += (const.HALFDIM - DIMEN) / 2 * const.blocksize
-
+            newX += (const.HALFDIM - DIMEN)/2*const.blocksize
+            newY += (const.HALFDIM - DIMEN)/2*const.blocksize
+        
         #make the move animated
         if animated:
             if not hero.moving:
                 scrolling = False
-            else:
-                scrollX, scrollY = const.scrollingDict[dir]
-            (px, py) = hero.getXY()
-            pos, oldPos = map.updateWindowCoordinates(hero)
+            if scrolling:
+                scrollX , scrollY = const.scrollingDict[dir]
+            else: (scrollX , scrollY) = (0, 0)
+            (px,py) = hero.getXY()
+            pos, oldPos = map.updateWindowCoordinates( hero )
             (topX, topY) = pos
             if oldX == newX:
-                xAxis = [oldX] * const.blocksize
+                xAxis = [oldX] * (const.blocksize)
             elif oldX < newX:
-                xAxis = range(oldX, newX)
+                xAxis = range(oldX, newX, 1)
             else:
                 xAxis = range(oldX, newX, -1)
             if oldY == newY:
-                yAxis = [oldY] * const.blocksize
+                yAxis = [oldY] * (const.blocksize/1)
             elif oldY < newY:
-                yAxis = range(oldY, newY)
+                yAxis = range(oldY, newY, 1)
             elif oldY > newY:
                 yAxis = range(oldY, newY, -1)
-            for (idx, (i, j)) in list(enumerate(zip(xAxis, yAxis), start=1)):
-
-                game.clock.tick(200)
-                hero.setRect(i, j, const.blocksize, const.blocksize)
+            for (idx, (i, j)) in list( enumerate(zip(xAxis, yAxis), start=1) ):
+                hero.setRect( i, j, const.blocksize, const.blocksize)
                 for npc in game.NPCs:
                     if npc.moving:
                         npc.shiftOnePixel(npc.dir, -1)
-                        if (idx % 2 == 0):
+                        if idx in [6,12,21,27]:
                             npc.takeStep()
+                # compensate for scrolling
                 if scrolling:
                     for npc in game.NPCs:
                         npc.shiftOnePixel(dir, 1)
-
-                    gameBoard.blit(self.getScrollingMapWindow(((
-                        topX * const.blocksize) + (idx * scrollX) -
-                        (const.blocksize * scrollX), (topY * const.blocksize) +
-                        (idx * scrollY) - (const.blocksize * scrollY))),
-                            (0, 0))
-
-                    if map.type in ['dungeon', 'maze', 'fortress']:
-                        self.drawShade(map, gameBoard)
+                    #self.redrawMap(map, hero, )
+                    gameBoard.blit( self.getScrollingMapWindow( ( (topX*const.blocksize)+(idx*scrollX)-(const.blocksize*scrollX), 
+                                                                  (topY*const.blocksize)+(idx*scrollY)-(const.blocksize*scrollY) ) ), (0,0) )
+                    
                 else:
                     self.redrawMap(map, hero, gameBoard)
+                
                 if (idx % 3) == 0:
-
+                    
                     if hero.moving:
                         if idx in [6,12,21,27]:
                             hero.takeStep()
                     self.displayOneFrame(game.myInterface, game.FX, game.gameBoard, game, True)
             hero.moving = False
-
+        
         for npc in game.NPCs:
             npcdir = npc.dir
             (cX, cY) = npc.getXY()
             (tX, tY) = map.topMapCorner
             (oRX, oRY, oRX2, oRY2) = npc.getRect()
-            nRX = cX * const.blocksize - (tX * const.blocksize)
-            nRY = cY * const.blocksize - (tY * const.blocksize)
+            nRX = cX*const.blocksize-(tX*const.blocksize)
+            nRY = cY*const.blocksize-(tY*const.blocksize)
             npc.setRect(nRX, nRY, const.blocksize, const.blocksize)
             npc.moving = False
-        hero.setRect(newX, newY, const.blocksize, const.blocksize)
-        self.redrawXMap(map, 2)
-        self.redrawMap(map, hero, gameBoard)
+            if npc.dir == 'up':
+                npc.dir = 'down'
+        hero.setRect( newX, newY, const.blocksize, const.blocksize)
+        
+        if map.type in const.darkMaps:
+            self.redrawXMap(map, 2 + hero.hasItem(const.LANTERN), True)

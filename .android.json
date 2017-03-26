@@ -1,0 +1,1 @@
+{"layout": "internal", "orientation": "portrait", "package": "com.silo.ransack", "include_pil": false, "name": "Ransack", "icon_name": "Ransack", "version": "0.1", "permissions": ["INTERNET", "VIBRATE"], "include_sqlite": false, "numeric_version": "1"}

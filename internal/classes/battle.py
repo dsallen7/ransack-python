@@ -258,3 +258,4 @@ class battle():
             game.textMessage("Congratulations! You have gained a level.")
         game.FX.scrollFromCenter(self.background, board_)
         return 'won'
+        return 'won'

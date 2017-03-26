@@ -1,6 +1,10 @@
 # Constant variables for Ransack game
 
+<<<<<<< HEAD
 scaleFactor = 1
+=======
+scaleFactor = 2.4
+>>>>>>> origin/android
 
 def setScaleFactor(sF):
     scaleFactor = sF
