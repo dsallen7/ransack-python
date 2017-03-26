@@ -110,18 +110,12 @@ class game():
             self.allsprites.clear(self.screen, self.gameBoard)
     
     def addShops(self):
-        self.Tavern = tavern.Tavern(self.screen, self.myInterface, self.Ticker, 
-                                    self.inputHandler, self.myMenu)
-        self.Townhall = townhall.Townhall(self.screen, self.myInterface, self.Ticker, 
-                                          self.inputHandler, self.myMenu)
-        self.Itemshop = shop.itemShop(self.screen, self.myInterface, 'itemshop', self.Ticker,
-                                      self.inputHandler, self.myMenu)
-        self.Magicshop = shop.magicShop(self.screen, self.myInterface, 'magicshop', self.Ticker, 
-                                        self.inputHandler, self.myMenu)
-        self.Blacksmith = shop.Blacksmith(self.screen, self.myInterface, 'blacksmith', self.Ticker, 
-                                          self.inputHandler, self.myMenu)
-        self.Armory = shop.Armory(self.screen, self.myInterface, 'armory', self.Ticker, 
-                                  self.inputHandler, self.myMenu)
+        self.Tavern = tavern.Tavern(self.screen, self.myInterface, self.Ticker, self.inputHandler, self.myMenu)
+        self.Townhall = townhall.Townhall(self.screen, self.myInterface, self.Ticker, self.inputHandler, self.myMenu)
+        self.Itemshop = shop.itemShop(self.screen, self.myInterface, 'itemshop', self.Ticker, self.inputHandler, self.myMenu)
+        self.Magicshop = shop.magicShop(self.screen, self.myInterface, 'magicshop', self.Ticker, self.inputHandler, self.myMenu)
+        self.Blacksmith = shop.Blacksmith(self.screen, self.myInterface, 'blacksmith', self.Ticker, self.inputHandler, self.myMenu)
+        self.Armory = shop.Armory(self.screen, self.myInterface, 'armory', self.Ticker, self.inputHandler, self.myMenu)
         
     def transition(self, loc):
         gameBoard_old = self.gameBoard.copy()
@@ -158,6 +152,7 @@ class game():
         #self.SFX.play(0)
     
     def event_handler(self, event):
+        #player clicked space on map
         if type(event) == TupleType:
             if event == (0,0): return
             (topX, topY) = self.myMap.topMapCorner
@@ -273,37 +268,25 @@ class game():
         elif i == const.SIGN:
             self.boxMessage( self.myMap.grid[x][y].getMsgText() )
         elif i == const.WELLSP:
-            if self.myHero.drinkWater():
-                self.boxMessage( 'Your thirst is quenched!')
-            else:
-                self.boxMessage("You don't need a drink now!")
+            self.boxMessage(self.myHero.drinkWater())
                 
         elif i == const.COUNTER_EW or i == const.COUNTER_NS:
             shopID = self.myMap.grid[x][y].getShopID()
-            if shopID[0] == 'blacksmith':
-                self.Blacksmith.enterStore(self.myHero, self, shopID[1])
-                pygame.time.wait(500)
-                return
-            elif shopID[0] == 'townhall':
-                pygame.time.wait(500)
+            if shopID[0] == 'townhall':
                 return self.Townhall.enterStore(self.myHero, self, self.FX, shopID[1],
                                                 (self.myMap.getName(), self.myMap.getPlayerXY() ) )
-            elif shopID[0] == 'armory':
-                self.Armory.enterStore(self.myHero, self, shopID[1])
-                pygame.time.wait(500)
-                return
-            elif shopID[0] == 'itemshop':
-                self.Itemshop.enterStore(self.myHero, self, shopID[1])
-                pygame.time.wait(500)
-                return
-            elif shopID[0] == 'magicshop':
-                self.Magicshop.enterStore(self.myHero, self, shopID[1])
-                pygame.time.wait(500)
-                return
             elif shopID[0] == 'tavern':
                 self.Tavern.enterStore(self.myHero, self, self.FX)
-                pygame.time.wait(500)
-                return
+            elif shopID[0] == 'blacksmith':
+                self.Blacksmith.enterStore(self.myHero, self, shopID[1])
+            elif shopID[0] == 'armory':
+                self.Armory.enterStore(self.myHero, self, shopID[1])
+            elif shopID[0] == 'itemshop':
+                self.Itemshop.enterStore(self.myHero, self, shopID[1])
+            elif shopID[0] == 'magicshop':
+                self.Magicshop.enterStore(self.myHero, self, shopID[1])
+            pygame.time.wait(500)
+            return
         else:
             try:
                 self.boxMessage( mapScr.descriptions[i] )
@@ -356,6 +339,7 @@ class game():
             self.Display.redrawXMap(self.myMap, l)
             return
         elif i == -1 or i in range(const.BRICK1,86)+[const.CHEST]+[const.OCHEST]+range(128, 216):
+            #impassable solid
             return
         # dungeon door
         elif i == const.DOOR:
@@ -409,7 +393,7 @@ class game():
             return
         # open space
         self.myHero.moving = True
-        if ( (0 <= X+moveX < const.blocksize*self.myMap.getDIM() ) and (0 <= Y+moveY < const.blocksize*self.myMap.getDIM() ) and i in range(const.BRICK1) ):
+        if (0 <= X+moveX < const.blocksize*self.myMap.getDIM() ) and (0 <= Y+moveY < const.blocksize*self.myMap.getDIM() ) and i in range(const.BRICK1):
             self.myHero.moving = True
             self.myMap.clearOccupied(X/const.blocksize,Y/const.blocksize)
             X += moveX
@@ -441,18 +425,14 @@ class game():
         elif result == 'died': # died in battle
             self.gameOver()
         elif result == 'won': # won battle
-            for item in self.myMenu.displayChest( self.getLoot(enemyNpc.name), 'Enemy Loot' ):
+            for item in self.myMenu.displayChest(self.getLoot(enemyNpc.name), 'Enemy Loot'):
                 msg = self.myHero.getItem(item)
                 self.Ticker.tick(30)
                 self.textMessage(msg)
             self.myHero.notchKill()
-            # final boss
-            if enemyNpc.name == 'Garden Badger':
-                self.Director.advanceQuest(0)
-                if self.Director.getQuestStatus(0) == 3:
-                    self.boxMessage("Finished off those garden badgers, did ya? Garden Variety is more like it!")
-            elif enemyNpc.name == 'Skeleton King':
-                self.Director.setEvent(11)
+            msg = self.Director.specialEnemy(enemyNpc.name)
+            if msg is not None:
+                self.boxMessage(msg)
             return True
 
     # calls interface.boxMessage

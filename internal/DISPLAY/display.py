@@ -39,33 +39,16 @@ class Display():
                                                            (int(ceil(300 * const.scaleFactor)),
                                                             int(ceil(300 * const.scaleFactor)) ) ), (100,100) )'''
         pygame.display.flip()
-
-    def drawShade(self, map, gameBoard):
-        """Takes first two coordinates of hero rect, gameBoard and
-        draws darkness
-        """
-        (topX, topY) = map.topMapCorner
-        (px, py) = map.playerXY
-        tiles = map.litTiles
-        for x in range(map.WINDOWSIZE):
-            for y in range(map.WINDOWSIZE):
-                if (x + topX, y + topY) in tiles:
-                    self.fog.set_alpha(0)
-                else:
-                    self.fog.set_alpha(140)
-                gameBoard.blit(self.fog, ((x) * const.blocksize,
-                    (y) * const.blocksize), area=(0, 0, const.blocksize,
-                    const.blocksize))
-
-    # Takes first two coordinates of hero rect, gameBoard and
-    # draws darkness
-    def drawDarkness(self, map, gameBoard, offset=(0,0) ):
+    
+    # Darkness effect. Takes first two coordinates of hero rect, gameBoard and
+    # draws darkness overlay for gameBoard
+    def drawDarkness(self, thisMap, gameBoard, offset=(0, 0)):
         (oX, oY) = offset
-        (topX, topY) = map.oldTopMapCorner
-        (px, py) = map.playerXY
-        tiles = map.litTiles
-        for x in range( -1, map.WINDOWSIZE+1 ):
-            for y in range( -1, map.WINDOWSIZE+1 ):
+        (topX, topY) = thisMap.oldTopMapCorner
+        (px, py) = thisMap.playerXY
+        tiles = thisMap.litTiles
+        for x in range( -1, thisMap.WINDOWSIZE+1 ):
+            for y in range( -1, thisMap.WINDOWSIZE+1 ):
                 if (x+topX, y+topY) not in tiles:
                     #AAfilledRoundedRect(surface,rect,color,radius=0.4)
                     gameBoard.blit(self.fog,
@@ -134,7 +117,7 @@ class Display():
                     else: self.xGameBoard.blit( self.images[ thismap.defaultBkgd ], ( (x*const.blocksize), (y*const.blocksize) ) )
                     '''
                     if tile > const.BRICK1:
-                        shortList = [map.getEntry(tx, ty) for (tx, ty) in map.cardinalNeighbors((x,y))]
+                        shortList = [map.getEntry(tx, ty) for (tx, ty) in thisMap.cardinalNeighbors((x,y))]
                         if const.VOID not in shortList:
                             self.xGameBoard.blit( self.images[ map.defaultBkgd ], ( (x*const.blocksize), (y*const.blocksize) ) )
 
@@ -162,19 +145,19 @@ class Display():
                                                     y*const.blocksize+5) )
                         except AttributeError:
                             pass
-        if map.type == 'village':
-            for s in map.shops:
+        if thisMap.type == 'village':
+            for s in thisMap.shops:
                 (sX, sY) = s
-                self.xGameBoard.blit( self.images[ mapScr.siteImgDict[ map.shops[s][0] ][0] ], 
+                self.xGameBoard.blit( self.images[ mapScr.siteImgDict[ thisMap.shops[s][0] ][0] ],
                                       (sX*const.blocksize - const.blocksize, 
-                                       sY*const.blocksize - (mapScr.siteImgDict[ map.shops[s][0] ][1]*const.blocksize)) )
+                                       sY*const.blocksize - (mapScr.siteImgDict[ thisMap.shops[s][0] ][1]*const.blocksize)) )
     
     # draws all pending sprite movements
-    def drawSprites(self, hero, map, gameBoard, game=None, dir=None, animated=True):
-        DIMEN = map.getDIM()
+    def drawSprites(self, hero, thisMap, gameBoard, game=None, dir=None, animated=True):
+        DIMEN = thisMap.getDIM()
         # by default, the hero is in the upper left corner of the map
         (newX,newY) = hero.getXY()
-        map.setPlayerXY(newX/const.blocksize, newY/const.blocksize)
+        thisMap.setPlayerXY(newX/const.blocksize, newY/const.blocksize)
         #top-left corner of hero sprite location
         (oldX, oldY, c, d) = hero.getRect()
         scrolling = False
@@ -185,7 +168,7 @@ class Display():
                 if dir in ['left','right'] and oldX == 5*const.blocksize:
                     scrolling = True
             if newX > (DIMEN-5)*const.blocksize:
-                if map.getDIM() % 5 == 0:
+                if thisMap.getDIM() % 5 == 0:
                     newX = (5 * const.blocksize) + ( newX % (5 * const.blocksize) )# + const.blocksize
                 else:
                     newX = (5 * const.blocksize) + ( newX % (5 * const.blocksize) ) + const.blocksize
@@ -194,7 +177,7 @@ class Display():
                 if dir in ['up','down'] and oldY == 5*const.blocksize:
                     scrolling = True
             if newY > (DIMEN-5)*const.blocksize:
-                if map.getDIM() % 5 == 0:
+                if thisMap.getDIM() % 5 == 0:
                     newY = (5 * const.blocksize) + ( newY % (5 * const.blocksize) )# + const.blocksize
                 else:
                     newY = (5 * const.blocksize) + ( newY % (5 * const.blocksize) ) + const.blocksize
@@ -210,7 +193,7 @@ class Display():
                 scrollX , scrollY = const.scrollingDict[dir]
             else: (scrollX , scrollY) = (0, 0)
             (px,py) = hero.getXY()
-            pos, oldPos = map.updateWindowCoordinates( hero )
+            pos, oldPos = thisMap.updateWindowCoordinates( hero )
             (topX, topY) = pos
             if oldX == newX:
                 xAxis = [oldX] * (const.blocksize)
@@ -253,7 +236,7 @@ class Display():
         for npc in game.NPCs:
             npcdir = npc.dir
             (cX, cY) = npc.getXY()
-            (tX, tY) = map.topMapCorner
+            (tX, tY) = thisMap.topMapCorner
             (oRX, oRY, oRX2, oRY2) = npc.getRect()
             nRX = cX*const.blocksize-(tX*const.blocksize)
             nRY = cY*const.blocksize-(tY*const.blocksize)
@@ -263,5 +246,5 @@ class Display():
                 npc.dir = 'down'
         hero.setRect( newX, newY, const.blocksize, const.blocksize)
         
-        if map.type in const.darkMaps:
+        if thisMap.type in const.darkMaps:
             self.redrawXMap(map, 2 + hero.hasItem(const.LANTERN), True)

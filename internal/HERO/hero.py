@@ -31,8 +31,14 @@ class hero(pygame.sprite.Sprite):
         if self.gender == 'male':
             self.images = images.mHeroImages
         else: self.images = images.fHeroImages
+
+        #currently displayed animation frame index
         self.imgIdx = 2
+
+        #currently displayed animation frame
         self.image = self.images[self.imgIdx]
+
+        #dimensions of image in pixels
         self.rect = (const.blocksize, const.blocksize, const.blocksize, const.blocksize)
         
         if self.weaponEquipped == None:
@@ -126,15 +132,17 @@ class hero(pygame.sprite.Sprite):
         self.currHP = self.maxHP
         if rMP:
             self.currMP = self.maxMP
+
+    #qty is water in container
     def drinkWater(self, qty=None):
         if self.thirst == 0:
-            return False
+            return "You don't need a drink now!"
         if qty is None:
             self.thirst = 0
-            return True
+            return 'Your thirst is quenched!'
         else:
             self.thirst = max(0, self.thirst-qty)
-            return True
+            return 'Your thirst is quenched!'
     
     # increases level, next exp for lev up, max HP and MP and refills both
     def gainLevel(self):

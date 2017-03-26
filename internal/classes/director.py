@@ -62,14 +62,24 @@ class Director():
 
     def getQuestStatus(self, q):
         return self.quests[q]
-    
+
+    def specialEnemy(self, name):
+        if name == 'Garden Badger':
+            self.advanceQuest(0)
+            if self.Director.getQuestStatus(0) == 3:
+                return "Finished off those garden badgers, did ya? Garden Variety is more like it!"
+        elif name == 'Skeleton King':
+            self.Director.setEvent(11)
+        return None
+
     def getNarrartionEventByMapName(self, name):
         try:
             e = self.narrationEventsByMapName[name]
             if not self.getNarr(e[1]):
                 self.setNarr(e[1])
                 return e[0]
-            else: return None
+            else:
+                return None
         except KeyError:
             return None
     

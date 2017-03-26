@@ -33,8 +33,8 @@ class effects():
                           }
 
     def fadeOut(self, size):
-        fadeScreen = pygame.Surface( (int(ceil(300 * const.scaleFactor)) - 2*size, 
-                                      int(ceil(300 * const.scaleFactor)) - 2*size) )
+        fadeScreen = pygame.Surface( (int(ceil(600 * const.scaleFactor)) - 2*size,
+                                      int(ceil(600 * const.scaleFactor)) - 2*size) )
         fadeScreen.fill( colors.black )
         for i in range(0, 255, 5):
             fadeScreen.set_alpha(i)

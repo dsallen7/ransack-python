@@ -246,6 +246,8 @@ walkingList = [ 1, 9, -1, -9 ]
 
 darkMaps = ['dungeon', 'maze', 'fortress', 'cave']
 
+shopsList = ['blacksmith', 'armory', 'itemshop', 'magicshop']
+
 # Define the colors we will use in RGB format
 black = [  0,  0,  0]
 offblack = [16, 16, 16]

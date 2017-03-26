@@ -59,7 +59,7 @@ class battle():
             self.battleField, r = load_image.load_image(os.path.join('ANIMATION', 'battlefield.bmp'), -1)
             if game.myMap.type == 'dungeon': self.background.blit(self.dungeonField, (0,0) )
             elif game.myMap.type == 'dungeon': self.background.blit(self.forestField, (0,0) )
-            elif game.myMap.type == 'village': self.background.blit(self.townField, (0,0) )
+            else: self.background.blit(self.townField, (0,0) ) # game.myMap.type == 'village'
             self.battleField.blit( self.enemyAvatar, (enemyX, enemyY) )
             self.battleField.blit( self.heroAvatar, (heroX, heroY) )
             self.battleField.blit( self.boxStat(enemy.getHP(), enemy.maxHP, colors.red, colors.black, (150, 30) ), (10, 85) )
