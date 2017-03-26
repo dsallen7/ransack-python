@@ -1,13 +1,13 @@
 import pygame, random, cPickle, ppov, gzip, os
 from UTIL import queue, const, colors, load_image, misc
 from types import *
-from entity.maps  import tile, minimap, submap, ppov as PPOV
+from MAP import tile, minimap, submap, ppov as PPOV
 
 from math import sqrt
 
-from script import enemy as enemyScr
+from SCRIPTS import enemyScr
 
-class generalmap():
+class map():
     def __init__(self, DIM=const.DIM, dFG=const.DFLOOR1):
         self.grid = []
         self.DIM = DIM
@@ -70,7 +70,6 @@ class generalmap():
     
     def getName(self):
         return self.name[0]
-
     def setName(self, name):
         self.name = (name,)
     
@@ -97,7 +96,6 @@ class generalmap():
     
     def getGrid(self):
         return self.grid
-
     def getMapBall(self):
         for x in range( self.getDIM() ):
             for y in range( self.getDIM() ):
@@ -169,16 +167,17 @@ class generalmap():
                 self.grid[i+sX][j+sY].setXY(i+sX, j+sY)
 
 
-class gameMap(generalmap):
+class gameMap(map):
+    
     def __init__(self, mapball = None, level=0):
-        generalmap.__init__(self)
+        map.__init__(self)
         
         self.level = level
         self.BFSQueue = queue.Queue()
         
         self.newNPCs = []
         
-        if mapball is not None:
+        if mapball != None:
             self.installBall(mapball)
         
         for i in range( self.DIM ):
@@ -258,7 +257,7 @@ class gameMap(generalmap):
                 y = random.randrange(0, self.DIM)
             return x, y
         else:
-            while (self.getEntry(x, y) not in range(0, 25)) or self.isOccupied(x, y):
+            while ( self.getEntry(x, y) not in range(0, 25) ) or self.isOccupied(x, y):
                 x = random.randrange(0, self.DIM)
                 y = random.randrange(0, self.DIM)
             return x, y
@@ -438,9 +437,9 @@ class gameMap(generalmap):
         return bMap
 
 # inherited map class to be used by level editor
-class edMap(generalmap):
+class edMap(map):
     def __init__(self, mBall=None, name=None):
-        generalmap.__init__(self, 2*const.DIM)
+        map.__init__(self, 2*const.DIM)
         if mBall is not None:
             self.installBall(mBall)
         else:
@@ -567,10 +566,10 @@ class edMap(generalmap):
         pass
 
 # inherited map class to be used by map generator
-class genMap(generalmap):
+class genMap(map):
     
     def __init__(self, DIM, level, name):
-        generalmap.__init__(self, DIM, const.VOID)
+        map.__init__(self, DIM, const.VOID)
         self.level = level
         self.BFSQueue = queue.Queue()
         for i in range(self.DIM):

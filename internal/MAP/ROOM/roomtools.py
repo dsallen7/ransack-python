@@ -1,4 +1,4 @@
-from SCRIPTS import mapScr
+from script import map as mapScr
 
 from UTIL import const
 

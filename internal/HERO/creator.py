@@ -3,7 +3,7 @@ import os
 
 from DISPLAY import text
 from UTIL import load_image, const, colors, slider, eztext
-from IMG import images
+from engine.IMG import images
 from random import randrange
 from math import ceil, floor
 

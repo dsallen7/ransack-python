@@ -1,9 +1,9 @@
 import pygame, random, os
 from UTIL import const, colors, load_image, button
 from DISPLAY import text, menuBox
-from OBJ import item, spell, weapon, armor
-from SCRIPTS import menuScr, armorScr, helpScr
-from IMG import images
+from entity.item import item, spell, weapon, armor
+from script import menu as menuScr, armor as armorScr, help as helpScr
+from engine.IMG import images
 
 from math import ceil, floor
 

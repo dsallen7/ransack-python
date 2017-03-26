@@ -2,12 +2,12 @@ import pygame
 from UTIL import colors, const
 from math import ceil, floor
 
-from SCRIPTS import mapScr
+from script import map as mapScr
 
 # Main graphics engine for Ransack.
 
 class Display():
-    
+
     def __init__(self, screen, images):
         self.screen = screen
         self.images = images.mapImages
@@ -34,10 +34,10 @@ class Display():
                                                            (int(ceil(300 * const.scaleFactor)),
                                                             int(ceil(300 * const.scaleFactor)) ) ), (0,0) )
                                                             '''
-            '''
+
             self.screen.blit( pygame.transform.scale(board,
                                                            (int(ceil(300 * const.scaleFactor)),
-                                                            int(ceil(300 * const.scaleFactor)) ) ), (100,100) )'''
+                                                            int(ceil(300 * const.scaleFactor)) ) ), (0,0) )
         pygame.display.flip()
     
     # Darkness effect. Takes first two coordinates of hero rect, gameBoard and
@@ -56,18 +56,35 @@ class Display():
                                      (y)*const.blocksize - oY),
                                    area=(0,0,const.blocksize,const.blocksize) )
 
-    def redrawMap(self, map, hero, gameBoard):
+    def drawShade(self, thisMap, gameBoard):
+        """Takes first two coordinates of hero rect, gameBoard and
+        draws darkness
+        """
+        (topX, topY) = thisMap.topMapCorner
+        (px, py) = thisMap.playerXY
+        tiles = thisMap.litTiles
+        for x in range(thisMap.WINDOWSIZE):
+            for y in range(thisMap.WINDOWSIZE):
+                if (x + topX, y + topY) in tiles:
+                    self.fog.set_alpha(0)
+                else:
+                    self.fog.set_alpha(140)
+                gameBoard.blit(self.fog, ((x) * const.blocksize,
+                    (y) * const.blocksize), area=(0, 0, const.blocksize,
+                    const.blocksize))
+
+    def redrawMap(self, thisMap, hero, gameBoard):
         """Redraw map on screen from current map matrix
         """
         #self.revealMap()
         (rx, ry, rx2, ry2) = hero.getRect()
         rx = rx / const.blocksize
         ry = ry / const.blocksize
-        (topX, topY), (oldTopX, oldTopY) = map.updateWindowCoordinates(hero)
+        (topX, topY), (oldTopX, oldTopY) = thisMap.updateWindowCoordinates(hero)
         gameBoard.blit(self.getMapWindow((topX, topY),
-            map.WINDOWSIZE), (map.WINDOWOFFSET, map.WINDOWOFFSET))
-        if map.type in ['dungeon', 'maze', 'fortress']:
-            self.drawShade(map, gameBoard)
+            thisMap.WINDOWSIZE), (thisMap.WINDOWOFFSET, thisMap.WINDOWOFFSET))
+        if thisMap.type in ['dungeon', 'maze', 'fortress']:
+            self.drawShade(thisMap, gameBoard)
             #self.drawDarkness(rx, ry, gameBoard)
 
     def getMapWindow(self, pos, wsize=10):
@@ -91,30 +108,30 @@ class Display():
         #self.drawDarkness
         return window
 
-    def redrawXMap(self, thismap, light, local=False):
+    def redrawXMap(self, thisMap, light, local=False):
         """draws entire map to DIMxDIM Surface
             light: number of tiles visible from player
         """
-        self.xGameBoard = pygame.Surface((thismap.getDIM() * const.blocksize,
-             thismap.getDIM() * const.blocksize))
-        if thismap.type in const.darkMaps:
-            thismap.revealMap(light)
+        self.xGameBoard = pygame.Surface((thisMap.getDIM() * const.blocksize,
+             thisMap.getDIM() * const.blocksize))
+        if thisMap.type in const.darkMaps:
+            thisMap.revealMap(light)
         if local:
-            (tX, tY) = thismap.topMapCorner
+            (tX, tY) = thisMap.topMapCorner
             rX = range(tX-1, tX+const.HALFDIM+1)
             rY = range(tY-1, tY+const.HALFDIM+1)
         else:
-            (rX, rY) = ( range(thismap.getDIM()), range(thismap.getDIM()) )
+            (rX, rY) = ( range(thisMap.getDIM()), range(thisMap.getDIM()) )
         for x in rX:
             for y in rY:
-                fTile = thismap.getTileFG(x,y)
-                bTile = thismap.getTileBG(x,y)
-                if fTile != const.VOID and thismap.visDict[(x,y)]:
+                fTile = thisMap.getTileFG(x,y)
+                bTile = thisMap.getTileBG(x,y)
+                if fTile != const.VOID and thisMap.visDict[(x,y)]:
                     # draw background tile first
                     if bTile is not None:
                         self.xGameBoard.blit( self.images[ bTile ], ( (x*const.blocksize), (y*const.blocksize) ) )
                     # then foreground
-                    else: self.xGameBoard.blit( self.images[ thismap.defaultBkgd ], ( (x*const.blocksize), (y*const.blocksize) ) )
+                    else: self.xGameBoard.blit( self.images[thisMap.defaultBkgd ], ( (x*const.blocksize), (y*const.blocksize) ) )
                     '''
                     if tile > const.BRICK1:
                         shortList = [map.getEntry(tx, ty) for (tx, ty) in thisMap.cardinalNeighbors((x,y))]
@@ -130,9 +147,9 @@ class Display():
                     # whenever four adjacent trees are drawn one the map, draw
                     # another one in the center
 
-                    nbrL = thismap.getTileFG(x-1, y)
-                    nbrU = thismap.getTileFG(x, y-1)
-                    nbrUL = thismap.getTileFG(x-1, y-1)
+                    nbrL = thisMap.getTileFG(x-1, y)
+                    nbrU = thisMap.getTileFG(x, y-1)
+                    nbrUL = thisMap.getTileFG(x-1, y-1)
                     if nbrL in mapScr.pines and nbrU in mapScr.pines and nbrUL in mapScr.pines and fTile in mapScr.pines:
                         self.xGameBoard.blit( self.images[ mapScr.pineDict[fTile] ],
                                               ( (x*const.blocksize)-(const.blocksize/2),
@@ -140,7 +157,7 @@ class Display():
                     # put accessories on the table
                     if fTile in range(const.TABLE1, const.TABLE3+1):
                         try:
-                            self.xGameBoard.blit( self.accImages[thismap.grid[x][y].accessory],
+                            self.xGameBoard.blit( self.accImages[thisMap.grid[x][y].accessory],
                                                   ( x*const.blocksize+10,
                                                     y*const.blocksize+5) )
                         except AttributeError:
@@ -223,7 +240,7 @@ class Display():
                                                                   (topY*const.blocksize)+(idx*scrollY)-(const.blocksize*scrollY) ) ), (0,0) )
                     
                 else:
-                    self.redrawMap(map, hero, gameBoard)
+                    self.redrawMap(thisMap, hero, gameBoard)
                 
                 if (idx % 3) == 0:
                     
@@ -247,4 +264,4 @@ class Display():
         hero.setRect( newX, newY, const.blocksize, const.blocksize)
         
         if thisMap.type in const.darkMaps:
-            self.redrawXMap(map, 2 + hero.hasItem(const.LANTERN), True)
+            self.redrawXMap(thisMap, 2 + hero.hasItem(const.LANTERN), True)
