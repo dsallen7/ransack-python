@@ -10,12 +10,14 @@ class Tile():
     
     def getXY(self):
         return (self.x, self.y)
+
     def setXY(self, x, y):
         self.x = x
         self.y = y
     
     def getFG(self):
         return self.fg
+
     def setFG(self, fg):
         self.fg = fg
     
@@ -26,6 +28,7 @@ class Tile():
         
     def getMsgText(self):
         return self.msgText
+
     def setMsgText(self, txt):
         self.msgText = txt
     

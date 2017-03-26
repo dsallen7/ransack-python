@@ -44,18 +44,22 @@ class Director():
     
     def setEvent(self, e):
         self.events[e] = True
+
     def clearEvent(self, e):
         self.events[e] = False
+
     def getEvent(self, e):
         return self.events[e]
     
     def getNarr(self, n):
         return self.narrations[n]
+
     def setNarr(self, n):
         self.narrations[n] = True
     
     def advanceQuest(self, q):
         self.quests[q] += 1
+
     def getQuestStatus(self, q):
         return self.quests[q]
     

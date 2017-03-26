@@ -6,7 +6,7 @@
     # 4: fortress floor 1
     # 5: fortress floor 2
     # 6: fortress floor 3
-    # 7: fortress ladder
+    # 7: fortress floor 4
     # 8: road 1
     # 9: road 2 
     # 10: NS bridge
@@ -16,7 +16,7 @@
     # 14: grass 3
     # 15: grass 4
     # 16: wood floor 1
-    # 17: sand
+    # 17: wood floor 2
     # 18: NS open door
     # 19: EW open door
     # 20: castle floor 1
@@ -26,7 +26,7 @@
     # --------BLOCKING TILES---------
     # 24: brick 1
     # 25: brick 2
-    # 26: wooden left corner
+    # 26: 
     # 27: upper right wall
     # 28: stone 1
     # 29: stone 2
@@ -38,31 +38,31 @@
     # 35: portcullis 4
     # 36: portcullis 5
     # 37: portcullis 6
-    # 38: 
-    # 39: 
-    # 40: 
-    # 41: house door
-    # 42: townhall door
+    # 38: E/W door
+    # 39: E/W window
+    # 40: upper left wall
+    # 41: blacksmith window
+    # 42: house 1 lower left
     # 43: item shop door
-    # 44: magicshop door
-    # 45: armory door
-    # 46: blacksmith door
-    # 47: tavern door
+    # 44: house 1 lower right
+    # 45: house 1 upper left
+    # 46: E/W fake wall
+    # 47: N/S fake wall
     # 48: house 1 roof 1
     # 49: 
     # 50: 
     # 51: lower left wall
-    # 52: pine 1
-    # 53: pine 2
-    # 54: pine 3
-    # 55: pine 4
+    # 52: tree 1
+    # 53: tree 2
+    # 54: tree 3
+    # 55: wellspring
     # 56: transparent block
-    # 57: 
-    # 58: 
-    # 59: 
-    # 60: 
-    # 61: river lower right
-    # 62: palm
+    # 57: magic shop door
+    # 58: armory door
+    # 59: blacksmith door
+    # 60: tavern door
+    # 61: blacksmith roof 1
+    # 62: blacksmith roof 2
     # 63: blacksmith roof 3
     # 64: blacksmith shield
     # 65: lake 1
@@ -72,17 +72,17 @@
     # 69: lake 5
     # 70: lake 6
     # 71: lava
-    # 72: shop counter
-    # 73: fence E/W
-    # 74: fence
-    # 75: sign
-    # 76: wellspring
-    # 77: chair
+    # 72: house 2 upper left
+    # 73: house 2 upper right
+    # 74: magicshop sign
+    # 75: lower right wall
+    # 76: rampart 1
+    # 77: rampart 2
     # 78: lava river 1
     # 79: lava river 2
     # 80: N/S window
     # 81: N/S door
-    # 82: lower left wall
+    # 82: tower 3
     # 83: tower 4
     # 84: crenellations 1
     # 85: crenellations 2
@@ -117,107 +117,15 @@
     # 113: axe
     # 114: spear
     # 115: 
-    # 116: 
+    # 116: dungeon door
     # 117: shield
     # 118: breastplate
-    # 119: helmet
+    # 119: 
+    # 120: stairs up
+    # 121: stairs down
     # 122: poison
     # 123: 
     # 124: 
     # 125: 
-    
-    # 128: wooden wall E/W
-    # 129: wooden wall N/S
-    # 130: wooden wall LL
-    # 131: wooden wall LR
-    # 132: wooden wall w/stag
-    # 133: counter E/W
-    # 134: counter corner
-    # 135: counter N/S
-    # 136: stone wall E/W
-    # 137: stone wall N/S
-    # 138: stone wall UL
-    # 139: stone wall UR
-    # 140: stone wall LL
-    # 141: stone wall LR
-    # 142: fake wall E/W
-    # 143: fake wall N/S
-    # 144: closed door E/W
-    # 145: window E/W
-    # 146: window N/S
-    # 147: closed door N/S
-    # 148: stone wall LL alt
-    # 149:
-    # 150:
-    # 151: column
-    
-    # 152: portcullis 1
-    # 153: portcullis 2
-    # 154: portcullis 3
-    # 155: portcullis 4
-    # 156: portcullis 5
-    # 157: portcullis 6
-    # 158: 
-    # 159: crenellation
-    
-    # 160: brick wall EW
-    # 161: brick wall NS
-    
-    # 168: turret
-    # 169: turret
-    # 170: turret
-    # 171: turret
-    # 172: turret
-    # 173: turret
-    # 174:
-    # 175:
-    # 176: turret
-    # 177: turret
-    # 178: turret
-    # 179: turret
-    # 180: turret
-    # 181: turret
-    
-    # 184: turret
-    
-    # 192: turret
-        
-    # 200: book on counter
-    # 201: bookshelf
-    # 202: china shelf
-    
-    # 208: chair 1
-    # 209: chair 2
-    # 210: table 1
-    # 211: table 2
-    # 212: table 3
-    # 213: barrel
-    # 214: grocery veggies
-    # 215: grocery meat n cheese
-    
-    # 216: fruit 1
-    # 217: cheese
-    # 218: ring
-    # 219: potion
-    # 220: bread
-    # 221: antidote
-    # 222: small healing potion
-    # 223: med healing potion
-    # 224: large healing potion
-    # 225: small magic potion
-    # 226: med magic potion
-    # 227: large magic potion
-    # 228: dungeon key
-    # 229: gold
-    # 230: spellbook
-    # 231: parchment
-    # 240: dungeon door
-    # 242: accessories 1
-    # 243: accessories 2
-    # 244: accessories 3
-    # 245: hammer of Thor
-    # 246: Christian cross
-    # 248: stairs up
-    # 249: stairs down
-    # 254: void
-    # 255: hero starting position
+    # 126: void
+    # 127: hero starting position

@@ -1,33 +1,32 @@
-import pygame, os
+import pygame
+import os
 
 from DISPLAY import text
 from UTIL import load_image, const, colors, slider, eztext
-
 from IMG import images
-
 from random import randrange
-
 from math import ceil, floor
 
 try:
     import android
-except:
+except ImportError as e:
+    print ("in HERO.creator: {}".format(e))
     android = False
-    print "No android"
+
 
 class Creator():
     
     def __init__(self):
-        self.displayField, r = load_image.load_image( os.path.join('MENU', "createBox.png") )
+        self.displayField, r = load_image.load_image(os.path.join('MENU', "createBox.png"))
         self.baseHP = randrange(25, 35)
         self.baseMP = randrange(15, 25)
         self.bStr = randrange(6, 10)
         self.bItl = randrange(8, 10)
         self.bDex = randrange(8, 10)
-        self.sliders = [slider.Slider(216, 145), # Warrior/Wizard
-                        slider.Slider(172, 145), # Lawful/neutral/chaotic
-                        slider.Slider(101, 61, 0, 1), #Male/female
-                        slider.Slider(81, 134, 0, 1) #Faith
+        self.sliders = [slider.Slider(216, 145),  # Warrior/Wizard
+                        slider.Slider(172, 145),  # Lawful/neutral/chaotic
+                        slider.Slider(101, 61, 0, 1),  # Male/female
+                        slider.Slider(81, 134, 0, 1)  # Faith
                         ]
         self.gender = 'male'
         self.faith = 'xtian'
@@ -37,6 +36,7 @@ class Creator():
         self.images[1], r = load_image.load_image( os.path.join('MENU', 'cursor_l.png'), -1)
         
         images.load()
+
     def getInput(self, screen, msg):
         #get file name
         input = None
@@ -46,13 +46,13 @@ class Creator():
                              prompt='')
         inputWindow = pygame.Surface( (int(ceil(223*const.scaleFactor)),
                                        int(ceil(36*const.scaleFactor))) )
-        while input == None:
+        while input is None:
 
             # events for txtbx
             events = pygame.event.get()
             # process other events
             for event in events:
-                # close it x button si pressed
+                # close it x button is pressed
                 if event.type == pygame.QUIT:
                         os.sys.exit()
                 if event.type == pygame.KEYDOWN:
@@ -101,9 +101,9 @@ class Creator():
         self.HP = self.baseHP + (self.sliders[0].getMax() - self.sliders[0].getValue() ) * 10
         # goes down with
         self.MP = self.baseMP + self.sliders[0].getValue() * 10
-        self.str = self.bStr + ( ( ( (self.sliders[0].getMax() -  self.sliders[1].getValue() ) * 10 ) / 2 ) / 5 ) + 2*(1-self.sliders[2].getValue())
-        self.itl = self.bItl + (       ( self.sliders[1].getValue()   * 10 ) / 4 ) / 5
-        self.dex = self.bDex + ( (     ( self.sliders[1].getValue()   * 10 ) / 2 ) / 5 ) + 2*self.sliders[2].getValue()
+        self.str = self.bStr + ((((self.sliders[0].getMax() - self.sliders[1].getValue()) * 10 ) / 2) / 5) + 2 * (1 - self.sliders[2].getValue())
+        self.itl = self.bItl + ((self.sliders[1].getValue() * 10) / 4) / 5
+        self.dex = self.bDex + (((self.sliders[1].getValue() * 10) / 2) / 5) + 2 * self.sliders[2].getValue()
     
     def updateDisplay(self, screen, step):
         if step == 'stats':
@@ -121,21 +121,21 @@ class Creator():
                 else: self.displayField.blit(self.images[0], (s.getXLoc(), s.getYLoc()+(s.getValue()*10)) )
             if self.sliders[2].getValue() == 0:
                 self.gender = 'male'
-                self.displayField.blit(images.mHeroImages[8], (40 , 59) )
+                self.displayField.blit(images.mHeroImages[8], (40 , 59))
             else:
                 self.gender = 'female'
-                self.displayField.blit(images.fHeroImages[8], (40 , 59) )
+                self.displayField.blit(images.fHeroImages[8], (40 , 59))
             
             if self.sliders[3].getValue() == 0:
                 self.faith = 'xtian'
-                self.displayField.blit(images.mapImages[246], (40 , 134) )
+                self.displayField.blit(images.mapImages[246], (40 , 134))
             else:
                 self.faith = 'asatru'
-                self.displayField.blit(images.mapImages[245], (40 , 134) )
-            screen.blit(pygame.transform.scale(self.displayField, (720, 720) ), (0, 0) )
+                self.displayField.blit(images.mapImages[245], (40 , 134))
+            screen.blit(pygame.transform.scale(self.displayField, (720, 720)), (0, 0))
             pygame.display.flip()
         elif step == 'name':
-            self.displayField, r = load_image.load_image(os.path.join('MENU', "createBox2.png" ) )
+            self.displayField, r = load_image.load_image(os.path.join('MENU', "createBox2.png"))
             screen.blit(pygame.transform.scale(self.displayField, (720, 720) ), (0, 0) )
             pygame.display.flip()
             
@@ -188,4 +188,5 @@ class Creator():
                     elif event.key == pygame.K_ESCAPE:
                         os.sys.exit()
             self.updateDisplay(screen, 'stats')
-        while (pygame.event.wait().type != pygame.KEYDOWN): pass
+        while (pygame.event.wait().type != pygame.KEYDOWN):
+            pass

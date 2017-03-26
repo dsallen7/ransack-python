@@ -1,6 +1,7 @@
 from UTIL import const
 from SCRIPTS import weaponScr
 
+
 class Weapon():
     
     def __init__(self, type, mods=None):
@@ -9,7 +10,7 @@ class Weapon():
         self.imgNum = type
         self.name = 'weapon'
         self.desc = weaponScr.descDict[self.type]
-        
+
         if mods is not None:
             self.plusStr = mods[0]
             self.plusItl = mods[1]
@@ -18,20 +19,23 @@ class Weapon():
             self.plusStr = 0
             self.plusItl = 0
             self.plusDex = 0
-    
+
     def getType(self):
         return self.type
+
     def getLevel(self):
         return self.level
+
     def getImg(self):
         return self.imgNum
+
     def getName(self):
         return self.name
+
     def getDesc(self):
         return self.desc
-    def getEnhancements(self):
-        return (self.plusStr,
-                self.plusItl,
-                self.plusDex)
+
     def getStats(self):
-        return '+'+str(self.plusStr)+'Str +'+str(self.plusItl)+' Intel +'+str(self.plusDex)+'Dex'
+        return self.desc + ' ' + 'Level ' + str(self.level) + ' +' + str(
+            self.plusStr) + ' Str +' + str(self.plusItl) + ' Intel +' + str(
+            self.plusDex) + 'Dex'

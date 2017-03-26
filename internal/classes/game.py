@@ -5,28 +5,25 @@ from IMG import images
 from HERO import hero
 from DISPLAY import display, interface, menu
 from SCRIPTS import mapScr, enemyScr
-
 from NPC import npcspawner
 from SND import sfx
-
-from MAP import world, map, mapgen#, mazegen
+from MAP import world, generalmap, mapgen
 from UTIL import ticker, const, colors, load_image, misc, astar
-
 from math import ceil, floor
-
 from types import TupleType
 
+
 class game():
-    
+
     def __init__(self, images, screen, clock, iFace, FX, iH, titleScreen, SFX, myWorldBall,
                  loadTicker=None, loadHero=None, loadWorld=None, loadDirector=None):
         self.Display = display.Display(screen, images)
         self.FX = FX
         self.SFX = SFX
-        if loadTicker == None:
+        if loadTicker is None:
             self.Ticker = ticker.Ticker()
         else: self.Ticker = loadTicker
-        if loadDirector == None:
+        if loadDirector is None:
             self.Director = director.Director()
         else: self.Director = loadDirector
         self.myMenu = menu.menu(screen, iH, self.Display, iFace, FX, SFX)
@@ -37,7 +34,7 @@ class game():
         # myWorldBall is the game world which always is loaded
         # loadWorld is the levels which have been generated ingame and saved
         self.myMap = None
-        if loadWorld == None:
+        if loadWorld is None:
             self.myWorld = world.World('game', myWorldBall)
             self.myMap = self.myWorld.initialMap
             self.myWorld.currentMap = self.myMap
@@ -91,6 +88,7 @@ class game():
         for n in self.NPCs:
             if n.name == name:
                 return n
+
     def addNPCs(self, map, type='all'):
         if type=='all':
             self.NPCs = []
@@ -492,7 +490,7 @@ class game():
                 redraw = True
             else:
                 r = n.update(self.myMap, self.myHero.getXY() )
-                if r == True:# and n in self.visibleNPCs:
+                if r == True:  # and n in self.visibleNPCs:
                     redraw = True
                 elif r == 'battle':
                     self.myInterface.npcMessage( n.message, n.images[2] )
