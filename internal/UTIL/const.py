@@ -1,5 +1,5 @@
 # Constant variables for Ransack game
-scaleFactor = 1
+scaleFactor = 2.4
 
 def setScaleFactor(sF):
     scaleFactor = sF
