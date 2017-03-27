@@ -1,5 +1,5 @@
 import pygame, os
-from DISPLAY import text
+from engine.display import text
 from UTIL import const, colors
 from math import floor, ceil
 

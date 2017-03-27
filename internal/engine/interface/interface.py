@@ -4,12 +4,14 @@ from pygame.locals import *
 import random
 
 from UTIL import const, colors, load_image, button
-from DISPLAY import text
+from UTIL.singleton import Singleton
+from engine.display import text
 from math import ceil, floor
 
 #import threading
 import Queue
 
+@Singleton
 class Interface( ):
     def __init__(self, screen, iH, SFX):
         self.textBox = pygame.Surface((251, 75))

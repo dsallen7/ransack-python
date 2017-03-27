@@ -3,12 +3,13 @@ import pygame, flash
 from UTIL import const, colors
 
 from math import floor, ceil
-
-from DISPLAY import text
+from UTIL.singleton import Singleton
+from engine.display import text
 
 import os
 
-class effects():
+@Singleton
+class Effects():
     def __init__(self, clock, screen):
         self.clock = clock
         self.screen = screen

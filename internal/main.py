@@ -1,11 +1,10 @@
 import pygame, random, cPickle, gzip, os
 from engine import game
-from UTIL import const, colors, load_image, inputHandler, button
-from DISPLAY import interface, effects, menu, display, text
-from HERO import creator
+from UTIL import const, colors, load_image, button
+from engine.display import effects, display, text
+from engine.interface import interface, inputHandler, menu
+from module import creator
 from entity.item import weapon
-
-from UTIL import const, inputHandler
 
 from math import ceil, floor
 from engine.SND import sfx
@@ -41,13 +40,14 @@ if android:
     android.init()
     android.map_key(android.KEYCODE_BACK, pygame.K_ESCAPE)
 
-FX = effects.effects(clock, screen)
-SFX = sfx.sfx(mixer)
+FX = effects.Effects.Instance(clock, screen)
+SFX = sfx.SFX.Instance(mixer)
 C = creator.Creator()
-iH = inputHandler.inputHandler(FX)
-iFace = interface.Interface(screen, iH, SFX)
+myInputHandler = inputHandler.InputHandler.Instance(FX)
+myInterface = interface.Interface.Instance(screen, myInputHandler, SFX)
 images.load()
-D = display.Display(screen, images )
+#D = display.Display(screen, images )
+myDisplay = display.Display.Instance(screen, images)
 
 # this is the static game world i.e. non-generated world
 # loaded once at startup and used thereafter
@@ -96,9 +96,9 @@ def endScreen(game, msg):
     while (pygame.event.wait().type != pygame.MOUSEBUTTONDOWN): pass
 
 def launchNewGame(titleScreen):
-    newGame = game.game(images, screen, clock, iFace, FX, iH, titleScreen, SFX, myWorldBall, loadHero=C.mainLoop(screen))
+    newGame = game.Game(screen, clock, titleScreen, myWorldBall, loadHero=C.mainLoop(screen))
     FX.fadeOut(0)
-    iFace.state = 'game'
+    myInterface.state = 'game'
     if newGame.mainLoop():
         endScreen(newGame, "You Win!")
     else:
@@ -126,9 +126,9 @@ def loadSavedGame(titleScreen):
         FX.displayLoadingMessage(titleScreen, 'Loading saved game...')
         ball = cPickle.load(savFile)
         savFile.close()
-        Game = game.game(images, screen, clock, iFace, FX, iH, titleScreen, SFX, myWorldBall, ball[0], ball[1], ball[2], ball[3])
+        Game = game.game(screen, clock, titleScreen, myWorldBall, ball[0], ball[1], ball[2], ball[3])
         FX.fadeOut(0)
-        iFace.state = 'game'
+        myInterface.state = 'game'
         if Game.mainLoop():
             endScreen(Game, "You Win!")
         else:
@@ -162,7 +162,7 @@ def updateDisplay():
         screen.blit(b.img, ( b.locX, b.locY ) )
 
 def showCredits():
-    creditsMenu = menu.menu(screen, iH, D, iFace, FX, SFX)
+    creditsMenu = menu.menu(screen, myInputHandler, myDisplay, myInterface, FX, SFX)
     creditsMenu.displayStory("Ransack - An RPG Roguelike. All game code, story (if you can call it that!) and artwork, with the exclusion of fonts, created by D. Allen. dsallen7@gmail.com Powered by Python - www.python.org Game engine built with Pygame - pygame.org and ported to Android using PGS4a - pygame.renpy.org/")
     creditsMenu.displayStory("Fonts used in game: Steelfish, Sqeualer by Ray Larabie, Typodermic Fonts - http://www.dafont.com/ typodermic.d1705 Gothic and Chancery by URW Software. urwpp.de/")
     creditsMenu.displayStory("I'm a big fan of all the classic roguelikes, and cult favorites like Castle of the Winds and Moraff's World, as well as Japanese-style RPGs, from Final Fantasy to Suikoden to Pokemon. So, you could call this a melting pot of all my gaming influences.")
@@ -188,7 +188,7 @@ def main():
                     os.sys.exit()
                 elif selection == None:
                     pass
-        iFace.update()
+        myInterface.update()
         font = pygame.font.Font(os.getcwd()+"/FONTS/courier.ttf", 28)
         if android:
             screen.blit( font.render( str( android.get_dpi() ), 1, colors.white, colors.black ), (0,0) )

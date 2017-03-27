@@ -1,5 +1,6 @@
 import pygame, os
-from DISPLAY import menu, text
+from engine.display import text
+from engine.interface import menu
 import random
 from entity.item import armor, weapon, item
 from script import shop as shopScr, armor as armorScr, weapon as weaponScr, price as prices

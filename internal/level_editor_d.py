@@ -3,7 +3,7 @@ import pygame, os, cPickle, random, gzip
 
 from entity.maps import world, mapgen, mazegen, generalmap, wilds, cavegen, tile
 #from MAP import world, mapgen, mazegen, generalmap, wilds, cavegen, tile
-from DISPLAY import text
+from engine.display import text
 from UTIL import queue, const, colors, eztext, load_image, misc, button
 from engine.IMG import images, spritesheet
 from math import floor, ceil

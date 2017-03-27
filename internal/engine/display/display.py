@@ -1,11 +1,13 @@
 import pygame
 from UTIL import colors, const
+from UTIL.singleton import Singleton
 from math import ceil, floor
 
 from script import map as mapScr
 
 # Main graphics engine for Ransack.
 
+@Singleton
 class Display():
 
     def __init__(self, screen, images):
@@ -68,7 +70,7 @@ class Display():
                 if (x + topX, y + topY) in tiles:
                     self.fog.set_alpha(0)
                 else:
-                    self.fog.set_alpha(140)
+                    self.fog.set_alpha(192)
                 gameBoard.blit(self.fog, ((x) * const.blocksize,
                     (y) * const.blocksize), area=(0, 0, const.blocksize,
                     const.blocksize))
@@ -247,7 +249,7 @@ class Display():
                     if hero.moving:
                         if idx in [6,12,21,27]:
                             hero.takeStep()
-                    self.displayOneFrame(game.myInterface, game.FX, game.gameBoard, game, True)
+                    self.displayOneFrame(game.interface, game.FX, game.gameBoard, game, True)
             hero.moving = False
         
         for npc in game.NPCs:

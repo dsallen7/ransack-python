@@ -3,7 +3,7 @@ import os
 import pygame
 import cPickle
 import gzip
-from DISPLAY import menu
+from engine.interface import menu
 from engine.IMG import images
 from entity.item import item
 from script import shop as shopScr

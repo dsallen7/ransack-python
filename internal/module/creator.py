@@ -1,7 +1,7 @@
 import pygame
 import os
 
-from DISPLAY import text
+from engine.display import text
 from UTIL import load_image, const, colors, slider, eztext
 from engine.IMG import images
 from random import randrange

@@ -1,5 +1,5 @@
 import pygame, os
-from DISPLAY import menu
+from engine.interface import menu
 import random
 from UTIL import const, colors, load_image, button, misc
 from math import floor, ceil
@@ -65,7 +65,7 @@ class battle():
             self.battleField.blit( self.boxStat(enemy.getHP(), enemy.maxHP, colors.red, colors.black, (150, 30) ), (10, 85) )
             self.background.blit(self.battleField, (0,0) )
         #self.screen.blit( pygame.transform.scale(self.battleField, (720, 720) ), (0, 0) )
-        game.Display.displayOneFrame(game.myInterface, game.FX, self.background, game, False, True)
+        game.Display.displayOneFrame(game.interface, game.FX, self.background, game, False, True)
         pygame.display.flip()
 
     def drawHeroAttack(self, game, enemy):
@@ -212,7 +212,7 @@ class battle():
             # hero turn
             while not self.heroTurn(game, enemy, board_):
                 pass
-            game.myInterface.update(game)
+            game.interface.update(game)
             self.drawBattleScreen(game, enemy)
             
             game.Ticker.tick(10)
@@ -250,7 +250,7 @@ class battle():
                     game.textMessage("The "+enemy.getName()+" missed you!")
                     game.SFX.play(2)
             game.Ticker.tick(10)
-            game.myInterface.update(game)
+            game.interface.update(game)
             self.drawBattleScreen(game, enemy)
             pygame.time.wait(1000)
         game.textMessage("The "+enemy.getName()+" is dead!")

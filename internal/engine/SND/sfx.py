@@ -1,4 +1,5 @@
 import pygame, os
+from UTIL.singleton import Singleton
 
 try:
     import android
@@ -6,7 +7,8 @@ except ImportError as e:
     print "No android in sfx",e
     android = False
 
-class sfx():
+@Singleton
+class SFX():
     
     def __init__(self, mixer):
         # 0 : 

@@ -1,38 +1,54 @@
-import pygame, os, random, cPickle, gzip
-import director
-from module import battle
-from entity.character import enemy
-from entity.location import shop, tavern, townhall
-from IMG import images
-from entity.character import hero
-from DISPLAY import display, interface, menu
-from script import map as mapScr, enemy as enemyScr
-from entity.character.NPC import npcspawner
-from engine.SND import sfx
-from entity.maps import world, generalmap, mapgen
-from UTIL import ticker, const, colors, load_image, misc, astar
-from math import ceil, floor
+import os
+import random
+import cPickle
+import gzip
 from types import TupleType
 
+import pygame
 
-class game():
+import director
+from display import display
+from interface import menu, inputHandler, interface
 
-    def __init__(self, images, screen, clock, iFace, FX, iH, titleScreen, SFX, myWorldBall,
+from engine.display import effects
+from engine.SND import sfx
+
+from entity.character import enemy
+from entity.location import shop, tavern, townhall
+from entity.character import hero
+from entity.maps import world
+from entity.item import item
+
+from script import map as mapScr, enemy as enemyScr
+from entity.character.NPC import npcspawner
+from UTIL import ticker, const, misc, colors, astar
+from module import battle, creator
+
+class Game():
+
+    def __init__(self, screen, clock, titleScreen, myWorldBall,
                  loadTicker=None, loadHero=None, loadWorld=None, loadDirector=None):
-        self.Display = display.Display(screen, images)
-        self.FX = FX
-        self.SFX = SFX
+
+        self.Display = display.Display.Instance()#(screen, images)
+        self.inputHandler = inputHandler.InputHandler.Instance()
+        self.FX = effects.Effects.Instance()
+        self.SFX = sfx.SFX.Instance()
+        self.interface = interface.Interface.Instance()
+        self.menu = menu.Menu.Instance(screen,
+                                         self.inputHandler,
+                                         self.Display,
+                                         self.interface,
+                                         self.FX,
+                                         self.SFX)
+
         if loadTicker is None:
             self.Ticker = ticker.Ticker()
         else: self.Ticker = loadTicker
         if loadDirector is None:
             self.Director = director.Director()
         else: self.Director = loadDirector
-        self.myMenu = menu.menu(screen, iH, self.Display, iFace, FX, SFX)
-        #self.levelDepth = levelDepth
-        self.inputHandler = iH
-        
-        FX.displayLoadingMessage(titleScreen, 'Loading world...')
+
+        self.FX.displayLoadingMessage(titleScreen, 'Loading world...')
         # myWorldBall is the game world which always is loaded
         # loadWorld is the levels which have been generated ingame and saved
         self.myMap = None
@@ -50,7 +66,7 @@ class game():
             self.myMap = self.myWorld.currentMap
             self.myHero = hero.hero(loadHero)
         
-        FX.displayLoadingMessage(titleScreen, 'Loading game engine...')
+        self.FX.displayLoadingMessage(titleScreen, 'Loading game engine...')
         self.NPCs = []
         self.screen = screen
         self.gameBoard = pygame.Surface( [300,300] )
@@ -60,15 +76,13 @@ class game():
         #this is true while player is in a particular game
         self.gameOn = True
         self.DIM = const.DIM
-                        
-        self.myInterface = iFace
+
         self.addShops()
         self.addNPCs(self.myMap)
-        
-        self.myBattle = battle.battle(self.screen, iH, self.myMenu)
+
+        self.myBattle = battle.battle(self.screen, self.inputHandler, self.menu)
         self.clock = clock
-        
-        self.inputHandler = iH
+
         self.state = 'overworld'
         self.won = False
     
@@ -112,12 +126,12 @@ class game():
             self.allsprites.clear(self.screen, self.gameBoard)
     
     def addShops(self):
-        self.Tavern = tavern.Tavern(self.screen, self.myInterface, self.Ticker, self.inputHandler, self.myMenu)
-        self.Townhall = townhall.Townhall(self.screen, self.myInterface, self.Ticker, self.inputHandler, self.myMenu)
-        self.Itemshop = shop.itemShop(self.screen, self.myInterface, 'itemshop', self.Ticker, self.inputHandler, self.myMenu)
-        self.Magicshop = shop.magicShop(self.screen, self.myInterface, 'magicshop', self.Ticker, self.inputHandler, self.myMenu)
-        self.Blacksmith = shop.Blacksmith(self.screen, self.myInterface, 'blacksmith', self.Ticker, self.inputHandler, self.myMenu)
-        self.Armory = shop.Armory(self.screen, self.myInterface, 'armory', self.Ticker, self.inputHandler, self.myMenu)
+        self.Tavern = tavern.Tavern(self.screen, self.interface, self.Ticker, self.inputHandler, self.menu)
+        self.Townhall = townhall.Townhall(self.screen, self.interface, self.Ticker, self.inputHandler, self.menu)
+        self.Itemshop = shop.itemShop(self.screen, self.interface, 'itemshop', self.Ticker, self.inputHandler, self.menu)
+        self.Magicshop = shop.magicShop(self.screen, self.interface, 'magicshop', self.Ticker, self.inputHandler, self.menu)
+        self.Blacksmith = shop.Blacksmith(self.screen, self.interface, 'blacksmith', self.Ticker, self.inputHandler, self.menu)
+        self.Armory = shop.Armory(self.screen, self.interface, 'armory', self.Ticker, self.inputHandler, self.menu)
         
     def transition(self, loc):
         gameBoard_old = self.gameBoard.copy()
@@ -139,7 +153,7 @@ class game():
         self.myHero.setXY( x*const.blocksize,y*const.blocksize )
         self.Display.redrawMap(self.myMap, self.myHero, self.gameBoard)
         self.FX.scrollFromCenter( gameBoard_old, self.gameBoard  )
-        self.myMenu.displayStory(self.Director.getNarrartionEventByMapName(self.myMap.getName() ) )
+        self.menu.displayStory(self.Director.getNarrartionEventByMapName(self.myMap.getName() ) )
     
     #takes screen shot and saves as bmp in serial fashion, beginning with 1
     def screenShot(self):
@@ -168,16 +182,16 @@ class game():
             return
         elif event == pygame.K_c:
             # cast spell
-            self.myHero.castSpell( self.myMenu.mainMenu(self, 'spell'), self )
+            self.myHero.castSpell( self.menu.mainMenu(self, 'spell'), self )
         elif event == pygame.K_p:
             # print map
             print self.myMap.grid
         elif event == pygame.K_s:
             # show stats
-            self.myMenu.displayHeroStats(self.myHero)
+            self.menu.displayHeroStats(self.myHero)
         elif event == pygame.K_i:
             # use item
-            self.myHero.useItem( self.myMenu.mainMenu(self, 'items'), self  )
+            self.myHero.useItem( self.menu.mainMenu(self, 'items'), self  )
         elif event == pygame.K_t:
             # take screenshot
             self.screenShot()
@@ -189,12 +203,12 @@ class game():
             self.actionCommand()
         elif event == pygame.K_h:
             # do nothing - advance clock by 1 min
-            self.myMenu.displayHelp()
+            self.menu.displayHelp()
         elif event == pygame.K_e:
             #equipment menu
-            self.myMenu.equipmentMenu(self)
+            self.menu.equipmentMenu(self)
         elif event == pygame.K_ESCAPE:
-            if self.myInterface.npcDialog('Are you sure you want to quit?', self.myHero.images[2]) == 'Yes':
+            if self.interface.npcDialog('Are you sure you want to quit?', self.myHero.images[2]) == 'Yes':
                 os.sys.exit()
             else:
                 pass
@@ -226,7 +240,7 @@ class game():
         l = 2 + self.myHero.hasItem(const.LANTERN)
         for n in self.NPCs:
             if ( x, y ) == n.getXY():
-                r = n.interact(self.myInterface, self)
+                r = n.interact(self.interface, self)
                 if r == None: return
                 elif r == 'battle':
                     if self.launchBattle(n, self.myWorld.currentMap.level):
@@ -235,10 +249,10 @@ class game():
                     return
                 elif r[0] == 'item':
                     if r[1] == const.GOLD:
-                        self.myHero.getItem( entity.item.Item( r[1], r[2] ) )
+                        self.myHero.getItem( item.Item( r[1], r[2] ) )
                     else:
                         for i in range( r[2] ):
-                            self.myHero.getItem( entity.item.Item( r[1] ) )
+                            self.myHero.getItem( item.Item( r[1] ) )
                     return
                 elif r == 'win':
                     self.won = True
@@ -248,7 +262,7 @@ class game():
         if i == const.CHEST:
             self.textMessage( 'The chest contains:')
             chestlist = self.myMap.chests[(x, y)]
-            for item in self.myMenu.displayChest( chestlist ):
+            for item in self.menu.displayChest( chestlist ):
                 msg = self.myHero.getItem(item)
                 self.Ticker.tick(30)
                 self.textMessage(msg)
@@ -356,10 +370,10 @@ class game():
                 return
         #item
         if i in range(const.FRUIT1, const.KEY + 1):
-            self.myHero.getItem( entity.item.Item(i) )
+            self.myHero.getItem( item.Item(i) )
             self.myMap.setEntry( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize, self.myMap.defaultBkgd)
             self.Display.redrawXMap(self.myMap, l)
-            self.myInterface.boxMessage(const.itemMsgs[i])
+            self.interface.boxMessage(const.itemMsgs[i])
             return
         # Stairs down
         if i == const.STAIRDN:
@@ -427,7 +441,7 @@ class game():
         elif result == 'died': # died in battle
             self.gameOver()
         elif result == 'won': # won battle
-            for item in self.myMenu.displayChest(self.getLoot(enemyNpc.name), 'Enemy Loot'):
+            for item in self.menu.displayChest(self.getLoot(enemyNpc.name), 'Enemy Loot'):
                 msg = self.myHero.getItem(item)
                 self.Ticker.tick(30)
                 self.textMessage(msg)
@@ -439,11 +453,11 @@ class game():
 
     # calls interface.boxMessage
     def boxMessage(self, msg):
-        self.myInterface.boxMessage(msg)
+        self.interface.boxMessage(msg)
     
     # calls interface.txtMessage
     def textMessage(self, msg):
-        self.myInterface.txtMessage(msg, self)
+        self.interface.txtMessage(msg, self)
         pygame.display.flip()
     
     def getSaveBall(self):
@@ -475,7 +489,7 @@ class game():
                 if r == True:  # and n in self.visibleNPCs:
                     redraw = True
                 elif r == 'battle':
-                    self.myInterface.npcMessage( n.message, n.images[2] )
+                    self.interface.npcMessage( n.message, n.images[2] )
                     self.displayOneFrame()
                     if self.launchBattle(n, self.myWorld.currentMap.level):
                         self.removeNPC(n.getID())
@@ -486,12 +500,12 @@ class game():
     def displayOneFrame(self):
         self.Display.redrawMap(self.myMap, self.myHero, self.gameBoard)
         #self.updateSprites()
-        self.Display.displayOneFrame(self.myInterface, self.FX, self.gameBoard, self, self.myMap.type in const.darkMaps)
+        self.Display.displayOneFrame(self.interface, self.FX, self.gameBoard, self, self.myMap.type in const.darkMaps)
 
     def mainLoop(self):
         self.visibleNPCs = []
         if not self.Director.getEvent(0):
-            self.myMenu.displayStory("So here you are in the same town, in front of the same house you've lived in forever. There's gotta be something else out there. It's time to go find it. Welcome to Ransack.")
+            self.menu.displayStory("So here you are in the same town, in front of the same house you've lived in forever. There's gotta be something else out there. It's time to go find it. Welcome to Ransack.")
             self.Director.setEvent(0)
         (pX, pY) = self.myHero.getXY()
         self.myMap.setPlayerXY( pX/const.blocksize, pY/const.blocksize )
@@ -524,5 +538,5 @@ class game():
             self.displayOneFrame()
             pygame.time.wait(10)
             
-        self.myInterface.state = 'mainmenu'
+        self.interface.state = 'mainmenu'
         return self.won

@@ -1,6 +1,8 @@
 import pygame, random, os
 from UTIL import const, colors, load_image, button
-from DISPLAY import text, menuBox
+from UTIL.singleton import Singleton
+from engine.display import text
+from engine.interface import menuBox
 from entity.item import item, spell, weapon, armor
 from script import menu as menuScr, armor as armorScr, help as helpScr
 from engine.IMG import images
@@ -9,7 +11,8 @@ from math import ceil, floor
 
 from types import *
 
-class menu():
+@Singleton
+class Menu():
     
     def __init__(self, screen, iH, Display, iFace, FX, SFX):
         self.images = images.mapImages

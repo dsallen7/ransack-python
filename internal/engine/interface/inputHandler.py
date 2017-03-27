@@ -3,12 +3,14 @@ import pygame
 from math import floor, ceil
 
 from UTIL import const
+from UTIL.singleton import Singleton
 
 '''
             (left bound of button, top bound of button + size of gameboard) : key
 '''
 
-class inputHandler():
+@Singleton
+class InputHandler():
     
     def __init__(self, FX):
         self.keyDict = {(int(floor(173*2.4)), 
