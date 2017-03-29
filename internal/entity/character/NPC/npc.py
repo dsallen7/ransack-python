@@ -27,6 +27,7 @@ class Npc(pygame.sprite.Sprite):
         self.movingRate = 20
         self.moveQueue = queue.Queue()
         self.name = name
+        self.confused = 0
     
     def setRect(self, x1, y1, x2, y2):
         self.rect = (x1, y1, x2, y2)

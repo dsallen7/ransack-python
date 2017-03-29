@@ -47,6 +47,7 @@ class battle():
                         button.Button( (200, 249), 'Flee',os.getcwd()+"/FONTS/Squealer.ttf", 12)
                         
                         ]
+        self.escaped = False
         
     def writeText(self, surface, loc, text, fgc, bgc, size=18, font="SpinalTfanboy.ttf"):
         font = pygame.font.Font(os.getcwd()+"/FONTS/"+font, size)
@@ -159,7 +160,7 @@ class battle():
             a = random.randrange(0, dex+5)
             if not (a > dex):
                 dmg = random.randrange(sth/2,sth) + weapon.getLevel()**2
-                game.textMessage('You hit the '+enemy.getName() +' for '+str(dmg)+' points!')
+                game.textMessage('You hit the '+enemy.getName() + ' for ' + str(dmg)+' points!')
                 game.SFX.play(1)
                 self.damageEnemy(game, enemy, dmg)
             else:
@@ -172,19 +173,18 @@ class battle():
             else:
                 self.damageEnemy(game, enemy, dmg)
                 return True
-            
         elif action == 'Item':
             dmg = hero.useItem(self.myMenu.invMenu(game, hero.getItems(), "Items:", ['Use', 'Return'] ), game, True )
             if dmg in [True, False]: return dmg
             else:
                 self.damageEnemy(game, enemy, dmg)
                 return True
-            
         elif action == 'Flee':
             if misc.rollDie(1,3):
                 game.textMessage("You escaped safely.")
                 game.FX.scrollFromCenter(self.battleField, board_)
-                return 'escaped'
+                self.escaped = True
+                return True
             else:
                 game.textMessage("You can't escape!")
                 return True
@@ -205,7 +205,7 @@ class battle():
         else:
             game.textMessage('You are facing the {}!'.format(enemy.getName()))
         time = 0
-        while enemy.getHP() > 0:
+        while enemy.getHP() > 0 and self.escaped is False:
             self.drawBattleScreen(game, enemy)
             if not hero.updateStatus(game):
                 return False
@@ -213,6 +213,9 @@ class battle():
             while not self.heroTurn(game, enemy, board_):
                 pass
             game.interface.update(game)
+            if self.escaped:
+                return 'escaped'
+
             self.drawBattleScreen(game, enemy)
             
             game.Ticker.tick(10)
@@ -257,5 +260,4 @@ class battle():
         if hero.increaseExp( enemyScr.expDict[enemy.getName()] + random.randrange(enemy.getLevel()*2, enemy.getLevel()*4)  ):
             game.textMessage("Congratulations! You have gained a level.")
         game.FX.scrollFromCenter(self.background, board_)
-        return 'won'
         return 'won'

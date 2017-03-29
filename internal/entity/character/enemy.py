@@ -29,7 +29,7 @@ class enemy():
         return self.currHP
 
     def getMaxHP(self):
-        return maxHP
+        return self.maxHP
 
     def getName(self):
         return self.name

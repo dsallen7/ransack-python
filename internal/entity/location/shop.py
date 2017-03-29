@@ -2,7 +2,7 @@ import pygame, os
 from engine.display import text
 from engine.interface import menu
 import random
-from entity.item import armor, weapon, item
+from entity.item import armor, weapon, baseitem
 from script import shop as shopScr, armor as armorScr, weapon as weaponScr, price as prices
 from UTIL import const, colors, load_image, misc, button
 
@@ -81,10 +81,10 @@ class Shop():
             #self.background.blit( menuBox, (200,150) )
             
     def buy(self, game, items, pD):
-        return game.myMenu.mainMenu(game, 'buy', items, pD)
+        return game.menu.mainMenu(game, 'buy', items, pD)
     
     def sell(self, game, items, pD ):
-        return game.myMenu.mainMenu(game, 'sell', items, pD)
+        return game.menu.mainMenu(game, 'sell', items, pD)
         #return self.myMenu.storeMenu( items, 'Select item to buy:', self.prices)
     
     def getHeroSaleItems(self, hero):
@@ -225,7 +225,7 @@ class itemShop(Shop):
         self.items[level] = []
         self.prices[level] = {}
         for i in itemsList:
-            iT = item.Item( i )
+            iT = baseitem.BaseItem( i )
             iT.priceID = i
             self.items[level].append( iT )
             self.prices[level][i] = prices.priceItem(iT)
@@ -245,7 +245,7 @@ class magicShop(Shop):
         self.prices[level] = {}
         self.items[level] = []
         for i in itemsList:
-            iT = item.Item( i[0], i[1] )
+            iT = baseitem.BaseItem( i[0], i[1] )
             iT.priceID = i
             self.items[level].append( iT )
             self.prices[level][i] = prices.priceItem(iT)

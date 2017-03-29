@@ -4,7 +4,7 @@
 from UTIL import const
 from script import item as itemScr
 
-class Item():
+class BaseItem():
     
     def __init__(self, type, num=None):
         self.type = type

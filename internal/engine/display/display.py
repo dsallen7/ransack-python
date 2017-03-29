@@ -20,7 +20,7 @@ class Display():
     
     def displayOneFrame(self, iFace, FX, board=None, game=None, dark=False, smooth=False):
         if game is not None:
-            game.updateSprites()
+            game.drawSprites()
             iFace.update(game)
             #board.blit( game.myHero.showLocation(), (0,50) )
         FX.update(self.screen)
@@ -28,18 +28,18 @@ class Display():
             if game.myMap.type in const.darkMaps and dark:
                 self.drawDarkness(game.myMap, board)
                 #board.blit( self.SS_, (0, 0) )
-            #pygame.time.delay(500)
+            pygame.time.delay(game.delay)
             if smooth:
                 pass
-            '''
-                self.screen.blit( pygame.transform.smoothscale(board,
-                                                           (int(ceil(300 * const.scaleFactor)),
-                                                            int(ceil(300 * const.scaleFactor)) ) ), (0,0) )
-                                                            '''
 
-            self.screen.blit( pygame.transform.scale(board,
+            self.screen.blit( pygame.transform.smoothscale(board,
+                                                       (int(ceil(300 * const.scaleFactor)),
+                                                        int(ceil(300 * const.scaleFactor)) ) ), (0,0) )
+
+
+            '''self.screen.blit( pygame.transform.scale(board,
                                                            (int(ceil(300 * const.scaleFactor)),
-                                                            int(ceil(300 * const.scaleFactor)) ) ), (0,0) )
+                                                            int(ceil(300 * const.scaleFactor)) ) ), (0,0) )'''
         pygame.display.flip()
     
     # Darkness effect. Takes first two coordinates of hero rect, gameBoard and
@@ -90,7 +90,8 @@ class Display():
             #self.drawDarkness(rx, ry, gameBoard)
 
     def getMapWindow(self, pos, wsize=10):
-        """takes map coordinates, returns map window
+        """takes map coordinates, returns "window" selection
+        of map to be displayed in view area
         """
         (x1, y1) = pos
         window = pygame.Surface((
@@ -172,10 +173,10 @@ class Display():
                                        sY*const.blocksize - (mapScr.siteImgDict[ thisMap.shops[s][0] ][1]*const.blocksize)) )
     
     # draws all pending sprite movements
-    def drawSprites(self, hero, thisMap, gameBoard, game=None, dir=None, animated=True):
+    def UpdateSprites(self, hero, thisMap, gameBoard, game=None, dir=None, animated=True):
         DIMEN = thisMap.getDIM()
         # by default, the hero is in the upper left corner of the map
-        (newX,newY) = hero.getXY()
+        (newX, newY) = hero.getXY()
         thisMap.setPlayerXY(newX/const.blocksize, newY/const.blocksize)
         #top-left corner of hero sprite location
         (oldX, oldY, c, d) = hero.getRect()
@@ -234,13 +235,13 @@ class Display():
                         if idx in [6,12,21,27]:
                             npc.takeStep()
                 # compensate for scrolling
+                # occurs when hero is at halfway mark across gameboard
                 if scrolling:
                     for npc in game.NPCs:
                         npc.shiftOnePixel(dir, 1)
                     #self.redrawMap(map, hero, )
                     gameBoard.blit( self.getScrollingMapWindow( ( (topX*const.blocksize)+(idx*scrollX)-(const.blocksize*scrollX), 
                                                                   (topY*const.blocksize)+(idx*scrollY)-(const.blocksize*scrollY) ) ), (0,0) )
-                    
                 else:
                     self.redrawMap(thisMap, hero, gameBoard)
                 

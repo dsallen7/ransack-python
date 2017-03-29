@@ -751,7 +751,7 @@ class Handler():
             if self.offset == 256:
                 self.offset = 0
         elif gridField.get_width()+50 <= mx < gridField.get_width()+80 and 530 <= my < 560:
-            self.myMap.mapCut()
+            self.myMap.mapCut(self.selection[0],self.selection[1])
         elif gridField.get_width()+80 <= mx < gridField.get_width()+110 and 530 <= my < 560:
             self.myMap.mapPaste( self.cursorPos )
         elif gridField.get_width()+110 <= mx < gridField.get_width()+140 and 530 <= my < 560:

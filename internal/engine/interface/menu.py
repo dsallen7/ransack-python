@@ -3,7 +3,7 @@ from UTIL import const, colors, load_image, button
 from UTIL.singleton import Singleton
 from engine.display import text
 from engine.interface import menuBox
-from entity.item import item, spell, weapon, armor
+from entity.item import baseitem, spell, weapon, armor
 from script import menu as menuScr, armor as armorScr, help as helpScr
 from engine.IMG import images
 
@@ -111,11 +111,11 @@ class Menu():
         for i in chest:
             (type, param) = i         # param can be quantity of gold, spell type, or enhancement
             if type in range(const.FRUIT1, const.GOLD):
-                availableItems += [ item.Item(type) ]
+                availableItems += [ baseitem.BaseItem(type) ]
             elif type == const.GOLD:
-                availableItems += [ item.Item(type, param) ]
+                availableItems += [ baseitem.BaseItem(type, param) ]
             elif type in [const.PARCHMENT, const.SPELLBOOK, const.CERTIFICATE]:
-                availableItems += [ item.Item(type, param) ]
+                availableItems += [ baseitem.BaseItem(type, param) ]
             elif type in range(const.WSWORD, const.RING):
                 availableItems += [ weapon.Weapon(type, param ) ]
             elif type == const.RING:

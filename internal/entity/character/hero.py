@@ -3,7 +3,7 @@ import pygame, random, math, os
 from types import *
 
 from engine.IMG import images
-from entity.item import spell, item, weapon, armor
+from entity.item import spell, baseitem, weapon, armor
 from UTIL import const, colors, queue
 from script import item as itemScr, spell as spellScr
 import Queue
@@ -212,7 +212,7 @@ class hero(pygame.sprite.Sprite):
         except AttributeError as e:
             print 'AttributeError in takeItem: ', e
         if type(tItem) == IntType:
-            tItem = item.Item( tItem )
+            tItem = baseitem.BaseItem( tItem )
         try:
             self.items[ tItem.getID() ] = self.items[ tItem.getID() ][1:]
             if self.items[ tItem.getID()] == []:
@@ -365,7 +365,7 @@ class hero(pygame.sprite.Sprite):
             game.textMessage('That spell may only be cast in the dungeon.')
             return False
         elif spell.cost > self.currMP:
-            if item == False:
+            if baseitem == False:
                 game.textMessage("You don't have enough MP!")
                 return False
         else:
@@ -382,7 +382,7 @@ class hero(pygame.sprite.Sprite):
             loc2 = (x, y)
             game.myMap.playerXY = loc2
             #game.Display.mapJump(self, game.myMap, game.gameBoard, game, loc1, loc2)
-            game.Display.drawSprites(self, game.myMap, game.gameBoard, game, animated=False)
+            game.Display.UpdateSprites(self, game.myMap, game.gameBoard, game, animated=False)
             game.myMap.revealMap()
             game.Display.redrawXMap(game.myMap)
             game.Display.redrawMap(game.myMap, self, game.gameBoard)
@@ -392,7 +392,7 @@ class hero(pygame.sprite.Sprite):
         if spell.getType() == const.ASCD:
             loc = game.myWorld.upLevel()
             game.transition(loc)
-            game.Display.drawSprites(game.myHero,
+            game.Display.UpdateSprites(game.myHero,
                                      game.myMap,
                                      game.gameBoard,
                                      game,

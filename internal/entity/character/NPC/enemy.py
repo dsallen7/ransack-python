@@ -28,7 +28,7 @@ class Enemy(Npc):
         (mX, mY) = const.scrollingDict[dir]
         self.dir = dir
         if map.getEntry(sX + mX, sY + mY) in range(const.BRICK1):
-            if (sX + mX, sY + mY) == (hX, hY): # encountered hero
+            if (sX + mX, sY + mY) == (hX, hY) and self.confused == 0: # encountered hero
                 self.moving = False
                 return 'battle'
             elif not map.isOccupied(sX + mX, sY + mY): # open space
@@ -44,6 +44,7 @@ class Enemy(Npc):
         self.imgIdx = const.imgDict[dir]
         self.image = self.images[self.imgIdx]
         return True
+
     def seek(self, map, heroPos):
         (sX, sY) = self.getXY()
         (hX, hY) = heroPos
@@ -64,6 +65,7 @@ class Enemy(Npc):
     
     def update(self, map, heroPos):
         if self.confused > 0:
+            print self.confused
             imgCopy = self.image.copy()
             imgCopy.blit( self.images[8],(0,0) )
             if self.confused/2 == 0:

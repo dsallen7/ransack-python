@@ -2,7 +2,7 @@ import pygame
 from engine.display import text
 from engine.interface import menu
 import random, os
-from entity.item import item
+from entity.item import baseitem
 from script import shop as shopScr, price as prices
 from shop import Shop
 from UTIL import const, colors, load_image
@@ -28,7 +28,7 @@ class Townhall(Shop):
         self.prices[level] = {}
         self.items[level] = []
         for i in itemsList:
-            iT = item.Item( *i )
+            iT = baseitem.BaseItem( *i )
             iT.priceID = i
             self.items[level].append( iT )
             self.prices[level][i] = prices.priceItem(iT)

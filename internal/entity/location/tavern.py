@@ -5,7 +5,7 @@ import cPickle
 import gzip
 from engine.interface import menu
 from engine.IMG import images
-from entity.item import item
+from entity.item import baseitem
 from script import shop as shopScr
 
 from UTIL import const, colors

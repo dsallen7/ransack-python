@@ -17,7 +17,7 @@ from entity.character import enemy
 from entity.location import shop, tavern, townhall
 from entity.character import hero
 from entity.maps import world
-from entity.item import item
+from entity.item import baseitem
 
 from script import map as mapScr, enemy as enemyScr
 from entity.character.NPC import npcspawner
@@ -85,6 +85,8 @@ class Game():
 
         self.state = 'overworld'
         self.won = False
+
+        self.delay = 0
     
     #toggles switch to continue running game
     def gameOver(self):
@@ -212,6 +214,16 @@ class Game():
                 os.sys.exit()
             else:
                 pass
+        elif event == pygame.K_PLUS:
+            if self.delay == 0:
+                pass
+            else:
+                self.delay -= 10
+        elif event == pygame.K_MINUS:
+            if self.delay == 100:
+                pass
+            else:
+                self.delay += 10
         else:
             if not self.myHero.moving:
                 try:
@@ -249,10 +261,10 @@ class Game():
                     return
                 elif r[0] == 'item':
                     if r[1] == const.GOLD:
-                        self.myHero.getItem( item.Item( r[1], r[2] ) )
+                        self.myHero.getItem( baseitem.BaseItem( r[1], r[2] ) )
                     else:
                         for i in range( r[2] ):
-                            self.myHero.getItem( item.Item( r[1] ) )
+                            self.myHero.getItem( baseitem.BaseItem( r[1] ) )
                     return
                 elif r == 'win':
                     self.won = True
@@ -313,7 +325,7 @@ class Game():
         try:
             self.myWorld.currentMap = self.myWorld.getMapByName( newMap )
             self.transition( (newX, newY) )
-            self.Display.drawSprites(self.myHero,self.myMap,self.gameBoard,self,animated=False)
+            self.Display.UpdateSprites(self.myHero,self.myMap,self.gameBoard,self,animated=False)
         except AttributeError as e:
             #print 'AttributeError while trying to enter a door: ', e
             pass
@@ -370,7 +382,7 @@ class Game():
                 return
         #item
         if i in range(const.FRUIT1, const.KEY + 1):
-            self.myHero.getItem( item.Item(i) )
+            self.myHero.getItem( baseitem.BaseItem(i) )
             self.myMap.setEntry( (X + moveX)/const.blocksize, (Y + moveY)/const.blocksize, self.myMap.defaultBkgd)
             self.Display.redrawXMap(self.myMap, l)
             self.interface.boxMessage(const.itemMsgs[i])
@@ -381,14 +393,14 @@ class Game():
             self.myMap = self.myWorld.currentMap
             self.transition( loc )
             #self.nextLevel()
-            self.Display.drawSprites(self.myHero,self.myMap,self.gameBoard,self,animated=False)
+            self.Display.UpdateSprites(self.myHero,self.myMap,self.gameBoard,self,animated=False)
             return
         # Stairs up
         if i == const.STAIRUP:
             loc = self.myWorld.upLevel()
             self.transition( loc )
             #self.prevLevel()
-            self.Display.drawSprites(self.myHero,self.myMap,self.gameBoard,self,animated=False)
+            self.Display.UpdateSprites(self.myHero,self.myMap,self.gameBoard,self,animated=False)
             return
         # edge of map
         if i == const.VOID:
@@ -403,7 +415,7 @@ class Game():
             try:
                 if loc is not False:
                     self.transition(loc)
-                    self.Display.drawSprites(self.myHero,self.myMap,self.gameBoard,self,animated=False)
+                    self.Display.UpdateSprites(self.myHero,self.myMap,self.gameBoard,self,animated=False)
             except UnboundLocalError as e:
                 print 'UnboundLocalError while leaving edge of map: ', e
             return
@@ -433,6 +445,7 @@ class Game():
     
     # takes enemy NPC object, dungeon level
     def launchBattle(self, enemyNpc, lD):
+        print "Battle launched"
         #self.boxMessage("The battle is joined!")
         result = self.myBattle.fightBattle(self, enemy.enemy(enemyNpc.name, lD), self.gameBoard, enemyNpc.images, self.myHero.images)
         #result = self.myBattle.fightBattle(self, enemy.enemy(enemyNpc.name, lD), self.gameBoard )
@@ -463,15 +476,7 @@ class Game():
     def getSaveBall(self):
         saveBall = (self.Ticker, self.myHero.getSaveBall(), self.myWorld.getWorldBall('game'), self.Director)
         return saveBall
-    
-    def updateSprites(self):
-        if self.myMap.type in const.darkMaps:
-            self.allsprites = pygame.sprite.RenderPlain((self.myHero, self.visibleNPCs))
-        else: self.allsprites = pygame.sprite.RenderPlain((self.myHero, self.NPCs))
-        self.allsprites.clear(self.screen, self.gameBoard)
-        rects = self.allsprites.draw(self.gameBoard)
-        pygame.display.update(rects)
-    
+
     def updateNPCs(self):
         #self.allsprites.update()
         self.visibleNPCs = []
@@ -493,14 +498,23 @@ class Game():
                     self.displayOneFrame()
                     if self.launchBattle(n, self.myWorld.currentMap.level):
                         self.removeNPC(n.getID())
-                    else: n.confuse(30)
-                
+                    else:
+                        n.confuse(1000)
         return redraw
     
     def displayOneFrame(self):
         self.Display.redrawMap(self.myMap, self.myHero, self.gameBoard)
-        #self.updateSprites()
+        #self.drawSprites()
         self.Display.displayOneFrame(self.interface, self.FX, self.gameBoard, self, self.myMap.type in const.darkMaps)
+
+
+    def drawSprites(self):
+        if self.myMap.type in const.darkMaps:
+            self.allsprites = pygame.sprite.RenderPlain((self.myHero, self.visibleNPCs))
+        else: self.allsprites = pygame.sprite.RenderPlain((self.myHero, self.NPCs))
+        self.allsprites.clear(self.screen, self.gameBoard)
+        rects = self.allsprites.draw(self.gameBoard)
+        pygame.display.update(rects)
 
     def mainLoop(self):
         self.visibleNPCs = []
@@ -511,8 +525,8 @@ class Game():
         self.myMap.setPlayerXY( pX/const.blocksize, pY/const.blocksize )
         self.myMap.updateWindowCoordinates(self.myHero)
         self.Display.redrawXMap(self.myMap, 2)
-        self.updateSprites()
-        self.Display.drawSprites(self.myHero, self.myMap, self.gameBoard, self, animated=False)
+        self.drawSprites()
+        self.Display.UpdateSprites(self.myHero, self.myMap, self.gameBoard, self, animated=False)
         while self.gameOn:
             # execute player queue movements first
             if not self.myHero.moveQueue.isEmpty():
@@ -533,8 +547,8 @@ class Game():
                 self.addNPCs(self.myMap, 'new')
             
             if self.updateNPCs() or self.myHero.moving:
-                self.Display.drawSprites(self.myHero, self.myMap, self.gameBoard, self, self.myHero.dir, animated=True)
-                    #self.Display.drawSprites(self.myHero, self.myMap, self.gameBoard, self, None, animated=True)
+                self.Display.UpdateSprites(self.myHero, self.myMap, self.gameBoard, self, self.myHero.dir, animated=True)
+                    #self.Display.UpdateSprites(self.myHero, self.myMap, self.gameBoard, self, None, animated=True)
             self.displayOneFrame()
             pygame.time.wait(10)
             
