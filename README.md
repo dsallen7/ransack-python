@@ -3,7 +3,7 @@ ransack-python
 
 Ransack - a Python based roguelike
 *************************************************************************************************************************
-This project is no longer supported or maintained and is offered for free modification and use under the GPL 3.0 license.
+This project is no longer supported or maintained and is offered for free modification and use under the MIT license.
 
 The only reservation is the name "ransack". All derivative works must not use this name, either in text or artistic form.
 
