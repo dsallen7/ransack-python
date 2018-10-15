@@ -2,10 +2,22 @@ ransack-python
 ==============
 
 Ransack - a Python based roguelike
+*************************************************************************************************************************
+This project is no longer supported or maintained and is offered for free modification and use under the GPL 3.0 license.
 
-In beta stage at the moment. Our hero can explore the levels, collect items, fight monsters, and interact with the townspeople.
+The only reservation is the name "ransack". All derivative works must not use this name, either in text or artistic form.
 
-Coming soon: Ransack for Android. I've gotten it to run on an Android emulator using Pygame Subset for Android, there's still a mountain of issues to work out, but I'll keep all updates posted here.
+The artwork and visual assets, which includes the contents of the assets/IMG/ folder, are covered by the CC Attribution 4.0 license in the root file CC.
+
+Please note that this project include TrueType fonts under the internal/FONTS/ folder which are NOT covered by the CC License. These are:
+
+Spinal Tap (http://www.rockbandfonts.com/), 
+Devinne Swash, by Dieter Steffmann. http://www.fontspace.com/dieter-steffmann/devinne-swash
+Chancery Gothic and Courier.
+
+You may either obtain permission to use these files or remove them from derivative works.
+
+*************************************************************************************************************************
 
 Move with arrow keys. Monsters are found in the dungeon. Approach a monster and press Enter to commence battle, the monsters can also initiate battle
 
@@ -36,25 +48,18 @@ Click the red square to place non-player characters. The types currently impleme
 . There are cut/copy paste buttons but I haven't implemented them yet.
 Note that setting rooms too high may cause the generator to hang if the map is not big enough.
 
-I have created all the artwork for the game, at this point it's quite rudimentary but it will be expanded as the project continues.
-
 Uses sprite sheet code from www.scriptefun.com/transcript-2-using-sprite-sheets-and-drawing-the-background
-
 The level editor uses EzText courtest of pywiz32 - http://www.pygame.org/project-EzText-920-.html
-
 The random map generator algorithm is based on the description written here (the actual code is my own):
 http://breinygames.blogspot.com/2011/07/random-map-generation.html
-
 The randome maze generator algorithm is taken from the following source:
-
 http://en.wikipedia.org/wiki/Maze_generation_algorithm
 
+*************************************************************************************************************************
+ATTRIBUTIONS
+*************************************************************************************************************************
 The fonts used ingame are: 
-
 Spinal Tap (http://www.rockbandfonts.com/), 
-
 Devinne Swash, by Dieter Steffmann. http://www.fontspace.com/dieter-steffmann/devinne-swash
-
 Chancery Gothic and Courier.
-
-As a side note, this project is turning into more of an RPG with roguelike features. Rogue purists may sneer :-P but I look forward to seeing what happens with this thing and I hope you do too.
+*************************************************************************************************************************
